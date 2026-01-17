@@ -4,14 +4,14 @@
       {{ mode === 'create' ? 'Ajout contact' : 'Détails du contact' }}
     </span>
     
-    <!-- Bouton Modifier (visible uniquement en mode edit et non en édition) -->
+    <!-- Bouton Modifier -->
     <button
       *ngIf="mode === 'edit' && !isEditing"
       pButton
       pRipple
       label="Modifier"
       icon="pi pi-pencil"
-      
+      severity="warn"
       (click)="enableEditing()"
       class="w-auto"
     ></button>
@@ -50,42 +50,93 @@
         </div>
 
         <!-- Prénom -->
-        <!-- Prénom -->
-<div class="mb-6 col-span-12 md:col-span-6">
-  <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-    Prénom <span class="text-red-500" *ngIf="isEditing">*</span>
-  </label>
-  <input
-    id="prenom"
-    type="text"
-    pInputText
-    fluid
-    [(ngModel)]="model.prenom"
-    [invalid]="submitted && !model.prenom?.trim()"
-    [disabled]="fieldsDisabled"
-  />
-  <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
-    Prénom obligatoire.
-  </small>
-</div>
-
-        <!-- Phone -->
-        <div class="mb-6 col-span-12">
-          <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Prénom <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <input
-            id="phone"
-            type="tel"
+            id="prenom"
+            type="text"
             pInputText
             fluid
-            [(ngModel)]="model.phone"
-            [invalid]="submitted && !model.phone?.trim()"
+            [(ngModel)]="model.prenom"
+            [invalid]="submitted && !model.prenom?.trim()"
             [disabled]="fieldsDisabled"
-            placeholder="+224 XXX XXX XXX"
           />
-          <small class="text-red-500" *ngIf="submitted && !model.phone?.trim() && isEditing">
+          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
+            Prénom obligatoire.
+          </small>
+        </div>
+
+        <!-- Téléphone avec sélecteur de pays -->
+        <div class="mb-6 col-span-12">
+          <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+            Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          
+          <div class="grid grid-cols-12 gap-3">
+            <!-- Sélecteur de pays -->
+            <div class="col-span-12 md:col-span-4">
+              <label for="codePays" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
+                Pays
+              </label>
+              <p-select
+                id="codePays"
+                [(ngModel)]="phoneCountry"
+                [options]="countries"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Sélectionner un pays"
+                [disabled]="fieldsDisabled"
+                (onChange)="onCountryChange()"
+                fluid
+              >
+                <ng-template let-country pTemplate="item">
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
+                  </div>
+                </ng-template>
+                <ng-template let-country pTemplate="selectedItem">
+                  <div class="flex items-center gap-2" *ngIf="country">
+                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <!-- Champ téléphone -->
+            <div class="col-span-12 md:col-span-8">
+              <label for="phone" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
+                Numéro
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                pInputText
+                fluid
+                [(ngModel)]="model.phone"
+                [invalid]="(submitted || phoneError) && (!model.phone?.trim() || !!phoneError)"
+                [disabled]="fieldsDisabled"
+                (input)="onPhoneInput()"
+                (blur)="onPhoneBlur()"
+                placeholder="Exemple: 622 00 00 00"
+              />
+            </div>
+          </div>
+
+          <!-- Messages d'erreur pour le téléphone -->
+          <small class="text-red-500 block mt-2" *ngIf="submitted && !model.phone?.trim() && isEditing">
             Téléphone obligatoire.
+          </small>
+          <small class="text-red-500 block mt-2" *ngIf="phoneError && model.phone?.trim() && isEditing">
+            {{ phoneError }}
+          </small>
+          
+          <!-- Indication du format attendu -->
+          <small class="text-surface-500 dark:text-surface-400 block mt-2" *ngIf="isEditing && !phoneError && !fieldsDisabled">
+            Format: {{ getCountryName(phoneCountry) }} ({{ getSelectedCountryDialCode() }})
           </small>
         </div>
 
@@ -127,7 +178,7 @@
           </small>
         </div>
 
-        <!-- Boutons (visibles uniquement en mode édition) -->
+        <!-- Boutons -->
         <div class="col-span-12 flex gap-2" *ngIf="isEditing">
           <button
             pButton
