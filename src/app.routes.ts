@@ -28,6 +28,10 @@ export const appRoutes: Routes = [
                 data: { breadcrumb: 'Documentation' },
                 loadComponent: () => import('./app/pages/documentation/documentation').then(c => c.Documentation)
             },
+             {
+                path: 'contacts',
+                loadChildren: () => import('@/pages/contacts/contacts.routes'),
+            },
             {
                 path: 'pages',
                 loadChildren: () => import('@/pages/pages.routes'),
