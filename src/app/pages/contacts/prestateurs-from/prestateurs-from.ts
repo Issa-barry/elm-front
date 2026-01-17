@@ -38,6 +38,7 @@ export class PrestateursFrom {
   @Output() cancel = new EventEmitter<void>();
 
   submitted = false;
+  isEditing = false; // Nouvel état pour gérer le mode édition
   model: ContactInterface = {};
   type_piece_identite: any[] = [];
 
@@ -49,6 +50,11 @@ export class PrestateursFrom {
     ];
 
     this.model = this.initialData ? { ...this.initialData } : {};
+    
+    // En mode création, toujours en édition
+    if (this.mode === 'create') {
+      this.isEditing = true;
+    }
   }
 
   isValid(): boolean {
@@ -59,6 +65,19 @@ export class PrestateursFrom {
       this.model.ville?.trim() &&
       this.model.quartier?.trim()
     );
+  }
+
+  // Activer le mode édition
+  enableEditing() {
+    this.isEditing = true;
+  }
+
+  // Annuler les modifications et revenir en mode lecture
+  cancelEditing() {
+    this.isEditing = false;
+    this.submitted = false;
+    // Restaurer les données initiales
+    this.model = this.initialData ? { ...this.initialData } : {};
   }
 
   onSubmit() {
@@ -73,5 +92,10 @@ export class PrestateursFrom {
 
   onCancel() {
     this.cancel.emit();
+  }
+
+  // Getter pour savoir si les champs sont désactivés
+  get fieldsDisabled(): boolean {
+    return this.mode === 'edit' && !this.isEditing || this.loading;
   }
 }

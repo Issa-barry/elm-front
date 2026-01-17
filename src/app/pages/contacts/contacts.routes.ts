@@ -7,5 +7,6 @@ export default [
      { path: '', component: Prestateurs },
     { path: 'prestateurs', component: Prestateurs },
     { path: 'prestateurs/new', component: PrestateursNew },
+    { path: 'prestateurs/:id/edit', component: PrestateursNew },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
