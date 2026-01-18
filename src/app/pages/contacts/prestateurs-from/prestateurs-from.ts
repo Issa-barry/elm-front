@@ -49,18 +49,33 @@ export class PrestateursFrom {
 
   // Liste des pays pour le sélecteur
   countries: { name: string; code: CountryCode; dialCode: string }[] = [
+    // Pays de l'Afrique de l'Ouest (Union du Fleuve Mano)
     { name: 'Guinée', code: 'GN', dialCode: '+224' },
-    { name: 'France', code: 'FR', dialCode: '+33' },
-    { name: 'Sénégal', code: 'SN', dialCode: '+221' },
     { name: 'Sierra Leone', code: 'SL', dialCode: '+232' },
-    { name: 'Mali', code: 'ML', dialCode: '+223' },
+    { name: 'Liberia', code: 'LR', dialCode: '+231' },
     { name: 'Côte d\'Ivoire', code: 'CI', dialCode: '+225' },
+    
+    // Autres pays de l'Afrique de l'Ouest
+    { name: 'Sénégal', code: 'SN', dialCode: '+221' },
+    { name: 'Mali', code: 'ML', dialCode: '+223' },
     { name: 'Burkina Faso', code: 'BF', dialCode: '+226' },
+    { name: 'Niger', code: 'NE', dialCode: '+227' },
     { name: 'Togo', code: 'TG', dialCode: '+228' },
     { name: 'Bénin', code: 'BJ', dialCode: '+229' },
-    { name: 'Niger', code: 'NE', dialCode: '+227' },
+    { name: 'Ghana', code: 'GH', dialCode: '+233' },
+    { name: 'Nigeria', code: 'NG', dialCode: '+234' },
+    { name: 'Gambie', code: 'GM', dialCode: '+220' },
+    { name: 'Guinée-Bissau', code: 'GW', dialCode: '+245' },
+    { name: 'Cap-Vert', code: 'CV', dialCode: '+238' },
+    { name: 'Mauritanie', code: 'MR', dialCode: '+222' },
+    
+    // Europe
+    { name: 'France', code: 'FR', dialCode: '+33' },
     { name: 'Belgique', code: 'BE', dialCode: '+32' },
     { name: 'Suisse', code: 'CH', dialCode: '+41' },
+    { name: 'Luxembourg', code: 'LU', dialCode: '+352' },
+    
+    // Amérique du Nord
     { name: 'Canada', code: 'CA', dialCode: '+1' },
     { name: 'États-Unis', code: 'US', dialCode: '+1' },
   ];
@@ -119,8 +134,8 @@ export class PrestateursFrom {
       const phoneNumber = parsePhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
       if (phoneNumber) {
         this.model.phone = phoneNumber.formatInternational();
-        this.model.code_pays = this.phoneCountry; // Sauvegarder le code pays
-        this.model.pays = this.getCountryName(this.phoneCountry); // Sauvegarder le nom du pays
+        this.model.code_pays = this.phoneCountry;
+        this.model.pays = this.getCountryName(this.phoneCountry);
         this.phoneError = null;
         return true;
       }
@@ -143,6 +158,16 @@ export class PrestateursFrom {
   getSelectedCountryDialCode(): string {
     const country = this.countries.find(c => c.code === this.phoneCountry);
     return country ? country.dialCode : '';
+  }
+
+  // Obtenir la classe CSS du drapeau
+  getFlagClass(code: string): string {
+    return `fi fi-${code.toLowerCase()}`;
+  }
+
+  // Ajouter cette méthode
+  getCountryFlag(code: string): string {
+    return `https://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`;
   }
 
   // Événement déclenché lors du changement de pays
@@ -179,7 +204,6 @@ export class PrestateursFrom {
       return false;
     }
 
-    // Valider le téléphone
     return this.validatePhone();
   }
 
@@ -191,7 +215,6 @@ export class PrestateursFrom {
     this.isEditing = false;
     this.submitted = false;
     this.phoneError = null;
-    // Restaurer les données initiales
     this.model = this.initialData ? { ...this.initialData } : {};
     if (this.model.code_pays) {
       this.phoneCountry = this.model.code_pays;
@@ -217,4 +240,6 @@ export class PrestateursFrom {
   get fieldsDisabled(): boolean {
     return (this.mode === 'edit' && !this.isEditing) || this.loading;
   }
+
+
 }

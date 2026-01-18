@@ -52,11 +52,11 @@ export class AppMenu {
                 items: [
                     {
                         label: 'Comptabilité',
-                        icon: 'pi pi-fw pi-comment',
+                        icon: 'pi pi-fw pi-calculator',
                         items: [
                             {
                                 label: 'Salaire packing',
-                                icon: 'pi pi-fw pi-image',
+                                icon: 'pi pi-fw pi-money-bill',
                                 routerLink: ['/apps/blog/list'],
                             },
                             // {
@@ -85,7 +85,7 @@ export class AppMenu {
                      {
                         label: 'Packing',
                         icon: 'pi pi-fw pi-box',
-                        routerLink: ['/apps/files'],
+                        routerLink: ['/packings'],
                     },
                     {
                         label: 'Contacts',
@@ -117,7 +117,7 @@ export class AppMenu {
                     {
                         label: 'Produits',
                         icon: 'pi pi-fw pi-barcode',
-                        routerLink: ['/apps/tasklist'],
+                        routerLink: ['/produits'],
                     },
                 ],
             },

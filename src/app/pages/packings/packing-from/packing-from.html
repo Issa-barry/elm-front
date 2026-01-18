@@ -1,0 +1,227 @@
+<!-- src/app/pages/packings/packing-from/packing-from.html -->
+<div class="card">
+  <div class="flex justify-between items-center mb-6">
+    <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
+      {{ mode === 'create' ? 'Nouveau Packing' : 'Détails du Packing' }}
+    </span>
+    
+    <!-- Bouton Modifier -->
+    <button
+      *ngIf="mode === 'edit' && !isEditing"
+      pButton
+      pRipple
+      severity="warn"
+      (click)="enableEditing()"
+      class="w-auto"
+    >
+      <i class="pi pi-pencil mr-2"></i>
+      Modifier
+    </button>
+  </div>
+  
+  <div class="grid grid-cols-12 gap-4">
+    <div class="col-span-12 lg:col-span-2">
+      <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">
+        Packing
+      </div>
+      <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
+        - Suivi rouleaux<br />
+        - Gestion période
+      </p>
+    </div>
+
+    <div class="col-span-12 lg:col-span-10">
+      <div class="grid grid-cols-12 gap-4">
+        <!-- Contact -->
+        <div class="mb-6 col-span-12">
+          <label for="contact" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Contact <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <p-select
+            id="contact"
+            [(ngModel)]="model.contact_id"
+            [options]="contacts"
+            optionLabel="nom"
+            optionValue="id"
+            placeholder="Sélectionnez un contact"
+            [filter]="true"
+            filterBy="nom,prenom,phone"
+            [showClear]="true"
+            [disabled]="fieldsDisabled"
+            fluid
+          >
+            <ng-template let-contact pTemplate="item">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                  <i class="pi pi-user text-primary"></i>
+                </div>
+                <div>
+                  <div class="font-medium">{{ contact.prenom }} {{ contact.nom }}</div>
+                  <div class="text-sm text-surface-500">{{ contact.phone }}</div>
+                </div>
+              </div>
+            </ng-template>
+            
+            <ng-template let-contact pTemplate="selectedItem">
+              <div class="flex items-center gap-2" *ngIf="contact">
+                <i class="pi pi-user text-primary"></i>
+                <span>{{ contact.prenom }} {{ contact.nom }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+          <small class="text-red-500" *ngIf="submitted && !model.contact_id && isEditing">
+            Veuillez sélectionner un contact
+          </small>
+        </div>
+
+        <!-- Dates -->
+        <div class="mb-6 col-span-12">
+          <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+            Période <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          
+          <div class="grid grid-cols-12 gap-3">
+            <!-- Date de début -->
+            <div class="col-span-12 md:col-span-6">
+              <label for="dateDebut" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
+                Date de début
+              </label>
+              <p-datepicker
+                id="dateDebut"
+                [(ngModel)]="model.date_debut"
+                [showIcon]="true"
+                [minDate]="minDate"
+                dateFormat="dd/mm/yy"
+                placeholder="Sélectionnez la date"
+                [disabled]="fieldsDisabled"
+                (onSelect)="onDateDebutChange()"
+                (onBlur)="onDateBlur('debut')"
+                fluid
+              />
+            </div>
+
+            <!-- Date de fin -->
+            <div class="col-span-12 md:col-span-6">
+              <label for="dateFin" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
+                Date de fin
+              </label>
+              <p-datepicker
+                id="dateFin"
+                [(ngModel)]="model.date_fin"
+                [showIcon]="true"
+                [minDate]="model.date_debut || minDate"
+                dateFormat="dd/mm/yy"
+                placeholder="Sélectionnez la date"
+                [disabled]="fieldsDisabled"
+                (onSelect)="onDateFinChange()"
+                (onBlur)="onDateBlur('fin')"
+                fluid
+              />
+            </div>
+          </div>
+
+          <!-- Messages d'erreur pour les dates -->
+          <small class="text-red-500 block mt-2" *ngIf="submitted && dateDebutError && isEditing">
+            {{ dateDebutError }}
+          </small>
+          <small class="text-red-500 block mt-2" *ngIf="submitted && dateFinError && isEditing">
+            {{ dateFinError }}
+          </small>
+          <small class="text-red-500 block mt-2" *ngIf="submitted && dateRangeError && isEditing">
+            {{ dateRangeError }}
+          </small>
+        </div>
+
+        <!-- Nombre de rouleaux -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="nombreRouleaux" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Nombre de rouleaux <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <p-inputnumber
+            id="nombreRouleaux"
+            [(ngModel)]="model.nombre_rouleaux"
+            [showButtons]="true"
+            [min]="1"
+            [max]="9999"
+            placeholder="Entrez le nombre"
+            mode="decimal"
+            [useGrouping]="false"
+            [disabled]="fieldsDisabled"
+            fluid
+          />
+          <small class="text-red-500" *ngIf="submitted && (!model.nombre_rouleaux || model.nombre_rouleaux < 1) && isEditing">
+            Le nombre de rouleaux doit être supérieur à 0
+          </small>
+        </div>
+
+        <!-- Récapitulatif -->
+        <div class="col-span-12 mb-6" *ngIf="model.contact_id && model.date_debut && model.date_fin && model.nombre_rouleaux && !hasErrors()">
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="pi pi-info-circle text-blue-600 dark:text-blue-400"></i>
+              <span class="font-semibold text-blue-900 dark:text-blue-100">Récapitulatif</span>
+            </div>
+            <div class="grid grid-cols-1 gap-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-surface-600 dark:text-surface-300">Contact :</span>
+                <span class="font-medium text-surface-900 dark:text-surface-0">
+                  {{ getSelectedContact()?.prenom }} {{ getSelectedContact()?.nom }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-surface-600 dark:text-surface-300">Téléphone :</span>
+                <span class="font-medium text-surface-900 dark:text-surface-0">
+                  {{ getSelectedContact()?.phone }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-surface-600 dark:text-surface-300">Période :</span>
+                <span class="font-medium text-surface-900 dark:text-surface-0">
+                  {{ model.date_debut | date:'dd/MM/yyyy' }} - {{ model.date_fin | date:'dd/MM/yyyy' }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-surface-600 dark:text-surface-300">Durée :</span>
+                <span class="font-medium text-surface-900 dark:text-surface-0">
+                  {{ calculateDays() }} jour(s)
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-surface-600 dark:text-surface-300">Rouleaux :</span>
+                <span class="font-bold text-primary text-lg">
+                  {{ model.nombre_rouleaux }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+       <!-- Boutons -->
+<div class="col-span-12 flex gap-2" *ngIf="isEditing">
+  <button
+    pButton
+    pRipple
+    (click)="onSubmit()"
+    [disabled]="!isValid() || loading"
+    class="w-auto"
+  >
+    <i class="pi pi-check mr-2"></i>
+    {{ mode === 'create' ? 'Enregistrer' : 'Sauvegarder' }}
+  </button>
+  
+  <button
+    pButton
+    pRipple
+    severity="secondary"
+    (click)="mode === 'create' ? onCancel() : cancelEditing()"
+    [disabled]="loading"
+    class="w-auto"
+  >
+    <i class="pi pi-times mr-2"></i>
+    Annuler
+  </button>
+</div>
+      </div>
+    </div>
+  </div>
+</div>
