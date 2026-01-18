@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { PackingFrom } from '../packing-from/packing-from';
 import { ContactInterface } from '@/models/contacts/contact-interface';
-import { PackingModel } from '@/models/contacts/packing-model';
+import { PackingModel } from '@/models/packing-model';
 
 @Component({
   selector: 'app-packing-new',

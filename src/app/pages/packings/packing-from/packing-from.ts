@@ -11,7 +11,7 @@ import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { Ripple } from 'primeng/ripple';
 import { ContactInterface } from '@/models/contacts/contact-interface';
-import { PackingModel } from '@/models/contacts/packing-model';
+import { PackingModel } from '@/models/packing-model';
  
 @Component({
   selector: 'app-packing-from',
