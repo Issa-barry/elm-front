@@ -1,7 +1,21 @@
 <div class="card">
-  <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block">
-    {{ mode === 'create' ? 'Ajout contact' : 'Modifier Contact' }}
-  </span>
+  <div class="flex justify-between items-center mb-6">
+    <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
+      {{ mode === 'create' ? 'Ajout contact' : 'Détails du contact' }}
+    </span>
+    
+    <!-- Bouton Modifier -->
+    <button
+      *ngIf="mode === 'edit' && !isEditing"
+      pButton
+      pRipple
+      label="Modifier"
+      icon="pi pi-pencil"
+      severity="warn"
+      (click)="enableEditing()"
+      class="w-auto"
+    ></button>
+  </div>
   
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12 lg:col-span-2">
@@ -19,7 +33,7 @@
         <!-- Nom -->
         <div class="mb-6 col-span-12 md:col-span-6">
           <label for="nom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Nom <span class="text-red-500">*</span>
+            Nom <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <input
             id="nom"
@@ -28,9 +42,9 @@
             fluid
             [(ngModel)]="model.nom"
             [invalid]="submitted && !model.nom?.trim()"
-            [disabled]="loading"
+            [disabled]="fieldsDisabled"
           />
-          <small class="text-red-500" *ngIf="submitted && !model.nom?.trim()">
+          <small class="text-red-500" *ngIf="submitted && !model.nom?.trim() && isEditing">
             Nom obligatoire.
           </small>
         </div>
@@ -38,7 +52,7 @@
         <!-- Prénom -->
         <div class="mb-6 col-span-12 md:col-span-6">
           <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Prénom <span class="text-red-500">*</span>
+            Prénom <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <input
             id="prenom"
@@ -47,37 +61,89 @@
             fluid
             [(ngModel)]="model.prenom"
             [invalid]="submitted && !model.prenom?.trim()"
-            [disabled]="loading"
+            [disabled]="fieldsDisabled"
           />
-          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim()">
+          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
             Prénom obligatoire.
           </small>
         </div>
 
-        <!-- Phone -->
+        <!-- Téléphone avec sélecteur de pays -->
         <div class="mb-6 col-span-12">
-          <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Téléphone <span class="text-red-500">*</span>
+          <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+            Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
-          <input
-            id="phone"
-            type="tel"
-            pInputText
-            fluid
-            [(ngModel)]="model.phone"
-            [invalid]="submitted && !model.phone?.trim()"
-            [disabled]="loading"
-            placeholder="+224 XXX XXX XXX"
-          />
-          <small class="text-red-500" *ngIf="submitted && !model.phone?.trim()">
+          
+          <div class="grid grid-cols-12 gap-3">
+            <!-- Sélecteur de pays -->
+            <div class="col-span-12 md:col-span-4">
+              <label for="codePays" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
+                Pays
+              </label>
+              <p-select
+                id="codePays"
+                [(ngModel)]="phoneCountry"
+                [options]="countries"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Sélectionner un pays"
+                [disabled]="fieldsDisabled"
+                (onChange)="onCountryChange()"
+                fluid
+              >
+                <ng-template let-country pTemplate="item">
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
+                  </div>
+                </ng-template>
+                <ng-template let-country pTemplate="selectedItem">
+                  <div class="flex items-center gap-2" *ngIf="country">
+                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <!-- Champ téléphone -->
+            <div class="col-span-12 md:col-span-8">
+              <label for="phone" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
+                Numéro
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                pInputText
+                fluid
+                [(ngModel)]="model.phone"
+                [invalid]="(submitted || phoneError) && (!model.phone?.trim() || !!phoneError)"
+                [disabled]="fieldsDisabled"
+                (input)="onPhoneInput()"
+                (blur)="onPhoneBlur()"
+                placeholder="Exemple: 622 00 00 00"
+              />
+            </div>
+          </div>
+
+          <!-- Messages d'erreur pour le téléphone -->
+          <small class="text-red-500 block mt-2" *ngIf="submitted && !model.phone?.trim() && isEditing">
             Téléphone obligatoire.
           </small>
+          <small class="text-red-500 block mt-2" *ngIf="phoneError && model.phone?.trim() && isEditing">
+            {{ phoneError }}
+          </small>
+          
+          <!-- Indication du format attendu -->
+          <!-- <small class="text-surface-500 dark:text-surface-400 block mt-2" *ngIf="isEditing && !phoneError && !fieldsDisabled">
+            Format: {{ getCountryName(phoneCountry) }} ({{ getSelectedCountryDialCode() }})
+          </small> -->
         </div>
 
         <!-- Ville -->
         <div class="mb-6 col-span-12 md:col-span-6">
           <label for="ville" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Ville <span class="text-red-500">*</span>
+            Ville <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <input
             id="ville"
@@ -86,9 +152,9 @@
             fluid
             [(ngModel)]="model.ville"
             [invalid]="submitted && !model.ville?.trim()"
-            [disabled]="loading"
+            [disabled]="fieldsDisabled"
           />
-          <small class="text-red-500" *ngIf="submitted && !model.ville?.trim()">
+          <small class="text-red-500" *ngIf="submitted && !model.ville?.trim() && isEditing">
             Ville obligatoire.
           </small>
         </div>
@@ -96,7 +162,7 @@
         <!-- Quartier -->
         <div class="mb-6 col-span-12 md:col-span-6">
           <label for="quartier" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Quartier <span class="text-red-500">*</span>
+            Quartier <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <input
             id="quartier"
@@ -105,19 +171,19 @@
             fluid
             [(ngModel)]="model.quartier"
             [invalid]="submitted && !model.quartier?.trim()"
-            [disabled]="loading"
+            [disabled]="fieldsDisabled"
           />
-          <small class="text-red-500" *ngIf="submitted && !model.quartier?.trim()">
+          <small class="text-red-500" *ngIf="submitted && !model.quartier?.trim() && isEditing">
             Quartier obligatoire.
           </small>
         </div>
 
         <!-- Boutons -->
-        <div class="col-span-12 flex gap-2">
+        <div class="col-span-12 flex gap-2" *ngIf="isEditing">
           <button
             pButton
             pRipple
-            label="Enregistrer"
+            [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
             icon="pi pi-check"
             (click)="onSubmit()"
             [loading]="loading"
@@ -131,10 +197,9 @@
             label="Annuler"
             icon="pi pi-times"
             severity="secondary"
-            (click)="onCancel()"
+            (click)="mode === 'create' ? onCancel() : cancelEditing()"
             [disabled]="loading"
             class="w-auto"
-            *ngIf="mode === 'edit'"
           ></button>
         </div>
       </div>

@@ -1,0 +1,57 @@
+<div class="card">
+        <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block">Ajout produit</span>
+        <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-12 lg:col-span-2">
+                <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Profile</div>
+                <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">Les champs sont afficher en fonction du type de produit.</p>
+            </div>
+            <div class="col-span-12 lg:col-span-10">
+                <div class="grid grid-cols-12 gap-4">
+                    
+                    <div class="mb-6 col-span-12 md:col-span-12">
+                        <label for="country" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block"> Type de produit </label>
+                        <p-select inputId="country" [options]="countries" optionLabel="name" fluid [filter]="true" filterBy="name" [showClear]="true" placeholder="Select a Country">
+                            <ng-template let-country #item>
+                                <div class="flex items-center">
+                                    <img src="https://primefaces.org/cdn/primeng/images/flag/flag_placeholder.png" [class]="'mr-2 flag flag-' + country.code.toLowerCase()" style="width:18px" />
+                                    <div>{{ country.name }}</div>
+                                </div>
+                            </ng-template>
+                        </p-select>
+                    </div>
+
+                    <div class="mb-6 col-span-12">
+                        <label for="nickname" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block"> Nom du produit </label>
+                        <input id="nickname" type="text" pInputText fluid />
+                    </div>
+                     
+                    <div class="mb-6 col-span-12 md:col-span-6">
+                        <label for="email" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block"> Prix Usine </label>
+                        <input id="email" type="text" pInputText fluid />
+                    </div>
+                    <div class="mb-6 col-span-12 md:col-span-6">
+                        <label for="email" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block"> Prix Vente </label>
+                        <input id="email" type="text" pInputText fluid />
+                    </div>
+                    <div class="mb-6 col-span-12 md:col-span-6">
+                        <label for="state" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block"> Prix Achat </label>
+                        <input id="state" type="text" pInputText fluid />
+                    </div>
+                    <div class="mb-6 col-span-12 md:col-span-6">
+                        <label for="city" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block"> Coût </label>
+                        <input id="city" type="text" pInputText fluid />
+                    </div>
+                    
+
+                    <div class="mb-6 col-span-12 flex flex-col items-end">
+                        <label for="avatar" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">Photo</label>
+                        <p-fileupload mode="basic" name="avatar" url="./upload.php" accept="image/*" [maxFileSize]="1000000" styleClass="p-button-outlined p-button-plain" chooseLabel="Choisire photo"></p-fileupload>
+                    </div>
+
+                    <div class="col-span-12">
+                        <button pButton pRipple label="Enregistrer" class="w-auto mt-3"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

@@ -3,6 +3,9 @@ import {
 } from "./chunk-2VKU4RHV.js";
 import "./chunk-GCUZRUSE.js";
 import {
+  NG_VALUE_ACCESSOR
+} from "./chunk-ESOFH62Q.js";
+import {
   Bind,
   BindModule
 } from "./chunk-7J3RN223.js";
@@ -21,9 +24,6 @@ import {
 import {
   z2 as z
 } from "./chunk-U4LT4ZJN.js";
-import {
-  NG_VALUE_ACCESSOR
-} from "./chunk-ESOFH62Q.js";
 import {
   CommonModule,
   NgIf,
@@ -72,8 +72,8 @@ import {
   ɵɵtemplate,
   ɵɵtext
 } from "./chunk-T3DH5CBL.js";
-import "./chunk-HWYXSU2G.js";
 import "./chunk-JRFR6BLO.js";
+import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
 import {
   __spreadValues

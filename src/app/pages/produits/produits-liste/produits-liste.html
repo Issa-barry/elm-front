@@ -1,0 +1,12 @@
+<div class="card">
+            <div class="flex justify-between items-center mb-8">
+                <span class="text-surface-900 dark:text-surface-0 text-xl font-semibold">Liste des produits</span>
+                <!-- <button pButton pRipple class="font-semibold" outlined icon="pi pi-plus" label="Nouveau Produit" (click)="showDialog()"></button> -->
+                <button pButton pRipple class="font-semibold" outlined icon="pi pi-plus" label="Nouveau Produit" (click)="goToNewProduits()"></button>
+            </div>
+            <app-task-list [taskList]="todo" title="En stock"></app-task-list>
+            <app-task-list [taskList]="completed" title="Rupture"></app-task-list>
+        </div>
+
+<app-produits-form></app-produits-form>
+<!-- <app-create-task></app-create-task> -->

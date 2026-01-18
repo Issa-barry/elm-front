@@ -7,6 +7,9 @@ import {
 } from "./chunk-K3ACD73M.js";
 import "./chunk-DRUBN77R.js";
 import {
+  NG_VALUE_ACCESSOR
+} from "./chunk-ESOFH62Q.js";
+import {
   Bind,
   BindModule
 } from "./chunk-7J3RN223.js";
@@ -27,9 +30,6 @@ import {
   W,
   k2 as k
 } from "./chunk-U4LT4ZJN.js";
-import {
-  NG_VALUE_ACCESSOR
-} from "./chunk-ESOFH62Q.js";
 import {
   CommonModule,
   NgIf,
@@ -83,8 +83,8 @@ import {
   ɵɵtemplate,
   ɵɵviewQuery
 } from "./chunk-T3DH5CBL.js";
-import "./chunk-HWYXSU2G.js";
 import "./chunk-JRFR6BLO.js";
+import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
 import "./chunk-4MWRP73S.js";
 

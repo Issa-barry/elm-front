@@ -6,10 +6,7 @@ import {
 } from "./chunk-BGS3BFBN.js";
 import {
   Button
-} from "./chunk-3RJZMAAI.js";
-import {
-  Badge
-} from "./chunk-KVC4GAWA.js";
+} from "./chunk-3OH3R3H7.js";
 import "./chunk-V7YOKKWJ.js";
 import "./chunk-K3ACD73M.js";
 import "./chunk-DRUBN77R.js";
@@ -20,6 +17,9 @@ import {
   UploadIcon
 } from "./chunk-L4BOAW7V.js";
 import "./chunk-S5LK7CTB.js";
+import {
+  Badge
+} from "./chunk-KVC4GAWA.js";
 import {
   Bind
 } from "./chunk-7J3RN223.js";
@@ -44,11 +44,7 @@ import "./chunk-LR4OQNMI.js";
 import "./chunk-YLKDNKK4.js";
 import {
   DomSanitizer
-} from "./chunk-I3TQTHWJ.js";
-import {
-  HttpClient,
-  HttpEventType
-} from "./chunk-VKTFISRF.js";
+} from "./chunk-ZTU24O5S.js";
 import "./chunk-AAQPR7NU.js";
 import {
   CommonModule,
@@ -59,6 +55,10 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-OSSX5W73.js";
+import {
+  HttpClient,
+  HttpEventType
+} from "./chunk-VKTFISRF.js";
 import "./chunk-R6U7IGMG.js";
 import {
   ChangeDetectionStrategy,
@@ -126,8 +126,8 @@ import {
   ɵɵtextInterpolate1,
   ɵɵviewQuery
 } from "./chunk-T3DH5CBL.js";
-import "./chunk-HWYXSU2G.js";
 import "./chunk-JRFR6BLO.js";
+import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
 import "./chunk-4MWRP73S.js";
 
