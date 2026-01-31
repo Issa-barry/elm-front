@@ -85,8 +85,20 @@ export class Produit {
     if (data) Object.assign(this, data);
   }
 
-  getImageUrl(defaultImage: string = 'assets/images/no-product.png'): string {
-    return this.image_url || defaultImage;
+  /**
+   * Retourne l'URL complète de l'image.
+   * Si image_url est juste un nom de fichier, ajoute le chemin de base.
+   */
+  getImageUrl(defaultImage: string = 'assets/demo/images/no-product.png'): string {
+    if (!this.image_url) return defaultImage;
+
+    // Si c'est déjà une URL complète (http:// ou https://), la retourner telle quelle
+    if (this.image_url.startsWith('http://') || this.image_url.startsWith('https://')) {
+      return this.image_url;
+    }
+
+    // Sinon, c'est juste un nom de fichier, ajouter le chemin de base
+    return `assets/demo/images/produits/${this.image_url}`;
   }
 
   // ✅ format en number

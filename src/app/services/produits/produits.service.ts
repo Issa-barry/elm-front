@@ -167,14 +167,42 @@ export class ProduitService {
   private toFormData(dto: CreateProduitDto): FormData {
     const formData = new FormData();
 
-    Object.entries(dto).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (key === 'image' && value instanceof File) {
-          formData.append(key, value, value.name);
-        } else {
-          formData.append(key, value.toString());
-        }
-      }
+    // Ajouter les champs dans l'ordre correct pour Laravel
+    if (dto.nom) formData.append('nom', dto.nom);
+    if (dto.type) formData.append('type', dto.type);
+
+    // qte_stock peut être 0, donc on vérifie !== undefined
+    if (dto.qte_stock !== undefined && dto.qte_stock !== null) {
+      formData.append('qte_stock', dto.qte_stock.toString());
+    }
+
+    // Prix (peuvent être undefined)
+    if (dto.prix_usine !== undefined && dto.prix_usine !== null) {
+      formData.append('prix_usine', dto.prix_usine.toString());
+    }
+    if (dto.prix_vente !== undefined && dto.prix_vente !== null) {
+      formData.append('prix_vente', dto.prix_vente.toString());
+    }
+    if (dto.prix_achat !== undefined && dto.prix_achat !== null) {
+      formData.append('prix_achat', dto.prix_achat.toString());
+    }
+
+    // Champs optionnels
+    if (dto.statut) formData.append('statut', dto.statut);
+    if (dto.description) formData.append('description', dto.description);
+    if (dto.cout !== undefined && dto.cout !== null) {
+      formData.append('cout', dto.cout.toString());
+    }
+
+    // Image en dernier
+    if (dto.image instanceof File) {
+      formData.append('image', dto.image, dto.image.name);
+    }
+
+    // Debug: afficher le contenu du FormData
+    console.log('FormData content:');
+    formData.forEach((value, key) => {
+      console.log(`  ${key}:`, value);
     });
 
     return formData;
