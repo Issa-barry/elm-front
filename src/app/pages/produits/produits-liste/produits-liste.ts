@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -18,10 +18,19 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '@/pages/service/product.service';
 import { Router } from '@angular/router';
 import { ProduitService } from '@/services/produits/produits.service';
-import { Produit, PRODUIT_STATUT_LABELS, PRODUIT_STATUT_SEVERITY, ProduitStatut, ProduitStatutSeverity } from '@/models/produit.model';
+import { forkJoin } from 'rxjs';
+import {
+    CreateProduitDto,
+    Produit,
+    PRODUIT_STATUT_LABELS,
+    PRODUIT_STATUT_SEVERITY,
+    PRODUIT_TYPE_LABELS,
+    ProduitStatut,
+    ProduitStatutSeverity,
+    ProduitType
+} from '@/models/produit.model';
 
 interface Column {
     field: string;
@@ -58,29 +67,27 @@ interface ExportColumn {
         IconFieldModule,
         ConfirmDialogModule
     ],
-        providers: [MessageService, ProductService, ConfirmationService],
+        providers: [MessageService, ProduitService, ConfirmationService],
 
   templateUrl: './produits-liste.html',
   styleUrl: './produits-liste.scss',
 })
 export class ProduitsListe implements OnInit {
      produits: Produit[] = [];
+     produit: Produit = new Produit();
     loading: boolean = true;
 
     ///
-    filterFields: string[] = ['code', 'name', 'description', 'price', 'quantity', 'inventoryStatus', 'category', 'rating', 'image'];
+    filterFields: string[] = ['code', 'nom', 'description', 'type', 'statut', 'qte_stock'];
 
-    productDialog: boolean = false;
+    produitDialog: boolean = false;
 
-    products = signal<Product[]>([]);
-
-    product!: Product;
-
-    selectedProducts!: Product[] | null;
+    selectedProduits!: Produit[] | null;
 
     submitted: boolean = false;
 
-    statuses!: any[];
+    typeOptions: { label: string; value: ProduitType }[] = [];
+    statutOptions: { label: string; value: ProduitStatut }[] = [];
 
     @ViewChild('dt') dt!: Table;
 
@@ -90,7 +97,6 @@ export class ProduitsListe implements OnInit {
 
     constructor(
         private router: Router,
-        private productService: ProductService,
         private produitService: ProduitService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
@@ -101,7 +107,8 @@ export class ProduitsListe implements OnInit {
     }
 
     ngOnInit() {
-        this.loadDemoData();
+        this.initOptions();
+        this.initColumns();
         this.loadProduits();
     }
 
@@ -121,29 +128,28 @@ export class ProduitsListe implements OnInit {
     }
 
 
-    //
+    initOptions() {
+        this.typeOptions = Object.entries(PRODUIT_TYPE_LABELS).map(([value, label]) => ({
+            label,
+            value: value as ProduitType
+        }));
+        this.statutOptions = Object.entries(PRODUIT_STATUT_LABELS).map(([value, label]) => ({
+            label,
+            value: value as ProduitStatut
+        }));
+    }
 
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
-        });
-
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
-  
+    initColumns() {
         this.cols = [
             {
                 field: 'code',
                 header: 'Code',
                 customExportHeader: 'Product Code'
             },
-            { field: 'name', header: 'Name' },
+            { field: 'nom', header: 'Nom' },
             { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'prix_vente', header: 'Prix' },
+            { field: 'type', header: 'Type' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({
@@ -157,14 +163,14 @@ export class ProduitsListe implements OnInit {
     }
 
     openNew() {
-        this.product = {};
+        this.produit = new Produit();
         this.submitted = false;
-        this.productDialog = true;
+        this.produitDialog = true;
     }
 
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
+    editProduct(produit: Produit) {
+        this.produit = new Produit({ ...produit });
+        this.produitDialog = true;
     }
 
     deleteSelectedProducts() {
@@ -173,60 +179,68 @@ export class ProduitsListe implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
+                const ids = (this.selectedProduits ?? []).map((item) => item.id).filter((id) => !!id);
+                if (ids.length === 0) return;
+
+                forkJoin(ids.map((id) => this.produitService.delete(id))).subscribe({
+                    next: () => {
+                        this.selectedProduits = null;
+                        this.loadProduits();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'Products Deleted',
+                            life: 3000
+                        });
+                    },
+                    error: (err) => {
+                        console.error('Erreur lors de la suppression des produits :', err);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erreur',
+                            detail: 'Suppression impossible.',
+                            life: 3000
+                        });
+                    }
                 });
             }
         });
     }
 
     hideDialog() {
-        this.productDialog = false;
+        this.produitDialog = false;
         this.submitted = false;
     }
 
-    deleteProduct(product: Product) {
+    deleteProduct(produit: Produit) {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
+            message: 'Are you sure you want to delete ' + (produit.nom || 'this product') + '?',
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
+                if (!produit.id) return;
+                this.produitService.delete(produit.id).subscribe({
+                    next: () => {
+                        this.loadProduits();
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Successful',
+                            detail: 'Product Deleted',
+                            life: 3000
+                        });
+                    },
+                    error: (err) => {
+                        console.error('Erreur lors de la suppression du produit :', err);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erreur',
+                            detail: 'Suppression impossible.',
+                            life: 3000
+                        });
+                    }
                 });
             }
         });
-    }
-
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    }
-
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
     }
 
     getSeverity(status: string) {
@@ -252,34 +266,53 @@ export class ProduitsListe implements OnInit {
         return PRODUIT_STATUT_LABELS[statut] ?? PRODUIT_STATUT_LABELS.brouillon;
     }
 
-    saveProduct() {
+    saveProduit() {
         this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
-                });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
-            }
-
-            this.productDialog = false;
-            this.product = {};
+        if (!this.produit.nom?.trim() || !this.produit.type) {
+            return;
         }
+
+        const dto: CreateProduitDto = {
+            nom: this.produit.nom.trim(),
+            type: this.produit.type,
+            qte_stock: this.produit.qte_stock ?? 0,
+            code: this.produit.code || undefined,
+            statut: this.produit.statut,
+            cout: this.produit.cout ?? undefined,
+            description: this.produit.description ?? undefined,
+            prix_usine: this.produit.prix_usine ?? undefined,
+            prix_vente: this.produit.prix_vente ?? undefined,
+            prix_achat: this.produit.prix_achat ?? undefined
+        };
+
+        const isUpdate = !!this.produit.id;
+        const request$ = isUpdate
+            ? this.produitService.update(this.produit.id, dto)
+            : this.produitService.create(dto);
+
+        request$.subscribe({
+            next: () => {
+                this.produitDialog = false;
+                this.produit = new Produit();
+                this.submitted = false;
+                this.loadProduits();
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: isUpdate ? 'Product Updated' : 'Product Created',
+                    life: 3000
+                });
+            },
+            error: (err) => {
+                console.error('Erreur lors de la sauvegarde du produit :', err);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: 'Sauvegarde impossible.',
+                    life: 3000
+                });
+            }
+        });
     }
 
      goToNewProduits() {

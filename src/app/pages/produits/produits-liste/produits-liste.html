@@ -3,7 +3,7 @@
                 <ng-template #start>
                     <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" />
                     <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                    <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+                    <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProduits || !selectedProduits.length" />
                 </ng-template>
 
                 <ng-template #end>
@@ -19,10 +19,10 @@
                 [paginator]="true"
                 [globalFilterFields]="filterFields"
                 [tableStyle]="{ 'min-width': '75rem' }"
-                [(selection)]="selectedProducts"
+                [(selection)]="selectedProduits"
                 [rowHover]="true"
                 dataKey="id"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} produits"
                 [showCurrentPageReport]="true"
                 [rowsPerPageOptions]="[10, 20, 30]"
             >
@@ -44,26 +44,26 @@
                             <span class="flex items-center gap-2">Code
                             <p-sortIcon field="code" /></span>
                         </th>
-                        <th pSortableColumn="name" style="min-width:16rem">
+                        <th pSortableColumn="nom" style="min-width:16rem">
                             <span class="flex items-center gap-2">Nom
-                            <p-sortIcon field="name" /></span>
+                            <p-sortIcon field="nom" /></span>
                         </th>
                         <!-- <th>Image</th> -->
                         <!-- <th pSortableColumn="price" style="min-width: 8rem">
                             <span class="flex items-center gap-2">Prix
                             <p-sortIcon field="price" /></span>
                         </th> -->
-                        <th pSortableColumn="category" style="min-width:10rem">
+                        <th pSortableColumn="type" style="min-width:10rem">
                             <span class="flex items-center gap-2">Type
-                            <p-sortIcon field="category" /></span>
+                            <p-sortIcon field="type" /></span>
                         </th>
-                        <th pSortableColumn="rating" style="min-width: 12rem">
+                        <th pSortableColumn="qte_stock" style="min-width: 12rem">
                             <span class="flex items-center gap-2">Qté
-                            <p-sortIcon field="rating" /></span>
+                            <p-sortIcon field="qte_stock" /></span>
                         </th>
-                        <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
+                        <th pSortableColumn="statut" style="min-width: 12rem">
                             <span class="flex items-center gap-2">Status
-                            <p-sortIcon field="inventoryStatus" /></span>
+                            <p-sortIcon field="statut" /></span>
                         </th>
                         <th style="min-width: 12rem">Action</th>
                     </tr>
@@ -76,7 +76,7 @@
                         <td style="min-width: 12rem">{{ produit.code }}</td>
                        <td style="min-width: 16rem">{{ produit.nom }}</td>
                         <!-- <td>
-                            <img [src]="'/demo/images/product/' + produit.image" [alt]="produit.name" style="width: 64px" class="rounded" /> 
+                            <img [src]="'/demo/images/produit/' + produit.image" [alt]="produit.name" style="width: 64px" class="rounded" /> 
                         </td> -->
                          <td>{{ produit.type }}</td>
                         <td>{{ produit.qte_stock }}</td>
@@ -95,64 +95,89 @@
             </p-table>
         </div>
 
-        <!-- <p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Product Details" [modal]="true">
+
+
+        <p-dialog [(visible)]="produitDialog" [style]="{ width: '520px' }" [header]="produit?.id ? 'Modifier un produit' : 'Nouveau produit'" [modal]="true">
             <ng-template #content>
                 <div class="flex flex-col gap-6">
-                    <img [src]="'/demo/images/product/' + product.image" [alt]="product.image" class="block m-auto pb-6" *ngIf="product.image" />
                     <div>
-                        <label for="name" class="block font-bold mb-4">Name</label>
-                        <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Name is required.</small>
+                        <label for="nom" class="block font-bold mb-4">Nom</label>
+                        <input type="text" pInputText id="nom" [(ngModel)]="produit.nom" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !produit.nom?.trim()">Nom obligatoire.</small>
                     </div>
+
+                    <div>
+                        <label for="code" class="block font-bold mb-4">Code</label>
+                        <input type="text" pInputText id="code" [(ngModel)]="produit.code" fluid />
+                    </div>
+
                     <div>
                         <label for="description" class="block font-bold mb-4">Description</label>
-                        <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
+                        <textarea id="description" pTextarea [(ngModel)]="produit.description" rows="3" cols="20" fluid></textarea>
                     </div>
 
                     <div>
-                        <label for="inventoryStatus" class="block font-bold mb-4">Inventory Status</label>
-                        <p-select [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Select a Status" fluid />
+                        <label for="type" class="block font-bold mb-4">Type</label>
+                        <p-select
+                            [(ngModel)]="produit.type"
+                            inputId="type"
+                            [options]="typeOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner un type"
+                            fluid
+                        />
+                        <small class="text-red-500" *ngIf="submitted && !produit.type">Type obligatoire.</small>
                     </div>
 
                     <div>
-                        <span class="block font-bold mb-6">Category</span>
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category1" name="category" value="Accessories" [(ngModel)]="product.category" />
-                                <label for="category1">Accessories</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category2" name="category" value="Clothing" [(ngModel)]="product.category" />
-                                <label for="category2">Clothing</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category3" name="category" value="Electronics" [(ngModel)]="product.category" />
-                                <label for="category3">Electronics</label>
-                            </div>
-                            <div class="flex items-center gap-2 col-span-6">
-                                <p-radiobutton id="category4" name="category" value="Fitness" [(ngModel)]="product.category" />
-                                <label for="category4">Fitness</label>
-                            </div>
+                        <label for="statut" class="block font-bold mb-4">Statut</label>
+                        <p-select
+                            [(ngModel)]="produit.statut"
+                            inputId="statut"
+                            [options]="statutOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner un statut"
+                            fluid
+                        />
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                            <label for="qte_stock" class="block font-bold mb-4">Quantité</label>
+                            <p-inputnumber id="qte_stock" [(ngModel)]="produit.qte_stock" fluid />
+                        </div>
+                        <div class="col-span-6">
+                            <label for="cout" class="block font-bold mb-4">Coût</label>
+                            <p-inputnumber id="cout" [(ngModel)]="produit.cout" mode="currency" currency="GNF" locale="fr-GN" fluid />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-4">Price</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US" fluid />
+                            <label for="prix_achat" class="block font-bold mb-4">Prix achat</label>
+                            <p-inputnumber id="prix_achat" [(ngModel)]="produit.prix_achat" mode="currency" currency="GNF" locale="fr-GN" fluid />
                         </div>
                         <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-4">Quantity</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
+                            <label for="prix_vente" class="block font-bold mb-4">Prix vente</label>
+                            <p-inputnumber id="prix_vente" [(ngModel)]="produit.prix_vente" mode="currency" currency="GNF" locale="fr-GN" fluid />
                         </div>
+                    </div>
+
+                    <div>
+                        <label for="prix_usine" class="block font-bold mb-4">Prix usine</label>
+                        <p-inputnumber id="prix_usine" [(ngModel)]="produit.prix_usine" mode="currency" currency="GNF" locale="fr-GN" fluid />
                     </div>
                 </div>
             </ng-template>
 
             <ng-template #footer>
-                <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Save" icon="pi pi-check" (click)="saveProduct()" />
+                <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" />
+                <p-button label="Enregistrer" icon="pi pi-check" (click)="saveProduit()" />
             </ng-template>
-        </p-dialog> -->
+        </p-dialog>
 
         <p-confirmdialog [style]="{ width: '450px' }" />
+
+
