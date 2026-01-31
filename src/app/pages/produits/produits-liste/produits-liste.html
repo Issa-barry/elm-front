@@ -2,8 +2,8 @@
   <div class="card">
             <p-toolbar styleClass="mb-12">
                 <ng-template #start>
-                    <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" />
-                    <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+                    <!-- <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" /> -->
+                    <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
                     <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProduits || !selectedProduits.length" />
                 </ng-template>
 
@@ -98,8 +98,14 @@
 
 
 
-        <p-dialog [(visible)]="produitDialog" [style]="{ width: '520px' }" [header]="produit?.id ? 'Modifier un produit' : 'Nouveau produit'" [modal]="true">
+        <p-dialog [(visible)]="produitDialog" [style]="{ width: '720px', maxWidth: '95vw' }" [header]="produit?.id ? 'Modifier un produit' : 'Nouveau produit'" [modal]="true">
             <ng-template #content>
+                
+                    <div *ngIf="produit?.id" class="mb-4">
+                        <label for="code" class="block font-bold mb-4">Code</label>
+                        <input type="text" pInputText id="code" [(ngModel)]="produit.code" [disabled]="true" fluid />
+                    </div>
+
                 <div class="flex flex-col gap-6">
                     <div>
                         <label for="type" class="block font-bold mb-4">Type</label>
@@ -121,10 +127,6 @@
                         <small class="text-red-500" *ngIf="submitted && !produit.nom?.trim()">Nom obligatoire.</small>
                     </div>
 
-                    <div>
-                        <label for="code" class="block font-bold mb-4">Code</label>
-                        <input type="text" pInputText id="code" [(ngModel)]="produit.code" fluid />
-                    </div>
 
                     <div>
                         <label for="description" class="block font-bold mb-4">Description</label>

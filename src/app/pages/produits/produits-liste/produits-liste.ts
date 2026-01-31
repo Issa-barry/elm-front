@@ -276,7 +276,6 @@ export class ProduitsListe implements OnInit {
             nom: this.produit.nom.trim(),
             type: this.produit.type,
             qte_stock: this.produit.qte_stock ?? 0,
-            code: this.produit.code || undefined,
             statut: this.produit.statut,
             cout: this.produit.cout ?? undefined,
             description: this.produit.description ?? undefined,
