@@ -1,4 +1,3 @@
-<!-- src/app/pages/packings/packing-from/packing-from.html -->
 <div class="card">
   <div class="flex justify-between items-center mb-6">
     <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
@@ -12,8 +11,7 @@
       pRipple
       severity="warn"
       (click)="enableEditing()"
-      class="w-auto"
-    >
+      class="w-auto">
       <i class="pi pi-pencil mr-2"></i>
       Modifier
     </button>
@@ -21,21 +19,21 @@
   
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12 lg:col-span-2">
-      <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">
+      <!-- <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">
         Packing
       </div>
       <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
-        - Suivi rouleaux<br />
-        - Gestion période
-      </p>
+        Gestion complète des rouleaux avec suivi des périodes et calcul automatique des montants.
+      </p> -->
     </div>
 
     <div class="col-span-12 lg:col-span-10">
       <div class="grid grid-cols-12 gap-4">
+        
         <!-- Contact -->
         <div class="mb-6 col-span-12">
           <label for="contact" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Contact <span class="text-red-500" *ngIf="isEditing">*</span>
+            Contact <span class="text-red-500" *ngIf="isEditing">*</span> (Machiniste)
           </label>
           <p-select
             id="contact"
@@ -43,13 +41,12 @@
             [options]="contacts"
             optionLabel="nom"
             optionValue="id"
-            placeholder="Sélectionnez un contact"
+            placeholder="Sélectionnez un machiniste"
             [filter]="true"
             filterBy="nom,prenom,phone"
             [showClear]="true"
             [disabled]="fieldsDisabled"
-            fluid
-          >
+            fluid>
             <ng-template let-contact pTemplate="item">
               <div class="flex items-center gap-3">
                 <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
@@ -70,157 +67,236 @@
             </ng-template>
           </p-select>
           <small class="text-red-500" *ngIf="submitted && !model.contact_id && isEditing">
-            Veuillez sélectionner un contact
+            Veuillez sélectionner un machiniste
           </small>
         </div>
 
-        <!-- Dates -->
-        <div class="mb-6 col-span-12">
-          <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
-            Période <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          
-          <div class="grid grid-cols-12 gap-3">
-            <!-- Date de début -->
-            <div class="col-span-12 md:col-span-6">
-              <label for="dateDebut" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
-                Date de début
-              </label>
-              <p-datepicker
-                id="dateDebut"
-                [(ngModel)]="model.date_debut"
-                [showIcon]="true"
-                [minDate]="minDate"
-                dateFormat="dd/mm/yy"
-                placeholder="Sélectionnez la date"
-                [disabled]="fieldsDisabled"
-                (onSelect)="onDateDebutChange()"
-                (onBlur)="onDateBlur('debut')"
-                fluid
-              />
-            </div>
+       <!-- Dates - Version simplifiée -->
+<div class="mb-6 col-span-12">
+  <div class="grid grid-cols-12 gap-3">
+    <!-- Date de début -->
+    <div class="col-span-12 md:col-span-6">
+      <label for="dateDebut" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+        Date de début <span class="text-red-500" *ngIf="isEditing">*</span>
+      </label>
+      <p-datepicker
+        id="dateDebut"
+        [(ngModel)]="model.date_debut"
+        [showIcon]="true"
+        [minDate]="minDate"
+        dateFormat="dd/mm/yy"
+        placeholder="Sélectionnez la date"
+        [disabled]="fieldsDisabled"
+        (onSelect)="onDateDebutChange()"
+        (onBlur)="onDateBlur('debut')"
+        fluid />
+      <small class="text-red-500 block mt-1" *ngIf="submitted && dateDebutError && isEditing">
+        {{ dateDebutError }}
+      </small>
+    </div>
 
-            <!-- Date de fin -->
-            <div class="col-span-12 md:col-span-6">
-              <label for="dateFin" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
-                Date de fin
-              </label>
-              <p-datepicker
-                id="dateFin"
-                [(ngModel)]="model.date_fin"
-                [showIcon]="true"
-                [minDate]="model.date_debut || minDate"
-                dateFormat="dd/mm/yy"
-                placeholder="Sélectionnez la date"
-                [disabled]="fieldsDisabled"
-                (onSelect)="onDateFinChange()"
-                (onBlur)="onDateBlur('fin')"
-                fluid
-              />
-            </div>
-          </div>
+    <!-- Date de fin -->
+    <div class="col-span-12 md:col-span-6">
+      <label for="dateFin" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+        Date de fin <span class="text-red-500" *ngIf="isEditing">*</span>
+      </label>
+      <p-datepicker
+        id="dateFin"
+        [(ngModel)]="model.date_fin"
+        [showIcon]="true"
+        [minDate]="model.date_debut || minDate"
+        dateFormat="dd/mm/yy"
+        placeholder="Sélectionnez la date"
+        [disabled]="fieldsDisabled"
+        (onSelect)="onDateFinChange()"
+        (onBlur)="onDateBlur('fin')"
+        fluid />
+      <small class="text-red-500 block mt-1" *ngIf="submitted && dateFinError && isEditing">
+        {{ dateFinError }}
+      </small>
+    </div>
+  </div>
 
-          <!-- Messages d'erreur pour les dates -->
-          <small class="text-red-500 block mt-2" *ngIf="submitted && dateDebutError && isEditing">
-            {{ dateDebutError }}
-          </small>
-          <small class="text-red-500 block mt-2" *ngIf="submitted && dateFinError && isEditing">
-            {{ dateFinError }}
-          </small>
-          <small class="text-red-500 block mt-2" *ngIf="submitted && dateRangeError && isEditing">
-            {{ dateRangeError }}
-          </small>
-        </div>
-
-        <!-- Nombre de rouleaux -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="nombreRouleaux" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Nombre de rouleaux <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <p-inputnumber
-            id="nombreRouleaux"
-            [(ngModel)]="model.nombre_rouleaux"
-            [showButtons]="true"
-            [min]="1"
-            [max]="9999"
-            placeholder="Entrez le nombre"
-            mode="decimal"
-            [useGrouping]="false"
-            [disabled]="fieldsDisabled"
-            fluid
-          />
-          <small class="text-red-500" *ngIf="submitted && (!model.nombre_rouleaux || model.nombre_rouleaux < 1) && isEditing">
-            Le nombre de rouleaux doit être supérieur à 0
-          </small>
-        </div>
-
-        <!-- Récapitulatif -->
-        <div class="col-span-12 mb-6" *ngIf="model.contact_id && model.date_debut && model.date_fin && model.nombre_rouleaux && !hasErrors()">
-          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div class="flex items-center gap-2 mb-3">
-              <i class="pi pi-info-circle text-blue-600 dark:text-blue-400"></i>
-              <span class="font-semibold text-blue-900 dark:text-blue-100">Récapitulatif</span>
-            </div>
-            <div class="grid grid-cols-1 gap-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-surface-600 dark:text-surface-300">Contact :</span>
-                <span class="font-medium text-surface-900 dark:text-surface-0">
-                  {{ getSelectedContact()?.prenom }} {{ getSelectedContact()?.nom }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-surface-600 dark:text-surface-300">Téléphone :</span>
-                <span class="font-medium text-surface-900 dark:text-surface-0">
-                  {{ getSelectedContact()?.phone }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-surface-600 dark:text-surface-300">Période :</span>
-                <span class="font-medium text-surface-900 dark:text-surface-0">
-                  {{ model.date_debut | date:'dd/MM/yyyy' }} - {{ model.date_fin | date:'dd/MM/yyyy' }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-surface-600 dark:text-surface-300">Durée :</span>
-                <span class="font-medium text-surface-900 dark:text-surface-0">
-                  {{ calculateDays() }} jour(s)
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-surface-600 dark:text-surface-300">Rouleaux :</span>
-                <span class="font-bold text-primary text-lg">
-                  {{ model.nombre_rouleaux }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-       <!-- Boutons -->
-<div class="col-span-12 flex gap-2" *ngIf="isEditing">
-  <button
-    pButton
-    pRipple
-    (click)="onSubmit()"
-    [disabled]="!isValid() || loading"
-    class="w-auto"
-  >
-    <i class="pi pi-check mr-2"></i>
-    {{ mode === 'create' ? 'Enregistrer' : 'Sauvegarder' }}
-  </button>
-  
-  <button
-    pButton
-    pRipple
-    severity="secondary"
-    (click)="mode === 'create' ? onCancel() : cancelEditing()"
-    [disabled]="loading"
-    class="w-auto"
-  >
-    <i class="pi pi-times mr-2"></i>
-    Annuler
-  </button>
+  <!-- Message d'erreur pour la plage de dates -->
+  <small class="text-red-500 block mt-2" *ngIf="submitted && dateRangeError && isEditing">
+    {{ dateRangeError }}
+  </small>
 </div>
+
+        <!-- Nombre de rouleaux et Prix unitaire -->
+        <div class="mb-6 col-span-12 grid grid-cols-12 gap-3">
+          <!-- Nombre de rouleaux -->
+          <div class="col-span-12 md:col-span-6">
+            <label for="nombreRouleaux" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+              Nombre de rouleaux <span class="text-red-500" *ngIf="isEditing">*</span>
+            </label>
+            <p-inputnumber
+              id="nombreRouleaux"
+              [(ngModel)]="model.nombre_rouleaux"
+              (ngModelChange)="onPrixOrQuantityChange()"
+              [showButtons]="true"
+              [min]="1"
+              [max]="9999"
+              placeholder="Entrez le nombre"
+              mode="decimal"
+              [useGrouping]="false"
+              [disabled]="fieldsDisabled"
+              fluid />
+            <small class="text-red-500" *ngIf="submitted && (!model.nombre_rouleaux || model.nombre_rouleaux < 1) && isEditing">
+              Le nombre de rouleaux doit être supérieur à 0
+            </small>
+          </div>
+
+          <!-- Prix unitaire -->
+          <div class="col-span-12 md:col-span-6">
+            <label for="prixRouleau" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+              Prix unitaire (GNF) <span class="text-red-500" *ngIf="isEditing">*</span>
+            </label>
+            <p-inputnumber
+              id="prixRouleau"
+              [(ngModel)]="model.prix_rouleau"
+              (ngModelChange)="onPrixOrQuantityChange()"
+              mode="currency"
+              currency="GNF"
+              locale="fr-GN"
+              [min]="0"
+              placeholder="Prix par rouleau"
+              [disabled]="fieldsDisabled"
+              fluid />
+            <small class="text-red-500" *ngIf="submitted && (!model.prix_rouleau || model.prix_rouleau <= 0) && isEditing">
+              Le prix unitaire doit être supérieur à 0
+            </small>
+          </div>
+        </div>
+
+         <!-- Montant total (toujours visible) -->
+          <div class="mb-6 col-span-12">
+            <div class="bg-gradient-to-r from-primary/10 to-primary/5 border-l-4 border-primary rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <i class="pi pi-money-bill text-primary text-xl"></i>
+                  </div>
+                  <div>
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">
+                      Montant total
+                    </div>
+                    <div class="text-3xl font-bold text-primary">
+                      {{ model.montant |money }} 
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-sm text-surface-600 dark:text-surface-300 mt-3 flex items-center gap-2" *ngIf="model.nombre_rouleaux && model.prix_rouleau">
+                <i class="pi pi-calculator text-surface-500"></i>
+                {{ model.nombre_rouleaux }} rouleaux × {{ model.prix_rouleau | number:'1.0-0' }} GNF
+              </div>
+              <div class="text-sm text-surface-500 dark:text-surface-400 mt-3 italic" *ngIf="!model.nombre_rouleaux || !model.prix_rouleau">
+                <i class="pi pi-info-circle mr-2"></i>
+                Entrez la quantité et le prix unitaire pour calculer le montant
+              </div>
+            </div>
+          </div>
+
+        <!-- Récapitulatif complet -->
+        <div class="col-span-12 mb-6" *ngIf="model.contact_id && model.date_debut && model.date_fin && model.nombre_rouleaux && model.prix_rouleau && !hasErrors()">
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <i class="pi pi-info-circle text-blue-600 dark:text-blue-400 text-lg"></i>
+              <span class="font-bold text-blue-900 dark:text-blue-100 text-lg">Récapitulatif</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Colonne 1 : Informations contact et période -->
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <i class="pi pi-user text-blue-600 mt-1"></i>
+                  <div class="flex-1">
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Contact</div>
+                    <div class="font-semibold text-surface-900 dark:text-surface-0">
+                      {{ getSelectedContact()?.prenom }} {{ getSelectedContact()?.nom }}
+                    </div>
+                    <div class="text-sm text-surface-500 dark:text-surface-400">
+                      {{ getSelectedContact()?.phone }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <i class="pi pi-calendar text-blue-600 mt-1"></i>
+                  <div class="flex-1">
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Période</div>
+                    <div class="font-medium text-surface-900 dark:text-surface-0">
+                      {{ model.date_debut | date:'dd/MM/yyyy' }} - {{ model.date_fin | date:'dd/MM/yyyy' }}
+                    </div>
+                    <div class="text-sm text-surface-500 dark:text-surface-400">
+                      {{ calculateDays() }} jour(s)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Colonne 2 : Informations financières -->
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <i class="pi pi-box text-blue-600 mt-1"></i>
+                  <div class="flex-1">
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Quantité</div>
+                    <div class="font-bold text-primary text-xl">
+                      {{ model.nombre_rouleaux }} rouleaux
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <i class="pi pi-tag text-blue-600 mt-1"></i>
+                  <div class="flex-1">
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Prix unitaire</div>
+                    <div class="font-medium text-surface-900 dark:text-surface-0">
+                      {{ model.prix_rouleau | number:'1.0-0' }} GNF
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3 pt-3 border-t border-blue-200 dark:border-blue-700">
+                  <i class="pi pi-wallet text-blue-600 mt-1"></i>
+                  <div class="flex-1">
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Montant total</div>
+                    <div class="font-bold text-primary text-2xl">
+                      {{ model.montant | number:'1.0-0' }} GNF
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+         <!-- Boutons d'action -->
+        <div class="col-span-12 flex gap-2 mb-4" *ngIf="isEditing">
+          <button
+            pButton
+            pRipple
+            (click)="onSubmit()"
+            [disabled]="!isValid() || loading"
+            class="w-auto">
+            <i class="pi" [ngClass]="loading ? 'pi-spin pi-spinner' : 'pi-check'" [class.mr-2]="!loading"></i>
+            <span *ngIf="!loading">{{ mode === 'create' ? 'Enregistrer' : 'Sauvegarder' }}</span>
+            <span *ngIf="loading">Enregistrement...</span>
+          </button>
+          
+          <button
+            pButton
+            pRipple
+            severity="secondary"
+            (click)="mode === 'create' ? onCancel() : cancelEditing()"
+            [disabled]="loading"
+            class="w-auto">
+            <i class="pi pi-times mr-2"></i>
+            Annuler
+          </button>
+        </div>
+        
       </div>
     </div>
   </div>

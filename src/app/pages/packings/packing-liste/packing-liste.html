@@ -1,1 +1,272 @@
- <app-packing-from></app-packing-from>
+<p-toast />
+<p-confirmDialog />
+
+<div class="card">
+    <!-- En-tête -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-surface-900 dark:text-surface-0 mb-2">
+                Gestion des Packings
+            </h1>
+            <p class="text-surface-600 dark:text-surface-400">
+                Liste de tous les packings enregistrés
+            </p>
+        </div>
+        
+        <div class="flex gap-2">
+            <button
+                pButton
+                pRipple
+                label="Nouveau Packing"
+                icon="pi pi-plus"
+                (click)="navigateToNew()">
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="mb-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg">
+        <div class="grid grid-cols-12 gap-4">
+            <!-- Date de début -->
+            <div class="col-span-12 md:col-span-3">
+                <label class="font-medium text-surface-900 dark:text-surface-0 mb-2 block text-sm">
+                    Date de début
+                </label>
+                <p-datepicker
+                    [(ngModel)]="dateDebutFilter"
+                    [showIcon]="true"
+                    dateFormat="dd/mm/yy"
+                    placeholder="Filtrer par date début"
+                    (onSelect)="onFilterChange()"
+                    (onClear)="onFilterChange()"
+                    [showClear]="true"
+                    fluid />
+            </div>
+            
+            <!-- Date de fin -->
+            <div class="col-span-12 md:col-span-3">
+                <label class="font-medium text-surface-900 dark:text-surface-0 mb-2 block text-sm">
+                    Date de fin
+                </label>
+                <p-datepicker
+                    [(ngModel)]="dateFinFilter"
+                    [showIcon]="true"
+                    dateFormat="dd/mm/yy"
+                    placeholder="Filtrer par date fin"
+                    (onSelect)="onFilterChange()"
+                    (onClear)="onFilterChange()"
+                    [showClear]="true"
+                    fluid />
+            </div>
+
+            <!-- Statut -->
+            <div class="col-span-12 md:col-span-3">
+                <label class="font-medium text-surface-900 dark:text-surface-0 mb-2 block text-sm">
+                    Statut
+                </label>
+                <p-select
+                    [(ngModel)]="statutFilter"
+                    [options]="statutOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Filtrer par statut"
+                    (onChange)="onFilterChange()"
+                    [showClear]="true"
+                    fluid />
+            </div>
+            
+            <!-- Bouton réinitialiser -->
+            <div class="col-span-12 md:col-span-3 flex items-end">
+                <button
+                    pButton
+                    pRipple
+                    label="Réinitialiser"
+                    icon="pi pi-filter-slash"
+                    severity="secondary"
+                    outlined
+                    (click)="resetFilters()"
+                    class="w-full">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <p-table
+        #dt
+        [value]="packings"
+        [loading]="loading"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Affichage de {first} à {last} sur {totalRecords} packings"
+        [globalFilterFields]="['contact.nom', 'contact.prenom', 'contact.phone']"
+        styleClass="p-datatable-sm"
+        [tableStyle]="{ 'min-width': '60rem' }"
+        responsiveLayout="scroll">
+        
+        <!-- Caption avec recherche -->
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <p-iconfield iconPosition="left">
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input
+                        pInputText
+                        type="text"
+                        (input)="onGlobalFilter(dt, $event)"
+                        placeholder="Rechercher..."
+                        class="w-full md:w-80" />
+                </p-iconfield>
+                
+                <span class="text-surface-600 dark:text-surface-400 text-sm">
+                    Total: {{ packings.length }} packing(s)
+                </span>
+            </div>
+        </ng-template>
+
+        <!-- Colonnes -->
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="contact.nom">
+                    Contact
+                    <p-sortIcon field="contact.nom" />
+                </th>
+                <th pSortableColumn="contact.phone">
+                    Téléphone
+                    <p-sortIcon field="contact.phone" />
+                </th>
+                <th pSortableColumn="date_debut">
+                    Date début
+                    <p-sortIcon field="date_debut" />
+                </th>
+                <th pSortableColumn="date_fin">
+                    Date fin
+                    <p-sortIcon field="date_fin" />
+                </th>
+                <th pSortableColumn="nombre_rouleaux" class="text-center">
+                    Rouleaux
+                    <p-sortIcon field="nombre_rouleaux" />
+                </th>
+                <th pSortableColumn="montant" class="text-center">
+                    Montant
+                    <p-sortIcon field="montant" />
+                </th>
+                <th pSortableColumn="statut" class="text-center">
+                    Statut
+                    <p-sortIcon field="statut" />
+                </th>
+                <th class="text-center" style="width: 120px">
+                    Actions
+                </th>
+            </tr>
+        </ng-template>
+
+        <!-- Corps du tableau -->
+        <ng-template #body let-packing>
+            <tr>
+                <!-- Contact -->
+                <td>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                            <i class="pi pi-user text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-surface-900 dark:text-surface-0">
+                                {{ packing.contact?.prenom }} {{ packing.contact?.nom }}
+                            </div>
+                            <div class="text-sm text-surface-500 dark:text-surface-400">
+                                {{ packing.contact?.ville }} - {{ packing.contact?.quartier }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Téléphone -->
+                <td>
+                    <span class="text-surface-700 dark:text-surface-300">
+                        {{ packing.contact?.phone }}
+                    </span>
+                </td>
+
+                <!-- Date début -->
+                <td>
+                    <span>{{ packing.date_debut | date:'dd/MM/yyyy' }}</span>
+                </td>
+
+                <!-- Date fin -->
+                <td>
+                    <span>{{ packing.date_fin | date:'dd/MM/yyyy' }}</span>
+                </td>
+
+                <!-- Nombre de rouleaux -->
+                <td class="text-center">
+                    <span class="font-bold text-primary text-lg">
+                        {{ packing.nombre_rouleaux }}
+                    </span>
+                </td>
+
+                <!-- Montant -->
+                <td class="text-center">
+                    <span class="font-bold text-surface-900 dark:text-surface-0 text-base">
+                        {{ packing.montant | money }}
+                    </span>
+                </td>
+
+                <!-- Statut -->
+                <td class="text-center">
+                    <p-tag 
+                        [value]="getStatutLabel(packing.statut)" 
+                        [severity]="getStatutSeverity(packing.statut)" />
+                </td>
+
+                <!-- Actions -->
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <button
+                            pButton
+                            pRipple
+                            icon="pi pi-eye"
+                            class="p-button-rounded p-button-text"
+                            severity="info"
+                            (click)="viewDetails(packing)"
+                            pTooltip="Voir les détails"
+                            tooltipPosition="top">
+                        </button>
+                        <button
+                            pButton
+                            pRipple
+                            icon="pi pi-trash"
+                            class="p-button-rounded p-button-text"
+                            severity="danger"
+                            (click)="deletePacking(packing, $event)"
+                            pTooltip="Supprimer"
+                            tooltipPosition="top">
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <!-- Message vide -->
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="8">
+                    <div class="flex flex-col items-center justify-center py-12">
+                        <i class="pi pi-inbox text-6xl text-surface-300 dark:text-surface-600 mb-4"></i>
+                        <p class="text-surface-500 dark:text-surface-400 text-lg mb-4">
+                            Aucun packing trouvé
+                        </p>
+                        <button
+                            pButton
+                            pRipple
+                            label="Créer un packing"
+                            icon="pi pi-plus"
+                            (click)="navigateToNew()">
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

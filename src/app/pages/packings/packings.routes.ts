@@ -8,6 +8,6 @@ export default [
      { path: '', component: PackingListe },
     { path: 'packings', component: PackingListe },
     { path: 'packings-new', component: PackingNew },
-    { path: 'packings/:id/edit', component: PackingEdit },
+    { path: 'packings-edit/:id', component: PackingEdit },
      { path: '**', redirectTo: '/notfound' }
 ] as Routes;

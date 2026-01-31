@@ -1,17 +1,16 @@
-// src/app/pages/packings/packing-from/packing-from.ts
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePicker } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
 import { InputNumber } from 'primeng/inputnumber';
 import { Button } from 'primeng/button';
-import { Card } from 'primeng/card';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { Ripple } from 'primeng/ripple';
 import { ContactInterface } from '@/models/contacts/contact-interface';
 import { PackingModel } from '@/models/packing-model';
+import { MoneyPipe } from '@/pipes/money.pipe';
  
 @Component({
   selector: 'app-packing-from',
@@ -23,10 +22,10 @@ import { PackingModel } from '@/models/packing-model';
     Select,
     InputNumber,
     Button,
-    Card,
     InputGroup,
     InputGroupAddon,
-    Ripple
+    Ripple,
+    MoneyPipe
   ],
   templateUrl: './packing-from.html',
   styleUrl: './packing-from.scss',
@@ -54,6 +53,13 @@ export class PackingFrom implements OnInit {
     
     if (this.mode === 'create') {
       this.isEditing = true;
+    }
+  }
+
+  // Calculer automatiquement le montant
+  onPrixOrQuantityChange(): void {
+    if (this.model.nombre_rouleaux && this.model.prix_rouleau) {
+      this.model.calculateMontant();
     }
   }
 
@@ -163,7 +169,9 @@ export class PackingFrom implements OnInit {
       this.model.date_debut &&
       this.model.date_fin &&
       this.model.nombre_rouleaux &&
-      this.model.nombre_rouleaux > 0
+      this.model.nombre_rouleaux > 0 &&
+      this.model.prix_rouleau &&
+      this.model.prix_rouleau > 0
     );
 
     if (!basicValidation) {
@@ -193,6 +201,15 @@ export class PackingFrom implements OnInit {
     this.model = this.initialData ? new PackingModel(this.initialData) : new PackingModel();
   }
 
+  // Réinitialiser le formulaire (méthode publique)
+  public resetForm(): void {
+    this.submitted = false;
+    this.dateDebutError = null;
+    this.dateFinError = null;
+    this.dateRangeError = null;
+    this.model = new PackingModel();
+  }
+
   // Soumettre le formulaire
   onSubmit(): void {
     this.submitted = true;
@@ -200,6 +217,9 @@ export class PackingFrom implements OnInit {
     if (!this.isValid()) {
       return;
     }
+
+    // Calculer le montant avant soumission
+    this.model.calculateMontant();
 
     // Ajouter le contact au model avant l'émission
     this.model.contact = this.getSelectedContact();

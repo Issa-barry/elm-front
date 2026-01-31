@@ -57,7 +57,7 @@ export class AppMenu {
                             {
                                 label: 'Salaire packing',
                                 icon: 'pi pi-fw pi-money-bill',
-                                routerLink: ['/apps/blog/list'],
+                                routerLink: ['/comptabilite/comptabilite-packing'],
                             },
                             // {
                             //     label: 'Sailaire véhicule',
