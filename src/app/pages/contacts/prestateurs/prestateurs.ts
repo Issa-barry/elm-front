@@ -110,7 +110,7 @@ export class Prestateurs implements OnInit {
    * Naviguer vers la création d'un utilisateur
    */
   navigateToCreateUser() {
-    this.router.navigate(['contacts/users/new']);
+    this.router.navigate(['contacts/prestateurs/new']);
   }
 
   /**
