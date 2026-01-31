@@ -27,6 +27,17 @@ export const PRODUIT_STATUT_LABELS: Record<ProduitStatut, string> = {
   rupture_stock: 'Rupture de stock'
 };
 
+export type ProduitStatutSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast';
+
+// Severites PrimeNG pour les tags de statut
+export const PRODUIT_STATUT_SEVERITY: Record<ProduitStatut, ProduitStatutSeverity> = {
+  brouillon: 'secondary',
+  actif: 'success',
+  inactif: 'danger',
+  archive: 'danger',
+  rupture_stock: 'warn'
+};
+
 // Classes CSS pour les badges de statut
 export const PRODUIT_STATUT_COLORS: Record<ProduitStatut, string> = {
   brouillon: 'bg-gray-100 text-gray-800',
@@ -85,7 +96,7 @@ export class Produit {
     if (data) Object.assign(this, data);
   }
 
-  /**
+  /** 
    * Retourne l'URL complète de l'image.
    * Si image_url est juste un nom de fichier, ajoute le chemin de base.
    */
@@ -205,3 +216,4 @@ export interface UpdateStockDto {
 export interface ChangeStatusDto {
   statut: ProduitStatut;
 }
+

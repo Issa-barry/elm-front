@@ -1,51 +1,288 @@
-import { Component, OnDestroy } from '@angular/core';
-
-import { Subscription } from 'rxjs';
-import { ButtonModule } from 'primeng/button';
-import { Task } from '@/types/task';
-import { RippleModule } from 'primeng/ripple';
+import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { TaskListComponent } from '@/apps/tasklist/task-list';
-import { CreateTaskComponent } from '@/apps/tasklist/create-task';
-import { TaskService } from '@/apps/tasklist/service/task.service';
-import { ProduitsForm } from '../produits-form/produits-form';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
+import { ToastModule } from 'primeng/toast';
+import { ToolbarModule } from 'primeng/toolbar';
+import { RatingModule } from 'primeng/rating';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DialogModule } from 'primeng/dialog';
+import { TagModule } from 'primeng/tag';
+import { InputIconModule } from 'primeng/inputicon';
+import { IconFieldModule } from 'primeng/iconfield';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { Product, ProductService } from '@/pages/service/product.service';
 import { Router } from '@angular/router';
-import { ProduitsFormDialog } from '../produits-form-dialog/produits-form-dialog';
+import { ProduitService } from '@/services/produits/produits.service';
+import { Produit, PRODUIT_STATUT_LABELS, PRODUIT_STATUT_SEVERITY, ProduitStatut, ProduitStatutSeverity } from '@/models/produit.model';
+
+interface Column {
+    field: string;
+    header: string;
+    customExportHeader?: string;
+}
+
+interface ExportColumn {
+    title: string;
+    dataKey: string;
+}
 
 
 @Component({
   selector: 'app-produits-liste',
-  standalone:true,
-    imports: [CommonModule, ButtonModule, TaskListComponent, CreateTaskComponent, RippleModule, ProduitsForm, ProduitsFormDialog],
-    providers: [TaskService],
+   standalone: true,
+    imports: [
+        CommonModule,
+        TableModule,
+        FormsModule,
+        ButtonModule,
+        RippleModule,
+        ToastModule,
+        ToolbarModule,
+        RatingModule,
+        InputTextModule,
+        TextareaModule,
+        SelectModule,
+        RadioButtonModule,
+        InputNumberModule,
+        DialogModule,
+        TagModule,
+        InputIconModule,
+        IconFieldModule,
+        ConfirmDialogModule
+    ],
+        providers: [MessageService, ProductService, ConfirmationService],
+
   templateUrl: './produits-liste.html',
   styleUrl: './produits-liste.scss',
 })
-export class ProduitsListe implements OnDestroy {
-    subscription: Subscription;
+export class ProduitsListe implements OnInit {
+     produits: Produit[] = [];
+    loading: boolean = true;
 
-    todo: Task[] = [];
+    ///
+    filterFields: string[] = ['code', 'name', 'description', 'price', 'quantity', 'inventoryStatus', 'category', 'rating', 'image'];
 
-    completed: Task[] = [];
+    productDialog: boolean = false;
 
-    constructor(private taskService: TaskService, private router: Router) {
-        this.subscription = this.taskService.taskSource$.subscribe((data) => this.categorize(data));
+    products = signal<Product[]>([]);
+
+    product!: Product;
+
+    selectedProducts!: Product[] | null;
+
+    submitted: boolean = false;
+
+    statuses!: any[];
+
+    @ViewChild('dt') dt!: Table;
+
+    exportColumns!: ExportColumn[];
+
+    cols!: Column[];
+
+    constructor(
+        private router: Router,
+        private productService: ProductService,
+        private produitService: ProduitService,
+        private messageService: MessageService,
+        private confirmationService: ConfirmationService
+    ) {}
+
+    exportCSV() {
+        this.dt.exportCSV();
     }
 
-    categorize(tasks: Task[]) {
-        this.todo = tasks.filter((t) => t.completed !== true);
-        this.completed = tasks.filter((t) => t.completed);
+    ngOnInit() {
+        this.loadDemoData();
+        this.loadProduits();
     }
 
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
+      loadProduits() {
+        this.produitService.getAll().subscribe({
+                next: (produits) => {
+                    this.produits = produits;
+                    this.loading=false;
+                    console.log(this.produits);
+                    
+                },
+                error: (err) =>{
+                    console.error('Erreur lors du chargement des produits :', err),
+                this.loading = false;
+                }
+                });
     }
 
-    showDialog() {
-        this.taskService.showDialog('Nouveau Produit', true);
+
+    //
+
+    loadDemoData() {
+        this.productService.getProducts().then((data) => {
+            this.products.set(data);
+        });
+
+        this.statuses = [
+            { label: 'INSTOCK', value: 'instock' },
+            { label: 'LOWSTOCK', value: 'lowstock' },
+            { label: 'OUTOFSTOCK', value: 'outofstock' }
+        ];
+  
+        this.cols = [
+            {
+                field: 'code',
+                header: 'Code',
+                customExportHeader: 'Product Code'
+            },
+            { field: 'name', header: 'Name' },
+            { field: 'image', header: 'Image' },
+            { field: 'price', header: 'Price' },
+            { field: 'category', header: 'Category' }
+        ];
+
+        this.exportColumns = this.cols.map((col) => ({
+            title: col.header,
+            dataKey: col.field
+        }));
     }
 
-    goToNewProduits() {
+    onGlobalFilter(table: Table, event: Event) {
+        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    openNew() {
+        this.product = {};
+        this.submitted = false;
+        this.productDialog = true;
+    }
+
+    editProduct(product: Product) {
+        this.product = { ...product };
+        this.productDialog = true;
+    }
+
+    deleteSelectedProducts() {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete the selected products?',
+            header: 'Confirm',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
+                this.selectedProducts = null;
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Products Deleted',
+                    life: 3000
+                });
+            }
+        });
+    }
+
+    hideDialog() {
+        this.productDialog = false;
+        this.submitted = false;
+    }
+
+    deleteProduct(product: Product) {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete ' + product.name + '?',
+            header: 'Confirm',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.products.set(this.products().filter((val) => val.id !== product.id));
+                this.product = {};
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Product Deleted',
+                    life: 3000
+                });
+            }
+        });
+    }
+
+    findIndexById(id: string): number {
+        let index = -1;
+        for (let i = 0; i < this.products().length; i++) {
+            if (this.products()[i].id === id) {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
+    }
+
+    createId(): string {
+        let id = '';
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (var i = 0; i < 5; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+    }
+
+    getSeverity(status: string) {
+        switch (status) {
+            case 'INSTOCK':
+                return 'success';
+            case 'LOWSTOCK':
+                return 'warn';
+            case 'OUTOFSTOCK':
+                return 'danger';
+            default:
+                return 'info';
+        }
+    }
+
+    getStatutSeverity(statut?: ProduitStatut): ProduitStatutSeverity {
+        if (!statut) return PRODUIT_STATUT_SEVERITY.brouillon;
+        return PRODUIT_STATUT_SEVERITY[statut] ?? PRODUIT_STATUT_SEVERITY.brouillon;
+    }
+
+    getStatutLabel(statut?: ProduitStatut): string {
+        if (!statut) return PRODUIT_STATUT_LABELS.brouillon;
+        return PRODUIT_STATUT_LABELS[statut] ?? PRODUIT_STATUT_LABELS.brouillon;
+    }
+
+    saveProduct() {
+        this.submitted = true;
+        let _products = this.products();
+        if (this.product.name?.trim()) {
+            if (this.product.id) {
+                _products[this.findIndexById(this.product.id)] = this.product;
+                this.products.set([..._products]);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Product Updated',
+                    life: 3000
+                });
+            } else {
+                this.product.id = this.createId();
+                this.product.image = 'product-placeholder.svg';
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Product Created',
+                    life: 3000
+                });
+                this.products.set([..._products, this.product]);
+            }
+
+            this.productDialog = false;
+            this.product = {};
+        }
+    }
+
+     goToNewProduits() {
         this.router.navigate(['/produits/produits-new']);
     }
 }
