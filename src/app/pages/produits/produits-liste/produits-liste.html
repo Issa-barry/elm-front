@@ -102,6 +102,20 @@
             <ng-template #content>
                 <div class="flex flex-col gap-6">
                     <div>
+                        <label for="type" class="block font-bold mb-4">Type</label>
+                        <p-select
+                            [(ngModel)]="produit.type"
+                            inputId="type"
+                            [options]="typeOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner un type"
+                            fluid
+                        />
+                        <small class="text-red-500" *ngIf="submitted && !produit.type">Type obligatoire.</small>
+                    </div>
+
+                    <div>
                         <label for="nom" class="block font-bold mb-4">Nom</label>
                         <input type="text" pInputText id="nom" [(ngModel)]="produit.nom" required autofocus fluid />
                         <small class="text-red-500" *ngIf="submitted && !produit.nom?.trim()">Nom obligatoire.</small>
@@ -117,21 +131,7 @@
                         <textarea id="description" pTextarea [(ngModel)]="produit.description" rows="3" cols="20" fluid></textarea>
                     </div>
 
-                    <div>
-                        <label for="type" class="block font-bold mb-4">Type</label>
-                        <p-select
-                            [(ngModel)]="produit.type"
-                            inputId="type"
-                            [options]="typeOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Sélectionner un type"
-                            fluid
-                        />
-                        <small class="text-red-500" *ngIf="submitted && !produit.type">Type obligatoire.</small>
-                    </div>
-
-                    <div>
+                    <div *ngIf="produit?.id">
                         <label for="statut" class="block font-bold mb-4">Statut</label>
                         <p-select
                             [(ngModel)]="produit.statut"

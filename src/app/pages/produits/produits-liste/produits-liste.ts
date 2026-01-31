@@ -184,8 +184,8 @@ export class ProduitsListe implements OnInit {
 
                 forkJoin(ids.map((id) => this.produitService.delete(id))).subscribe({
                     next: () => {
+                        this.produits = this.produits.filter((item) => !ids.includes(item.id));
                         this.selectedProduits = null;
-                        this.loadProduits();
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Successful',
@@ -221,7 +221,7 @@ export class ProduitsListe implements OnInit {
                 if (!produit.id) return;
                 this.produitService.delete(produit.id).subscribe({
                     next: () => {
-                        this.loadProduits();
+                        this.produits = this.produits.filter((item) => item.id !== produit.id);
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Successful',
