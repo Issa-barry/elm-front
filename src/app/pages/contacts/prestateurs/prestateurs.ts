@@ -13,15 +13,14 @@ import { SelectModule } from 'primeng/select';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
- import { User } from '@/models/user.model';
-import { CustomerService } from '@/pages/service/customer.service';
-import { UserService } from '@/services/users/users.service';
+import { Prestataire, PrestataireType } from '@/models/prestataire.model';
+import { PrestataireService } from '@/services/prestataire/prestataire.service';
 
 
 @Component({
   selector: 'app-prestateurs',
   standalone: true,
-  providers: [CustomerService, MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './prestateurs.html',
   styleUrl: './prestateurs.scss',
   imports: [
@@ -39,8 +38,8 @@ import { UserService } from '@/services/users/users.service';
   ],
 })
 export class Prestateurs implements OnInit {
-  users: User[] = [];
-  selectedUser: User | null = null;
+  prestataires: Prestataire[] = [];
+  selectedPrestataire: Prestataire | null = null;
   loading = false;
   selectedStatus: boolean | null = null;
 
@@ -50,42 +49,44 @@ export class Prestateurs implements OnInit {
   ];
 
   constructor(
-    private userService: UserService,
+    private prestataireService: PrestataireService,
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit() {
-    this.loadUsers();
+    this.loadPrestataires();
   }
 
   /**
-   * Charger la liste des utilisateurs
+   * Charger la liste des prestataires
    */
-  loadUsers() {
+  loadPrestataires() {
     this.loading = true;
-    
-    const filters = this.selectedStatus !== null 
+
+    const filters = this.selectedStatus !== null
       ? { is_active: this.selectedStatus }
       : undefined;
 
-    this.userService.getUsers(filters).subscribe({
+    this.prestataireService.getPrestataires(filters).subscribe({
       next: (response) => {
         if (response.success) {
           // Gérer pagination ou liste simple
-          this.users = Array.isArray(response.data) 
-            ? response.data 
+          this.prestataires = Array.isArray(response.data)
+            ? response.data
             : response.data.data;
         }
+        console.log(response);
+        
         this.loading = false;
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des utilisateurs:', error);
+        console.error('Erreur lors du chargement des prestataires:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les utilisateurs'
+          detail: 'Impossible de charger les prestataires'
         });
         this.loading = false;
       }
@@ -103,13 +104,13 @@ export class Prestateurs implements OnInit {
    * Filtrer par statut
    */
   filterByStatus() {
-    this.loadUsers();
+    this.loadPrestataires();
   }
 
   /**
-   * Naviguer vers la création d'un utilisateur
+   * Naviguer vers la création d'un prestataire
    */
-  navigateToCreateUser() {
+  navigateToCreate() {
     this.router.navigate(['contacts/prestateurs/new']);
   }
 
@@ -117,34 +118,34 @@ export class Prestateurs implements OnInit {
    * Sélection d'une ligne - navigation vers l'édition
    */
   onRowSelect(event: any) {
-    this.router.navigate(['contacts/users', event.data.id, 'edit']);
+    this.router.navigate(['contacts/prestateurs', event.data.id, 'edit']);
   }
 
   /**
-   * Voir les détails d'un utilisateur
+   * Voir les détails d'un prestataire
    */
-  viewUser(event: Event, userId: number) {
+  viewPrestataire(event: Event, prestataireId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/users', userId]);
+    this.router.navigate(['contacts/prestateurs', prestataireId]);
   }
 
   /**
    * Basculer le statut actif/inactif
    */
-  toggleStatus(event: Event, userId: number) {
+  toggleStatus(event: Event, prestataireId: number) {
     event.stopPropagation();
-    
-    const user = this.users.find(u => u.id === userId);
-    const action = user?.is_active ? 'désactiver' : 'activer';
+
+    const prestataire = this.prestataires.find(p => p.id === prestataireId);
+    const action = prestataire?.is_active ? 'désactiver' : 'activer';
 
     this.confirmationService.confirm({
-      message: `Voulez-vous vraiment ${action} cet utilisateur ?`,
+      message: `Voulez-vous vraiment ${action} ce prestataire ?`,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       accept: () => {
-        this.userService.toggleUserStatus(userId).subscribe({
+        this.prestataireService.togglePrestataireStatus(prestataireId).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
@@ -152,7 +153,7 @@ export class Prestateurs implements OnInit {
                 summary: 'Succès',
                 detail: response.message
               });
-              this.loadUsers();
+              this.loadPrestataires();
             }
           },
           error: (error) => {
@@ -160,7 +161,7 @@ export class Prestateurs implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de changer le statut de l\'utilisateur'
+              detail: 'Impossible de changer le statut du prestataire'
             });
           }
         });
@@ -169,28 +170,28 @@ export class Prestateurs implements OnInit {
   }
 
   /**
-   * Supprimer un utilisateur
+   * Supprimer un prestataire
    */
-  deleteUser(event: Event, userId: number) {
+  deletePrestataire(event: Event, prestataireId: number) {
     event.stopPropagation();
 
     this.confirmationService.confirm({
-      message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
+      message: 'Êtes-vous sûr de vouloir supprimer ce prestataire ? Cette action est irréversible.',
       header: 'Confirmation de suppression',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui, supprimer',
       rejectLabel: 'Annuler',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.userService.deleteUser(userId).subscribe({
+        this.prestataireService.deletePrestataire(prestataireId).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
                 summary: 'Succès',
-                detail: 'Utilisateur supprimé avec succès'
+                detail: 'Prestataire supprimé avec succès'
               });
-              this.loadUsers();
+              this.loadPrestataires();
             }
           },
           error: (error) => {
@@ -198,7 +199,7 @@ export class Prestateurs implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de supprimer l\'utilisateur'
+              detail: 'Impossible de supprimer le prestataire'
             });
           }
         });
@@ -211,7 +212,7 @@ export class Prestateurs implements OnInit {
    */
   getInitials(nomComplet: string): string {
     if (!nomComplet) return '??';
-    
+
     const parts = nomComplet.trim().split(' ');
     if (parts.length >= 2) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -224,11 +225,24 @@ export class Prestateurs implements OnInit {
    */
   formatPhone(phone: string): string {
     if (!phone) return '-';
-    
-    // Supprimer le code pays s'il existe au début
-    const cleanPhone = phone.replace(/^\+\d+/, '').trim();
-    
+
+    // Supprimer le code pays s'il existe au début (1-3 chiffres après +)
+    const cleanPhone = phone.replace(/^\+\d{1,3}/, '').trim();
+
     // Formater par groupe de 2 chiffres
     return cleanPhone.replace(/(\d{2})(?=\d)/g, '$1 ');
+  }
+
+  /**
+   * Obtenir la couleur du tag selon le type
+   */
+  getTypeSeverity(type: PrestataireType | null): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    const severities: Record<PrestataireType, 'success' | 'info' | 'warn' | 'danger'> = {
+      'machiniste': 'info',
+      'mecanicien': 'warn',
+      'consultant': 'success',
+      'fournisseur': 'danger'
+    };
+    return type ? severities[type] : 'secondary';
   }
 }

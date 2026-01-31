@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
@@ -7,10 +7,10 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { ButtonModule } from 'primeng/button';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { RippleModule } from 'primeng/ripple';
-import { ContactInterface } from '@/models/contacts/contact-interface';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
+import { Prestataire, PRESTATAIRE_TYPES } from '@/models/prestataire.model';
 
 @Component({
   selector: 'app-prestateurs-from',
@@ -30,18 +30,19 @@ import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumbe
   templateUrl: './prestateurs-from.html',
   styleUrl: './prestateurs-from.scss',
 })
-export class PrestateursFrom {
+export class PrestateursFrom implements OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
-  @Input() initialData: ContactInterface | null = null;
+  @Input() initialData: Partial<Prestataire> | null = null;
   @Input() loading = false;
-  
-  @Output() submitForm = new EventEmitter<ContactInterface>();
+
+  @Output() submitForm = new EventEmitter<Partial<Prestataire>>();
   @Output() cancel = new EventEmitter<void>();
 
   submitted = false;
   isEditing = false;
-  model: ContactInterface = {};
+  model: Partial<Prestataire> = {};
   type_piece_identite: any[] = [];
+  prestataireTypes = PRESTATAIRE_TYPES;
   
   // Validation du téléphone
   phoneError: string | null = null;
@@ -87,10 +88,23 @@ export class PrestateursFrom {
       { name: 'Permis de conduire', code: 'PERMIS' }
     ];
 
+    this.initializeModel();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['initialData'] && changes['initialData'].currentValue) {
+      this.initializeModel();
+    }
+  }
+
+  private initializeModel() {
     this.model = this.initialData ? { ...this.initialData } : {};
-    
-    // En mode création, toujours en édition
+
+    // En mode création ou édition avec données, activer l'édition
     if (this.mode === 'create') {
+      this.isEditing = true;
+    } else if (this.mode === 'edit' && this.initialData) {
+      // En mode edit avec données chargées, activer l'édition automatiquement
       this.isEditing = true;
     }
 
@@ -192,16 +206,36 @@ export class PrestateursFrom {
   }
 
   isValid(): boolean {
-    const basicValidation = !!(
-      this.model.nom?.trim() &&
-      this.model.prenom?.trim() &&
-      this.model.phone?.trim() &&
-      this.model.ville?.trim() &&
-      this.model.quartier?.trim()
-    );
-
-    if (!basicValidation) {
+    // Type est toujours obligatoire
+    if (!this.model.type) {
       return false;
+    }
+
+    // Si fournisseur: raison_sociale obligatoire, nom/prénom non requis
+    if (this.model.type === 'fournisseur') {
+      const fournisseurValidation = !!(
+        this.model.raison_sociale?.trim() &&
+        this.model.phone?.trim() &&
+        this.model.ville?.trim() &&
+        this.model.quartier?.trim()
+      );
+
+      if (!fournisseurValidation) {
+        return false;
+      }
+    } else {
+      // Autres types: nom et prénom obligatoires
+      const basicValidation = !!(
+        this.model.nom?.trim() &&
+        this.model.prenom?.trim() &&
+        this.model.phone?.trim() &&
+        this.model.ville?.trim() &&
+        this.model.quartier?.trim()
+      );
+
+      if (!basicValidation) {
+        return false;
+      }
     }
 
     return this.validatePhone();

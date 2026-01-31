@@ -1,20 +1,8 @@
 <div class="card">
   <div class="flex justify-between items-center mb-6">
     <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
-      {{ mode === 'create' ? 'Ajout contact' : 'Détails du contact' }}
+      {{ mode === 'create' ? 'Ajout prestataire' : 'Modification prestataire' }}
     </span>
-    
-    <!-- Bouton Modifier -->
-    <button
-      *ngIf="mode === 'edit' && !isEditing"
-      pButton
-      pRipple
-      label="Modifier"
-      icon="pi pi-pencil"
-      severity="warn"
-      (click)="enableEditing()"
-      class="w-auto"
-    ></button>
   </div>
   
   <div class="grid grid-cols-12 gap-4">
@@ -24,14 +12,56 @@
       </div>
       <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
         - Machiniste<br />
-        - Mecanicien
+        - Mécanicien<br />
+        - Consultant<br />
+        - Fournisseur
       </p>
     </div>
 
     <div class="col-span-12 lg:col-span-10">
       <div class="grid grid-cols-12 gap-4">
-        <!-- Nom -->
+        <!-- Type de prestataire -->
         <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="type" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Type de prestataire <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <p-select
+            id="type"
+            [(ngModel)]="model.type"
+            [options]="prestataireTypes"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner un type"
+            [disabled]="fieldsDisabled"
+            [invalid]="submitted && !model.type"
+            fluid
+          ></p-select>
+          <small class="text-red-500" *ngIf="submitted && !model.type && isEditing">
+            Type obligatoire.
+          </small>
+        </div>
+
+        <!-- Raison sociale (visible uniquement pour fournisseur) -->
+        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type === 'fournisseur'">
+          <label for="raison_sociale" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Raison sociale <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <input
+            id="raison_sociale"
+            type="text"
+            pInputText
+            fluid
+            [(ngModel)]="model.raison_sociale"
+            [invalid]="submitted && !model.raison_sociale?.trim()"
+            [disabled]="fieldsDisabled"
+          />
+          <small class="text-red-500" *ngIf="submitted && !model.raison_sociale?.trim() && isEditing">
+            Raison sociale obligatoire.
+          </small>
+        </div>
+
+        <!-- Nom (masqué pour fournisseur) -->
+        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
           <label for="nom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Nom <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
@@ -49,8 +79,8 @@
           </small>
         </div>
 
-        <!-- Prénom -->
-        <div class="mb-6 col-span-12 md:col-span-6">
+        <!-- Prénom (masqué pour fournisseur) -->
+        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
           <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Prénom <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
@@ -197,7 +227,7 @@
             label="Annuler"
             icon="pi pi-times"
             severity="secondary"
-            (click)="mode === 'create' ? onCancel() : cancelEditing()"
+            (click)="onCancel()"
             [disabled]="loading"
             class="w-auto"
           ></button>
