@@ -15,12 +15,13 @@
             <p-table
                 #dt
                 [value]="produits"
+                [loading]="loading"
                 [rows]="10"
                 [columns]="cols"
                 [paginator]="true"
                 [globalFilterFields]="filterFields"
                 [tableStyle]="{ 'min-width': '75rem' }"
-                [(selection)]="selectedProduits"
+                [(selection)]="selectedProduits" 
                 [rowHover]="true"
                 dataKey="id"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} produits"
