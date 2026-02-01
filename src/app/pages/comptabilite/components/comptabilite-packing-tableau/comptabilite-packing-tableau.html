@@ -1,3 +1,5 @@
+<p-toast />
+
 <div class="card">
     <p-toolbar styleClass="mb-12">
         <ng-template #start>
@@ -106,16 +108,28 @@
         <div class="flex flex-col gap-6">
             <div>
                 <label for="prestataire" class="block font-bold mb-4">Prestataire (Machiniste)</label>
-                <p-autoComplete
+                <p-select
                     [(ngModel)]="selectedPrestataire"
-                    [suggestions]="filteredPrestataires"
-                    (completeMethod)="filterPrestataire($event)"
-                    field="nom_complet"
-                    [dropdown]="true"
-                    [forceSelection]="true"
+                    [options]="prestataires"
+                    optionLabel="nom"
+                    [filter]="true"
+                    filterBy="nom,prenom,phone"
                     placeholder="Sélectionner un prestataire"
                     styleClass="w-full"
-                />
+                >
+                    <ng-template let-prestataire pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} - {{ prestataire.phone }}</span>
+                        </div>
+                    </ng-template>
+                    <ng-template let-prestataire pTemplate="selectedItem">
+                        <div class="flex items-center gap-2" *ngIf="prestataire">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
                 <small class="text-red-500" *ngIf="submitted && !selectedPrestataire">Le prestataire est requis.</small>
             </div>
 
@@ -126,6 +140,7 @@
                         [(ngModel)]="packing.date_debut"
                         dateFormat="dd/mm/yy"
                         [showIcon]="true"
+                        inputStyleClass="w-full"
                         styleClass="w-full"
                     />
                 </div>
@@ -135,6 +150,7 @@
                         [(ngModel)]="packing.date_fin"
                         dateFormat="dd/mm/yy"
                         [showIcon]="true"
+                        inputStyleClass="w-full"
                         styleClass="w-full"
                     />
                 </div>
@@ -152,10 +168,10 @@
                     />
                 </div>
                 <div class="col-span-6">
-                    <label for="prix_rouleau" class="block font-bold mb-4">Prix du rouleau (GNF)</label>
+                    <label for="prix_par_rouleau" class="block font-bold mb-4">Prix du rouleau (GNF)</label>
                     <p-inputnumber
-                        id="prix_rouleau"
-                        [(ngModel)]="packing.prix_rouleau"
+                        id="prix_par_rouleau"
+                        [(ngModel)]="packing.prix_par_rouleau"
                         (onInput)="calculateMontant()"
                         [min]="0"
                         styleClass="w-full"
@@ -170,6 +186,7 @@
                         id="montant"
                         [(ngModel)]="packing.montant"
                         [min]="0"
+                        [readonly]="true"
                         styleClass="w-full"
                     />
                 </div>
@@ -200,8 +217,13 @@
     </ng-template>
 
     <ng-template #footer>
-        <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Enregistrer" icon="pi pi-check" (click)="savePacking()" />
+        <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
+        <p-button
+            [label]="saving ? 'Enregistrement...' : 'Enregistrer'"
+            [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+            (click)="savePacking()"
+            [disabled]="saving"
+            [loading]="saving" />
     </ng-template>
 </p-dialog>
 

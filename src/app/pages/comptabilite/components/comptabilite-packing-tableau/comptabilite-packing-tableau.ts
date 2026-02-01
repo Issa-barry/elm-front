@@ -76,6 +76,7 @@ export class ComptabilitePackingTableau implements OnInit {
   selectedPackings: Packing[] | null = null;
   submitted: boolean = false;
   loading: boolean = false;
+  saving: boolean = false;
 
   // Pour l'autocomplete prestataire
   prestataires: Prestataire[] = [];
@@ -132,6 +133,8 @@ export class ComptabilitePackingTableau implements OnInit {
           : (response as any).data?.data || [];
         this.packings.set(data);
         this.loading = false;
+        console.log(response);
+        
       },
       error: (error) => {
         this.messageService.add({
@@ -148,7 +151,8 @@ export class ComptabilitePackingTableau implements OnInit {
   loadPrestataires() {
     this.prestataireService.getActivePrestataires().subscribe({
       next: (response) => {
-        this.prestataires = response.data;
+        // Filtrer uniquement les machinistes
+        this.prestataires = response.data.filter(p => p.type === 'machiniste');
       },
       error: () => {
         this.messageService.add({
@@ -182,7 +186,7 @@ export class ComptabilitePackingTableau implements OnInit {
     this.packing = {
       statut: 'en_cours',
       nb_rouleaux: 0,
-      prix_rouleau: 0,
+      prix_par_rouleau: 0,
       montant: 0
     };
     this.selectedPrestataire = null;
@@ -191,7 +195,11 @@ export class ComptabilitePackingTableau implements OnInit {
   }
 
   editPacking(packing: Packing) {
-    this.packing = { ...packing };
+    this.packing = {
+      ...packing,
+      date_debut: packing.date_debut ? new Date(packing.date_debut) : undefined,
+      date_fin: packing.date_fin ? new Date(packing.date_fin) : undefined
+    };
     this.selectedPrestataire = packing.prestataire || null;
     this.packingDialog = true;
   }
@@ -255,16 +263,25 @@ export class ComptabilitePackingTableau implements OnInit {
   savePacking() {
     this.submitted = true;
 
-    if (!this.selectedPrestataire) {
+    if (!this.selectedPrestataire || this.saving) {
       return;
     }
+
+    this.saving = true;
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'En cours',
+      detail: 'Enregistrement en cours...',
+      life: 2000
+    });
 
     const packingData: CreatePackingDto | UpdatePackingDto = {
       prestataire_id: this.selectedPrestataire.id,
       date_debut: this.formatDate(this.packing.date_debut),
       date_fin: this.formatDate(this.packing.date_fin),
       nb_rouleaux: this.packing.nb_rouleaux || 0,
-      prix_rouleau: this.packing.prix_rouleau || 0,
+      prix_par_rouleau: this.packing.prix_par_rouleau || 0,
       montant: this.packing.montant || 0,
       statut: this.packing.statut,
       notes: this.packing.notes ?? undefined
@@ -288,6 +305,7 @@ export class ComptabilitePackingTableau implements OnInit {
           });
           this.packingDialog = false;
           this.packing = {};
+          this.saving = false;
         },
         error: () => {
           this.messageService.add({
@@ -296,6 +314,7 @@ export class ComptabilitePackingTableau implements OnInit {
             detail: 'Impossible de mettre à jour le packing',
             life: 3000
           });
+          this.saving = false;
         }
       });
     } else {
@@ -311,6 +330,7 @@ export class ComptabilitePackingTableau implements OnInit {
           });
           this.packingDialog = false;
           this.packing = {};
+          this.saving = false;
         },
         error: () => {
           this.messageService.add({
@@ -319,14 +339,15 @@ export class ComptabilitePackingTableau implements OnInit {
             detail: 'Impossible de créer le packing',
             life: 3000
           });
+          this.saving = false;
         }
       });
     }
   }
 
   calculateMontant() {
-    if (this.packing.nb_rouleaux && this.packing.prix_rouleau) {
-      this.packing.montant = this.packing.nb_rouleaux * this.packing.prix_rouleau;
+    if (this.packing.nb_rouleaux && this.packing.prix_par_rouleau) {
+      this.packing.montant = this.packing.nb_rouleaux * this.packing.prix_par_rouleau;
     }
   }
 

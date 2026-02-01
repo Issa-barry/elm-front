@@ -34,7 +34,7 @@ interface PackingPaiementInterface {
   date_debut?: Date | null;
   date_fin?: Date | null;
   nombre_rouleaux?: number;
-  prix_rouleau?: number;
+  prix_par_rouleau?: number;
   montant: number;
   statut?: 'en_cours' | 'termine' | 'annule';
   created_at?: string;
@@ -153,7 +153,7 @@ export class PackingPaiement implements OnInit {
         date_debut: new Date('2024-01-15'),
         date_fin: new Date('2024-01-20'),
         nombre_rouleaux: 150,
-        prix_rouleau: 5000,
+        prix_par_rouleau: 5000,
         montant: 750000,
         montant_paye: 750000,
         montant_restant: 0,
@@ -178,7 +178,7 @@ export class PackingPaiement implements OnInit {
         date_debut: new Date('2024-01-18'),
         date_fin: new Date('2024-01-25'),
         nombre_rouleaux: 200,
-        prix_rouleau: 4500,
+        prix_par_rouleau: 4500,
         montant: 900000,
         montant_paye: 500000,
         montant_restant: 400000,
@@ -203,7 +203,7 @@ export class PackingPaiement implements OnInit {
         date_debut: new Date('2024-01-22'),
         date_fin: null,
         nombre_rouleaux: 180,
-        prix_rouleau: 5000,
+        prix_par_rouleau: 5000,
         montant: 900000,
         montant_paye: 0,
         montant_restant: 900000,
@@ -225,7 +225,7 @@ export class PackingPaiement implements OnInit {
         date_debut: new Date('2024-01-20'),
         date_fin: new Date('2024-01-27'),
         nombre_rouleaux: 120,
-        prix_rouleau: 5500,
+        prix_par_rouleau: 5500,
         montant: 660000,
         montant_paye: 300000,
         montant_restant: 360000,

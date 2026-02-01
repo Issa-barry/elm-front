@@ -148,7 +148,7 @@
             </label>
             <p-inputnumber
               id="prixRouleau"
-              [(ngModel)]="model.prix_rouleau"
+              [(ngModel)]="model.prix_par_rouleau"
               (ngModelChange)="onPrixOrQuantityChange()"
               mode="currency"
               currency="GNF"
@@ -157,7 +157,7 @@
               placeholder="Prix par rouleau"
               [disabled]="fieldsDisabled"
               fluid />
-            <small class="text-red-500" *ngIf="submitted && (!model.prix_rouleau || model.prix_rouleau <= 0) && isEditing">
+            <small class="text-red-500" *ngIf="submitted && (!model.prix_par_rouleau || model.prix_par_rouleau <= 0) && isEditing">
               Le prix unitaire doit être supérieur à 0
             </small>
           </div>
@@ -181,11 +181,11 @@
                 </div>
               </div>
             </div>
-            <div class="text-sm text-surface-600 dark:text-surface-300 mt-3 flex items-center gap-2" *ngIf="model.nb_rouleaux && model.prix_rouleau">
+            <div class="text-sm text-surface-600 dark:text-surface-300 mt-3 flex items-center gap-2" *ngIf="model.nb_rouleaux && model.prix_par_rouleau">
               <i class="pi pi-calculator text-surface-500"></i>
-              {{ model.nb_rouleaux }} rouleaux × {{ model.prix_rouleau | number:'1.0-0' }} GNF
+              {{ model.nb_rouleaux }} rouleaux × {{ model.prix_par_rouleau | number:'1.0-0' }} GNF
             </div>
-            <div class="text-sm text-surface-500 dark:text-surface-400 mt-3 italic" *ngIf="!model.nb_rouleaux || !model.prix_rouleau">
+            <div class="text-sm text-surface-500 dark:text-surface-400 mt-3 italic" *ngIf="!model.nb_rouleaux || !model.prix_par_rouleau">
               <i class="pi pi-info-circle mr-2"></i>
               Entrez la quantité et le prix unitaire pour calculer le montant
             </div>
@@ -193,7 +193,7 @@
         </div>
 
         <!-- Récapitulatif complet -->
-        <div class="col-span-12 mb-6" *ngIf="model.prestataire_id && model.date_debut && model.date_fin && model.nb_rouleaux && model.prix_rouleau && !hasErrors()">
+        <div class="col-span-12 mb-6" *ngIf="model.prestataire_id && model.date_debut && model.date_fin && model.nb_rouleaux && model.prix_par_rouleau && !hasErrors()">
           <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5">
             <div class="flex items-center gap-2 mb-4">
               <i class="pi pi-info-circle text-blue-600 dark:text-blue-400 text-lg"></i>
@@ -247,7 +247,7 @@
                   <div class="flex-1">
                     <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Prix unitaire</div>
                     <div class="font-medium text-surface-900 dark:text-surface-0">
-                      {{ model.prix_rouleau | number:'1.0-0' }} GNF
+                      {{ model.prix_par_rouleau | number:'1.0-0' }} GNF
                     </div>
                   </div>
                 </div>

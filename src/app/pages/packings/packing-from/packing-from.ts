@@ -21,7 +21,7 @@ class PackingFormModel {
   date_debut?: Date | string | null;
   date_fin?: Date | string | null;
   nb_rouleaux: number = 0;
-  prix_rouleau: number = 0;
+  prix_par_rouleau: number = 0;
   montant: number = 0;
   statut: PackingStatut = 'en_cours';
   notes?: string | null;
@@ -35,7 +35,7 @@ class PackingFormModel {
       this.date_debut = data.date_debut ? new Date(data.date_debut) : null;
       this.date_fin = data.date_fin ? new Date(data.date_fin) : null;
       this.nb_rouleaux = data.nb_rouleaux || 0;
-      this.prix_rouleau = data.prix_rouleau || 0;
+      this.prix_par_rouleau = data.prix_par_rouleau || 0;
       this.montant = data.montant || 0;
       this.statut = data.statut || 'en_cours';
       this.notes = data.notes;
@@ -43,7 +43,7 @@ class PackingFormModel {
   }
 
   calculateMontant(): void {
-    this.montant = this.nb_rouleaux * this.prix_rouleau;
+    this.montant = this.nb_rouleaux * this.prix_par_rouleau;
   }
 }
 
@@ -93,7 +93,7 @@ export class PackingFrom implements OnInit {
 
   // Calculer automatiquement le montant
   onPrixOrQuantityChange(): void {
-    if (this.model.nb_rouleaux && this.model.prix_rouleau) {
+    if (this.model.nb_rouleaux && this.model.prix_par_rouleau) {
       this.model.calculateMontant();
     }
   }
@@ -224,8 +224,8 @@ export class PackingFrom implements OnInit {
       this.model.date_fin &&
       this.model.nb_rouleaux &&
       this.model.nb_rouleaux > 0 &&
-      this.model.prix_rouleau &&
-      this.model.prix_rouleau > 0
+      this.model.prix_par_rouleau &&
+      this.model.prix_par_rouleau > 0
     );
 
     if (!basicValidation) {
@@ -288,7 +288,7 @@ export class PackingFrom implements OnInit {
       date_debut: this.formatDate(this.model.date_debut),
       date_fin: this.formatDate(this.model.date_fin),
       nb_rouleaux: this.model.nb_rouleaux,
-      prix_rouleau: this.model.prix_rouleau,
+      prix_par_rouleau: this.model.prix_par_rouleau,
       montant: this.model.montant,
       statut: this.model.statut,
       notes: this.model.notes ?? undefined
