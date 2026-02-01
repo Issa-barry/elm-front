@@ -7,239 +7,354 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '@/pages/service/product.service';
+import { DatePickerModule } from 'primeng/datepicker';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { TextareaModule } from 'primeng/textarea';
+
+import { PackingService } from '@/services/packing/packing.service';
+import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
+import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { Prestataire } from '@/models/prestataire.model';
 
 interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
+  field: string;
+  header: string;
+  customExportHeader?: string;
 }
 
 interface ExportColumn {
-    title: string;
-    dataKey: string;
+  title: string;
+  dataKey: string;
 }
 
+interface StatutOption {
+  label: string;
+  value: PackingStatut;
+}
 
 @Component({
   selector: 'app-comptabilite-packing-tableau',
   templateUrl: './comptabilite-packing-tableau.html',
   styleUrl: './comptabilite-packing-tableau.scss',
   standalone: true,
-  imports: [CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        RatingModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule],
-        providers: [MessageService, ProductService, ConfirmationService],
-
- 
+  imports: [
+    CommonModule,
+    TableModule,
+    FormsModule,
+    ButtonModule,
+    RippleModule,
+    ToastModule,
+    ToolbarModule,
+    InputTextModule,
+    SelectModule,
+    InputNumberModule,
+    DialogModule,
+    TagModule,
+    InputIconModule,
+    IconFieldModule,
+    ConfirmDialogModule,
+    DatePickerModule,
+    AutoCompleteModule,
+    TextareaModule
+  ],
+  providers: [MessageService, ConfirmationService]
 })
 export class ComptabilitePackingTableau implements OnInit {
-    filterFields: string[] = ['code', 'name', 'description', 'price', 'quantity', 'inventoryStatus', 'category', 'rating', 'image'];
+  filterFields: string[] = ['reference', 'prestataire.nom', 'prestataire.prenom', 'prestataire.phone', 'statut', 'montant'];
 
-    productDialog: boolean = false;
+  packingDialog: boolean = false;
+  packings = signal<Packing[]>([]);
+  packing: Partial<Packing> = {};
+  selectedPackings: Packing[] | null = null;
+  submitted: boolean = false;
+  loading: boolean = false;
 
-    products = signal<Product[]>([]);
+  // Pour l'autocomplete prestataire
+  prestataires: Prestataire[] = [];
+  filteredPrestataires: Prestataire[] = [];
+  selectedPrestataire: Prestataire | null = null;
 
-    product!: Product;
+  statuses: StatutOption[] = [
+    { label: 'En cours', value: 'en_cours' },
+    { label: 'Terminé', value: 'termine' },
+    { label: 'Payé', value: 'paye' },
+    { label: 'Annulé', value: 'annule' }
+  ];
 
-    selectedProducts!: Product[] | null;
+  @ViewChild('dt') dt!: Table;
+  exportColumns!: ExportColumn[];
+  cols!: Column[];
 
-    submitted: boolean = false;
+  constructor(
+    private packingService: PackingService,
+    private prestataireService: PrestataireService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
+  ) {}
 
-    statuses!: any[];
+  ngOnInit() {
+    this.loadPackings();
+    this.loadPrestataires();
+    this.initColumns();
+  }
 
-    @ViewChild('dt') dt!: Table;
+  initColumns() {
+    this.cols = [
+      { field: 'reference', header: 'Référence' },
+      { field: 'prestataire', header: 'Prestataire' },
+      { field: 'date_debut', header: 'Début' },
+      { field: 'date_fin', header: 'Fin' },
+      { field: 'nb_rouleaux', header: 'Rouleaux' },
+      { field: 'montant', header: 'Montant' },
+      { field: 'statut', header: 'Statut' }
+    ];
 
-    exportColumns!: ExportColumn[];
+    this.exportColumns = this.cols.map((col) => ({
+      title: col.header,
+      dataKey: col.field
+    }));
+  }
 
-    cols!: Column[];
-
-    constructor(
-        private productService: ProductService,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService
-    ) {}
-
-    exportCSV() {
-        this.dt.exportCSV();
-    }
-
-    ngOnInit() {
-        this.loadDemoData();
-    }
-
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
+  loadPackings() {
+    this.loading = true;
+    this.packingService.getPackings().subscribe({
+      next: (response) => {
+        const data = 'data' in response && Array.isArray(response.data)
+          ? response.data
+          : (response as any).data?.data || [];
+        this.packings.set(data);
+        this.loading = false;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les packings',
+          life: 3000
         });
+        this.loading = false;
+      }
+    });
+  }
 
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
-
-        this.cols = [
-            {
-                field: 'code',
-                header: 'Code',
-                customExportHeader: 'Product Code'
-            },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
-        ];
-
-        this.exportColumns = this.cols.map((col) => ({
-            title: col.header,
-            dataKey: col.field
-        }));
-    }
-
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
-
-    openNew() {
-        this.product = {};
-        this.submitted = false;
-        this.productDialog = true;
-    }
-
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
-    }
-
-    deleteSelectedProducts() {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
-                });
-            }
+  loadPrestataires() {
+    this.prestataireService.getActivePrestataires().subscribe({
+      next: (response) => {
+        this.prestataires = response.data;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les prestataires',
+          life: 3000
         });
-    }
+      }
+    });
+  }
 
-    hideDialog() {
-        this.productDialog = false;
-        this.submitted = false;
-    }
+  filterPrestataire(event: { query: string }) {
+    const query = event.query.toLowerCase();
+    this.filteredPrestataires = this.prestataires.filter(p =>
+      p.nom.toLowerCase().includes(query) ||
+      p.prenom.toLowerCase().includes(query) ||
+      p.phone.includes(query)
+    );
+  }
 
-    deleteProduct(product: Product) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
-                });
-            }
+  exportCSV() {
+    this.dt.exportCSV();
+  }
+
+  onGlobalFilter(table: Table, event: Event) {
+    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  }
+
+  openNew() {
+    this.packing = {
+      statut: 'en_cours',
+      nb_rouleaux: 0,
+      prix_rouleau: 0,
+      montant: 0
+    };
+    this.selectedPrestataire = null;
+    this.submitted = false;
+    this.packingDialog = true;
+  }
+
+  editPacking(packing: Packing) {
+    this.packing = { ...packing };
+    this.selectedPrestataire = packing.prestataire || null;
+    this.packingDialog = true;
+  }
+
+  deletePacking(packing: Packing) {
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir supprimer le packing ${packing.reference} ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.packingService.deletePacking(packing.id).subscribe({
+          next: () => {
+            this.packings.set(this.packings().filter((p) => p.id !== packing.id));
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: 'Packing supprimé',
+              life: 3000
+            });
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de supprimer le packing',
+              life: 3000
+            });
+          }
         });
+      }
+    });
+  }
+
+  deleteSelectedPackings() {
+    this.confirmationService.confirm({
+      message: 'Êtes-vous sûr de vouloir supprimer les packings sélectionnés ?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        // Supprimer chaque packing sélectionné
+        this.selectedPackings?.forEach(packing => {
+          this.packingService.deletePacking(packing.id).subscribe();
+        });
+        this.packings.set(this.packings().filter((p) => !this.selectedPackings?.includes(p)));
+        this.selectedPackings = null;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Packings supprimés',
+          life: 3000
+        });
+      }
+    });
+  }
+
+  hideDialog() {
+    this.packingDialog = false;
+    this.submitted = false;
+  }
+
+  savePacking() {
+    this.submitted = true;
+
+    if (!this.selectedPrestataire) {
+      return;
     }
 
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
-                index = i;
-                break;
-            }
+    const packingData: CreatePackingDto | UpdatePackingDto = {
+      prestataire_id: this.selectedPrestataire.id,
+      date_debut: this.formatDate(this.packing.date_debut),
+      date_fin: this.formatDate(this.packing.date_fin),
+      nb_rouleaux: this.packing.nb_rouleaux || 0,
+      prix_rouleau: this.packing.prix_rouleau || 0,
+      montant: this.packing.montant || 0,
+      statut: this.packing.statut,
+      notes: this.packing.notes ?? undefined
+    };
+
+    if (this.packing.id) {
+      // Mise à jour
+      this.packingService.updatePacking(this.packing.id, packingData).subscribe({
+        next: (response) => {
+          const index = this.packings().findIndex(p => p.id === this.packing.id);
+          if (index !== -1) {
+            const updatedPackings = [...this.packings()];
+            updatedPackings[index] = response.data;
+            this.packings.set(updatedPackings);
+          }
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Packing mis à jour',
+            life: 3000
+          });
+          this.packingDialog = false;
+          this.packing = {};
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de mettre à jour le packing',
+            life: 3000
+          });
         }
-
-        return index;
-    }
-
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
+      });
+    } else {
+      // Création
+      this.packingService.createPacking(packingData as CreatePackingDto).subscribe({
+        next: (response) => {
+          this.packings.set([...this.packings(), response.data]);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Packing créé',
+            life: 3000
+          });
+          this.packingDialog = false;
+          this.packing = {};
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de créer le packing',
+            life: 3000
+          });
         }
-        return id;
+      });
     }
+  }
 
-    getSeverity(status: string) {
-        switch (status) {
-            case 'INSTOCK':
-                return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
-                return 'danger';
-            default:
-                return 'info';
-        }
+  calculateMontant() {
+    if (this.packing.nb_rouleaux && this.packing.prix_rouleau) {
+      this.packing.montant = this.packing.nb_rouleaux * this.packing.prix_rouleau;
     }
+  }
 
-    saveProduct() {
-        this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
-                });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
-            }
+  formatDate(date: any): string {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  }
 
-            this.productDialog = false;
-            this.product = {};
-        }
-    }
+  getStatutLabel(statut: PackingStatut): string {
+    return PACKING_STATUT_LABELS[statut] || statut;
+  }
+
+  getStatutSeverity(statut: PackingStatut): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    return PACKING_STATUT_SEVERITY[statut] || 'info';
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0
+    }).format(value) + ' GNF';
+  }
+
+  formatDateDisplay(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR');
+  }
 }

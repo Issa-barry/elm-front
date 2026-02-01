@@ -12,7 +12,7 @@
                 Liste de tous les packings enregistrés
             </p>
         </div>
-        
+
         <div class="flex gap-2">
             <button
                 pButton
@@ -42,7 +42,7 @@
                     [showClear]="true"
                     fluid />
             </div>
-            
+
             <!-- Date de fin -->
             <div class="col-span-12 md:col-span-3">
                 <label class="font-medium text-surface-900 dark:text-surface-0 mb-2 block text-sm">
@@ -74,7 +74,7 @@
                     [showClear]="true"
                     fluid />
             </div>
-            
+
             <!-- Bouton réinitialiser -->
             <div class="col-span-12 md:col-span-3 flex items-end">
                 <button
@@ -101,11 +101,11 @@
         [rowsPerPageOptions]="[5, 10, 20, 50]"
         [showCurrentPageReport]="true"
         currentPageReportTemplate="Affichage de {first} à {last} sur {totalRecords} packings"
-        [globalFilterFields]="['contact.nom', 'contact.prenom', 'contact.phone']"
+        [globalFilterFields]="['prestataire.nom', 'prestataire.prenom', 'prestataire.phone', 'reference']"
         styleClass="p-datatable-sm"
         [tableStyle]="{ 'min-width': '60rem' }"
         responsiveLayout="scroll">
-        
+
         <!-- Caption avec recherche -->
         <ng-template #caption>
             <div class="flex items-center justify-between">
@@ -118,7 +118,7 @@
                         placeholder="Rechercher..."
                         class="w-full md:w-80" />
                 </p-iconfield>
-                
+
                 <span class="text-surface-600 dark:text-surface-400 text-sm">
                     Total: {{ packings.length }} packing(s)
                 </span>
@@ -128,13 +128,13 @@
         <!-- Colonnes -->
         <ng-template #header>
             <tr>
-                <th pSortableColumn="contact.nom">
-                    Contact
-                    <p-sortIcon field="contact.nom" />
+                <th pSortableColumn="prestataire.nom">
+                    Prestataire
+                    <p-sortIcon field="prestataire.nom" />
                 </th>
-                <th pSortableColumn="contact.phone">
+                <th pSortableColumn="prestataire.phone">
                     Téléphone
-                    <p-sortIcon field="contact.phone" />
+                    <p-sortIcon field="prestataire.phone" />
                 </th>
                 <th pSortableColumn="date_debut">
                     Date début
@@ -144,9 +144,9 @@
                     Date fin
                     <p-sortIcon field="date_fin" />
                 </th>
-                <th pSortableColumn="nombre_rouleaux" class="text-center">
+                <th pSortableColumn="nb_rouleaux" class="text-center">
                     Rouleaux
-                    <p-sortIcon field="nombre_rouleaux" />
+                    <p-sortIcon field="nb_rouleaux" />
                 </th>
                 <th pSortableColumn="montant" class="text-center">
                     Montant
@@ -165,7 +165,7 @@
         <!-- Corps du tableau -->
         <ng-template #body let-packing>
             <tr>
-                <!-- Contact -->
+                <!-- Prestataire -->
                 <td>
                     <div class="flex items-center gap-2">
                         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
@@ -173,10 +173,10 @@
                         </div>
                         <div>
                             <div class="font-medium text-surface-900 dark:text-surface-0">
-                                {{ packing.contact?.prenom }} {{ packing.contact?.nom }}
+                                {{ packing.prestataire?.prenom }} {{ packing.prestataire?.nom }}
                             </div>
                             <div class="text-sm text-surface-500 dark:text-surface-400">
-                                {{ packing.contact?.ville }} - {{ packing.contact?.quartier }}
+                                {{ packing.prestataire?.ville }}
                             </div>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                 <!-- Téléphone -->
                 <td>
                     <span class="text-surface-700 dark:text-surface-300">
-                        {{ packing.contact?.phone }}
+                        {{ packing.prestataire?.phone }}
                     </span>
                 </td>
 
@@ -202,7 +202,7 @@
                 <!-- Nombre de rouleaux -->
                 <td class="text-center">
                     <span class="font-bold text-primary text-lg">
-                        {{ packing.nombre_rouleaux }}
+                        {{ packing.nb_rouleaux }}
                     </span>
                 </td>
 
@@ -215,8 +215,8 @@
 
                 <!-- Statut -->
                 <td class="text-center">
-                    <p-tag 
-                        [value]="getStatutLabel(packing.statut)" 
+                    <p-tag
+                        [value]="getStatutLabel(packing.statut)"
                         [severity]="getStatutSeverity(packing.statut)" />
                 </td>
 

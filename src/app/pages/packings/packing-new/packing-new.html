@@ -1,6 +1,8 @@
- <app-packing-from
-   [mode]="'create'"
-  [contacts]="contacts"
+<p-toast />
+<app-packing-from
+  [mode]="'create'"
+  [prestataires]="prestataires"
   [loading]="loading"
   (submitForm)="onSubmit($event)"
- ></app-packing-from> 
+  (cancel)="onCancel()">
+</app-packing-from>

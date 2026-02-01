@@ -1,40 +1,51 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PackingFrom } from '../packing-from/packing-from';
-import { ContactInterface } from '@/models/contacts/contact-interface';
-import { PackingModel } from '@/models/packing-model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { PackingService } from '@/services/packing/packing.service';
 import { Prestataire } from '@/models/prestataire.model';
+import { CreatePackingDto } from '@/models/packing.model';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-packing-new',
-  standalone:true,
-  imports: [PackingFrom],
+  standalone: true,
+  imports: [PackingFrom, ToastModule],
+  providers: [MessageService],
   templateUrl: './packing-new.html',
   styleUrl: './packing-new.scss',
 })
 export class PackingNew implements OnInit {
-  contacts: ContactInterface[] = [];
-
+  prestataires: Prestataire[] = [];
   loading = false;
 
-  constructor(private prestataireService: PrestataireService) {}
+  constructor(
+    private prestataireService: PrestataireService,
+    private packingService: PackingService,
+    private messageService: MessageService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.loadMachinistes();
+    this.loadPrestataires();
   }
 
-  private loadMachinistes(): void {
+  private loadPrestataires(): void {
     this.loading = true;
     this.prestataireService.getPrestataires().subscribe({
       next: (response) => {
-        const prestataires = this.extractPrestataires(response);
-        this.contacts = prestataires
-          .filter((prestataire) => prestataire.type === 'machiniste')
-          .map((prestataire) => this.mapToContact(prestataire));
+        this.prestataires = this.extractPrestataires(response);
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur lors du chargement des machinistes :', err);
+        console.error('Erreur lors du chargement des prestataires :', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les prestataires',
+          life: 3000
+        });
         this.loading = false;
       }
     });
@@ -49,31 +60,37 @@ export class PackingNew implements OnInit {
     return [];
   }
 
-  private mapToContact(prestataire: Prestataire): ContactInterface {
-    return {
-      id: String(prestataire.id),
-      nom: prestataire.nom,
-      prenom: prestataire.prenom,
-      phone: prestataire.phone,
-      ville: prestataire.ville,
-      quartier: prestataire.quartier ?? undefined,
-      type: prestataire.type ?? null,
-      type_label: prestataire.type_label ?? undefined
-    };
+  onSubmit(packingData: CreatePackingDto): void {
+    this.loading = true;
+
+    this.packingService.createPacking(packingData).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'SuccÃ¨s',
+          detail: 'Packing crÃ©Ã© avec succÃ¨s',
+          life: 3000
+        });
+        this.loading = false;
+        // Redirection vers la liste aprÃ¨s crÃ©ation
+        setTimeout(() => {
+          this.router.navigate(['/packings/packings-liste']);
+        }, 1000);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la crÃ©ation du packing :', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de crÃ©er le packing',
+          life: 3000
+        });
+        this.loading = false;
+      }
+    });
   }
 
-  onSubmit(packing: PackingModel): void {
-    this.loading = true;
-    console.log('Packing à créer:', packing);
-    
-    // TODO: Appel API
-    setTimeout(() => {
-      this.loading = false;
-      alert('Packing créé avec succès !');
-    }, 1500);
-  } 
-
   onCancel(): void {
-    console.log('Annulation');
+    this.router.navigate(['/packings/packings-liste']);
   }
 }
