@@ -145,7 +145,16 @@ export class PackingFrom implements OnInit {
 
   // Obtenir le contact sélectionné
   getSelectedContact(): ContactInterface | undefined {
-    return this.contacts.find(c => c.id === this.model.contact_id);
+    return this.filteredContacts.find(c => c.id === this.model.contact_id);
+  }
+
+  // Filtrer les prestataires de type machiniste
+  get filteredContacts(): ContactInterface[] {
+    const selectedId = this.model.contact_id;
+    return (this.contacts ?? []).filter((contact) => {
+      if (selectedId && contact.id === selectedId) return true;
+      return contact.type === 'machiniste';
+    });
   }
 
   // Calculer le nombre de jours

@@ -33,12 +33,12 @@
         <!-- Contact -->
         <div class="mb-6 col-span-12">
           <label for="contact" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Contact <span class="text-red-500" *ngIf="isEditing">*</span> (Machiniste)
+            Prestateur <span class="text-red-500" *ngIf="isEditing">*</span> (Machiniste)
           </label>
           <p-select
             id="contact"
             [(ngModel)]="model.contact_id"
-            [options]="contacts"
+            [options]="filteredContacts"
             optionLabel="nom"
             optionValue="id"
             placeholder="Sélectionnez un machiniste"
