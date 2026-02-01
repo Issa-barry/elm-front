@@ -8,20 +8,17 @@
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12 lg:col-span-2">
       <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">
-        Prestateur
+        <!-- Prestateur -->
       </div>
       <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
-        - Machiniste<br />
-        - Mécanicien<br />
-        - Consultant<br />
-        - Fournisseur
+       Les champs s'affiche en fonctin du type de prestateur.
       </p>
     </div>
 
     <div class="col-span-12 lg:col-span-10">
       <div class="grid grid-cols-12 gap-4">
         <!-- Type de prestataire -->
-        <div class="mb-6 col-span-12 md:col-span-6">
+        <div class="mb-6 col-span-12 md:col-span-12">
           <label for="type" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Type de prestataire <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
@@ -42,7 +39,7 @@
         </div>
 
         <!-- Raison sociale (visible uniquement pour fournisseur) -->
-        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type === 'fournisseur'">
+        <div class="mb-6 col-span-12 md:col-span-12" *ngIf="model.type === 'fournisseur'">
           <label for="raison_sociale" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Raison sociale <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
@@ -100,15 +97,15 @@
 
         <!-- Téléphone avec sélecteur de pays -->
         <div class="mb-6 col-span-12">
-          <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+          <!-- <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
             Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
+          </label> -->
           
           <div class="grid grid-cols-12 gap-3">
             <!-- Sélecteur de pays -->
             <div class="col-span-12 md:col-span-4">
-              <label for="codePays" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
-                Pays
+              <label for="codePays" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+                Pays <span class="text-red-500" *ngIf="isEditing">*</span>
               </label>
               <p-select
                 id="codePays"
@@ -138,8 +135,8 @@
 
             <!-- Champ téléphone -->
             <div class="col-span-12 md:col-span-8">
-              <label for="phone" class="font-medium text-surface-700 dark:text-surface-300 mb-2 block text-sm">
-                Numéro
+              <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+                Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
               </label>
               <input
                 id="phone"
