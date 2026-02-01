@@ -1,3 +1,5 @@
+import { PrestataireType } from '@/models/prestataire.model';
+
 export interface ContactInterface {
   id?: string;
   nom?: string;
@@ -10,4 +12,6 @@ export interface ContactInterface {
   adresse?: string;
   ville?: string;
   quartier?: string;
+  type?: PrestataireType | null;
+  type_label?: string | null;
 }

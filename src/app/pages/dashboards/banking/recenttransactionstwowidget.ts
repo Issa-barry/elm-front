@@ -111,7 +111,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 mt-8">
-                <p-inputnumber
+                <p-inputnumber 
                     type="text"
                     [(ngModel)]="price"
                     mode="currency"

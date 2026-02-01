@@ -1,12 +1,187 @@
-<div class="card">
-            <div class="flex justify-between items-center mb-8">
-                <span class="text-surface-900 dark:text-surface-0 text-xl font-semibold">Liste des produits</span>
-                <!-- <button pButton pRipple class="font-semibold" outlined icon="pi pi-plus" label="Nouveau Produit" (click)="showDialog()"></button> -->
-                <button pButton pRipple class="font-semibold" outlined icon="pi pi-plus" label="Nouveau Produit" (click)="goToNewProduits()"></button>
-            </div>
-            <app-task-list [taskList]="todo" title="En stock"></app-task-list>
-            <app-task-list [taskList]="completed" title="Rupture"></app-task-list>
+<p-toast></p-toast>
+  <div class="card">
+            <p-toolbar styleClass="mb-12">
+                <ng-template #start>
+                    <!-- <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" /> -->
+                    <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+                    <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProduits || !selectedProduits.length" />
+                </ng-template>
+
+                <ng-template #end>
+                    <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+                </ng-template>
+            </p-toolbar>
+
+            <p-table
+                #dt
+                [value]="produits"
+                [loading]="loading"
+                [rows]="10"
+                [columns]="cols"
+                [paginator]="true"
+                [globalFilterFields]="filterFields"
+                [tableStyle]="{ 'min-width': '75rem' }"
+                [(selection)]="selectedProduits" 
+                [rowHover]="true"
+                dataKey="id"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} produits"
+                [showCurrentPageReport]="true"
+                [rowsPerPageOptions]="[10, 20, 30]"
+            >
+                <ng-template #caption>
+                    <div class="flex items-center justify-between">
+                        <h5 class="m-0">Manage Products</h5>
+                        <p-iconfield>
+                            <p-inputicon styleClass="pi pi-search" />
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                        </p-iconfield>
+                    </div>
+                </ng-template>
+              <ng-template #header>
+                    <tr>
+                        <th style="width: 3rem">
+                            <p-tableHeaderCheckbox />
+                        </th>
+                        <th style="min-width: 16rem" pSortableColumn="code">
+                            <span class="flex items-center gap-2">Code
+                            <p-sortIcon field="code" /></span>
+                        </th>
+                        <th pSortableColumn="nom" style="min-width:16rem">
+                            <span class="flex items-center gap-2">Nom
+                            <p-sortIcon field="nom" /></span>
+                        </th>
+                        <!-- <th>Image</th> -->
+                        <!-- <th pSortableColumn="price" style="min-width: 8rem">
+                            <span class="flex items-center gap-2">Prix
+                            <p-sortIcon field="price" /></span>
+                        </th> -->
+                        <th pSortableColumn="type" style="min-width:10rem">
+                            <span class="flex items-center gap-2">Type
+                            <p-sortIcon field="type" /></span>
+                        </th>
+                        <th pSortableColumn="qte_stock" style="min-width: 12rem">
+                            <span class="flex items-center gap-2">Qté
+                            <p-sortIcon field="qte_stock" /></span>
+                        </th>
+                        <th pSortableColumn="statut" style="min-width: 12rem">
+                            <span class="flex items-center gap-2">Status
+                            <p-sortIcon field="statut" /></span>
+                        </th>
+                        <th style="min-width: 12rem">Action</th>
+                    </tr>
+                </ng-template>
+                   <ng-template #body let-produit>
+                    <tr>
+                        <td style="width: 3rem">
+                            <p-tableCheckbox [value]="produit" />
+                        </td>
+                        <td style="min-width: 12rem">{{ produit.code }}</td>
+                       <td style="min-width: 16rem">{{ produit.nom }}</td>
+                        <!-- <td>
+                            <img [src]="'/demo/images/produit/' + produit.image" [alt]="produit.name" style="width: 64px" class="rounded" /> 
+                        </td> -->
+                         <td>{{ produit.type }}</td>
+                        <td>{{ produit.qte_stock }}</td>
+                        <td>
+                            <p-tag
+                                [value]="getStatutLabel(produit.statut)"
+                                [severity]="getStatutSeverity(produit.statut)"
+                            />
+                        </td>
+                        <td>
+                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(produit)" />
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(produit)" />
+                        </td>
+                    </tr>
+                </ng-template> 
+            </p-table>
         </div>
 
-<app-produits-form></app-produits-form>
-<!-- <app-create-task></app-create-task> -->
+
+
+        <p-dialog [(visible)]="produitDialog" [style]="{ width: '720px', maxWidth: '95vw' }" [header]="produit?.id ? 'Modifier un produit' : 'Nouveau produit'" [modal]="true">
+            <ng-template #content>
+                
+                    <div *ngIf="produit?.id" class="mb-4">
+                        <label for="code" class="block font-bold mb-4">Code</label>
+                        <input type="text" pInputText id="code" [(ngModel)]="produit.code" [disabled]="true" fluid />
+                    </div>
+
+                <div class="flex flex-col gap-6">
+                    <div>
+                        <label for="type" class="block font-bold mb-4">Type</label>
+                        <p-select
+                            [(ngModel)]="produit.type"
+                            inputId="type"
+                            [options]="typeOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner un type"
+                            fluid
+                        />
+                        <small class="text-red-500" *ngIf="submitted && !produit.type">Type obligatoire.</small>
+                    </div>
+
+                    <div>
+                        <label for="nom" class="block font-bold mb-4">Nom</label>
+                        <input type="text" pInputText id="nom" [(ngModel)]="produit.nom" required autofocus fluid />
+                        <small class="text-red-500" *ngIf="submitted && !produit.nom?.trim()">Nom obligatoire.</small>
+                    </div>
+
+
+                    <div>
+                        <label for="description" class="block font-bold mb-4">Description</label>
+                        <textarea id="description" pTextarea [(ngModel)]="produit.description" rows="3" cols="20" fluid></textarea>
+                    </div>
+
+                    <div *ngIf="produit?.id">
+                        <label for="statut" class="block font-bold mb-4">Statut</label>
+                        <p-select
+                            [(ngModel)]="produit.statut"
+                            inputId="statut"
+                            [options]="statutOptions"
+                            optionLabel="label"
+                            optionValue="value"
+                            placeholder="Sélectionner un statut"
+                            fluid
+                        />
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                            <label for="qte_stock" class="block font-bold mb-4">Quantité</label>
+                            <p-inputnumber id="qte_stock" [(ngModel)]="produit.qte_stock" fluid />
+                        </div>
+                        <div class="col-span-6">
+                            <label for="cout" class="block font-bold mb-4">Coût</label>
+                            <p-inputnumber id="cout" [(ngModel)]="produit.cout" mode="currency" currency="GNF" locale="fr-GN" fluid />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                            <label for="prix_achat" class="block font-bold mb-4">Prix achat</label>
+                            <p-inputnumber id="prix_achat" [(ngModel)]="produit.prix_achat" mode="currency" currency="GNF" locale="fr-GN" fluid />
+                        </div>
+                        <div class="col-span-6">
+                            <label for="prix_vente" class="block font-bold mb-4">Prix vente</label>
+                            <p-inputnumber id="prix_vente" [(ngModel)]="produit.prix_vente" mode="currency" currency="GNF" locale="fr-GN" fluid />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="prix_usine" class="block font-bold mb-4">Prix usine</label>
+                        <p-inputnumber id="prix_usine" [(ngModel)]="produit.prix_usine" mode="currency" currency="GNF" locale="fr-GN" fluid />
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #footer>
+                <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" />
+                <p-button label="Enregistrer" icon="pi pi-check" (click)="saveProduit()" />
+            </ng-template>
+        </p-dialog>
+
+        <p-confirmdialog [style]="{ width: '450px' }" />
+
+
