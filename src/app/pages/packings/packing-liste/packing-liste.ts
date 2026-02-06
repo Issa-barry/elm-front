@@ -81,9 +81,10 @@ export class PackingListe implements OnInit {
   loading: boolean = false;
   saving: boolean = false;
 
-  // Filtres par date
+  // Filtres
   filterDateDebut: Date | null = null;
   filterDateFin: Date | null = null;
+  filterStatut: string | null = null;
 
   // Pour l'autocomplete prestataire
   prestataires: Prestataire[] = [];
@@ -138,6 +139,7 @@ export class PackingListe implements OnInit {
   clearDateFilters() {
     this.filterDateDebut = null;
     this.filterDateFin = null;
+    this.filterStatut = null;
     this.loadPackings();
   }
 
@@ -149,6 +151,9 @@ export class PackingListe implements OnInit {
     }
     if (this.filterDateFin) {
       filters.date_fin = this.formatDate(this.filterDateFin);
+    }
+    if (this.filterStatut) {
+      filters.statut = this.filterStatut;
     }
     this.packingService.getPackings(Object.keys(filters).length ? filters : undefined).subscribe({
       next: (response) => {

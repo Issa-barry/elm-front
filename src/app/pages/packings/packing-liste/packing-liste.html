@@ -44,7 +44,7 @@
                     [outlined]="true"
                     [rounded]="true"
                     (onClick)="clearDateFilters()"
-                    *ngIf="filterDateDebut || filterDateFin"
+                    *ngIf="filterDateDebut || filterDateFin || filterStatut"
                     pTooltip="Effacer les filtres"
                 />
                 <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
