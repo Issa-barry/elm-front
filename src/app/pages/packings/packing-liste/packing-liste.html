@@ -7,7 +7,48 @@
         </ng-template>
 
         <ng-template #end>
-            <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+            <div class="flex items-center gap-2">
+                <p-select
+                    [(ngModel)]="filterStatut"
+                    [options]="statuses"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Statut"
+                    [showClear]="true"
+                    (onChange)="onDateFilter()"
+                    styleClass="w-40"
+                />
+                <p-datepicker
+                    [(ngModel)]="filterDateDebut"
+                    dateFormat="dd/mm/yy"
+                    placeholder="Date début"
+                    [showIcon]="true"
+                    [maxDate]="filterDateFin"
+                    (onSelect)="onDateFilter()"
+                    inputStyleClass="w-full"
+                    styleClass="w-40"
+                />
+                <p-datepicker
+                    [(ngModel)]="filterDateFin"
+                    dateFormat="dd/mm/yy"
+                    placeholder="Date fin"
+                    [showIcon]="true"
+                    [minDate]="filterDateDebut"
+                    (onSelect)="onDateFilter()"
+                    inputStyleClass="w-full"
+                    styleClass="w-40"
+                />
+                <p-button
+                    icon="pi pi-filter-slash"
+                    severity="secondary"
+                    [outlined]="true"
+                    [rounded]="true"
+                    (onClick)="clearDateFilters()"
+                    *ngIf="filterDateDebut || filterDateFin"
+                    pTooltip="Effacer les filtres"
+                />
+                <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+            </div>
         </ng-template>
     </p-toolbar>
 

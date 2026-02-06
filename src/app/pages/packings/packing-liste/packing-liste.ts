@@ -18,6 +18,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { PackingService } from '@/services/packing/packing.service';
 import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
@@ -64,7 +65,8 @@ interface StatutOption {
     ConfirmDialogModule,
     DatePickerModule,
     AutoCompleteModule,
-    TextareaModule
+    TextareaModule,
+    TooltipModule
   ],
   providers: [MessageService, ConfirmationService]
 })
@@ -78,6 +80,10 @@ export class PackingListe implements OnInit {
   submitted: boolean = false;
   loading: boolean = false;
   saving: boolean = false;
+
+  // Filtres par date
+  filterDateDebut: Date | null = null;
+  filterDateFin: Date | null = null;
 
   // Pour l'autocomplete prestataire
   prestataires: Prestataire[] = [];
@@ -125,9 +131,26 @@ export class PackingListe implements OnInit {
     }));
   }
 
+  onDateFilter() {
+    this.loadPackings();
+  }
+
+  clearDateFilters() {
+    this.filterDateDebut = null;
+    this.filterDateFin = null;
+    this.loadPackings();
+  }
+
   loadPackings() {
     this.loading = true;
-    this.packingService.getPackings().subscribe({
+    const filters: any = {};
+    if (this.filterDateDebut) {
+      filters.date_debut = this.formatDate(this.filterDateDebut);
+    }
+    if (this.filterDateFin) {
+      filters.date_fin = this.formatDate(this.filterDateFin);
+    }
+    this.packingService.getPackings(Object.keys(filters).length ? filters : undefined).subscribe({
       next: (response) => {
         const data = 'data' in response && Array.isArray(response.data)
           ? response.data
