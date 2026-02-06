@@ -9,25 +9,28 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
 
-import { PackingService } from '@/services/packing/packing.service';
-import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
-import { PrestataireService } from '@/services/prestataire/prestataire.service';
-import { Prestataire } from '@/models/prestataire.model';
+import { PackingPaiementService } from '@/services/comptabilite/packing-paiement/packing-paiement.service';
+import {
+  ComptabilitePrestataire,
+  ComptabiliteSummary,
+  PreviewPaiementPacking,
+  StorePaiementPackingDto,
+  ModePaiement,
+  MODE_PAIEMENT_LABELS,
+} from '@/models/paiement-packing.model';
 
 interface Column {
   field: string;
   header: string;
-  customExportHeader?: string;
 }
 
 interface ExportColumn {
@@ -35,9 +38,9 @@ interface ExportColumn {
   dataKey: string;
 }
 
-interface StatutOption {
-  label: string; 
-  value: PackingStatut;
+interface ModePaiementOption {
+  label: string;
+  value: ModePaiement;
 }
 
 @Component({
@@ -55,123 +58,120 @@ interface StatutOption {
     ToolbarModule,
     InputTextModule,
     SelectModule,
-    InputNumberModule,
     DialogModule,
     TagModule,
     InputIconModule,
     IconFieldModule,
     ConfirmDialogModule,
     DatePickerModule,
-    AutoCompleteModule,
-    TextareaModule
+    TextareaModule,
+    TooltipModule,
   ],
-  providers: [MessageService, ConfirmationService]
+  providers: [MessageService, ConfirmationService],
 })
 export class ComptabilitePackingTableau implements OnInit {
-  filterFields: string[] = ['reference', 'prestataire.nom', 'prestataire.prenom', 'prestataire.phone', 'statut', 'montant'];
+  filterFields: string[] = ['prestataire_nom', 'prestataire_phone', 'montant_total_du'];
 
-  packingDialog: boolean = false;
-  packings = signal<Packing[]>([]);
-  packing: Partial<Packing> = {};
-  selectedPackings: Packing[] | null = null;
-  submitted: boolean = false;
+  prestataires = signal<ComptabilitePrestataire[]>([]);
+  selectedPrestataires: ComptabilitePrestataire[] | null = null;
+  comptaSummary: ComptabiliteSummary | null = null;
   loading: boolean = false;
   saving: boolean = false;
+  submitted: boolean = false;
 
-  // Pour l'autocomplete prestataire
-  prestataires: Prestataire[] = [];
-  filteredPrestataires: Prestataire[] = [];
-  selectedPrestataire: Prestataire | null = null;
+  // Filtres période
+  filtrePeriodeDebut: Date | null = null;
+  filtrePeriodeFin: Date | null = null;
 
-  statuses: StatutOption[] = [
-    { label: 'En cours', value: 'en_cours' },
-    { label: 'Terminé', value: 'termine' },
-    { label: 'Payé', value: 'paye' },
-    { label: 'Annulé', value: 'annule' }
+  // Dialog paiement
+  paiementDialog: boolean = false;
+  selectedItem: ComptabilitePrestataire | null = null;
+  paiementData: {
+    periode_debut: Date | null;
+    periode_fin: Date | null;
+    date_paiement: Date | null;
+    mode_paiement: ModePaiement;
+    notes: string;
+  } = {
+    periode_debut: null,
+    periode_fin: null,
+    date_paiement: null,
+    mode_paiement: 'especes',
+    notes: '',
+  };
+
+  modesPaiement: ModePaiementOption[] = [
+    { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
+    { label: MODE_PAIEMENT_LABELS.virement, value: 'virement' },
+    { label: MODE_PAIEMENT_LABELS.cheque, value: 'cheque' },
+    { label: MODE_PAIEMENT_LABELS.mobile_money, value: 'mobile_money' },
   ];
+
+  // Dialog prévisualisation
+  previewDialog: boolean = false;
+  previewData: PreviewPaiementPacking | null = null;
+  previewLoading: boolean = false;
 
   @ViewChild('dt') dt!: Table;
   exportColumns!: ExportColumn[];
   cols!: Column[];
 
   constructor(
-    private packingService: PackingService,
-    private prestataireService: PrestataireService,
+    private paiementService: PackingPaiementService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit() {
-    this.loadPackings();
-    this.loadPrestataires();
+    this.loadComptabilite();
     this.initColumns();
   }
 
   initColumns() {
     this.cols = [
-      { field: 'reference', header: 'Référence' },
-      { field: 'prestataire', header: 'Prestataire' },
-      { field: 'date_debut', header: 'Début' },
-      { field: 'date_fin', header: 'Fin' },
-      { field: 'nb_rouleaux', header: 'Rouleaux' },
-      { field: 'montant', header: 'Montant' },
-      { field: 'statut', header: 'Statut' }
+      { field: 'prestataire_nom', header: 'Prestataire' },
+      { field: 'prestataire_phone', header: 'Téléphone' },
+      { field: 'nb_packings_non_factures', header: 'Non facturés' },
+      { field: 'montant_non_facture', header: 'Mnt non facturé' },
+      { field: 'montant_facture', header: 'Facturé' },
+      { field: 'montant_verse', header: 'Versé' },
+      { field: 'montant_restant_facture', header: 'Reste facture' },
+      { field: 'montant_total_du', header: 'Total dû' },
     ];
 
     this.exportColumns = this.cols.map((col) => ({
       title: col.header,
-      dataKey: col.field
+      dataKey: col.field,
     }));
   }
 
-  loadPackings() {
+  loadComptabilite() {
     this.loading = true;
-    this.packingService.getPackings().subscribe({
-      next: (response) => {
-        const data = 'data' in response && Array.isArray(response.data)
-          ? response.data
-          : (response as any).data?.data || [];
-        this.packings.set(data);
-        this.loading = false;
-        console.log(response);
-        
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger les packings',
-          life: 3000
-        });
-        this.loading = false;
-      }
-    });
-  }
+    const filters: any = {};
 
-  loadPrestataires() {
-    this.prestataireService.getActivePrestataires().subscribe({
+    if (this.filtrePeriodeDebut) {
+      filters.periode_debut = this.formatDate(this.filtrePeriodeDebut);
+    }
+    if (this.filtrePeriodeFin) {
+      filters.periode_fin = this.formatDate(this.filtrePeriodeFin);
+    }
+
+    this.paiementService.getComptabilite(filters).subscribe({
       next: (response) => {
-        // Filtrer uniquement les machinistes
-        this.prestataires = response.data.filter(p => p.type === 'machiniste');
+        this.comptaSummary = new ComptabiliteSummary(response.data);
+        this.prestataires.set(this.comptaSummary.prestataires);
+        this.loading = false;
       },
       error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les prestataires',
-          life: 3000
+          detail: 'Impossible de charger la comptabilité',
+          life: 3000,
         });
-      }
+        this.loading = false;
+      },
     });
-  }
-
-  filterPrestataire(event: { query: string }) {
-    const query = event.query.toLowerCase();
-    this.filteredPrestataires = this.prestataires.filter(p =>
-      p.nom.toLowerCase().includes(query) ||
-      p.prenom.toLowerCase().includes(query) ||
-      p.phone.includes(query)
-    );
   }
 
   exportCSV() {
@@ -182,173 +182,92 @@ export class ComptabilitePackingTableau implements OnInit {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
-  openNew() {
-    this.packing = {
-      statut: 'en_cours',
-      nb_rouleaux: 0,
-      prix_par_rouleau: 0,
-      montant: 0
+  openPaiement(item: ComptabilitePrestataire) {
+    this.selectedItem = item;
+    this.paiementData = {
+      periode_debut: this.filtrePeriodeDebut ? new Date(this.filtrePeriodeDebut) : null,
+      periode_fin: this.filtrePeriodeFin ? new Date(this.filtrePeriodeFin) : null,
+      date_paiement: new Date(),
+      mode_paiement: 'especes',
+      notes: '',
     };
-    this.selectedPrestataire = null;
     this.submitted = false;
-    this.packingDialog = true;
+    this.paiementDialog = true;
   }
 
-  editPacking(packing: Packing) {
-    this.packing = {
-      ...packing,
-      date_debut: packing.date_debut ? new Date(packing.date_debut) : undefined,
-      date_fin: packing.date_fin ? new Date(packing.date_fin) : undefined
-    };
-    this.selectedPrestataire = packing.prestataire || null;
-    this.packingDialog = true;
-  }
-
-  deletePacking(packing: Packing) {
-    this.confirmationService.confirm({
-      message: `Êtes-vous sûr de vouloir supprimer le packing ${packing.reference} ?`,
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.packingService.deletePacking(packing.id).subscribe({
-          next: () => {
-            this.packings.set(this.packings().filter((p) => p.id !== packing.id));
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Packing supprimé',
-              life: 3000
-            });
-          },
-          error: () => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: 'Impossible de supprimer le packing',
-              life: 3000
-            });
-          }
-        });
-      }
-    });
-  }
-
-  deleteSelectedPackings() {
-    this.confirmationService.confirm({
-      message: 'Êtes-vous sûr de vouloir supprimer les packings sélectionnés ?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        // Supprimer chaque packing sélectionné
-        this.selectedPackings?.forEach(packing => {
-          this.packingService.deletePacking(packing.id).subscribe();
-        });
-        this.packings.set(this.packings().filter((p) => !this.selectedPackings?.includes(p)));
-        this.selectedPackings = null;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: 'Packings supprimés',
-          life: 3000
-        });
-      }
-    });
-  }
-
-  hideDialog() {
-    this.packingDialog = false;
+  hidePaiementDialog() {
+    this.paiementDialog = false;
     this.submitted = false;
   }
 
-  savePacking() {
+  savePaiement() {
     this.submitted = true;
 
-    if (!this.selectedPrestataire || this.saving) {
+    if (!this.selectedItem || !this.paiementData.periode_debut || !this.paiementData.periode_fin || !this.paiementData.date_paiement || this.saving) {
       return;
     }
 
     this.saving = true;
 
-    this.messageService.add({
-      severity: 'info',
-      summary: 'En cours',
-      detail: 'Enregistrement en cours...',
-      life: 2000
-    });
-
-    const packingData: CreatePackingDto | UpdatePackingDto = {
-      prestataire_id: this.selectedPrestataire.id,
-      date_debut: this.formatDate(this.packing.date_debut),
-      date_fin: this.formatDate(this.packing.date_fin),
-      nb_rouleaux: this.packing.nb_rouleaux || 0,
-      prix_par_rouleau: this.packing.prix_par_rouleau || 0,
-      montant: this.packing.montant || 0,
-      statut: this.packing.statut,
-      notes: this.packing.notes ?? undefined
+    const dto: StorePaiementPackingDto = {
+      prestataire_id: this.selectedItem.prestataire_id,
+      periode_debut: this.formatDate(this.paiementData.periode_debut),
+      periode_fin: this.formatDate(this.paiementData.periode_fin),
+      date_paiement: this.formatDate(this.paiementData.date_paiement),
+      mode_paiement: this.paiementData.mode_paiement,
+      notes: this.paiementData.notes || undefined,
     };
 
-    if (this.packing.id) {
-      // Mise à jour
-      this.packingService.updatePacking(this.packing.id, packingData).subscribe({
-        next: (response) => {
-          const index = this.packings().findIndex(p => p.id === this.packing.id);
-          if (index !== -1) {
-            const updatedPackings = [...this.packings()];
-            updatedPackings[index] = response.data;
-            this.packings.set(updatedPackings);
-          }
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Packing mis à jour',
-            life: 3000
-          });
-          this.packingDialog = false;
-          this.packing = {};
-          this.saving = false;
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de mettre à jour le packing',
-            life: 3000
-          });
-          this.saving = false;
-        }
-      });
-    } else {
-      // Création
-      this.packingService.createPacking(packingData as CreatePackingDto).subscribe({
-        next: (response) => {
-          this.packings.set([...this.packings(), response.data]);
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Packing créé',
-            life: 3000
-          });
-          this.packingDialog = false;
-          this.packing = {};
-          this.saving = false;
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de créer le packing',
-            life: 3000
-          });
-          this.saving = false;
-        }
-      });
-    }
+    this.paiementService.createPaiement(dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Paiement ${response.data.reference} créé avec succès`,
+          life: 3000,
+        });
+        this.paiementDialog = false;
+        this.saving = false;
+        this.loadComptabilite();
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Impossible de créer le paiement';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.saving = false;
+      },
+    });
   }
 
-  calculateMontant() {
-    if (this.packing.nb_rouleaux && this.packing.prix_par_rouleau) {
-      this.packing.montant = this.packing.nb_rouleaux * this.packing.prix_par_rouleau;
-    }
+  openPreview(item: ComptabilitePrestataire) {
+    const periodeDebut = this.filtrePeriodeDebut ? this.formatDate(this.filtrePeriodeDebut) : '2000-01-01';
+    const periodeFin = this.filtrePeriodeFin ? this.formatDate(this.filtrePeriodeFin) : '2099-12-31';
+
+    this.selectedItem = item;
+    this.previewDialog = true;
+    this.previewLoading = true;
+    this.previewData = null;
+
+    this.paiementService.getPreview(item.prestataire_id, periodeDebut, periodeFin).subscribe({
+      next: (response) => {
+        this.previewData = new PreviewPaiementPacking(response.data);
+        this.previewLoading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger la prévisualisation',
+          life: 3000,
+        });
+        this.previewLoading = false;
+        this.previewDialog = false;
+      },
+    });
   }
 
   formatDate(date: any): string {
@@ -358,18 +277,10 @@ export class ComptabilitePackingTableau implements OnInit {
     return d.toISOString().split('T')[0];
   }
 
-  getStatutLabel(statut: PackingStatut): string {
-    return PACKING_STATUT_LABELS[statut] || statut;
-  }
-
-  getStatutSeverity(statut: PackingStatut): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
-    return PACKING_STATUT_SEVERITY[statut] || 'info';
-  }
-
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'decimal',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(value) + ' GNF';
   }
 
