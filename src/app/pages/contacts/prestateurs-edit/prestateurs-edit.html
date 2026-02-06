@@ -6,7 +6,7 @@
   </div>
 
   <app-prestateurs-from
-    *ngIf="prestateursData"
+    *ngIf="prestateursData && !loading"
     [mode]="'edit'"
     [initialData]="prestateursData"
     [loading]="loading"

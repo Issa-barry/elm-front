@@ -118,7 +118,7 @@ export class Prestateurs implements OnInit {
    * Sélection d'une ligne - navigation vers l'édition
    */
   onRowSelect(event: any) {
-    this.router.navigate(['contacts/prestateurs', event.data.id, 'edit']);
+    this.router.navigate(['contacts/prestateurs/edit', event.data.id]);
   }
 
   /**

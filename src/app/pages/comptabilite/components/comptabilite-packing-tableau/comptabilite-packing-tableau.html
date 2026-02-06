@@ -1,140 +1,230 @@
- <div class="card">
-            <p-toolbar styleClass="mb-12">
-                <ng-template #start>
-                    <p-button label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                </ng-template>
+<p-toast />
 
-                <ng-template #end>
-                    <p-button label="Statut" icon="pi pi-filter" severity="secondary" (onClick)="exportCSV()" />
-                </ng-template>
-            </p-toolbar>
+<div class="card">
+    <p-toolbar styleClass="mb-12">
+        <ng-template #start>
+            <p-button label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        </ng-template>
 
-            <p-table
-                #dt
-                [value]="products()"
-                [rows]="10"
-                [columns]="cols"
-                [paginator]="true"
-                [globalFilterFields]="filterFields"
-                [tableStyle]="{ 'min-width': '75rem' }"
-                [(selection)]="selectedProducts"
-                [rowHover]="true"
-                dataKey="id"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-                [showCurrentPageReport]="true"
-                [rowsPerPageOptions]="[10, 20, 30]"
-            >
-                <ng-template #caption>
-                    <div class="flex items-center justify-between">
-                        <h5 class="m-0">Manage Products</h5>
-                        <p-iconfield>
-                            <p-inputicon styleClass="pi pi-search" />
-                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-                        </p-iconfield>
-                    </div>
-                </ng-template>
-                <ng-template #header>
-                    <tr>
-                        <th style="width: 3rem">
-                            <p-tableHeaderCheckbox />
-                        </th>
-                        <th style="min-width: 16rem" pSortableColumn="code">
-                            <span class="flex items-center gap-2">Contact
-                            <p-sortIcon field="code" /></span>
-                        </th>
-                        <th>Image</th>
-                        <th pSortableColumn="name" style="min-width:16rem">
-                            <span class="flex items-center gap-2">Phone
-                            <p-sortIcon field="name" /></span>
-                        </th>
-                        <th pSortableColumn="price" style="min-width: 8rem">
-                            <span class="flex items-center gap-2">Debut
-                            <p-sortIcon field="price" /></span>
-                        </th>
-                        <th pSortableColumn="category" style="min-width:10rem">
-                            <span class="flex items-center gap-2">Fin
-                            <p-sortIcon field="category" /></span>
-                        </th>
-                        <th pSortableColumn="rating" style="min-width: 12rem">
-                            <span class="flex items-center gap-2">Rouleau
-                            <p-sortIcon field="rating" /></span>
-                        </th>
-                        <th pSortableColumn="rating" style="min-width: 12rem">
-                            <span class="flex items-center gap-2">Montant
-                            <p-sortIcon field="rating" /></span>
-                        </th>
-                        <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
-                            <span class="flex items-center gap-2">Status
-                            <p-sortIcon field="inventoryStatus" /></span>
-                        </th>
-                        <th style="min-width: 12rem"></th>
-                    </tr>
-                </ng-template>
-                <ng-template #body let-product>
-                    <tr>
-                        <td style="width: 3rem">
-                            <p-tableCheckbox [value]="product" />
-                        </td>
-                        <td style="min-width: 12rem">{{ product.code }}</td>
-                            <td>
-                            <img [src]="'/demo/images/product/' + product.image" [alt]="product.name" style="width: 64px" class="rounded" />
-                        </td>
-                        <td style="min-width: 16rem">{{ product.name }}</td>
-                        <td>{{ product.price | currency: 'USD' }}</td>
-                        <td>{{ product.category }}</td>
-                        <td>
-                            <p>150</p>
-                        </td>
-                        <td>
-                            <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)" />
-                        </td>
-                        <td>
-                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>
+        <ng-template #end>
+            <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+        </ng-template>
+    </p-toolbar>
 
-        <p-dialog [(visible)]="productDialog" [style]="{ width: '750px' }" header="Détails du packing" [modal]="true">
-            <ng-template #content>
-                <div class="flex flex-col gap-6">
-                    <img [src]="'/demo/images/product/' + product.image" [alt]="product.image" class="block m-auto pb-6" *ngIf="product.image" />
-                    <div>
-                        <label for="name" class="block font-bold mb-4">Prestateur (Machiniste)</label>
-                        <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                        <small class="text-red-500" *ngIf="submitted && !product.name">Name is required.</small>
-                    </div>
+    <p-table
+        #dt
+        [value]="packings()"
+        [rows]="10"
+        [columns]="cols"
+        [paginator]="true"
+        [globalFilterFields]="filterFields"
+        [tableStyle]="{ 'min-width': '75rem' }"
+        [(selection)]="selectedPackings"
+        [rowHover]="true"
+        dataKey="id"
+        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} packings"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 20, 30]"
+        [loading]="loading"
+    >
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Gestion des Packings</h5>
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
+                </p-iconfield>
+            </div>
+        </ng-template>
+        <ng-template #header>
+            <tr>
+                <th style="width: 3rem">
+                    <p-tableHeaderCheckbox />
+                </th>
+                <th pSortableColumn="reference" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Référence
+                    <p-sortIcon field="reference" /></span>
+                </th>
+                <th pSortableColumn="prestataire.nom" style="min-width: 14rem">
+                    <span class="flex items-center gap-2">Prestataire
+                    <p-sortIcon field="prestataire.nom" /></span>
+                </th>
+                <th style="min-width: 10rem">Phone</th>
+                <th pSortableColumn="date_debut" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Début
+                    <p-sortIcon field="date_debut" /></span>
+                </th>
+                <th pSortableColumn="date_fin" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Fin
+                    <p-sortIcon field="date_fin" /></span>
+                </th>
+                <th pSortableColumn="nb_rouleaux" style="min-width: 8rem">
+                    <span class="flex items-center gap-2">Rouleaux
+                    <p-sortIcon field="nb_rouleaux" /></span>
+                </th>
+                <th pSortableColumn="montant" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Montant
+                    <p-sortIcon field="montant" /></span>
+                </th>
+                <th pSortableColumn="statut" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Statut
+                    <p-sortIcon field="statut" /></span>
+                </th>
+                <th style="min-width: 10rem"></th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-packing>
+            <tr>
+                <td style="width: 3rem">
+                    <p-tableCheckbox [value]="packing" />
+                </td>
+                <td>{{ packing.reference }}</td>
+                <td>
+                    <span *ngIf="packing.prestataire">
+                        {{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone }}</span>
+                </td>
+                <td>{{ formatDateDisplay(packing.date_debut) }}</td>
+                <td>{{ formatDateDisplay(packing.date_fin) }}</td>
+                <td>{{ packing.nb_rouleaux }}</td>
+                <td>{{ formatCurrency(packing.montant) }}</td>
+                <td>
+                    <p-tag [value]="getStatutLabel(packing.statut)" [severity]="getStatutSeverity(packing.statut)" />
+                </td>
+                <td>
+                    <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editPacking(packing)" />
+                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deletePacking(packing)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
 
-                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-4">Début</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US" fluid />
+<p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" header="Détails du packing" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <div>
+                <label for="prestataire" class="block font-bold mb-4">Prestataire (Machiniste)</label>
+                <p-select
+                    [(ngModel)]="selectedPrestataire"
+                    [options]="prestataires"
+                    optionLabel="nom"
+                    [filter]="true"
+                    filterBy="nom,prenom,phone"
+                    placeholder="Sélectionner un prestataire"
+                    styleClass="w-full"
+                >
+                    <ng-template let-prestataire pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} - {{ prestataire.phone }}</span>
                         </div>
-                        <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-4">Fin</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
+                    </ng-template>
+                    <ng-template let-prestataire pTemplate="selectedItem">
+                        <div class="flex items-center gap-2" *ngIf="prestataire">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }}</span>
                         </div>
-                    </div>
+                    </ng-template>
+                </p-select>
+                <small class="text-red-500" *ngIf="submitted && !selectedPrestataire">Le prestataire est requis.</small>
+            </div>
 
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label for="price" class="block font-bold mb-4">Nombre de rouleaux</label>
-                            <p-inputnumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US" fluid />
-                        </div>
-                        <div class="col-span-6">
-                            <label for="quantity" class="block font-bold mb-4">Prix du rouleau</label>
-                            <p-inputnumber id="quantity" [(ngModel)]="product.quantity" fluid />
-                        </div>
-                    </div>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                    <label for="date_debut" class="block font-bold mb-4">Date début</label>
+                    <p-datepicker
+                        [(ngModel)]="packing.date_debut"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        inputStyleClass="w-full"
+                        styleClass="w-full"
+                    />
                 </div>
-            </ng-template>
+                <div class="col-span-6">
+                    <label for="date_fin" class="block font-bold mb-4">Date fin</label>
+                    <p-datepicker
+                        [(ngModel)]="packing.date_fin"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        inputStyleClass="w-full"
+                        styleClass="w-full"
+                    />
+                </div>
+            </div>
 
-            <ng-template #footer>
-                <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Enregistrer" icon="pi pi-check" (click)="saveProduct()" />
-            </ng-template>
-        </p-dialog>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                    <label for="nb_rouleaux" class="block font-bold mb-4">Nombre de rouleaux</label>
+                    <p-inputnumber
+                        id="nb_rouleaux"
+                        [(ngModel)]="packing.nb_rouleaux"
+                        (onInput)="calculateMontant()"
+                        [min]="0"
+                        styleClass="w-full"
+                    />
+                </div>
+                <div class="col-span-6">
+                    <label for="prix_par_rouleau" class="block font-bold mb-4">Prix du rouleau (GNF)</label>
+                    <p-inputnumber
+                        id="prix_par_rouleau"
+                        [(ngModel)]="packing.prix_par_rouleau"
+                        (onInput)="calculateMontant()"
+                        [min]="0"
+                        styleClass="w-full"
+                    />
+                </div>
+            </div>
 
-        <p-confirmdialog [style]="{ width: '450px' }" />
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                    <label for="montant" class="block font-bold mb-4">Montant total (GNF)</label>
+                    <p-inputnumber
+                        id="montant"
+                        [(ngModel)]="packing.montant"
+                        [min]="0"
+                        [readonly]="true"
+                        styleClass="w-full"
+                    />
+                </div>
+                <div class="col-span-6">
+                    <label for="statut" class="block font-bold mb-4">Statut</label>
+                    <p-select
+                        [(ngModel)]="packing.statut"
+                        [options]="statuses"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Sélectionner un statut"
+                        styleClass="w-full"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label for="notes" class="block font-bold mb-4">Notes</label>
+                <textarea
+                    pTextarea
+                    id="notes"
+                    [(ngModel)]="packing.notes"
+                    rows="3"
+                    class="w-full"
+                ></textarea>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
+        <p-button
+            [label]="saving ? 'Enregistrement...' : 'Enregistrer'"
+            [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+            (click)="savePacking()"
+            [disabled]="saving"
+            [loading]="saving" />
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

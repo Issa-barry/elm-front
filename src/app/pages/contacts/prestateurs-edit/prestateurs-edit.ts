@@ -29,6 +29,8 @@ export class PrestateursEdit implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    console.log("id=",id);
+    
     if (id) {
       this.prestateurId = parseInt(id, 10);
       this.loadPrestataire(this.prestateurId);
@@ -40,18 +42,26 @@ export class PrestateursEdit implements OnInit {
 
     this.prestataireService.getPrestataire(id).subscribe({
       next: (response) => {
+        console.log("bonjour", response);
         if (response.success && response.data) {
           const prestataire = response.data;
           this.prestateursData = {
             id: prestataire.id,
+            type: prestataire.type || undefined,
             nom: prestataire.nom,
             prenom: prestataire.prenom,
+            raison_sociale: prestataire.raison_sociale || undefined,
             phone: prestataire.phone,
+            email: prestataire.email || undefined,
             pays: prestataire.pays,
             code_pays: prestataire.code_pays,
+            code_phone_pays: prestataire.code_phone_pays,
             ville: prestataire.ville,
             quartier: prestataire.quartier || undefined,
             adresse: prestataire.adresse || undefined,
+            specialite: prestataire.specialite || undefined,
+            tarif_horaire: prestataire.tarif_horaire || undefined,
+            notes: prestataire.notes || undefined,
           };
         }
         this.loading = false;

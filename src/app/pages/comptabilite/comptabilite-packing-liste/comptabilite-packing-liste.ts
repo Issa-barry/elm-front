@@ -43,7 +43,7 @@ interface PackingPaiementInterface {
   date_debut?: Date | null;
   date_fin?: Date | null;
   nombre_rouleaux?: number;
-  prix_rouleau?: number;
+  prix_par_rouleau?: number;
   montant: number;
   statut?: 'en_cours' | 'termine' | 'annule';
   created_at?: string;

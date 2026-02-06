@@ -91,30 +91,47 @@ export class PrestateursFrom implements OnInit, OnChanges {
     this.initializeModel();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['initialData'] && changes['initialData'].currentValue) {
+   ngOnChanges(changes: SimpleChanges) {
+  // Vérifier si initialData a changé et n'est pas la première initialisation vide
+  if (changes['initialData']) {
+    const change = changes['initialData'];
+    
+    // Si on a des données (et que ce n'est pas undefined/null)
+    if (change.currentValue && Object.keys(change.currentValue).length > 0) {
+      console.log("NgOnChanges - Nouvelles données:", change.currentValue);
       this.initializeModel();
     }
   }
+}
 
-  private initializeModel() {
-    this.model = this.initialData ? { ...this.initialData } : {};
+private initializeModel() {
+  console.log("InitializeModel appelé avec:", this.initialData);
+  
+  // Créer une copie profonde des données
+  this.model = this.initialData ? { ...this.initialData } : {};
+  
+  console.log("Model après initialisation:", this.model);
 
-    // En mode création ou édition avec données, activer l'édition
-    if (this.mode === 'create') {
-      this.isEditing = true;
-    } else if (this.mode === 'edit' && this.initialData) {
-      // En mode edit avec données chargées, activer l'édition automatiquement
-      this.isEditing = true;
-    }
-
-    // Détecter le pays du numéro existant ou utiliser celui sauvegardé
-    if (this.model.code_pays) {
-      this.phoneCountry = this.model.code_pays;
-    } else if (this.model.phone) {
-      this.detectPhoneCountry(this.model.phone);
-    }
+  // En mode création ou édition avec données, activer l'édition
+  if (this.mode === 'create') {
+    this.isEditing = true;
+  } else if (this.mode === 'edit' && this.initialData) {
+    this.isEditing = true;
   }
+
+  // Détecter le pays du numéro existant ou utiliser celui sauvegardé
+  if (this.model.code_pays) {
+    this.phoneCountry = this.model.code_pays;
+    console.log("Pays détecté depuis code_pays:", this.phoneCountry);
+  } else if (this.model.phone) {
+    this.detectPhoneCountry(this.model.phone);
+    console.log("Pays détecté depuis phone:", this.phoneCountry);
+  }
+  
+  // Réinitialiser l'état de validation
+  this.submitted = false;
+  this.phoneError = null;
+}
 
   // Détecter le pays depuis le numéro de téléphone
   detectPhoneCountry(phone: string) {
