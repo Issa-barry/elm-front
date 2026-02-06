@@ -36,7 +36,7 @@ interface ExportColumn {
 }
 
 interface StatutOption {
-  label: string;
+  label: string; 
   value: PackingStatut;
 }
 
