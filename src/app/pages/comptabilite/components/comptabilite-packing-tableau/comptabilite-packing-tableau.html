@@ -3,7 +3,33 @@
 <div class="card">
     <p-toolbar styleClass="mb-12">
         <ng-template #start>
-            <p-button label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <div class="flex items-center gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Période début</label>
+                    <p-datepicker
+                        [(ngModel)]="filtrePeriodeDebut"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        placeholder="Début"
+                        inputStyleClass="w-full"
+                        styleClass="w-48"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Période fin</label>
+                    <p-datepicker
+                        [(ngModel)]="filtrePeriodeFin"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        placeholder="Fin"
+                        inputStyleClass="w-full"
+                        styleClass="w-48"
+                    />
+                </div>
+                <div class="flex items-end h-full pt-5">
+                    <p-button label="Filtrer" icon="pi pi-filter" severity="secondary" (onClick)="loadComptabilite()" />
+                </div>
+            </div>
         </ng-template>
 
         <ng-template #end>
@@ -13,23 +39,23 @@
 
     <p-table
         #dt
-        [value]="packings()"
+        [value]="prestataires()"
         [rows]="10"
         [columns]="cols"
         [paginator]="true"
         [globalFilterFields]="filterFields"
-        [tableStyle]="{ 'min-width': '75rem' }"
-        [(selection)]="selectedPackings"
+        [tableStyle]="{ 'min-width': '90rem' }"
+        [(selection)]="selectedPrestataires"
         [rowHover]="true"
-        dataKey="id"
-        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} packings"
+        dataKey="prestataire_id"
+        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} prestataires"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
     >
         <ng-template #caption>
             <div class="flex items-center justify-between">
-                <h5 class="m-0">Gestion des Packings</h5>
+                <h5 class="m-0">Comptabilité Packings - Récapitulatif par prestataire</h5>
                 <p-iconfield>
                     <p-inputicon styleClass="pi pi-search" />
                     <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
@@ -41,174 +67,159 @@
                 <th style="width: 3rem">
                     <p-tableHeaderCheckbox />
                 </th>
-                <th pSortableColumn="reference" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Référence
-                    <p-sortIcon field="reference" /></span>
-                </th>
-                <th pSortableColumn="prestataire.nom" style="min-width: 14rem">
+                <th pSortableColumn="prestataire_nom" style="min-width: 14rem">
                     <span class="flex items-center gap-2">Prestataire
-                    <p-sortIcon field="prestataire.nom" /></span>
+                    <p-sortIcon field="prestataire_nom" /></span>
                 </th>
-                <th style="min-width: 10rem">Phone</th>
-                <th pSortableColumn="date_debut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Début
-                    <p-sortIcon field="date_debut" /></span>
+                <th style="min-width: 10rem">Téléphone</th>
+                <th pSortableColumn="nb_packings_non_factures" style="min-width: 8rem">
+                    <span class="flex items-center gap-2">Non facturés
+                    <p-sortIcon field="nb_packings_non_factures" /></span>
                 </th>
-                <th pSortableColumn="date_fin" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Fin
-                    <p-sortIcon field="date_fin" /></span>
+                <th pSortableColumn="montant_non_facture" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Mnt non facturé
+                    <p-sortIcon field="montant_non_facture" /></span>
                 </th>
-                <th pSortableColumn="nb_rouleaux" style="min-width: 8rem">
-                    <span class="flex items-center gap-2">Rouleaux
-                    <p-sortIcon field="nb_rouleaux" /></span>
+                <th pSortableColumn="montant_facture" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Facturé
+                    <p-sortIcon field="montant_facture" /></span>
                 </th>
-                <th pSortableColumn="montant" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Montant
-                    <p-sortIcon field="montant" /></span>
+                <th pSortableColumn="montant_verse" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Versé
+                    <p-sortIcon field="montant_verse" /></span>
                 </th>
-                <th pSortableColumn="statut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Statut
-                    <p-sortIcon field="statut" /></span>
+                <th pSortableColumn="montant_restant_facture" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Reste facture
+                    <p-sortIcon field="montant_restant_facture" /></span>
+                </th>
+                <th pSortableColumn="montant_total_du" style="min-width: 12rem">
+                    <span class="flex items-center gap-2">Total dû
+                    <p-sortIcon field="montant_total_du" /></span>
                 </th>
                 <th style="min-width: 10rem"></th>
             </tr>
         </ng-template>
-        <ng-template #body let-packing>
+        <ng-template #body let-item>
             <tr>
                 <td style="width: 3rem">
-                    <p-tableCheckbox [value]="packing" />
+                    <p-tableCheckbox [value]="item" />
                 </td>
-                <td>{{ packing.reference }}</td>
                 <td>
-                    <span *ngIf="packing.prestataire">
-                        {{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}
+                    <span class="font-semibold">{{ item.prestataire_nom }}</span>
+                </td>
+                <td>{{ item.prestataire_phone }}</td>
+                <td>
+                    <p-tag [value]="item.nb_packings_non_factures + ''" severity="warn" *ngIf="item.nb_packings_non_factures > 0" />
+                    <span *ngIf="item.nb_packings_non_factures === 0">0</span>
+                </td>
+                <td>{{ formatCurrency(item.montant_non_facture) }}</td>
+                <td>{{ formatCurrency(item.montant_facture) }}</td>
+                <td class="text-green-600 font-semibold">{{ formatCurrency(item.montant_verse) }}</td>
+                <td>
+                    <span [class]="item.montant_restant_facture > 0 ? 'text-orange-500 font-semibold' : ''">
+                        {{ formatCurrency(item.montant_restant_facture) }}
                     </span>
                 </td>
+                <td class="font-bold text-primary text-lg">{{ formatCurrency(item.montant_total_du) }}</td>
                 <td>
-                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone }}</span>
-                </td>
-                <td>{{ formatDateDisplay(packing.date_debut) }}</td>
-                <td>{{ formatDateDisplay(packing.date_fin) }}</td>
-                <td>{{ packing.nb_rouleaux }}</td>
-                <td>{{ formatCurrency(packing.montant) }}</td>
-                <td>
-                    <p-tag [value]="getStatutLabel(packing.statut)" [severity]="getStatutSeverity(packing.statut)" />
-                </td>
-                <td>
-                    <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editPacking(packing)" />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deletePacking(packing)" />
+                    <p-button icon="pi pi-money-bill" class="mr-2" [rounded]="true" [outlined]="true" pTooltip="Facturer" (click)="openPaiement(item)" *ngIf="item.nb_packings_non_factures > 0" />
+                    <p-button icon="pi pi-eye" severity="info" [rounded]="true" [outlined]="true" pTooltip="Prévisualiser" (click)="openPreview(item)" *ngIf="item.nb_packings_non_factures > 0" />
                 </td>
             </tr>
+        </ng-template>
+        <ng-template #summary>
+            <div class="flex items-center justify-between flex-wrap gap-4" *ngIf="comptaSummary">
+                <div class="flex items-center gap-6">
+                    <span><strong>{{ comptaSummary.nb_prestataires }}</strong> prestataire(s)</span>
+                    <span>Non facturé : <strong>{{ formatCurrency(comptaSummary.total_non_facture) }}</strong></span>
+                    <span>Versé : <strong class="text-green-600">{{ formatCurrency(comptaSummary.total_verse) }}</strong></span>
+                </div>
+                <div class="text-xl font-bold text-primary">
+                    Total dû : {{ formatCurrency(comptaSummary.montant_global_du) }}
+                </div>
+            </div>
         </ng-template>
     </p-table>
 </div>
 
-<p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" header="Détails du packing" [modal]="true">
+<!-- Dialog Paiement -->
+<p-dialog [(visible)]="paiementDialog" [style]="{ width: '750px' }" header="Effectuer un paiement" [modal]="true">
     <ng-template #content>
         <div class="flex flex-col gap-6">
-            <div>
-                <label for="prestataire" class="block font-bold mb-4">Prestataire (Machiniste)</label>
-                <p-select
-                    [(ngModel)]="selectedPrestataire"
-                    [options]="prestataires"
-                    optionLabel="nom"
-                    [filter]="true"
-                    filterBy="nom,prenom,phone"
-                    placeholder="Sélectionner un prestataire"
-                    styleClass="w-full"
-                >
-                    <ng-template let-prestataire pTemplate="item">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-user text-primary"></i>
-                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} - {{ prestataire.phone }}</span>
-                        </div>
-                    </ng-template>
-                    <ng-template let-prestataire pTemplate="selectedItem">
-                        <div class="flex items-center gap-2" *ngIf="prestataire">
-                            <i class="pi pi-user text-primary"></i>
-                            <span>{{ prestataire.prenom }} {{ prestataire.nom }}</span>
-                        </div>
-                    </ng-template>
-                </p-select>
-                <small class="text-red-500" *ngIf="submitted && !selectedPrestataire">Le prestataire est requis.</small>
+            <!-- Résumé prestataire -->
+            <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-4" *ngIf="selectedItem">
+                <div class="text-lg font-bold mb-2">{{ selectedItem.prestataire_nom }}</div>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-4">
+                        <span class="text-sm text-surface-500">Packings non facturés</span>
+                        <div class="font-bold">{{ selectedItem.nb_packings_non_factures }}</div>
+                    </div>
+                    <div class="col-span-4">
+                        <span class="text-sm text-surface-500">Montant non facturé</span>
+                        <div class="font-bold text-orange-500">{{ formatCurrency(selectedItem.montant_non_facture) }}</div>
+                    </div>
+                    <div class="col-span-4">
+                        <span class="text-sm text-surface-500">Total dû</span>
+                        <div class="font-bold text-primary">{{ formatCurrency(selectedItem.montant_total_du) }}</div>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-6">
-                    <label for="date_debut" class="block font-bold mb-4">Date début</label>
+                    <label class="block font-bold mb-4">Période début</label>
                     <p-datepicker
-                        [(ngModel)]="packing.date_debut"
+                        [(ngModel)]="paiementData.periode_debut"
                         dateFormat="dd/mm/yy"
                         [showIcon]="true"
                         inputStyleClass="w-full"
                         styleClass="w-full"
                     />
+                    <small class="text-red-500" *ngIf="submitted && !paiementData.periode_debut">Requis.</small>
                 </div>
                 <div class="col-span-6">
-                    <label for="date_fin" class="block font-bold mb-4">Date fin</label>
+                    <label class="block font-bold mb-4">Période fin</label>
                     <p-datepicker
-                        [(ngModel)]="packing.date_fin"
+                        [(ngModel)]="paiementData.periode_fin"
                         dateFormat="dd/mm/yy"
                         [showIcon]="true"
                         inputStyleClass="w-full"
                         styleClass="w-full"
                     />
+                    <small class="text-red-500" *ngIf="submitted && !paiementData.periode_fin">Requis.</small>
                 </div>
             </div>
 
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-6">
-                    <label for="nb_rouleaux" class="block font-bold mb-4">Nombre de rouleaux</label>
-                    <p-inputnumber
-                        id="nb_rouleaux"
-                        [(ngModel)]="packing.nb_rouleaux"
-                        (onInput)="calculateMontant()"
-                        [min]="0"
+                    <label class="block font-bold mb-4">Date de paiement</label>
+                    <p-datepicker
+                        [(ngModel)]="paiementData.date_paiement"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        inputStyleClass="w-full"
                         styleClass="w-full"
                     />
+                    <small class="text-red-500" *ngIf="submitted && !paiementData.date_paiement">Requis.</small>
                 </div>
                 <div class="col-span-6">
-                    <label for="prix_par_rouleau" class="block font-bold mb-4">Prix du rouleau (GNF)</label>
-                    <p-inputnumber
-                        id="prix_par_rouleau"
-                        [(ngModel)]="packing.prix_par_rouleau"
-                        (onInput)="calculateMontant()"
-                        [min]="0"
-                        styleClass="w-full"
-                    />
-                </div>
-            </div>
-
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="montant" class="block font-bold mb-4">Montant total (GNF)</label>
-                    <p-inputnumber
-                        id="montant"
-                        [(ngModel)]="packing.montant"
-                        [min]="0"
-                        [readonly]="true"
-                        styleClass="w-full"
-                    />
-                </div>
-                <div class="col-span-6">
-                    <label for="statut" class="block font-bold mb-4">Statut</label>
+                    <label class="block font-bold mb-4">Mode de paiement</label>
                     <p-select
-                        [(ngModel)]="packing.statut"
-                        [options]="statuses"
+                        [(ngModel)]="paiementData.mode_paiement"
+                        [options]="modesPaiement"
                         optionLabel="label"
                         optionValue="value"
-                        placeholder="Sélectionner un statut"
+                        placeholder="Sélectionner un mode"
                         styleClass="w-full"
                     />
                 </div>
             </div>
 
             <div>
-                <label for="notes" class="block font-bold mb-4">Notes</label>
+                <label class="block font-bold mb-4">Notes</label>
                 <textarea
                     pTextarea
-                    id="notes"
-                    [(ngModel)]="packing.notes"
+                    [(ngModel)]="paiementData.notes"
                     rows="3"
                     class="w-full"
                 ></textarea>
@@ -217,13 +228,58 @@
     </ng-template>
 
     <ng-template #footer>
-        <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
+        <p-button label="Annuler" icon="pi pi-times" text (click)="hidePaiementDialog()" [disabled]="saving" />
         <p-button
-            [label]="saving ? 'Enregistrement...' : 'Enregistrer'"
+            [label]="saving ? 'Enregistrement...' : 'Confirmer le paiement'"
             [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
-            (click)="savePacking()"
+            (click)="savePaiement()"
             [disabled]="saving"
-            [loading]="saving" />
+            [loading]="saving"
+        />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialog Prévisualisation -->
+<p-dialog [(visible)]="previewDialog" [style]="{ width: '850px' }" header="Prévisualisation des packings" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-4" *ngIf="previewData">
+            <div class="flex items-center justify-between bg-surface-100 dark:bg-surface-800 rounded-lg p-4">
+                <div>
+                    <span class="font-bold">{{ previewData.nb_packings }}</span> packing(s) -
+                    <span class="font-bold">{{ previewData.total_rouleaux }}</span> rouleaux
+                </div>
+                <div class="text-xl font-bold text-primary">{{ formatCurrency(previewData.montant_total) }}</div>
+            </div>
+
+            <p-table [value]="previewData.packings" [rows]="10" [paginator]="previewData.packings.length > 10" [rowHover]="true">
+                <ng-template #header>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Début</th>
+                        <th>Fin</th>
+                        <th>Rouleaux</th>
+                        <th>Montant</th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-packing>
+                    <tr>
+                        <td>{{ packing.reference }}</td>
+                        <td>{{ formatDateDisplay(packing.date_debut) }}</td>
+                        <td>{{ formatDateDisplay(packing.date_fin) }}</td>
+                        <td>{{ packing.nb_rouleaux }}</td>
+                        <td class="font-bold">{{ formatCurrency(packing.montant) }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <div *ngIf="previewLoading" class="flex items-center justify-center p-8">
+            <i class="pi pi-spin pi-spinner text-4xl"></i>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Fermer" icon="pi pi-times" text (click)="previewDialog = false" />
+        <p-button label="Payer" icon="pi pi-money-bill" (click)="previewDialog = false; openPaiement(selectedItem!)" *ngIf="selectedItem" />
     </ng-template>
 </p-dialog>
 
