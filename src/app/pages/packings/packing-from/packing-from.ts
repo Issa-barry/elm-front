@@ -23,7 +23,7 @@ class PackingFormModel {
   nb_rouleaux: number = 0;
   prix_par_rouleau: number = 0;
   montant: number = 0;
-  statut: PackingStatut = 'en_cours';
+  statut: PackingStatut = 'valide';
   notes?: string | null;
 
   constructor(data?: Partial<Packing>) {
@@ -37,7 +37,7 @@ class PackingFormModel {
       this.nb_rouleaux = data.nb_rouleaux || 0;
       this.prix_par_rouleau = data.prix_par_rouleau || 0;
       this.montant = data.montant || 0;
-      this.statut = data.statut || 'en_cours';
+      this.statut = data.statut || 'valide';
       this.notes = data.notes;
     }
   }

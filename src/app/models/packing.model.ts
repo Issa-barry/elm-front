@@ -1,13 +1,12 @@
 import { Prestataire } from './prestataire.model';
 
 // Types pour le statut du packing
-export type PackingStatut = 'en_cours' | 'termine' | 'paye' | 'annule';
+export type PackingStatut = 'a_valider' | 'valide' | 'annule';
 
 // Labels français pour l'affichage
 export const PACKING_STATUT_LABELS: Record<PackingStatut, string> = {
-  en_cours: 'En cours',
-  termine: 'Terminé',
-  paye: 'Payé',
+  a_valider: 'À valider',
+  valide: 'Validé',
   annule: 'Annulé'
 };
 
@@ -15,9 +14,8 @@ export type PackingStatutSeverity = 'success' | 'info' | 'warn' | 'danger' | 'se
 
 // Severities PrimeNG pour les tags de statut
 export const PACKING_STATUT_SEVERITY: Record<PackingStatut, PackingStatutSeverity> = {
-  en_cours: 'info',
-  termine: 'warn',
-  paye: 'success',
+  a_valider: 'warn',
+  valide: 'success',
   annule: 'danger'
 };
 
@@ -32,6 +30,7 @@ export interface Packing {
   prix_par_rouleau: number;
   montant: number;
   statut: PackingStatut;
+  facture_id: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

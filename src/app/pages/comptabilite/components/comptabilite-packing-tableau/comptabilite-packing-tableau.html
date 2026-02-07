@@ -48,7 +48,7 @@
         [(selection)]="selectedPrestataires"
         [rowHover]="true"
         dataKey="prestataire_id"
-        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} prestataires"
+        currentPageReportTemplate="  {first} à {last} sur {totalRecords} prestataires"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
@@ -72,29 +72,22 @@
                     <p-sortIcon field="prestataire_nom" /></span>
                 </th>
                 <th style="min-width: 10rem">Téléphone</th>
-                <th pSortableColumn="nb_packings_non_factures" style="min-width: 8rem">
-                    <span class="flex items-center gap-2">Non facturés
-                    <p-sortIcon field="nb_packings_non_factures" /></span>
-                </th>
+               
                 <th pSortableColumn="montant_non_facture" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Mnt non facturé
+                    <span class="flex items-center gap-2">Total
                     <p-sortIcon field="montant_non_facture" /></span>
                 </th>
                 <th pSortableColumn="montant_facture" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Facturé
+                    <span class="flex items-center gap-2">Payé
                     <p-sortIcon field="montant_facture" /></span>
-                </th>
-                <th pSortableColumn="montant_verse" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Versé
-                    <p-sortIcon field="montant_verse" /></span>
-                </th>
-                <th pSortableColumn="montant_restant_facture" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Reste facture
-                    <p-sortIcon field="montant_restant_facture" /></span>
-                </th>
+                </th> 
                 <th pSortableColumn="montant_total_du" style="min-width: 12rem">
                     <span class="flex items-center gap-2">Total dû
                     <p-sortIcon field="montant_total_du" /></span>
+                </th>
+                <th pSortableColumn="statut" style="min-width: 12rem">
+                    <span class="flex items-center gap-2">Statut
+                    <p-sortIcon field="statut" /></span>
                 </th>
                 <th style="min-width: 10rem"></th>
             </tr>
@@ -108,136 +101,29 @@
                     <span class="font-semibold">{{ item.prestataire_nom }}</span>
                 </td>
                 <td>{{ item.prestataire_phone }}</td>
-                <td>
-                    <p-tag [value]="item.nb_packings_non_factures + ''" severity="warn" *ngIf="item.nb_packings_non_factures > 0" />
-                    <span *ngIf="item.nb_packings_non_factures === 0">0</span>
-                </td>
-                <td>{{ formatCurrency(item.montant_non_facture) }}</td>
-                <td>{{ formatCurrency(item.montant_facture) }}</td>
+              
+                 <td class="font-bold text-primary text-lg">{{ formatCurrency(item.montant_facture) }}</td>
                 <td class="text-green-600 font-semibold">{{ formatCurrency(item.montant_verse) }}</td>
                 <td>
                     <span [class]="item.montant_restant_facture > 0 ? 'text-orange-500 font-semibold' : ''">
                         {{ formatCurrency(item.montant_restant_facture) }}
                     </span>
                 </td>
-                <td class="font-bold text-primary text-lg">{{ formatCurrency(item.montant_total_du) }}</td>
+                <!-- <td class="font-bold text-primary text-lg">{{ formatCurrency(item.montant_total_du) }}</td> -->
                 <td>
-                    <p-button icon="pi pi-money-bill" class="mr-2" [rounded]="true" [outlined]="true" pTooltip="Facturer" (click)="openPaiement(item)" *ngIf="item.nb_packings_non_factures > 0" />
+                    <p-tag *ngIf="item.statut === 'impaye'" value="Impayé" severity="danger" />
+                    <p-tag *ngIf="item.statut === 'partiel'" value="Partiel" severity="warn" />
+                    <p-tag *ngIf="item.statut === 'solde'" value="Soldé" severity="success" />
+                </td>
+                <td>
+                    <p-button icon="pi pi-wallet" severity="success" class="mr-2" [rounded]="true" [outlined]="true" pTooltip="Payer" (click)="openVersement(item)" />
                     <p-button icon="pi pi-eye" severity="info" [rounded]="true" [outlined]="true" pTooltip="Prévisualiser" (click)="openPreview(item)" *ngIf="item.nb_packings_non_factures > 0" />
                 </td>
             </tr>
         </ng-template>
-        <ng-template #summary>
-            <div class="flex items-center justify-between flex-wrap gap-4" *ngIf="comptaSummary">
-                <div class="flex items-center gap-6">
-                    <span><strong>{{ comptaSummary.nb_prestataires }}</strong> prestataire(s)</span>
-                    <span>Non facturé : <strong>{{ formatCurrency(comptaSummary.total_non_facture) }}</strong></span>
-                    <span>Versé : <strong class="text-green-600">{{ formatCurrency(comptaSummary.total_verse) }}</strong></span>
-                </div>
-                <div class="text-xl font-bold text-primary">
-                    Total dû : {{ formatCurrency(comptaSummary.montant_global_du) }}
-                </div>
-            </div>
-        </ng-template>
+
     </p-table>
 </div>
-
-<!-- Dialog Paiement -->
-<p-dialog [(visible)]="paiementDialog" [style]="{ width: '750px' }" header="Effectuer un paiement" [modal]="true">
-    <ng-template #content>
-        <div class="flex flex-col gap-6">
-            <!-- Résumé prestataire -->
-            <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-4" *ngIf="selectedItem">
-                <div class="text-lg font-bold mb-2">{{ selectedItem.prestataire_nom }}</div>
-                <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-4">
-                        <span class="text-sm text-surface-500">Packings non facturés</span>
-                        <div class="font-bold">{{ selectedItem.nb_packings_non_factures }}</div>
-                    </div>
-                    <div class="col-span-4">
-                        <span class="text-sm text-surface-500">Montant non facturé</span>
-                        <div class="font-bold text-orange-500">{{ formatCurrency(selectedItem.montant_non_facture) }}</div>
-                    </div>
-                    <div class="col-span-4">
-                        <span class="text-sm text-surface-500">Total dû</span>
-                        <div class="font-bold text-primary">{{ formatCurrency(selectedItem.montant_total_du) }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label class="block font-bold mb-4">Période début</label>
-                    <p-datepicker
-                        [(ngModel)]="paiementData.periode_debut"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                    <small class="text-red-500" *ngIf="submitted && !paiementData.periode_debut">Requis.</small>
-                </div>
-                <div class="col-span-6">
-                    <label class="block font-bold mb-4">Période fin</label>
-                    <p-datepicker
-                        [(ngModel)]="paiementData.periode_fin"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                    <small class="text-red-500" *ngIf="submitted && !paiementData.periode_fin">Requis.</small>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label class="block font-bold mb-4">Date de paiement</label>
-                    <p-datepicker
-                        [(ngModel)]="paiementData.date_paiement"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                    <small class="text-red-500" *ngIf="submitted && !paiementData.date_paiement">Requis.</small>
-                </div>
-                <div class="col-span-6">
-                    <label class="block font-bold mb-4">Mode de paiement</label>
-                    <p-select
-                        [(ngModel)]="paiementData.mode_paiement"
-                        [options]="modesPaiement"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Sélectionner un mode"
-                        styleClass="w-full"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <label class="block font-bold mb-4">Notes</label>
-                <textarea
-                    pTextarea
-                    [(ngModel)]="paiementData.notes"
-                    rows="3"
-                    class="w-full"
-                ></textarea>
-            </div>
-        </div>
-    </ng-template>
-
-    <ng-template #footer>
-        <p-button label="Annuler" icon="pi pi-times" text (click)="hidePaiementDialog()" [disabled]="saving" />
-        <p-button
-            [label]="saving ? 'Enregistrement...' : 'Confirmer le paiement'"
-            [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
-            (click)="savePaiement()"
-            [disabled]="saving"
-            [loading]="saving"
-        />
-    </ng-template>
-</p-dialog>
 
 <!-- Dialog Prévisualisation -->
 <p-dialog [(visible)]="previewDialog" [style]="{ width: '850px' }" header="Prévisualisation des packings" [modal]="true">
@@ -279,7 +165,195 @@
 
     <ng-template #footer>
         <p-button label="Fermer" icon="pi pi-times" text (click)="previewDialog = false" />
-        <p-button label="Payer" icon="pi pi-money-bill" (click)="previewDialog = false; openPaiement(selectedItem!)" *ngIf="selectedItem" />
+        <p-button label="Payer" icon="pi pi-wallet" severity="success" (click)="previewDialog = false; openVersement(selectedItem!)" *ngIf="selectedItem" />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialog Paiement -->
+<p-dialog [(visible)]="versementDialog" [style]="{ width: '550px' }" header="Payer" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-4" *ngIf="selectedItem">
+            <!-- Nom + Total dû -->
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-lg">{{ selectedItem.prestataire_nom }}</span>
+                <p-tag [value]="selectedItem.prestataire_type" severity="info" *ngIf="selectedItem.prestataire_type" />
+            </div>
+
+            <!-- Loading -->
+            <div *ngIf="versementLoading" class="flex items-center justify-center p-6">
+                <i class="pi pi-spin pi-spinner text-3xl"></i>
+            </div>
+
+            <!-- Facturer d'abord si pas de factures -->
+            <div *ngIf="!versementLoading && facturesPrestataire.length === 0 && selectedItem.nb_packings_non_factures > 0" class="text-center p-4">
+                <p class="mb-4 text-surface-500">{{ selectedItem.nb_packings_non_factures }} packing(s) à facturer avant de payer</p>
+                <p-button
+                    label="Facturer"
+                    icon="pi pi-money-bill"
+                    severity="warn"
+                    (click)="facturerNonFactures()"
+                    [loading]="facturerLoading"
+                />
+            </div>
+
+            <!-- Formulaire versement -->
+            <div *ngIf="!versementLoading && selectedFacture">
+                <!-- Bandeau facturation si non-facturés restants -->
+                <div *ngIf="selectedItem.nb_packings_non_factures > 0" class="flex items-center justify-between bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 mb-4">
+                    <span class="text-sm">{{ selectedItem.nb_packings_non_factures }} packing(s) non facturé(s)</span>
+                    <p-button label="Facturer" size="small" severity="warn" [outlined]="true" (click)="facturerNonFactures()" [loading]="facturerLoading" />
+                </div>
+
+                <!-- Sélection facture si plusieurs -->
+                <div *ngIf="facturesPrestataire.length > 1" class="mb-4">
+                    <label class="block font-bold mb-2">Facture</label>
+                    <p-select
+                        [(ngModel)]="selectedFacture"
+                        [options]="facturesPrestataire"
+                        optionLabel="reference"
+                        placeholder="Sélectionner"
+                        styleClass="w-full"
+                        (onChange)="onFactureChange()"
+                    />
+                </div>
+
+                <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-3 mb-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-surface-500">{{ selectedFacture.reference }}</span>
+                        <p-tag [value]="selectedFacture.statut_label" [severity]="selectedFacture.statut === 'impayee' ? 'danger' : 'warn'" />
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <div>
+                            <span class="text-xs text-surface-500">Total facture</span>
+                            <div class="font-bold">{{ formatCurrency(selectedFacture.montant_total) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-xs text-surface-500">Versé</span>
+                            <div class="font-bold text-green-600">{{ formatCurrency(selectedFacture.montant_verse) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-xs text-surface-500">Restant</span>
+                            <div class="font-bold text-orange-500">{{ formatCurrency(selectedFacture.montant_restant) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block font-bold mb-2">Montant à verser</label>
+                        <p-inputnumber
+                            [(ngModel)]="versementData.montant"
+                            [min]="1"
+                            [max]="selectedFacture.montant_restant"
+                            suffix=" GNF"
+                            [useGrouping]="true"
+                            locale="fr-FR"
+                            inputStyleClass="w-full"
+                            styleClass="w-full"
+                        />
+                        <small class="text-red-500" *ngIf="versementSubmitted && !versementData.montant">Requis.</small>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold mb-2">Mode de paiement</label>
+                        <p-select
+                            [(ngModel)]="versementData.mode_paiement"
+                            [options]="modesPaiement"
+                            optionLabel="label"
+                            optionValue="value"
+                            styleClass="w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold mb-2">Notes</label>
+                        <textarea pTextarea [(ngModel)]="versementData.notes" rows="2" class="w-full"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aucune facture et aucun non-facturé -->
+            <div *ngIf="!versementLoading && facturesPrestataire.length === 0 && selectedItem.nb_packings_non_factures === 0" class="text-center p-4 text-surface-500">
+                Aucun paiement en cours.
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Annuler" icon="pi pi-times" text (click)="hideVersementDialog()" [disabled]="versementSaving" />
+        <p-button
+            label="Payer"
+            icon="pi pi-check"
+            severity="success"
+            (click)="saveVersement()"
+            [disabled]="versementSaving || !selectedFacture"
+            [loading]="versementSaving"
+        />
+    </ng-template>
+</p-dialog>
+
+<!-- Dialog Historique Versements -->
+<p-dialog [(visible)]="historiqueDialog" [style]="{ width: '750px' }" header="Historique des versements" [modal]="true">
+    <ng-template #content>
+        <div *ngIf="historiqueLoading" class="flex items-center justify-center p-8">
+            <i class="pi pi-spin pi-spinner text-4xl"></i>
+        </div>
+
+        <div *ngIf="historiqueData" class="flex flex-col gap-4">
+            <!-- Résumé facture -->
+            <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-lg">{{ historiqueData.reference }}</span>
+                    <p-tag [value]="historiqueData.is_soldee ? 'Soldé' : 'En cours'" [severity]="historiqueData.is_soldee ? 'success' : 'warn'" />
+                </div>
+                <div class="grid grid-cols-12 gap-4">
+                    <div class="col-span-4">
+                        <span class="text-sm text-surface-500">Montant total</span>
+                        <div class="font-bold">{{ formatCurrency(historiqueData.montant_total) }}</div>
+                    </div>
+                    <div class="col-span-4">
+                        <span class="text-sm text-surface-500">Versé</span>
+                        <div class="font-bold text-green-600">{{ formatCurrency(historiqueData.montant_verse) }}</div>
+                    </div>
+                    <div class="col-span-4">
+                        <span class="text-sm text-surface-500">Restant</span>
+                        <div class="font-bold text-orange-500">{{ formatCurrency(historiqueData.montant_restant) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste versements -->
+            <p-table [value]="historiqueData.versements" [rowHover]="true" *ngIf="historiqueData.versements.length > 0">
+                <ng-template #header>
+                    <tr>
+                        <th>Date</th>
+                        <th>Montant</th>
+                        <th>Mode</th>
+                        <th>Notes</th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template #body let-versement>
+                    <tr>
+                        <td>{{ formatDateDisplay(versement.date_versement) }}</td>
+                        <td class="text-green-600 font-bold">{{ formatCurrency(versement.montant) }}</td>
+                        <td>{{ versement.mode_paiement_label }}</td>
+                        <td>{{ versement.notes || '-' }}</td>
+                        <td>
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" [text]="true" pTooltip="Supprimer" (click)="confirmDeleteVersement(historiqueData!.facture_id, versement)" />
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+            <div *ngIf="historiqueData.versements.length === 0" class="text-center p-4 text-surface-500">
+                Aucun versement enregistré.
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Fermer" icon="pi pi-times" text (click)="historiqueDialog = false" />
     </ng-template>
 </p-dialog>
 

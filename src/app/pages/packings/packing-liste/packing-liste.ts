@@ -19,11 +19,14 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { forkJoin } from 'rxjs';
 
 import { PackingService } from '@/services/packing/packing.service';
 import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { Prestataire } from '@/models/prestataire.model';
+import { ParametresService } from '@/services/parametres/parametres.service';
 
 interface Column {
   field: string;
@@ -66,7 +69,8 @@ interface StatutOption {
     DatePickerModule,
     AutoCompleteModule,
     TextareaModule,
-    TooltipModule
+    TooltipModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService, ConfirmationService]
 })
@@ -80,11 +84,15 @@ export class PackingListe implements OnInit {
   submitted: boolean = false;
   loading: boolean = false;
   saving: boolean = false;
+  dialogLoading: boolean = false;
 
   // Filtres
   filterDateDebut: Date | null = null;
   filterDateFin: Date | null = null;
   filterStatut: string | null = null;
+
+  // Prix rouleau par défaut (depuis les paramètres)
+  prixRouleauDefaut: number = 0;
 
   // Pour l'autocomplete prestataire
   prestataires: Prestataire[] = [];
@@ -92,9 +100,8 @@ export class PackingListe implements OnInit {
   selectedPrestataire: Prestataire | null = null;
 
   statuses: StatutOption[] = [
-    { label: 'En cours', value: 'en_cours' },
-    { label: 'Terminé', value: 'termine' },
-    { label: 'Payé', value: 'paye' },
+    { label: 'À valider', value: 'a_valider' },
+    { label: 'Validé', value: 'valide' },
     { label: 'Annulé', value: 'annule' }
   ];
 
@@ -105,6 +112,7 @@ export class PackingListe implements OnInit {
   constructor(
     private packingService: PackingService,
     private prestataireService: PrestataireService,
+    private parametresService: ParametresService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
@@ -112,6 +120,7 @@ export class PackingListe implements OnInit {
   ngOnInit() {
     this.loadPackings();
     this.loadPrestataires();
+    this.loadPrixRouleauDefaut();
     this.initColumns();
   }
 
@@ -177,6 +186,19 @@ export class PackingListe implements OnInit {
     });
   }
 
+  loadPrixRouleauDefaut() {
+    this.parametresService.getPeriodes().subscribe({
+      next: (response) => {
+        this.prixRouleauDefaut = response.data.prix_rouleau_defaut;
+        console.log("prix",response);
+        
+      },
+      error: () => {
+        this.prixRouleauDefaut = 0;
+      }
+    });
+  }
+
   loadPrestataires() {
     this.prestataireService.getActivePrestataires().subscribe({
       next: (response) => {
@@ -212,15 +234,36 @@ export class PackingListe implements OnInit {
   }
 
   openNew() {
-    this.packing = {
-      statut: 'en_cours',
-      nb_rouleaux: 0,
-      prix_par_rouleau: 0,
-      montant: 0
-    };
     this.selectedPrestataire = null;
     this.submitted = false;
     this.packingDialog = true;
+    this.dialogLoading = true;
+
+    forkJoin({
+      periodes: this.parametresService.getPeriodes(),
+      prestataires: this.prestataireService.getActivePrestataires()
+    }).subscribe({
+      next: ({ periodes, prestataires }) => {
+        this.prixRouleauDefaut = periodes.data.prix_rouleau_defaut;
+        this.prestataires = prestataires.data.filter(p => p.type === 'machiniste');
+        this.packing = {
+          statut: 'valide',
+          nb_rouleaux: 0,
+          prix_par_rouleau: this.prixRouleauDefaut,
+          montant: 0
+        };
+        this.dialogLoading = false;
+      },
+      error: () => {
+        this.packing = {
+          statut: 'valide',
+          nb_rouleaux: 0,
+          prix_par_rouleau: this.prixRouleauDefaut,
+          montant: 0
+        };
+        this.dialogLoading = false;
+      }
+    });
   }
 
   editPacking(packing: Packing) {

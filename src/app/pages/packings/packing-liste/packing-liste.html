@@ -146,7 +146,10 @@
 
 <p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" header="Détails du packing" [modal]="true">
     <ng-template #content>
-        <div class="flex flex-col gap-6">
+        <div *ngIf="dialogLoading" class="flex justify-center items-center py-12">
+            <p-progressSpinner strokeWidth="4" />
+        </div>
+        <div class="flex flex-col gap-6" *ngIf="!dialogLoading">
             <div>
                 <label for="prestataire" class="block font-bold mb-4">Prestataire (Machiniste)</label>
                 <p-select
@@ -191,6 +194,7 @@
                         [(ngModel)]="packing.date_fin"
                         dateFormat="dd/mm/yy"
                         [showIcon]="true"
+                        [minDate]="packing.date_debut ? $any(packing.date_debut) : null"
                         inputStyleClass="w-full"
                         styleClass="w-full"
                     />
@@ -220,31 +224,19 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="montant" class="block font-bold mb-4">Montant total (GNF)</label>
-                    <p-inputnumber
-                        id="montant"
-                        [(ngModel)]="packing.montant"
-                        [min]="0"
-                        [readonly]="true"
-                        styleClass="w-full"
-                    />
-                </div>
-                <div class="col-span-6">
-                    <label for="statut" class="block font-bold mb-4">Statut</label>
-                    <p-select
-                        [(ngModel)]="packing.statut"
-                        [options]="statuses"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Sélectionner un statut"
-                        styleClass="w-full"
-                    />
-                </div>
+            <div>
+                <label for="statut" class="block font-bold mb-4">Statut</label>
+                <p-select
+                    [(ngModel)]="packing.statut"
+                    [options]="statuses"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Sélectionner un statut"
+                    styleClass="w-full"
+                />
             </div>
 
-            <div>
+            <!-- <div>
                 <label for="notes" class="block font-bold mb-4">Notes</label>
                 <textarea
                     pTextarea
@@ -253,17 +245,23 @@
                     rows="3"
                     class="w-full"
                 ></textarea>
+            </div> -->
+
+            <div class="flex justify-between items-center p-4 mt-4 bg-surface-100 rounded-lg">
+                <span class="font-bold text-lg">Montant total</span>
+                <span class="text-2xl font-semibold text-primary">{{ formatCurrency(packing.montant || 0) }}</span>
             </div>
         </div>
     </ng-template>
 
-    <ng-template #footer>
-        <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
+    <ng-template #footer class="mt-4">
+        <p-button class="mt-4" label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving || dialogLoading" />
         <p-button
+            class="mt-4"
             [label]="saving ? 'Enregistrement...' : 'Enregistrer'"
             [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
             (click)="savePacking()"
-            [disabled]="saving"
+            [disabled]="saving || dialogLoading"
             [loading]="saving" />
     </ng-template>
 </p-dialog>

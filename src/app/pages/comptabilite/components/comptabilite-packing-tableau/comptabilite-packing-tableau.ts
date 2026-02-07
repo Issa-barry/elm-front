@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -18,15 +18,21 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 
-import { PackingPaiementService } from '@/services/comptabilite/packing-paiement/packing-paiement.service';
+import { InputNumberModule } from 'primeng/inputnumber';
+
+import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
 import {
   ComptabilitePrestataire,
   ComptabiliteSummary,
-  PreviewPaiementPacking,
-  StorePaiementPackingDto,
+  PreviewFacturePacking,
+  StoreFacturePackingDto,
+  StoreVersementDto,
+  FacturePacking,
+  Versement,
+  VersementIndexResponse,
   ModePaiement,
   MODE_PAIEMENT_LABELS,
-} from '@/models/paiement-packing.model';
+} from '@/models/facture-packing.model';
 
 interface Column {
   field: string;
@@ -66,39 +72,25 @@ interface ModePaiementOption {
     DatePickerModule,
     TextareaModule,
     TooltipModule,
+    InputNumberModule,
   ],
   providers: [MessageService, ConfirmationService],
 })
 export class ComptabilitePackingTableau implements OnInit {
+  @Output() dataChanged = new EventEmitter<void>();
+
   filterFields: string[] = ['prestataire_nom', 'prestataire_phone', 'montant_total_du'];
 
   prestataires = signal<ComptabilitePrestataire[]>([]);
   selectedPrestataires: ComptabilitePrestataire[] | null = null;
   comptaSummary: ComptabiliteSummary | null = null;
   loading: boolean = false;
-  saving: boolean = false;
-  submitted: boolean = false;
 
   // Filtres période
   filtrePeriodeDebut: Date | null = null;
   filtrePeriodeFin: Date | null = null;
 
-  // Dialog paiement
-  paiementDialog: boolean = false;
   selectedItem: ComptabilitePrestataire | null = null;
-  paiementData: {
-    periode_debut: Date | null;
-    periode_fin: Date | null;
-    date_paiement: Date | null;
-    mode_paiement: ModePaiement;
-    notes: string;
-  } = {
-    periode_debut: null,
-    periode_fin: null,
-    date_paiement: null,
-    mode_paiement: 'especes',
-    notes: '',
-  };
 
   modesPaiement: ModePaiementOption[] = [
     { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
@@ -109,15 +101,40 @@ export class ComptabilitePackingTableau implements OnInit {
 
   // Dialog prévisualisation
   previewDialog: boolean = false;
-  previewData: PreviewPaiementPacking | null = null;
+  previewData: PreviewFacturePacking | null = null;
   previewLoading: boolean = false;
+
+  // Dialog paiement (unifié)
+  versementDialog: boolean = false;
+  facturerLoading: boolean = false;
+  facturesPrestataire: FacturePacking[] = [];
+  selectedFacture: FacturePacking | null = null;
+  versementData: {
+    montant: number | null;
+    date_versement: Date | null;
+    mode_paiement: ModePaiement;
+    notes: string;
+  } = {
+    montant: null,
+    date_versement: null,
+    mode_paiement: 'especes',
+    notes: '',
+  };
+  versementLoading: boolean = false;
+  versementSaving: boolean = false;
+  versementSubmitted: boolean = false;
+
+  // Dialog historique versements
+  historiqueDialog: boolean = false;
+  historiqueData: VersementIndexResponse | null = null;
+  historiqueLoading: boolean = false;
 
   @ViewChild('dt') dt!: Table;
   exportColumns!: ExportColumn[];
   cols!: Column[];
 
   constructor(
-    private paiementService: PackingPaiementService,
+    private factureService: FacturePaiementService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
@@ -156,11 +173,12 @@ export class ComptabilitePackingTableau implements OnInit {
       filters.periode_fin = this.formatDate(this.filtrePeriodeFin);
     }
 
-    this.paiementService.getComptabilite(filters).subscribe({
+    this.factureService.getComptabilite(filters).subscribe({
       next: (response) => {
         this.comptaSummary = new ComptabiliteSummary(response.data);
         this.prestataires.set(this.comptaSummary.prestataires);
         this.loading = false;
+        this.dataChanged.emit();
       },
       error: () => {
         this.messageService.add({
@@ -182,67 +200,6 @@ export class ComptabilitePackingTableau implements OnInit {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
-  openPaiement(item: ComptabilitePrestataire) {
-    this.selectedItem = item;
-    this.paiementData = {
-      periode_debut: this.filtrePeriodeDebut ? new Date(this.filtrePeriodeDebut) : null,
-      periode_fin: this.filtrePeriodeFin ? new Date(this.filtrePeriodeFin) : null,
-      date_paiement: new Date(),
-      mode_paiement: 'especes',
-      notes: '',
-    };
-    this.submitted = false;
-    this.paiementDialog = true;
-  }
-
-  hidePaiementDialog() {
-    this.paiementDialog = false;
-    this.submitted = false;
-  }
-
-  savePaiement() {
-    this.submitted = true;
-
-    if (!this.selectedItem || !this.paiementData.periode_debut || !this.paiementData.periode_fin || !this.paiementData.date_paiement || this.saving) {
-      return;
-    }
-
-    this.saving = true;
-
-    const dto: StorePaiementPackingDto = {
-      prestataire_id: this.selectedItem.prestataire_id,
-      periode_debut: this.formatDate(this.paiementData.periode_debut),
-      periode_fin: this.formatDate(this.paiementData.periode_fin),
-      date_paiement: this.formatDate(this.paiementData.date_paiement),
-      mode_paiement: this.paiementData.mode_paiement,
-      notes: this.paiementData.notes || undefined,
-    };
-
-    this.paiementService.createPaiement(dto).subscribe({
-      next: (response) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: `Paiement ${response.data.reference} créé avec succès`,
-          life: 3000,
-        });
-        this.paiementDialog = false;
-        this.saving = false;
-        this.loadComptabilite();
-      },
-      error: (error) => {
-        const msg = error?.error?.message || 'Impossible de créer le paiement';
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: msg,
-          life: 5000,
-        });
-        this.saving = false;
-      },
-    });
-  }
-
   openPreview(item: ComptabilitePrestataire) {
     const periodeDebut = this.filtrePeriodeDebut ? this.formatDate(this.filtrePeriodeDebut) : '2000-01-01';
     const periodeFin = this.filtrePeriodeFin ? this.formatDate(this.filtrePeriodeFin) : '2099-12-31';
@@ -252,9 +209,9 @@ export class ComptabilitePackingTableau implements OnInit {
     this.previewLoading = true;
     this.previewData = null;
 
-    this.paiementService.getPreview(item.prestataire_id, periodeDebut, periodeFin).subscribe({
+    this.factureService.getPreview(item.prestataire_id, periodeDebut, periodeFin).subscribe({
       next: (response) => {
-        this.previewData = new PreviewPaiementPacking(response.data);
+        this.previewData = new PreviewFacturePacking(response.data);
         this.previewLoading = false;
       },
       error: () => {
@@ -266,6 +223,223 @@ export class ComptabilitePackingTableau implements OnInit {
         });
         this.previewLoading = false;
         this.previewDialog = false;
+      },
+    });
+  }
+
+  // ========================= Facturation =========================
+
+  facturerNonFactures() {
+    if (!this.selectedItem || this.facturerLoading) return;
+
+    this.facturerLoading = true;
+
+    const periodeDebut = this.filtrePeriodeDebut ? this.formatDate(this.filtrePeriodeDebut) : '2000-01-01';
+    const periodeFin = this.filtrePeriodeFin ? this.formatDate(this.filtrePeriodeFin) : '2099-12-31';
+
+    const dto: StoreFacturePackingDto = {
+      prestataire_id: this.selectedItem.prestataire_id,
+      periode_debut: periodeDebut,
+      periode_fin: periodeFin,
+    };
+
+    this.factureService.createFacture(dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Facture ${response.data.reference} créée`,
+          life: 3000,
+        });
+        this.facturerLoading = false;
+        if (this.selectedItem) {
+          this.selectedItem.nb_packings_non_factures = 0;
+          this.selectedItem.montant_non_facture = 0;
+        }
+        this.reloadFacturesInDialog();
+        this.loadComptabilite();
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Impossible de créer la facture';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.facturerLoading = false;
+      },
+    });
+  }
+
+  reloadFacturesInDialog() {
+    if (!this.selectedItem) return;
+    this.factureService.getFactures({ prestataire_id: this.selectedItem.prestataire_id }).subscribe({
+      next: (response) => {
+        this.facturesPrestataire = (response.data || [])
+          .map((p: any) => new FacturePacking(p))
+          .filter((f: FacturePacking) => f.statut === 'impayee' || f.statut === 'partielle');
+        if (this.facturesPrestataire.length > 0) {
+          this.selectedFacture = this.facturesPrestataire[0];
+        }
+      },
+    });
+  }
+
+  // ========================= Versements =========================
+
+  openVersement(item: ComptabilitePrestataire) {
+    this.selectedItem = item;
+    this.selectedFacture = null;
+    this.versementDialog = true;
+    this.versementLoading = true;
+    this.versementSubmitted = false;
+    this.facturesPrestataire = [];
+    this.resetVersementForm();
+
+    this.factureService.getFactures({ prestataire_id: item.prestataire_id }).subscribe({
+      next: (response) => {
+        this.facturesPrestataire = (response.data || [])
+          .map((p: any) => new FacturePacking(p))
+          .filter((f: FacturePacking) => f.statut === 'impayee' || f.statut === 'partielle');
+        if (this.facturesPrestataire.length > 0) {
+          this.selectedFacture = this.facturesPrestataire[0];
+          this.versementData.montant = this.selectedFacture.montant_restant;
+        }
+        this.versementLoading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les factures',
+          life: 3000,
+        });
+        this.versementLoading = false;
+        this.versementDialog = false;
+      },
+    });
+  }
+
+  resetVersementForm() {
+    this.versementData = {
+      montant: null,
+      date_versement: new Date(),
+      mode_paiement: 'especes',
+      notes: '',
+    };
+    this.versementSubmitted = false;
+  }
+
+  onFactureChange() {
+    if (this.selectedFacture) {
+      this.versementData.montant = this.selectedFacture.montant_restant;
+    }
+  }
+
+  hideVersementDialog() {
+    this.versementDialog = false;
+    this.selectedFacture = null;
+    this.versementSubmitted = false;
+  }
+
+  saveVersement() {
+    this.versementSubmitted = true;
+
+    if (!this.selectedFacture || !this.versementData.montant || !this.versementData.date_versement || this.versementSaving) {
+      return;
+    }
+
+    this.versementSaving = true;
+
+    const dto: StoreVersementDto = {
+      montant: this.versementData.montant,
+      date_versement: this.formatDate(this.versementData.date_versement),
+      mode_paiement: this.versementData.mode_paiement,
+      notes: this.versementData.notes || undefined,
+    };
+
+    this.factureService.createVersement(this.selectedFacture.id, dto).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistré`,
+          life: 3000,
+        });
+        this.versementSaving = false;
+        this.versementDialog = false;
+        this.loadComptabilite();
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Impossible d\'enregistrer le versement';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.versementSaving = false;
+      },
+    });
+  }
+
+  // ========================= Historique versements =========================
+
+  openHistorique(facture: FacturePacking) {
+    this.historiqueDialog = true;
+    this.historiqueLoading = true;
+    this.historiqueData = null;
+
+    this.factureService.getVersements(facture.id).subscribe({
+      next: (response) => {
+        this.historiqueData = response.data;
+        this.historiqueLoading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les versements',
+          life: 3000,
+        });
+        this.historiqueLoading = false;
+        this.historiqueDialog = false;
+      },
+    });
+  }
+
+  confirmDeleteVersement(factureId: number, versement: Versement) {
+    this.confirmationService.confirm({
+      message: `Supprimer le versement de ${this.formatCurrency(versement.montant)} ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.factureService.deleteVersement(factureId, versement.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: 'Versement supprimé',
+              life: 3000,
+            });
+            // Recharger l'historique
+            if (this.historiqueData) {
+              this.openHistorique({ id: factureId } as FacturePacking);
+            }
+            this.loadComptabilite();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de supprimer le versement',
+              life: 3000,
+            });
+          },
+        });
       },
     });
   }

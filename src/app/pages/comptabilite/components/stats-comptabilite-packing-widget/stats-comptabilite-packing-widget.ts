@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PackingPaiementService } from '@/services/comptabilite/packing-paiement/packing-paiement.service';
-import { ComptabiliteSummary } from '@/models/paiement-packing.model';
+import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
+import { ComptabiliteSummary } from '@/models/facture-packing.model';
 
 @Component({
   selector: 'app-stats-comptabilite-packing-widget',
@@ -16,7 +16,7 @@ import { ComptabiliteSummary } from '@/models/paiement-packing.model';
 export class StatsComptabilitePackingWidget implements OnInit {
   summary: ComptabiliteSummary | null = null;
 
-  constructor(private paiementService: PackingPaiementService) {}
+  constructor(private paiementService: FacturePaiementService) {}
 
   ngOnInit(): void {
     this.loadStats();
@@ -28,7 +28,7 @@ export class StatsComptabilitePackingWidget implements OnInit {
         this.summary = new ComptabiliteSummary(response.data);
       },
     });
-  }
+  } 
 
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('fr-FR', {
