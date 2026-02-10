@@ -26,6 +26,18 @@
                         styleClass="w-48"
                     />
                 </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Statut</label>
+                    <p-select
+                        [(ngModel)]="filtreStatut"
+                        [options]="statutOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Tous"
+                        styleClass="w-40"
+                        (onChange)="applyStatutFilter()"
+                    />
+                </div>
                 <div class="flex items-end h-full pt-5">
                     <p-button label="Filtrer" icon="pi pi-filter" severity="secondary" (onClick)="loadComptabilite()" />
                 </div>
@@ -204,23 +216,29 @@
                     <p-button label="Facturer" size="small" severity="warn" [outlined]="true" (click)="facturerNonFactures()" [loading]="facturerLoading" />
                 </div>
 
-                <!-- Sélection facture si plusieurs -->
-                <div *ngIf="facturesPrestataire.length > 1" class="mb-4">
-                    <label class="block font-bold mb-2">Facture</label>
-                    <p-select
-                        [(ngModel)]="selectedFacture"
-                        [options]="facturesPrestataire"
-                        optionLabel="reference"
-                        placeholder="Sélectionner"
-                        styleClass="w-full"
-                        (onChange)="onFactureChange()"
-                    />
+                <!-- Toggle factures payées + Sélection facture -->
+                <div class="flex items-center justify-between mb-4">
+                    <div *ngIf="facturesPrestataire.length > 1" class="flex-1 mr-4">
+                        <label class="block font-bold mb-2">Facture</label>
+                        <p-select
+                            [(ngModel)]="selectedFacture"
+                            [options]="facturesPrestataire"
+                            optionLabel="reference"
+                            placeholder="Sélectionner"
+                            styleClass="w-full"
+                            (onChange)="onFactureChange()"
+                        />
+                    </div>
+                    <div class="flex items-center gap-2" *ngIf="allFacturesPrestataire.length > facturesPrestataire.length || showFacturesPayees">
+                        <p-toggleswitch [(ngModel)]="showFacturesPayees" (onChange)="onToggleShowPayees()" />
+                        <label class="text-sm">Payées</label>
+                    </div>
                 </div>
 
                 <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-3 mb-4">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm text-surface-500">{{ selectedFacture.reference }}</span>
-                        <p-tag [value]="selectedFacture.statut_label" [severity]="selectedFacture.statut === 'impayee' ? 'danger' : 'warn'" />
+                        <p-tag [value]="selectedFacture.statut_label" [severity]="selectedFacture.statut === 'payee' ? 'success' : selectedFacture.statut === 'impayee' ? 'danger' : 'warn'" />
                     </div>
                     <div class="grid grid-cols-3 gap-2 mt-2">
                         <div>

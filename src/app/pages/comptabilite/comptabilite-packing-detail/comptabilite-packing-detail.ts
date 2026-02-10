@@ -30,14 +30,14 @@ interface ExportColumn {
     title: string;
     dataKey: string;
 }
- 
+
 
 @Component({
-  selector: 'app-packing-paiement',
-    templateUrl: './packing-paiement.html',
-  styleUrl: './packing-paiement.scss',
-  standalone: true,
-imports: [
+  selector: 'app-comptabilite-packing-detail',
+  templateUrl: './comptabilite-packing-detail.html',
+  styleUrl: './comptabilite-packing-detail.scss',
+  providers: [MessageService, ProductService, ConfirmationService],
+    imports: [
         CommonModule,
         TableModule,
         FormsModule,
@@ -57,10 +57,9 @@ imports: [
         IconFieldModule,
         ConfirmDialogModule
     ],
-  providers: [MessageService, ConfirmationService],
-
 })
-export class PackingPaiement implements OnInit {
+
+export class ComptabilitePackingDetail implements OnInit {
     filterFields: string[] = ['code', 'name', 'description', 'price', 'quantity', 'inventoryStatus', 'category', 'rating', 'image'];
 
     productDialog: boolean = false;

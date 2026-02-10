@@ -17,6 +17,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 import { InputNumberModule } from 'primeng/inputnumber';
 
@@ -73,6 +74,7 @@ interface ModePaiementOption {
     TextareaModule,
     TooltipModule,
     InputNumberModule,
+    ToggleSwitchModule,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -89,6 +91,15 @@ export class ComptabilitePackingTableau implements OnInit {
   // Filtres période
   filtrePeriodeDebut: Date | null = null;
   filtrePeriodeFin: Date | null = null;
+
+  // Filtre statut
+  filtreStatut: string | null = null;
+  statutOptions = [
+    { label: 'Tous', value: null },
+    { label: 'Impayé', value: 'impaye' },
+    { label: 'Partiel', value: 'partiel' },
+    { label: 'Soldé', value: 'solde' },
+  ];
 
   selectedItem: ComptabilitePrestataire | null = null;
 
@@ -107,7 +118,9 @@ export class ComptabilitePackingTableau implements OnInit {
   // Dialog paiement (unifié)
   versementDialog: boolean = false;
   facturerLoading: boolean = false;
+  allFacturesPrestataire: FacturePacking[] = [];
   facturesPrestataire: FacturePacking[] = [];
+  showFacturesPayees: boolean = false;
   selectedFacture: FacturePacking | null = null;
   versementData: {
     montant: number | null;
@@ -176,7 +189,7 @@ export class ComptabilitePackingTableau implements OnInit {
     this.factureService.getComptabilite(filters).subscribe({
       next: (response) => {
         this.comptaSummary = new ComptabiliteSummary(response.data);
-        this.prestataires.set(this.comptaSummary.prestataires);
+        this.applyStatutFilter();
         this.loading = false;
         this.dataChanged.emit();
       },
@@ -190,6 +203,17 @@ export class ComptabilitePackingTableau implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  applyStatutFilter() {
+    if (!this.comptaSummary) return;
+    if (this.filtreStatut) {
+      this.prestataires.set(
+        this.comptaSummary.prestataires.filter(p => p.statut === this.filtreStatut)
+      );
+    } else {
+      this.prestataires.set(this.comptaSummary.prestataires);
+    }
   }
 
   exportCSV() {
@@ -276,14 +300,35 @@ export class ComptabilitePackingTableau implements OnInit {
     if (!this.selectedItem) return;
     this.factureService.getFactures({ prestataire_id: this.selectedItem.prestataire_id }).subscribe({
       next: (response) => {
-        this.facturesPrestataire = (response.data || [])
-          .map((p: any) => new FacturePacking(p))
-          .filter((f: FacturePacking) => f.statut === 'impayee' || f.statut === 'partielle');
+        this.allFacturesPrestataire = (response.data || []).map((p: any) => new FacturePacking(p));
+        this.applyFacturesFilter();
         if (this.facturesPrestataire.length > 0) {
           this.selectedFacture = this.facturesPrestataire[0];
         }
       },
     });
+  }
+
+  applyFacturesFilter() {
+    if (this.showFacturesPayees) {
+      this.facturesPrestataire = [...this.allFacturesPrestataire];
+    } else {
+      this.facturesPrestataire = this.allFacturesPrestataire
+        .filter((f: FacturePacking) => f.statut === 'impayee' || f.statut === 'partielle');
+    }
+  }
+
+  onToggleShowPayees() {
+    const previousSelected = this.selectedFacture;
+    this.applyFacturesFilter();
+    if (previousSelected && this.facturesPrestataire.find(f => f.id === previousSelected.id)) {
+      this.selectedFacture = this.facturesPrestataire.find(f => f.id === previousSelected.id)!;
+    } else if (this.facturesPrestataire.length > 0) {
+      this.selectedFacture = this.facturesPrestataire[0];
+      this.onFactureChange();
+    } else {
+      this.selectedFacture = null;
+    }
   }
 
   // ========================= Versements =========================
@@ -294,14 +339,15 @@ export class ComptabilitePackingTableau implements OnInit {
     this.versementDialog = true;
     this.versementLoading = true;
     this.versementSubmitted = false;
+    this.showFacturesPayees = false;
+    this.allFacturesPrestataire = [];
     this.facturesPrestataire = [];
     this.resetVersementForm();
 
     this.factureService.getFactures({ prestataire_id: item.prestataire_id }).subscribe({
       next: (response) => {
-        this.facturesPrestataire = (response.data || [])
-          .map((p: any) => new FacturePacking(p))
-          .filter((f: FacturePacking) => f.statut === 'impayee' || f.statut === 'partielle');
+        this.allFacturesPrestataire = (response.data || []).map((p: any) => new FacturePacking(p));
+        this.applyFacturesFilter();
         if (this.facturesPrestataire.length > 0) {
           this.selectedFacture = this.facturesPrestataire[0];
           this.versementData.montant = this.selectedFacture.montant_restant;
