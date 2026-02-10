@@ -1,4 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, signal, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -28,7 +29,7 @@ import {
   PreviewFacturePacking,
   StoreFacturePackingDto,
   StoreVersementDto,
-  FacturePacking,
+  FacturePacking, 
   Versement,
   VersementIndexResponse,
   ModePaiement,
@@ -147,6 +148,7 @@ export class ComptabilitePackingTableau implements OnInit {
   cols!: Column[];
 
   constructor(
+    private router: Router,
     private factureService: FacturePaiementService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
@@ -508,5 +510,14 @@ export class ComptabilitePackingTableau implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR');
+  }
+
+  goToDetail(item: ComptabilitePrestataire) {
+    this.router.navigate(['/comptabilite/comptabilite-packing-detail', item.prestataire_id], {
+      queryParams: {
+        prestataire_nom: item.prestataire_nom,
+        prestataire_phone: item.prestataire_phone,
+      },
+    });
   }
 }

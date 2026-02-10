@@ -8,7 +8,7 @@ import { ComptabilitePackingDetail } from './comptabilite-packing-detail/comptab
 export default [
     { path: '', component: ComptabilitePackingListe },
     { path: 'comptabilite-packing-liste', component: ComptabilitePackingListe },
-    { path: 'comptabilite-packing-detail', component: ComptabilitePackingDetail },
+    { path: 'comptabilite-packing-detail/:id', component: ComptabilitePackingDetail },
     { path: 'comptabilite-packing-paiement', component: PackingPaiement },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

@@ -1,245 +1,339 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '@/pages/service/product.service';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
 
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
+import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
+import {
+  FacturePacking,
+  Versement,
+  VersementIndexResponse,
+  StoreVersementDto,
+  ModePaiement,
+  MODE_PAIEMENT_LABELS,
+  FACTURE_PACKING_STATUT_SEVERITY,
+  FacturePackingStatutSeverity,
+} from '@/models/facture-packing.model';
+
+interface ModePaiementOption {
+  label: string;
+  value: ModePaiement;
 }
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
-
 
 @Component({
   selector: 'app-comptabilite-packing-detail',
   templateUrl: './comptabilite-packing-detail.html',
   styleUrl: './comptabilite-packing-detail.scss',
-  providers: [MessageService, ProductService, ConfirmationService],
-    imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        RatingModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule
-    ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    TableModule,
+    FormsModule,
+    ButtonModule,
+    RippleModule,
+    ToastModule,
+    ToolbarModule,
+    InputTextModule,
+    SelectModule,
+    InputNumberModule,
+    DialogModule,
+    TagModule,
+    InputIconModule,
+    IconFieldModule,
+    ConfirmDialogModule,
+    DatePickerModule,
+    TextareaModule,
+    TooltipModule,
+  ],
+  providers: [MessageService, ConfirmationService],
 })
-
 export class ComptabilitePackingDetail implements OnInit {
-    filterFields: string[] = ['code', 'name', 'description', 'price', 'quantity', 'inventoryStatus', 'category', 'rating', 'image'];
+  prestataireId: number = 0;
+  prestataireNom: string = '';
+  prestatairePhone: string = '';
 
-    productDialog: boolean = false;
+  factures = signal<FacturePacking[]>([]);
+  loading: boolean = false;
 
-    products = signal<Product[]>([]);
+  // Totaux
+  totalFacture: number = 0;
+  totalVerse: number = 0;
+  totalRestant: number = 0;
 
-    product!: Product;
+  // Dialog versement
+  versementDialog: boolean = false;
+  selectedFacture: FacturePacking | null = null;
+  versementData: {
+    montant: number | null;
+    date_versement: Date | null;
+    mode_paiement: ModePaiement;
+    notes: string;
+  } = {
+    montant: null,
+    date_versement: new Date(),
+    mode_paiement: 'especes',
+    notes: '',
+  };
+  versementSaving: boolean = false;
+  versementSubmitted: boolean = false;
 
-    selectedProducts!: Product[] | null;
+  modesPaiement: ModePaiementOption[] = [
+    { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
+    { label: MODE_PAIEMENT_LABELS.virement, value: 'virement' },
+    { label: MODE_PAIEMENT_LABELS.cheque, value: 'cheque' },
+    { label: MODE_PAIEMENT_LABELS.mobile_money, value: 'mobile_money' },
+  ];
 
-    submitted: boolean = false;
+  // Dialog historique versements
+  historiqueDialog: boolean = false;
+  historiqueData: VersementIndexResponse | null = null;
+  historiqueLoading: boolean = false;
 
-    statuses!: any[];
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private factureService: FacturePaiementService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
+  ) {}
 
-    @ViewChild('dt') dt!: Table;
-
-    exportColumns!: ExportColumn[];
-
-    cols!: Column[];
-
-    constructor(
-        private productService: ProductService,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService
-    ) {}
-
-    exportCSV() {
-        this.dt.exportCSV();
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      this.prestataireId = +params['id'] || 0;
+    });
+    this.route.queryParams.subscribe((params) => {
+      this.prestataireNom = params['prestataire_nom'] || '';
+      this.prestatairePhone = params['prestataire_phone'] || '';
+    });
+    if (this.prestataireId) {
+      this.loadFactures();
     }
+  }
 
-    ngOnInit() {
-        this.loadDemoData();
-    }
-
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
+  loadFactures() {
+    this.loading = true;
+    this.factureService.getFactures({ prestataire_id: this.prestataireId }).subscribe({
+      next: (response) => {
+        const data = (response.data || []).map((f: any) => new FacturePacking(f));
+        this.factures.set(data);
+        this.calculateTotals(data);
+        this.loading = false;
+        
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les factures',
+          life: 3000,
         });
+        this.loading = false;
+      },
+    });
+  }
 
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
+  calculateTotals(factures: FacturePacking[]) {
+    this.totalFacture = factures.reduce((sum, f) => sum + f.montant_total, 0);
+    this.totalVerse = factures.reduce((sum, f) => sum + f.montant_verse, 0);
+    this.totalRestant = factures.reduce((sum, f) => sum + f.montant_restant, 0);
+  }
 
-        this.cols = [
-            {
-                field: 'code',
-                header: 'Code',
-                customExportHeader: 'Product Code'
-            },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
-        ];
+  // ========================= Versement =========================
 
-        this.exportColumns = this.cols.map((col) => ({
-            title: col.header,
-            dataKey: col.field
-        }));
+  openVersement(facture: FacturePacking) {
+    this.selectedFacture = facture;
+    this.versementDialog = true;
+    this.versementSubmitted = false;
+    this.versementData = {
+      montant: facture.montant_restant,
+      date_versement: new Date(),
+      mode_paiement: 'especes',
+      notes: '',
+    };
+  }
+
+  hideVersementDialog() {
+    this.versementDialog = false;
+    this.selectedFacture = null;
+    this.versementSubmitted = false;
+  }
+
+  saveVersement() {
+    this.versementSubmitted = true;
+
+    if (!this.selectedFacture || !this.versementData.montant || !this.versementData.date_versement || this.versementSaving) {
+      return;
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
+    this.versementSaving = true;
 
-    openNew() {
-        this.product = {};
-        this.submitted = false;
-        this.productDialog = true;
-    }
+    const dto: StoreVersementDto = {
+      montant: this.versementData.montant,
+      date_versement: this.formatDate(this.versementData.date_versement),
+      mode_paiement: this.versementData.mode_paiement,
+      notes: this.versementData.notes || undefined,
+    };
 
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
-    }
-
-    deleteSelectedProducts() {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
-                });
-            }
+    this.factureService.createVersement(this.selectedFacture.id, dto).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistré`,
+          life: 3000,
         });
-    }
-
-    hideDialog() {
-        this.productDialog = false;
-        this.submitted = false;
-    }
-
-    deleteProduct(product: Product) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
-                });
-            }
+        this.versementSaving = false;
+        this.versementDialog = false;
+        this.loadFactures();
+      },
+      error: (error) => {
+        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
         });
-    }
+        this.versementSaving = false;
+      },
+    });
+  }
 
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
-                index = i;
-                break;
+  // ========================= Historique versements =========================
+
+  openHistorique(facture: FacturePacking) {
+    this.historiqueDialog = true;
+    this.historiqueLoading = true;
+    this.historiqueData = null;
+
+    this.factureService.getVersements(facture.id).subscribe({
+      next: (response) => {
+        this.historiqueData = response.data;
+        this.historiqueLoading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les versements',
+          life: 3000,
+        });
+        this.historiqueLoading = false;
+        this.historiqueDialog = false;
+      },
+    });
+  }
+
+  confirmDeleteVersement(factureId: number, versement: Versement) {
+    this.confirmationService.confirm({
+      message: `Supprimer le versement de ${this.formatCurrency(versement.montant)} ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.factureService.deleteVersement(factureId, versement.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: 'Versement supprimé',
+              life: 3000,
+            });
+            if (this.historiqueData) {
+              this.openHistorique({ id: factureId } as FacturePacking);
             }
-        }
+            this.loadFactures();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de supprimer le versement',
+              life: 3000,
+            });
+          },
+        });
+      },
+    });
+  }
 
-        return index;
-    }
+  confirmDeleteFacture(facture: FacturePacking) {
+    this.confirmationService.confirm({
+      message: `Supprimer la facture ${facture.reference} ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.factureService.deleteFacture(facture.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: 'Facture supprimée',
+              life: 3000,
+            });
+            this.loadFactures();
+          },
+          error: (error) => {
+            const msg = error?.error?.message || 'Impossible de supprimer la facture';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: msg,
+              life: 5000,
+            });
+          },
+        });
+      },
+    });
+  }
 
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
-    }
+  // ========================= Helpers =========================
 
-    getSeverity(status: string) {
-        switch (status) {
-            case 'INSTOCK':
-                return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
-                return 'danger';
-            default:
-                return 'info';
-        }
-    }
+  getStatutSeverity(statut: string): FacturePackingStatutSeverity {
+    return (FACTURE_PACKING_STATUT_SEVERITY as any)[statut] ?? 'info';
+  }
 
-    saveProduct() {
-        this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
-                });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
-            }
+  formatDate(date: any): string {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  }
 
-            this.productDialog = false;
-            this.product = {};
-        }
-    }
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+    }).format(value) + ' GNF';
+  }
+
+  formatDateDisplay(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR');
+  }
+
+  goBack() {
+    this.router.navigate(['/comptabilite/comptabilite-packing-liste']);
+  }
 }
