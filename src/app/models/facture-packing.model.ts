@@ -99,13 +99,15 @@ export class FacturePacking {
   id: number;
   reference: string;
   prestataire_id: number;
-  periode_debut: string;
-  periode_fin: string;
+  date: string;
   montant_total: number;
   nb_packings: number;
+  date_paiement: string | null;
+  mode_paiement: ModePaiement | null;
   statut: FacturePackingStatut;
   notes: string | null;
   created_by: number | null;
+  validated_by: number | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -115,6 +117,9 @@ export class FacturePacking {
   prestataire_nom: string | null;
   montant_verse: number;
   montant_restant: number;
+  mode_paiement_label: string;
+  total_rouleaux: number;
+  prix_par_rouleau: number;
 
   // Relations
   prestataire?: Prestataire;
@@ -126,13 +131,15 @@ export class FacturePacking {
     this.id = data.id ?? 0;
     this.reference = data.reference ?? '';
     this.prestataire_id = data.prestataire_id ?? 0;
-    this.periode_debut = data.periode_debut ?? '';
-    this.periode_fin = data.periode_fin ?? '';
+    this.date = data.date ?? '';
     this.montant_total = data.montant_total ?? 0;
     this.nb_packings = data.nb_packings ?? 0;
+    this.date_paiement = data.date_paiement ?? null;
+    this.mode_paiement = data.mode_paiement ?? null;
     this.statut = data.statut ?? 'impayee';
     this.notes = data.notes ?? null;
     this.created_by = data.created_by ?? null;
+    this.validated_by = data.validated_by ?? null;
     this.created_at = data.created_at ?? '';
     this.updated_at = data.updated_at ?? '';
     this.deleted_at = data.deleted_at ?? null;
@@ -141,6 +148,9 @@ export class FacturePacking {
     this.prestataire_nom = data.prestataire_nom ?? null;
     this.montant_verse = data.montant_verse ?? 0;
     this.montant_restant = data.montant_restant ?? 0;
+    this.mode_paiement_label = data.mode_paiement_label ?? '';
+    this.total_rouleaux = data.total_rouleaux ?? 0;
+    this.prix_par_rouleau = data.prix_par_rouleau ?? 0;
 
     this.prestataire = data.prestataire;
     this.packings = data.packings;
@@ -152,8 +162,8 @@ export class FacturePacking {
 // DTO pour créer une facture
 export interface StoreFacturePackingDto {
   prestataire_id: number;
-  periode_debut: string;
-  periode_fin: string;
+  date_debut: string;
+  date_fin: string;
   statut?: FacturePackingStatut;
   notes?: string;
 }
@@ -207,8 +217,8 @@ export class ComptabilitePrestataire {
 
 // Résumé comptabilité (réponse complète de /comptabilite)
 export class ComptabiliteSummary {
-  periode_debut: string | null;
-  periode_fin: string | null;
+  date_debut: string | null;
+  date_fin: string | null;
   nb_prestataires: number;
 
   // Totaux non facturés
@@ -228,8 +238,8 @@ export class ComptabiliteSummary {
   prestataires: ComptabilitePrestataire[];
 
   constructor(data: Partial<ComptabiliteSummary> = {}) {
-    this.periode_debut = data.periode_debut ?? null;
-    this.periode_fin = data.periode_fin ?? null;
+    this.date_debut = data.date_debut ?? null;
+    this.date_fin = data.date_fin ?? null;
     this.nb_prestataires = data.nb_prestataires ?? 0;
 
     this.total_non_facture = data.total_non_facture ?? 0;
@@ -249,8 +259,8 @@ export class ComptabiliteSummary {
 // Prévisualisation facture (retour de /preview)
 export class PreviewFacturePacking {
   prestataire_id: number;
-  periode_debut: string;
-  periode_fin: string;
+  date_debut: string;
+  date_fin: string;
   nb_packings: number;
   montant_total: number;
   total_rouleaux: number;
@@ -258,8 +268,8 @@ export class PreviewFacturePacking {
 
   constructor(data: Partial<PreviewFacturePacking> = {}) {
     this.prestataire_id = data.prestataire_id ?? 0;
-    this.periode_debut = data.periode_debut ?? '';
-    this.periode_fin = data.periode_fin ?? '';
+    this.date_debut = data.date_debut ?? '';
+    this.date_fin = data.date_fin ?? '';
     this.nb_packings = data.nb_packings ?? 0;
     this.montant_total = data.montant_total ?? 0;
     this.total_rouleaux = data.total_rouleaux ?? 0;
@@ -270,19 +280,19 @@ export class PreviewFacturePacking {
 // Filtres pour la liste des factures
 export interface FacturePackingFilters {
   prestataire_id?: number;
-  periode_debut?: string;
-  periode_fin?: string;
+  date_debut?: string;
+  date_fin?: string;
   statut?: FacturePackingStatut;
   soldee?: boolean;
   search?: string;
-  sort_by?: 'created_at' | 'montant_total' | 'nb_packings' | 'periode_debut';
+  sort_by?: 'created_at' | 'montant_total' | 'nb_packings' | 'date';
   sort_order?: 'asc' | 'desc';
   per_page?: number;
 }
 
 // Filtres pour la comptabilité
 export interface ComptabiliteFilters {
-  periode_debut?: string;
-  periode_fin?: string;
+  date_debut?: string;
+  date_fin?: string;
   prestataire_id?: number;
 }

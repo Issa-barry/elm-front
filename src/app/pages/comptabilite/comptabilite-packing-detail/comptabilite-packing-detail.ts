@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +19,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
+import { StyleClassModule } from 'primeng/styleclass';
 
 import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
 import {
@@ -31,6 +32,19 @@ import {
   FACTURE_PACKING_STATUT_SEVERITY,
   FacturePackingStatutSeverity,
 } from '@/models/facture-packing.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { ComptabilitePackingPaiement } from '../components/comptabilite-packing-paiement/comptabilite-packing-paiement';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { RatingModule } from 'primeng/rating';
+import { ComptabilitePackingPaiementDialog } from '../components/comptabilite-packing-paiement-dialog/comptabilite-packing-paiement-dialog';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  quantity: number;
+  price: number;
+}
 
 interface ModePaiementOption {
   label: string;
@@ -61,6 +75,16 @@ interface ModePaiementOption {
     DatePickerModule,
     TextareaModule,
     TooltipModule,
+    PhoneFormatPipe,
+    StyleClassModule,
+    ComptabilitePackingPaiement,
+    ComptabilitePackingPaiementDialog,
+
+       
+        RatingModule,
+
+        RadioButtonModule,
+ 
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -69,10 +93,19 @@ export class ComptabilitePackingDetail implements OnInit {
   prestataireNom: string = '';
   prestatairePhone: string = '';
 
+  // Slide-over products
+  products = signal<Product[]>([
+    { id: '0', name: 'Everlight Canvas Backpack', description: 'Light Grey', quantity: 1, price: 39.0 },
+    { id: '1', name: 'Stride Low-Top Sneakers', description: 'Crimson Sole', quantity: 1, price: 52.0 },
+    { id: '2', name: 'Cozy Knit Beanie', description: 'Mustard', quantity: 1, price: 21.0 },
+  ]);
+  subtotal = computed(() => this.products().reduce((sum, p) => sum + p.quantity * p.price, 0));
+
   factures = signal<FacturePacking[]>([]);
   loading: boolean = false;
 
-  // Totaux
+  // Totaux 
+  
   totalFacture: number = 0;
   totalVerse: number = 0;
   totalRestant: number = 0;
@@ -333,7 +366,23 @@ export class ComptabilitePackingDetail implements OnInit {
     return date.toLocaleDateString('fr-FR');
   }
 
+  removeProduct(index: number, event: Event) {
+    event.stopPropagation();
+    const currentProducts = this.products();
+    currentProducts.splice(index, 1);
+    this.products.set([...currentProducts]);
+  }
+
   goBack() {
     this.router.navigate(['/comptabilite/comptabilite-packing-liste']);
   }
+
+  openPaiement() {
+    // Logique pour ouvrir le slide-over de paiement
+    // Par exemple, vous pouvez utiliser un service de communication ou un signal partagé
+    // Ici, on va juste afficher une alerte pour la démonstration
+    this.paiementDialog = true;
+  }
+
+  paiementDialog: boolean = false;
 }

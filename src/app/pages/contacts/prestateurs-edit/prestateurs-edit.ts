@@ -93,19 +93,23 @@ export class PrestateursEdit implements OnInit {
       ville: data.ville,
       quartier: data.quartier || undefined,
       adresse: data.adresse || undefined,
+      raison_sociale: data.raison_sociale || undefined,
+      email: data.email || undefined,
+      specialite: data.specialite || undefined,
+      type: data.type || undefined,
+      tarif_horaire: data.tarif_horaire || undefined,
+      notes: data.notes || undefined,
     };
 
     this.prestataireService.updatePrestataire(this.prestateurId, payload).subscribe({
       next: (response) => {
         if (response.success) {
+          this.prestateursData = { ...data };
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
             detail: 'Prestataire modifié avec succès'
           });
-          setTimeout(() => {
-            this.router.navigate(['contacts/prestateurs']);
-          }, 1500);
         }
         this.loading = false;
       },

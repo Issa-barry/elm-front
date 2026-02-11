@@ -3,6 +3,7 @@ import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 import { BadgeModule } from 'primeng/badge';
 import { LayoutService } from '@/layout/service/layout.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
     selector: '[app-profilesidebar]',
@@ -10,6 +11,7 @@ import { LayoutService } from '@/layout/service/layout.service';
         ButtonModule,
         DrawerModule,
         BadgeModule,
+        RouterModule
     ],
     template: `
         <p-drawer
@@ -46,9 +48,10 @@ import { LayoutService } from '@/layout/service/layout.service';
                     </li>
                     
                     <li>
-                        <a
+                        <a [routerLink]="['/parametres']"
+                            (click)="onDrawerHide()"
                             class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150"
-                        >
+                           >
                             <span>
                                 <i class="pi pi-cog text-xl text-primary"></i>
                             </span>
@@ -57,7 +60,7 @@ import { LayoutService } from '@/layout/service/layout.service';
                                 <p
                                     class="text-surface-500 dark:text-surface-400 m-0"
                                 >
-                                    Gestionde pamètres
+                                    Gestion de paramètres
                                 </p>
                             </div>
                         </a>

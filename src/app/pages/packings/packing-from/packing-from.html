@@ -65,55 +65,23 @@
           </small>
         </div>
 
-        <!-- Dates -->
-        <div class="mb-6 col-span-12">
-          <div class="grid grid-cols-12 gap-3">
-            <!-- Date de début -->
-            <div class="col-span-12 md:col-span-6">
-              <label for="dateDebut" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                Date de début <span class="text-red-500" *ngIf="isEditing">*</span>
-              </label>
-              <p-datepicker
-                id="dateDebut"
-                [(ngModel)]="model.date_debut"
-                [showIcon]="true"
-                [minDate]="minDate"
-                dateFormat="dd/mm/yy"
-                placeholder="Sélectionnez la date"
-                [disabled]="fieldsDisabled"
-                (onSelect)="onDateDebutChange()"
-                (onBlur)="onDateBlur('debut')"
-                fluid />
-              <small class="text-red-500 block mt-1" *ngIf="submitted && dateDebutError && isEditing">
-                {{ dateDebutError }}
-              </small>
-            </div>
-
-            <!-- Date de fin -->
-            <div class="col-span-12 md:col-span-6">
-              <label for="dateFin" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                Date de fin <span class="text-red-500" *ngIf="isEditing">*</span>
-              </label>
-              <p-datepicker
-                id="dateFin"
-                [(ngModel)]="model.date_fin"
-                [showIcon]="true"
-                [minDate]="minDateFin"
-                dateFormat="dd/mm/yy"
-                placeholder="Sélectionnez la date"
-                [disabled]="fieldsDisabled"
-                (onSelect)="onDateFinChange()"
-                (onBlur)="onDateBlur('fin')"
-                fluid />
-              <small class="text-red-500 block mt-1" *ngIf="submitted && dateFinError && isEditing">
-                {{ dateFinError }}
-              </small>
-            </div>
-          </div>
-
-          <!-- Message d'erreur pour la plage de dates -->
-          <small class="text-red-500 block mt-2" *ngIf="submitted && dateRangeError && isEditing">
-            {{ dateRangeError }}
+        <!-- Date -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="date" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Date <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <p-datepicker
+            id="date"
+            [(ngModel)]="model.date"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="Sélectionnez la date"
+            [disabled]="fieldsDisabled"
+            (onSelect)="onDateChange()"
+            (onBlur)="onDateBlur()"
+            fluid />
+          <small class="text-red-500 block mt-1" *ngIf="submitted && dateError && isEditing">
+            {{ dateError }}
           </small>
         </div>
 
@@ -193,7 +161,7 @@
         </div>
 
         <!-- Récapitulatif complet -->
-        <div class="col-span-12 mb-6" *ngIf="model.prestataire_id && model.date_debut && model.date_fin && model.nb_rouleaux && model.prix_par_rouleau && !hasErrors()">
+        <div class="col-span-12 mb-6" *ngIf="model.prestataire_id && model.date && model.nb_rouleaux && model.prix_par_rouleau && !hasErrors()">
           <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-5">
             <div class="flex items-center gap-2 mb-4">
               <i class="pi pi-info-circle text-blue-600 dark:text-blue-400 text-lg"></i>
@@ -219,12 +187,9 @@
                 <div class="flex items-start gap-3">
                   <i class="pi pi-calendar text-blue-600 mt-1"></i>
                   <div class="flex-1">
-                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Période</div>
+                    <div class="text-xs text-surface-600 dark:text-surface-400 mb-1">Date</div>
                     <div class="font-medium text-surface-900 dark:text-surface-0">
-                      {{ model.date_debut | date:'dd/MM/yyyy' }} - {{ model.date_fin | date:'dd/MM/yyyy' }}
-                    </div>
-                    <div class="text-sm text-surface-500 dark:text-surface-400">
-                      {{ calculateDays() }} jour(s)
+                      {{ model.date | date:'dd/MM/yyyy' }}
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Parametre, PeriodesResponse, UpdateParametreDto } from '@/models/parametres.model';
+import { map, Observable } from 'rxjs';
+import { Parametre, UpdateParametreDto } from '@/models/parametres.model';
 import { environment } from 'src/environments/environment.development';
 
 export interface ApiResponse<T> {
@@ -15,7 +15,7 @@ export interface ParametresListResponse {
   groupes: Record<string, string>;
 }
 
-@Injectable({
+@Injectable({ 
   providedIn: 'root',
 })
 export class ParametresService {
@@ -44,14 +44,14 @@ export class ParametresService {
   /**
    * Récupérer les périodes disponibles pour un mois/année
    */
-  getPeriodes(mois?: number, annee?: number): Observable<ApiResponse<PeriodesResponse>> {
-    let params = new HttpParams();
-    if (mois) {
-      params = params.set('mois', mois.toString());
-    }
-    if (annee) {
-      params = params.set('annee', annee.toString());
-    }
-    return this.http.get<ApiResponse<PeriodesResponse>>(`${this.apiUrl}/periodes`, { params });
+  getPrixRouleauDefaut(): Observable<number> {
+    return this.getParametres('packing').pipe(
+      map((response) => {
+        const parametre = response.data.parametres.find((p) => p.cle === 'prix_rouleau_defaut');
+        if (!parametre) return 0;
+        const valeur = Number(parametre.valeur);
+        return Number.isFinite(valeur) ? valeur : 0;
+      })
+    );
   }
 }

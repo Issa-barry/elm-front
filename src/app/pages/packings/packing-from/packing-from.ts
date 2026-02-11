@@ -18,8 +18,7 @@ class PackingFormModel {
   prestataire_id?: number;
   prestataire?: Prestataire;
   reference?: string;
-  date_debut?: Date | string | null;
-  date_fin?: Date | string | null;
+  date?: Date | string | null;
   nb_rouleaux: number = 0;
   prix_par_rouleau: number = 0;
   montant: number = 0;
@@ -32,8 +31,7 @@ class PackingFormModel {
       this.prestataire_id = data.prestataire_id;
       this.prestataire = data.prestataire;
       this.reference = data.reference;
-      this.date_debut = data.date_debut ? new Date(data.date_debut) : null;
-      this.date_fin = data.date_fin ? new Date(data.date_fin) : null;
+      this.date = data.date ? new Date(data.date) : null;
       this.nb_rouleaux = data.nb_rouleaux || 0;
       this.prix_par_rouleau = data.prix_par_rouleau || 0;
       this.montant = data.montant || 0;
@@ -79,9 +77,7 @@ export class PackingFrom implements OnInit {
   model: PackingFormModel = new PackingFormModel();
 
   minDate: Date = new Date();
-  dateDebutError: string | null = null;
-  dateFinError: string | null = null;
-  dateRangeError: string | null = null;
+  dateError: string | null = null;
 
   ngOnInit(): void {
     this.model = this.initialData ? new PackingFormModel(this.initialData) : new PackingFormModel();
@@ -98,79 +94,29 @@ export class PackingFrom implements OnInit {
     }
   }
 
-  // Validation de la date de début
-  validateDateDebut(): boolean {
-    if (!this.model.date_debut) {
-      this.dateDebutError = 'Date de début obligatoire.';
+  // Validation de la date
+  validateDate(): boolean {
+    if (!this.model.date) {
+      this.dateError = 'Date obligatoire.';
       return false;
     }
 
-    const dateDebut = new Date(this.model.date_debut);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (dateDebut < today && this.mode === 'create') {
-      this.dateDebutError = 'La date de début ne peut pas être dans le passé.';
-      return false;
-    }
-
-    this.dateDebutError = null;
+    this.dateError = null;
     return true;
   }
 
-  // Validation de la date de fin
-  validateDateFin(): boolean {
-    if (!this.model.date_fin) {
-      this.dateFinError = 'Date de fin obligatoire.';
-      return false;
-    }
-
-    this.dateFinError = null;
-    return true;
-  }
-
-  // Validation de la plage de dates
-  validateDateRange(): boolean {
-    if (!this.model.date_debut || !this.model.date_fin) {
-      return true;
-    }
-
-    const dateDebut = new Date(this.model.date_debut);
-    const dateFin = new Date(this.model.date_fin);
-
-    if (dateFin < dateDebut) {
-      this.dateRangeError = 'La date de fin doit être supérieure ou égale à la date de début.';
-      return false;
-    }
-
-    this.dateRangeError = null;
-    return true;
-  }
-
-  // Événement déclenché lors du changement de date de début
-  onDateDebutChange(): void {
+  // Événement déclenché lors du changement de date
+  onDateChange(): void {
     if (this.submitted) {
-      this.validateDateDebut();
-      this.validateDateRange();
+      this.validateDate();
     }
   }
 
-  // Événement déclenché lors du changement de date de fin
-  onDateFinChange(): void {
-    if (this.submitted) {
-      this.validateDateFin();
-      this.validateDateRange();
+  // Événement déclenché lors de la perte de focus de la date
+  onDateBlur(): void {
+    if (this.model.date) {
+      this.validateDate();
     }
-  }
-
-  // Événement déclenché lors de la perte de focus des dates
-  onDateBlur(field: 'debut' | 'fin'): void {
-    if (field === 'debut' && this.model.date_debut) {
-      this.validateDateDebut();
-    } else if (field === 'fin' && this.model.date_fin) {
-      this.validateDateFin();
-    }
-    this.validateDateRange();
   }
 
   // Obtenir le nom complet du prestataire
@@ -192,36 +138,11 @@ export class PackingFrom implements OnInit {
     });
   }
 
-  // Getter pour la date minimum de fin (doit être >= date début)
-  get minDateFin(): Date {
-    if (!this.model.date_debut) {
-      return this.minDate;
-    }
-    return this.model.date_debut instanceof Date
-      ? this.model.date_debut
-      : new Date(this.model.date_debut);
-  }
-
-  // Calculer le nombre de jours
-  calculateDays(): number {
-    if (!this.model.date_debut || !this.model.date_fin) {
-      return 0;
-    }
-
-    const debut = new Date(this.model.date_debut);
-    const fin = new Date(this.model.date_fin);
-    const diffTime = Math.abs(fin.getTime() - debut.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffDays + 1;
-  }
-
   // Validation complète
   isValid(): boolean {
     const basicValidation = !!(
       this.model.prestataire_id &&
-      this.model.date_debut &&
-      this.model.date_fin &&
+      this.model.date &&
       this.model.nb_rouleaux &&
       this.model.nb_rouleaux > 0 &&
       this.model.prix_par_rouleau &&
@@ -232,11 +153,7 @@ export class PackingFrom implements OnInit {
       return false;
     }
 
-    return (
-      this.validateDateDebut() &&
-      this.validateDateFin() &&
-      this.validateDateRange()
-    );
+    return this.validateDate();
   }
 
   // Activer l'édition
@@ -248,9 +165,7 @@ export class PackingFrom implements OnInit {
   cancelEditing(): void {
     this.isEditing = false;
     this.submitted = false;
-    this.dateDebutError = null;
-    this.dateFinError = null;
-    this.dateRangeError = null;
+    this.dateError = null;
 
     this.model = this.initialData ? new PackingFormModel(this.initialData) : new PackingFormModel();
   }
@@ -258,9 +173,7 @@ export class PackingFrom implements OnInit {
   // Réinitialiser le formulaire (méthode publique)
   public resetForm(): void {
     this.submitted = false;
-    this.dateDebutError = null;
-    this.dateFinError = null;
-    this.dateRangeError = null;
+    this.dateError = null;
     this.model = new PackingFormModel();
   }
 
@@ -285,11 +198,9 @@ export class PackingFrom implements OnInit {
     // Créer le DTO pour l'API
     const packingData: CreatePackingDto = {
       prestataire_id: this.model.prestataire_id!,
-      date_debut: this.formatDate(this.model.date_debut),
-      date_fin: this.formatDate(this.model.date_fin),
+      date: this.formatDate(this.model.date),
       nb_rouleaux: this.model.nb_rouleaux,
       prix_par_rouleau: this.model.prix_par_rouleau,
-      montant: this.model.montant,
       statut: this.model.statut,
       notes: this.model.notes ?? undefined
     };
@@ -309,10 +220,6 @@ export class PackingFrom implements OnInit {
 
   // Vérifier si le formulaire a des erreurs
   hasErrors(): boolean {
-    return !!(
-      this.dateDebutError ||
-      this.dateFinError ||
-      this.dateRangeError
-    );
+    return !!this.dateError;
   }
 }

@@ -1,6 +1,6 @@
-<p-toast />
+<p-toast position="top-right" appendTo="body" [baseZIndex]="1100" [preventOpenDuplicates]="true" />
 
-<div class="card">
+<div class="card relative">
     <!-- Header avec bouton retour -->
     <p-toolbar styleClass="mb-6">
         <ng-template #start>
@@ -8,20 +8,35 @@
                 <p-button icon="pi pi-arrow-left" severity="secondary" [rounded]="true" [outlined]="true" pTooltip="Retour" (click)="goBack()" />
                 <div>
                     <h4 class="m-0 font-bold">{{ prestataireNom }}</h4>
-                    <p class="text-sm text-surface-500">
-                        <span *ngIf="prestatairePhone"><i class="pi pi-phone mr-1"></i>{{ prestatairePhone }}</span>
-                        <!-- Détail des factures -->
+                    <p class="text-sm text-surface-500 mt-2">
+                        <span *ngIf="prestatairePhone"><i class="pi pi-phone mr-1"></i>{{ prestatairePhone | phoneFormat:'INT' }}</span>
                     </p>
                 </div>
             </div>
         </ng-template>
+        <ng-template #end>
+            <button pButton pStyleClass="#slideover-cart" enterFromClass="hidden" enterActiveClass="animate-fadeinright" leaveToClass="hidden" leaveActiveClass="animate-fadeoutright" [hideOnOutsideClick]="true">
+                <span pButtonLabel>Display</span>
+            </button>
+ 
+        </ng-template>
     </p-toolbar>
+
+    <!-- Slide-over paiement -->
+    <div id="slideover-cart" class="hidden fixed inset-0 z-50">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/50" pStyleClass="#slideover-cart" leaveToClass="hidden" leaveActiveClass="animate-fadeoutright"></div>
+        <!-- Panel -->
+        <div class="bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full">
+             <app-comptabilite-packing-paiement></app-comptabilite-packing-paiement>
+        </div>
+    </div> 
 
     <!-- Résumé -->
     <div class="grid grid-cols-12 gap-4 mb-6">
         <div class="col-span-4">
             <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-4 text-center">
-                <span class="text-sm text-surface-500 block mb-1">Total facturé</span>
+                <span class="text-sm text-surface-500 block mb-1">Total à payer</span>
                 <span class="text-xl font-bold text-primary">{{ formatCurrency(totalFacture) }}</span>
             </div>
         </div>
@@ -62,13 +77,17 @@
                     <span class="flex items-center gap-2">Référence
                     <p-sortIcon field="reference" /></span>
                 </th>
-                <th pSortableColumn="periode_debut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Période
-                    <p-sortIcon field="periode_debut" /></span>
+                <th pSortableColumn="date" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Date
+                    <p-sortIcon field="date" /></span>
                 </th>
-                <th style="min-width: 6rem">Packings</th>
+                <th pSortableColumn="total_rouleaux" style="min-width: 8rem">
+                    <span class="flex items-center gap-2">Rouleaux
+                    <p-sortIcon field="total_rouleaux" /></span>
+                </th>
+                <th style="min-width: 8rem">Prix/rouleau</th>
                 <th pSortableColumn="montant_total" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Montant
+                    <span class="flex items-center gap-2">A payer
                     <p-sortIcon field="montant_total" /></span>
                 </th>
                 <th pSortableColumn="montant_verse" style="min-width: 10rem">
@@ -85,25 +104,22 @@
         </ng-template>
         <ng-template #body let-facture>
             <tr>
-                <td class="font-semibold">{{ facture.reference }}</td>
+                <td class="font-semibold">{{ facture.reference.replace('FACT-PACK-', '') }}</td>
                 <td>
-                    <span class="text-sm">{{ formatDateDisplay(facture.periode_debut) }} - {{ formatDateDisplay(facture.periode_fin) }}</span>
+                    <span class="text-sm">{{ formatDateDisplay(facture.date) }}</span>
                 </td>
-                <td>{{ facture.nb_packings }}</td>
-                <td class="font-bold">{{ formatCurrency(facture.montant_total) }}</td>
-                <td class="text-green-600 font-semibold">{{ formatCurrency(facture.montant_verse) }}</td>
-                <td>
-                    <span [class]="facture.montant_restant > 0 ? 'text-orange-500 font-semibold' : 'text-green-600'">
-                        {{ formatCurrency(facture.montant_restant) }}
-                    </span>
-                </td>
+                <td>{{ facture.total_rouleaux }}</td>
+                <td>{{ formatCurrency(facture.prix_par_rouleau) }}</td>
+                <td>{{ formatCurrency(facture.montant_total) }}</td>
+                <td>{{ formatCurrency(facture.montant_verse) }}</td>
+                <td>{{ formatCurrency(facture.montant_restant) }}</td>
                 <td>
                     <p-tag [value]="facture.statut_label" [severity]="getStatutSeverity(facture.statut)" />
                 </td>
                 <td>
                     <div class="flex gap-2">
                         <p-button
-                            icon="pi pi-wallet"
+                            icon="pi pi-money-bill"
                             severity="success"
                             [rounded]="true"
                             [outlined]="true"
@@ -134,7 +150,7 @@
         </ng-template>
         <ng-template #emptymessage>
             <tr>
-                <td colspan="8" class="text-center p-8 text-surface-500">
+                <td colspan="9" class="text-center p-8 text-surface-500">
                     Aucune facture pour ce prestataire.
                 </td>
             </tr>
@@ -143,13 +159,22 @@
 </div>
 
 <!-- Dialog Versement -->
-<p-dialog [(visible)]="versementDialog" [style]="{ width: '500px' }" header="Enregistrer un versement" [modal]="true">
+<p-dialog
+    [(visible)]="versementDialog"
+    [style]="{ width: '750px' }"
+    [contentStyle]="{ 'max-height': '70vh', 'overflow': 'auto' }"
+    header="Enregistrer un versement"
+    [modal]="true"
+    [blockScroll]="true"
+    [dismissableMask]="false"
+    [closeOnEscape]="false"
+>
     <ng-template #content>
         <div class="flex flex-col gap-4" *ngIf="selectedFacture">
             <!-- Résumé facture -->
             <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-3">
                 <div class="flex items-center justify-between mb-1">
-                    <span class="font-bold">{{ selectedFacture.reference }}</span>
+                    <span class="font-bold">{{ selectedFacture.reference.replace('FACT-PACK-', '') }}</span>
                     <p-tag [value]="selectedFacture.statut_label" [severity]="getStatutSeverity(selectedFacture.statut)" />
                 </div>
                 <div class="grid grid-cols-3 gap-2 mt-2">
@@ -170,7 +195,21 @@
 
             <!-- Formulaire -->
             <div class="flex flex-col gap-4">
-                <div>
+                
+
+                <div class="mt-4">
+                    <label class="block font-bold mb-2">Mode de paiement</label>
+                    <p-select
+                        [(ngModel)]="versementData.mode_paiement"
+                        [options]="modesPaiement"
+                        optionLabel="label"
+                        optionValue="value"
+                        styleClass="w-full"
+                        appendTo="body"
+                    />
+                </div>
+
+                <div class="mt-4">
                     <label class="block font-bold mb-2">Montant à verser</label>
                     <p-inputnumber
                         [(ngModel)]="versementData.montant"
@@ -185,38 +224,16 @@
                     <small class="text-red-500" *ngIf="versementSubmitted && !versementData.montant">Montant requis.</small>
                 </div>
 
-                <div>
-                    <label class="block font-bold mb-2">Date du versement</label>
-                    <p-datepicker
-                        [(ngModel)]="versementData.date_versement"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        styleClass="w-full"
-                    />
-                    <small class="text-red-500" *ngIf="versementSubmitted && !versementData.date_versement">Date requise.</small>
-                </div>
-
-                <div>
-                    <label class="block font-bold mb-2">Mode de paiement</label>
-                    <p-select
-                        [(ngModel)]="versementData.mode_paiement"
-                        [options]="modesPaiement"
-                        optionLabel="label"
-                        optionValue="value"
-                        styleClass="w-full"
-                    />
-                </div>
-
-                <div>
+                <!-- <div>
                     <label class="block font-bold mb-2">Notes</label>
                     <textarea pTextarea [(ngModel)]="versementData.notes" rows="2" class="w-full"></textarea>
-                </div>
+                </div> -->
             </div>
         </div>
     </ng-template>
 
-    <ng-template #footer>
-        <p-button label="Annuler" icon="pi pi-times" text (click)="hideVersementDialog()" [disabled]="versementSaving" />
+    <ng-template #footer class="mt-4">
+        <!-- <p-button label="Annuler" icon="pi pi-times" text (click)="hideVersementDialog()" [disabled]="versementSaving" />
         <p-button
             label="Payer"
             icon="pi pi-check"
@@ -224,12 +241,23 @@
             (click)="saveVersement()"
             [disabled]="versementSaving"
             [loading]="versementSaving"
-        />
+        /> -->
+        <button pButton [outlined]="true" (click)="hideVersementDialog()"> <span pButtonLabel>Annuler</span></button>
+        <button pButton (click)="saveVersement()" [disabled]="versementSaving" [loading]="versementSaving"> <span pButtonLabel>Enregistrer</span> </button>
     </ng-template>
 </p-dialog>
 
 <!-- Dialog Historique Versements -->
-<p-dialog [(visible)]="historiqueDialog" [style]="{ width: '750px' }" header="Historique des versements" [modal]="true">
+<p-dialog
+    [(visible)]="historiqueDialog"
+    [style]="{ width: '750px' }"
+    [contentStyle]="{ 'max-height': '70vh', 'overflow': 'auto' }"
+    header="Historique des versements"
+    [modal]="true"
+    [blockScroll]="true"
+    [dismissableMask]="false"
+    [closeOnEscape]="false"
+>
     <ng-template #content>
         <div *ngIf="historiqueLoading" class="flex items-center justify-center p-8">
             <i class="pi pi-spin pi-spinner text-4xl"></i>
@@ -239,7 +267,7 @@
             <!-- Résumé facture -->
             <div class="bg-surface-100 dark:bg-surface-800 rounded-lg p-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="font-bold text-lg">{{ historiqueData.reference }}</span>
+                    <span class="font-bold text-lg">{{ historiqueData.reference.replace('FACT-PACK-', '') }}</span>
                     <p-tag [value]="historiqueData.is_soldee ? 'Soldé' : 'En cours'" [severity]="historiqueData.is_soldee ? 'success' : 'warn'" />
                 </div>
                 <div class="grid grid-cols-12 gap-4">
@@ -292,5 +320,6 @@
         <p-button label="Fermer" icon="pi pi-times" text (click)="historiqueDialog = false" />
     </ng-template>
 </p-dialog>
+ 
 
 <p-confirmdialog [style]="{ width: '450px' }" />

@@ -24,8 +24,7 @@ export interface Packing {
   id: number;
   prestataire_id: number;
   reference: string;
-  date_debut: string | Date;
-  date_fin: string | Date;
+  date: string | Date;
   nb_rouleaux: number;
   prix_par_rouleau: number;
   montant: number;
@@ -36,6 +35,10 @@ export interface Packing {
   updated_at: string;
   deleted_at: string | null;
 
+  // Appended
+  statut_label?: string;
+  prestataire_nom?: string;
+
   // Relation
   prestataire?: Prestataire;
 }
@@ -43,11 +46,9 @@ export interface Packing {
 // DTO pour création
 export interface CreatePackingDto {
   prestataire_id: number;
-  date_debut: string;
-  date_fin: string;
+  date: string;
   nb_rouleaux: number;
   prix_par_rouleau: number;
-  montant?: number;
   statut?: PackingStatut;
   notes?: string;
 }
@@ -55,11 +56,9 @@ export interface CreatePackingDto {
 // DTO pour mise à jour
 export interface UpdatePackingDto {
   prestataire_id?: number;
-  date_debut?: string;
-  date_fin?: string;
+  date?: string;
   nb_rouleaux?: number;
   prix_par_rouleau?: number;
-  montant?: number;
   statut?: PackingStatut;
   notes?: string;
 }
@@ -72,7 +71,7 @@ export interface PackingFilters {
   date_fin?: string;
   non_payes?: boolean;
   search?: string;
-  sort_by?: 'date_debut' | 'date_fin' | 'created_at' | 'montant' | 'nb_rouleaux' | 'statut';
+  sort_by?: 'date' | 'created_at' | 'montant' | 'nb_rouleaux' | 'statut';
   sort_order?: 'asc' | 'desc';
   per_page?: number;
   page?: number;

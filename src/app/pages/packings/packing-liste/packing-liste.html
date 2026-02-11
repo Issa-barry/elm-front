@@ -91,13 +91,9 @@
                     <p-sortIcon field="prestataire.nom" /></span>
                 </th>
                 <th style="min-width: 10rem">Phone</th>
-                <th pSortableColumn="date_debut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Début
-                    <p-sortIcon field="date_debut" /></span>
-                </th>
-                <th pSortableColumn="date_fin" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Fin
-                    <p-sortIcon field="date_fin" /></span>
+                <th pSortableColumn="date" style="min-width: 10rem">
+                    <span class="flex items-center gap-2">Date
+                    <p-sortIcon field="date" /></span>
                 </th>
                 <th pSortableColumn="nb_rouleaux" style="min-width: 8rem">
                     <span class="flex items-center gap-2">Rouleaux
@@ -128,8 +124,7 @@
                 <td>
                     <span *ngIf="packing.prestataire">{{ packing.prestataire.phone }}</span>
                 </td>
-                <td>{{ formatDateDisplay(packing.date_debut) }}</td>
-                <td>{{ formatDateDisplay(packing.date_fin) }}</td>
+                <td>{{ formatDateDisplay(packing.date) }}</td>
                 <td>{{ packing.nb_rouleaux }}</td>
                 <td>{{ formatCurrency(packing.montant) }}</td>
                 <td>
@@ -177,28 +172,15 @@
                 <small class="text-red-500" *ngIf="submitted && !selectedPrestataire">Le prestataire est requis.</small>
             </div>
 
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="date_debut" class="block font-bold mb-4">Date début</label>
-                    <p-datepicker
-                        [(ngModel)]="packing.date_debut"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                </div>
-                <div class="col-span-6">
-                    <label for="date_fin" class="block font-bold mb-4">Date fin</label>
-                    <p-datepicker
-                        [(ngModel)]="packing.date_fin"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        [minDate]="packing.date_debut ? $any(packing.date_debut) : null"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                </div>
+            <div>
+                <label for="date" class="block font-bold mb-4">Date</label>
+                <p-datepicker
+                    [(ngModel)]="packing.date"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    inputStyleClass="w-full"
+                    styleClass="w-full"
+                />
             </div>
 
             <div class="grid grid-cols-12 gap-4">

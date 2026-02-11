@@ -38,11 +38,11 @@ export class FacturePaiementService {
       if (filters.prestataire_id) {
         params = params.set('prestataire_id', filters.prestataire_id.toString());
       }
-      if (filters.periode_debut) {
-        params = params.set('periode_debut', filters.periode_debut);
+      if (filters.date_debut) {
+        params = params.set('date_debut', filters.date_debut);
       }
-      if (filters.periode_fin) {
-        params = params.set('periode_fin', filters.periode_fin);
+      if (filters.date_fin) {
+        params = params.set('date_fin', filters.date_fin);
       }
       if (filters.statut) {
         params = params.set('statut', filters.statut);
@@ -77,11 +77,11 @@ export class FacturePaiementService {
   /**
    * Prévisualisation avant facturation
    */
-  getPreview(prestataireId: number, periodeDebut: string, periodeFin: string): Observable<ApiResponse<PreviewFacturePacking>> {
+  getPreview(prestataireId: number, dateDebut: string, dateFin: string): Observable<ApiResponse<PreviewFacturePacking>> {
     const params = new HttpParams()
       .set('prestataire_id', prestataireId.toString())
-      .set('periode_debut', periodeDebut)
-      .set('periode_fin', periodeFin);
+      .set('date_debut', dateDebut)
+      .set('date_fin', dateFin);
 
     return this.http.get<ApiResponse<PreviewFacturePacking>>(`${this.apiUrl}/preview`, { params });
   }
@@ -93,11 +93,11 @@ export class FacturePaiementService {
     let params = new HttpParams();
 
     if (filters) {
-      if (filters.periode_debut) {
-        params = params.set('periode_debut', filters.periode_debut);
+      if (filters.date_debut) {
+        params = params.set('date_debut', filters.date_debut);
       }
-      if (filters.periode_fin) {
-        params = params.set('periode_fin', filters.periode_fin);
+      if (filters.date_fin) {
+        params = params.set('date_fin', filters.date_fin);
       }
       if (filters.prestataire_id) {
         params = params.set('prestataire_id', filters.prestataire_id.toString());

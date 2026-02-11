@@ -37,7 +37,16 @@ export class PrestateursNew {
       ville: data.ville || '',
       quartier: data.quartier || undefined,
       adresse: data.adresse || undefined,
+      raison_sociale: data.raison_sociale || undefined,
+      email: data.email || undefined,
+      specialite: data.specialite || undefined,
+      type: data.type || undefined,
+      tarif_horaire: data.tarif_horaire || undefined,
+      notes: data.notes || undefined,
     };
+
+    console.log(payload);
+    
 
     this.prestataireService.createPrestataire(payload).subscribe({
       next: (response) => {

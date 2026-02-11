@@ -128,8 +128,7 @@ export class PackingListe implements OnInit {
     this.cols = [
       { field: 'reference', header: 'Référence' },
       { field: 'prestataire', header: 'Prestataire' },
-      { field: 'date_debut', header: 'Début' },
-      { field: 'date_fin', header: 'Fin' },
+      { field: 'date', header: 'Date' },
       { field: 'nb_rouleaux', header: 'Rouleaux' },
       { field: 'montant', header: 'Montant' },
       { field: 'statut', header: 'Statut' }
@@ -187,11 +186,9 @@ export class PackingListe implements OnInit {
   }
 
   loadPrixRouleauDefaut() {
-    this.parametresService.getPeriodes().subscribe({
-      next: (response) => {
-        this.prixRouleauDefaut = response.data.prix_rouleau_defaut;
-        console.log("prix",response);
-        
+    this.parametresService.getPrixRouleauDefaut().subscribe({
+      next: (prix) => {
+        this.prixRouleauDefaut = prix;
       },
       error: () => {
         this.prixRouleauDefaut = 0;
@@ -240,11 +237,11 @@ export class PackingListe implements OnInit {
     this.dialogLoading = true;
 
     forkJoin({
-      periodes: this.parametresService.getPeriodes(),
+      prixRouleauDefaut: this.parametresService.getPrixRouleauDefaut(),
       prestataires: this.prestataireService.getActivePrestataires()
     }).subscribe({
-      next: ({ periodes, prestataires }) => {
-        this.prixRouleauDefaut = periodes.data.prix_rouleau_defaut;
+      next: ({ prixRouleauDefaut, prestataires }) => {
+        this.prixRouleauDefaut = prixRouleauDefaut;
         this.prestataires = prestataires.data.filter(p => p.type === 'machiniste');
         this.packing = {
           statut: 'valide',
@@ -269,8 +266,7 @@ export class PackingListe implements OnInit {
   editPacking(packing: Packing) {
     this.packing = {
       ...packing,
-      date_debut: packing.date_debut ? new Date(packing.date_debut) : undefined,
-      date_fin: packing.date_fin ? new Date(packing.date_fin) : undefined
+      date: packing.date ? new Date(packing.date) : undefined
     };
     this.selectedPrestataire = packing.prestataire || null;
     this.packingDialog = true;
@@ -350,11 +346,9 @@ export class PackingListe implements OnInit {
 
     const packingData: CreatePackingDto | UpdatePackingDto = {
       prestataire_id: this.selectedPrestataire.id,
-      date_debut: this.formatDate(this.packing.date_debut),
-      date_fin: this.formatDate(this.packing.date_fin),
+      date: this.formatDate(this.packing.date),
       nb_rouleaux: this.packing.nb_rouleaux || 0,
       prix_par_rouleau: this.packing.prix_par_rouleau || 0,
-      montant: this.packing.montant || 0,
       statut: this.packing.statut,
       notes: this.packing.notes ?? undefined
     };

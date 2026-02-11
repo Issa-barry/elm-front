@@ -35,6 +35,10 @@ export const appRoutes: Routes = [
                 path: 'produits',
                 loadChildren: () => import('@/pages/produits/produits.routes'),
             },
+             {
+                path: 'parametres',
+                loadChildren: () => import('@/pages/parametres/parametres.routes'),
+            },
             {
                 path: 'dashboard-banking',
                 loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then(c => c.BankingDashboard),
