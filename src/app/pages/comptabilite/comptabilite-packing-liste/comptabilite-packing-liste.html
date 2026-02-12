@@ -3,5 +3,5 @@
   <app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
 </div>
 
-<app-comptabilite-packing-tableau (dataChanged)="statsWidget.loadStats()"></app-comptabilite-packing-tableau>
+<app-comptabilite-packing-tableau (dataChanged)="statsWidget.loadStats($event)"></app-comptabilite-packing-tableau>
  

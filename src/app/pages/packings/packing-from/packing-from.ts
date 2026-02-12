@@ -24,7 +24,7 @@ class PackingFormModel {
   montant: number = 0;
   statut: PackingStatut = 'valide';
   notes?: string | null;
-
+ 
   constructor(data?: Partial<Packing>) {
     if (data) {
       this.id = data.id;
@@ -84,6 +84,9 @@ export class PackingFrom implements OnInit {
 
     if (this.mode === 'create') {
       this.isEditing = true;
+      if (!this.model.date) {
+        this.model.date = new Date();
+      }
     }
   }
 

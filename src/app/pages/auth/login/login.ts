@@ -8,23 +8,25 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
+import { SelectModule } from 'primeng/select';
 import { LayoutService } from '@/layout/service/layout.service';
 import { AppConfigurator } from '@/layout/components/app.configurator';
 import { AuthService } from '@/services/auth/auth.service';
+import { COUNTRIES } from '@/models/country.model';
  
 @Component({
   selector: 'app-login',standalone: true,
     imports: [
       CommonModule,
         CheckboxModule,
-        InputTextModule,
+        InputTextModule, 
         FormsModule,
         RouterModule,
         AppConfigurator,
         IconFieldModule,
         InputIconModule,
         ButtonModule,
-
+        SelectModule,
          ReactiveFormsModule,
          MessageModule
     ],
@@ -44,9 +46,13 @@ export class Login {
     errorMessage = signal<string | null>(null);
     fieldErrors = signal<Record<string, string[]>>({});
 
+    // Code pays
+    selectedCountry = COUNTRIES[0]; // Guinée par défaut
+    countries = COUNTRIES;
+
     // Formulaire réactif
     loginForm: FormGroup = this.fb.group({
-        identifier: ['', [Validators.required]],
+        phone: ['', [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         remember_me: [false]
     });
@@ -68,8 +74,14 @@ export class Login {
         // Démarrer le chargement
         this.isLoading.set(true);
 
+        // Construire les credentials avec le code pays + téléphone
+        const credentials = {
+            ...this.loginForm.value,
+            phone: this.selectedCountry.dialCode + this.loginForm.value.phone
+        };
+
         // Appeler le service d'authentification
-        this.authService.login(this.loginForm.value).subscribe({
+        this.authService.login(credentials).subscribe({
             next: (response) => {
                 this.isLoading.set(false);
                 

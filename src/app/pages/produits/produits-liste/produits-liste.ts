@@ -76,6 +76,7 @@ export class ProduitsListe implements OnInit {
      produits: Produit[] = [];
      produit: Produit = new Produit();
     loading: boolean = true;
+    saving: boolean = false;
 
     ///
     filterFields: string[] = ['code', 'nom', 'description', 'type', 'statut', 'qte_stock'];
@@ -268,9 +269,11 @@ export class ProduitsListe implements OnInit {
 
     saveProduit() {
         this.submitted = true;
-        if (!this.produit.nom?.trim() || !this.produit.type) {
+        if (!this.produit.nom?.trim() || !this.produit.type || this.saving) {
             return;
         }
+
+        this.saving = true;
 
         const dto: CreateProduitDto = {
             nom: this.produit.nom.trim(),
@@ -294,24 +297,43 @@ export class ProduitsListe implements OnInit {
                 this.produitDialog = false;
                 this.produit = new Produit();
                 this.submitted = false;
+                this.saving = false;
                 this.loadProduits();
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Successful',
-                    detail: isUpdate ? 'Product Updated' : 'Product Created',
+                    summary: 'Succès',
+                    detail: isUpdate ? 'Produit mis à jour' : 'Produit créé',
                     life: 3000
                 });
             },
             error: (err) => {
-                console.error('Erreur lors de la sauvegarde du produit :', err);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erreur',
-                    detail: 'Sauvegarde impossible.',
-                    life: 3000
-                });
+                this.saving = false;
+                this.showApiError(err, 'Sauvegarde impossible');
             }
         });
+    }
+
+    private showApiError(err: any, fallback: string): void {
+        const summary = err.error?.message || fallback;
+
+        if (err.status === 422 && err.error?.errors) {
+            const messages = Object.values(err.error.errors).flat() as string[];
+            messages.forEach(msg => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary,
+                    detail: msg,
+                    life: 5000
+                });
+            });
+        } else {
+            this.messageService.add({
+                severity: 'error',
+                summary,
+                detail: '',
+                life: 5000
+            });
+        }
     }
 
      goToNewProduits() {

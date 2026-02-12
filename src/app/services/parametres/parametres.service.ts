@@ -40,7 +40,7 @@ export class ParametresService {
   updateParametre(id: number, data: UpdateParametreDto): Observable<ApiResponse<Parametre>> {
     return this.http.put<ApiResponse<Parametre>>(`${this.apiUrl}/${id}`, data);
   }
-
+ 
   /**
    * Récupérer les périodes disponibles pour un mois/année
    */

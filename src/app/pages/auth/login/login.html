@@ -12,7 +12,7 @@
     <path
         [attr.fill]="isDarkTheme() ? 'var(--p-primary-800)' : 'var(--p-primary-400)'"
         d="M478.4 581c3.2 0.8 6.4 1.7 9.5 2.5c196.2 52.5 388.7 133.5 593.5 176.6c174.2 36.6 349.5 29.2 518.6-10.2V0H0v574.9c52.3-17.6 106.5-27.7 161.1-30.9C268.4 537.4 375.7 554.2 478.4 581z"
-    />
+    /> 
     <path
         [attr.fill]="isDarkTheme() ? 'var(--p-primary-700)' : 'var(--p-primary-300)'"
         d="M181.8 259.4c98.2 6 191.9 35.2 281.3 72.1c2.8 1.1 5.5 2.3 8.3 3.4c171 71.6 342.7 158.5 531.3 207.7c198.8 51.8 403.4 40.8 597.3-14.8V0H0v283.2C59 263.6 120.6 255.7 181.8 259.4z"
@@ -48,32 +48,54 @@
         }
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col">
-            <!-- Champ Identifiant (Email ou Téléphone) -->
+            <!-- Champ Téléphone avec code pays -->
             <div class="mb-6">
-                <p-iconfield class="w-full">
-                    <p-inputicon class="pi pi-user" />
+                <div class="flex gap-2">
+                    <p-select
+                        [(ngModel)]="selectedCountry"
+                        [ngModelOptions]="{standalone: true}"
+                        [options]="countries"
+                        optionLabel="name"
+                        [disabled]="isLoading()"
+                        class="w-36"
+                    >
+                        <ng-template let-country pTemplate="selectedItem">
+                            <div class="flex items-center gap-2" *ngIf="country">
+                                <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
+                                <span class="font-semibold">{{ country.dialCode }}</span>
+                            </div>
+                        </ng-template>
+                        <ng-template let-country pTemplate="item">
+                            <div class="flex items-center gap-2">
+                                <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
+                                <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                                <span>{{ country.name }}</span>
+                            </div>
+                        </ng-template>
+                    </p-select>
+
                     <input
-                        id="identifier"
-                        type="text"
+                        id="phone"
+                        type="tel"
                         pInputText
-                        formControlName="identifier"
-                        class="w-full md:w-100"
-                        [class.ng-invalid]="isFieldInvalid('identifier') || hasFieldError('identifier')"
-                        [class.ng-dirty]="isFieldInvalid('identifier') || hasFieldError('identifier')"
-                        placeholder="Email ou téléphone"
+                        formControlName="phone"
+                        class="flex-1"
+                        [class.ng-invalid]="isFieldInvalid('phone') || hasFieldError('phone')"
+                        [class.ng-dirty]="isFieldInvalid('phone') || hasFieldError('phone')"
+                        placeholder="Numéro de téléphone"
                         [disabled]="isLoading()"
                     />
-                </p-iconfield>
-                
-                @if (isFieldInvalid('identifier')) {
+                </div>
+
+                @if (isFieldInvalid('phone')) {
                     <small class="text-red-500 mt-1 block">
-                        L'identifiant est obligatoire
+                        Le numéro de téléphone est obligatoire
                     </small>
                 }
-                
-                @if (hasFieldError('identifier')) {
+
+                @if (hasFieldError('phone')) {
                     <small class="text-red-500 mt-1 block">
-                        {{ getFieldError('identifier') }}
+                        {{ getFieldError('phone') }}
                     </small>
                 }
             </div>

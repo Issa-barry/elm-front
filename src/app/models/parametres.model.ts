@@ -24,8 +24,7 @@ export class Parametre {
 
   static fromApi(data: any): Parametre {
     return new Parametre(data);
-  }
-
+  } 
   static fromApiArray(data: any[]): Parametre[] {
     return data.map(item => Parametre.fromApi(item));
   }

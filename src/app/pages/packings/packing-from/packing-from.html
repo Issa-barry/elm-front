@@ -1,7 +1,7 @@
-<div class="card">
+﻿<div class="card">
   <div class="flex justify-between items-center mb-6">
     <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
-      {{ mode === 'create' ? 'Nouveau Packing' : 'Détails du Packing' }}
+      {{ mode === 'create' ? 'Nouveau packing' : 'Détails du packing' }}
     </span>
 
     <!-- Bouton Modifier -->
@@ -14,7 +14,7 @@
       class="w-auto">
       <i class="pi pi-pencil mr-2"></i>
       Modifier
-    </button>
+    </button> 
   </div>
 
   <div class="grid grid-cols-12 gap-4">
@@ -61,7 +61,7 @@
             </ng-template>
           </p-select>
           <small class="text-red-500" *ngIf="submitted && !model.prestataire_id && isEditing">
-            Veuillez sélectionner un machiniste
+            Veuillez sélectionnez un machiniste
           </small>
         </div>
 
@@ -169,7 +169,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Colonne 1 : Informations prestataire et période -->
+              <!-- Colonne 1 : Informations prestataire et pér période -->
               <div class="space-y-3">
                 <div class="flex items-start gap-3">
                   <i class="pi pi-user text-blue-600 mt-1"></i>
@@ -260,3 +260,5 @@
     </div>
   </div>
 </div>
+
+

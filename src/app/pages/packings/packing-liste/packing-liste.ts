@@ -19,7 +19,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonModule } from 'primeng/skeleton';
 import { forkJoin } from 'rxjs';
 
 import { PackingService } from '@/services/packing/packing.service';
@@ -70,7 +70,7 @@ interface StatutOption {
     AutoCompleteModule,
     TextareaModule,
     TooltipModule,
-    ProgressSpinnerModule
+    SkeletonModule
   ],
   providers: [MessageService, ConfirmationService]
 })
@@ -87,8 +87,7 @@ export class PackingListe implements OnInit {
   dialogLoading: boolean = false;
 
   // Filtres
-  filterDateDebut: Date | null = null;
-  filterDateFin: Date | null = null;
+  filterDateRange: Date[] | null = null;
   filterStatut: string | null = null;
 
   // Prix rouleau par défaut (depuis les paramètres)
@@ -140,13 +139,18 @@ export class PackingListe implements OnInit {
     }));
   }
 
+  onDateRangeSelect() {
+    if (this.filterDateRange && this.filterDateRange[1]) {
+      this.loadPackings();
+    }
+  }
+
   onDateFilter() {
     this.loadPackings();
   }
 
   clearDateFilters() {
-    this.filterDateDebut = null;
-    this.filterDateFin = null;
+    this.filterDateRange = null;
     this.filterStatut = null;
     this.loadPackings();
   }
@@ -154,11 +158,11 @@ export class PackingListe implements OnInit {
   loadPackings() {
     this.loading = true;
     const filters: any = {};
-    if (this.filterDateDebut) {
-      filters.date_debut = this.formatDate(this.filterDateDebut);
+    if (this.filterDateRange?.[0]) {
+      filters.date_debut = this.formatDate(this.filterDateRange[0]);
     }
-    if (this.filterDateFin) {
-      filters.date_fin = this.formatDate(this.filterDateFin);
+    if (this.filterDateRange?.[1]) {
+      filters.date_fin = this.formatDate(this.filterDateRange[1]);
     }
     if (this.filterStatut) {
       filters.statut = this.filterStatut;
@@ -245,6 +249,7 @@ export class PackingListe implements OnInit {
         this.prestataires = prestataires.data.filter(p => p.type === 'machiniste');
         this.packing = {
           statut: 'valide',
+          date: new Date(),
           nb_rouleaux: 0,
           prix_par_rouleau: this.prixRouleauDefaut,
           montant: 0
@@ -254,6 +259,7 @@ export class PackingListe implements OnInit {
       error: () => {
         this.packing = {
           statut: 'valide',
+          date: new Date(),
           nb_rouleaux: 0,
           prix_par_rouleau: this.prixRouleauDefaut,
           montant: 0
@@ -337,13 +343,6 @@ export class PackingListe implements OnInit {
 
     this.saving = true;
 
-    this.messageService.add({
-      severity: 'info',
-      summary: 'En cours',
-      detail: 'Enregistrement en cours...',
-      life: 2000
-    });
-
     const packingData: CreatePackingDto | UpdatePackingDto = {
       prestataire_id: this.selectedPrestataire.id,
       date: this.formatDate(this.packing.date),
@@ -356,13 +355,7 @@ export class PackingListe implements OnInit {
     if (this.packing.id) {
       // Mise à jour
       this.packingService.updatePacking(this.packing.id, packingData).subscribe({
-        next: (response) => {
-          const index = this.packings().findIndex(p => p.id === this.packing.id);
-          if (index !== -1) {
-            const updatedPackings = [...this.packings()];
-            updatedPackings[index] = response.data;
-            this.packings.set(updatedPackings);
-          }
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
@@ -372,22 +365,17 @@ export class PackingListe implements OnInit {
           this.packingDialog = false;
           this.packing = {};
           this.saving = false;
+          this.loadPackings();
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de mettre à jour le packing',
-            life: 3000
-          });
+        error: (err) => {
+          this.showApiError(err, 'Impossible de mettre à jour le packing');
           this.saving = false;
         }
       });
     } else {
       // Création
       this.packingService.createPacking(packingData as CreatePackingDto).subscribe({
-        next: (response) => {
-          this.packings.set([...this.packings(), response.data]);
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
@@ -397,14 +385,10 @@ export class PackingListe implements OnInit {
           this.packingDialog = false;
           this.packing = {};
           this.saving = false;
+          this.loadPackings();
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de créer le packing',
-            life: 3000
-          });
+        error: (err) => {
+          this.showApiError(err, 'Impossible de créer le packing');
           this.saving = false;
         }
       });
@@ -443,5 +427,28 @@ export class PackingListe implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR');
+  }
+
+  private showApiError(err: any, fallback: string): void {
+    const summary = err.error?.message || fallback;
+
+    if (err.status === 422 && err.error?.errors) {
+      const messages = Object.values(err.error.errors).flat() as string[];
+      messages.forEach(msg => {
+        this.messageService.add({
+          severity: 'error',
+          summary,
+          detail: msg,
+          life: 5000
+        });
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary,
+        detail: '',
+        life: 5000
+      });
+    }
   }
 }

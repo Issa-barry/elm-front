@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
-import { ComptabiliteSummary } from '@/models/facture-packing.model';
+import { ComptabiliteSummary, ComptabiliteFilters } from '@/models/facture-packing.model';
 
 @Component({
   selector: 'app-stats-comptabilite-packing-widget',
@@ -22,8 +22,8 @@ export class StatsComptabilitePackingWidget implements OnInit {
     this.loadStats();
   }
 
-  loadStats() {
-    this.paiementService.getComptabilite().subscribe({
+  loadStats(filters?: ComptabiliteFilters) {
+    this.paiementService.getComptabilite(filters).subscribe({
       next: (response) => {
         this.summary = new ComptabiliteSummary(response.data);
       },

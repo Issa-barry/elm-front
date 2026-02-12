@@ -26,6 +26,7 @@ import { FacturePaiementService } from '@/services/comptabilite/facture-paiement
 import {
   ComptabilitePrestataire,
   ComptabiliteSummary,
+  ComptabiliteFilters,
   PreviewFacturePacking,
   StoreFacturePackingDto,
 } from '@/models/facture-packing.model';
@@ -69,7 +70,7 @@ interface ExportColumn {
   providers: [MessageService],
 })
 export class ComptabilitePackingTableau implements OnInit {
-  @Output() dataChanged = new EventEmitter<void>();
+  @Output() dataChanged = new EventEmitter<ComptabiliteFilters>();
 
   filterFields: string[] = ['prestataire_nom', 'prestataire_phone', 'montant_total_du'];
 
@@ -150,7 +151,7 @@ export class ComptabilitePackingTableau implements OnInit {
         this.comptaSummary = new ComptabiliteSummary(response.data);
         this.applyStatutFilter();
         this.loading = false;
-        this.dataChanged.emit();
+        this.dataChanged.emit(filters);
       },
       error: () => {
         this.messageService.add({

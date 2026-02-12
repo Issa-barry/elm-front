@@ -7,7 +7,7 @@ import { AppSidebar } from './app.sidebar';
 import { LayoutService } from '@/layout/service/layout.service';
 import { AppConfigurator } from './app.configurator';
 import { AppProfileSidebar } from './app.profilesidebar';
-
+ 
 @Component({
     selector: 'app-layout',
     standalone: true,
