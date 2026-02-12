@@ -15,7 +15,7 @@
             (click)="enableEditing()"
             class="w-auto">
         </button>
-    </div>
+    </div> 
 
     <p-fluid class="grid grid-cols-12 gap-4 flex-wrap">
         <div class="col-span-12 lg:col-span-8">
@@ -75,12 +75,13 @@
                         mode="currency"
                         currency="GNF"
                         locale="fr-GN"
+                        [min]="0"
                         [disabled]="fieldsDisabled"
-                        [invalid]="submitted && isPrixUsineRequired() && !product.prix_usine"
+                        [invalid]="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine)"
                         placeholder="0"
                         fluid>
                     </p-inputnumber>
-                    <small class="text-red-500" *ngIf="submitted && isPrixUsineRequired() && !product.prix_usine && isEditing">
+                    <small class="text-red-500" *ngIf="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine) && isEditing">
                         Prix usine obligatoire pour "Fabricable".
                     </small>
                 </div>
@@ -96,12 +97,13 @@
                         mode="currency"
                         currency="GNF"
                         locale="fr-GN"
+                        [min]="0"
                         [disabled]="fieldsDisabled"
-                        [invalid]="submitted && isPrixAchatRequired() && !product.prix_achat"
+                        [invalid]="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat)"
                         placeholder="0"
                         fluid>
                     </p-inputnumber>
-                    <small class="text-red-500" *ngIf="submitted && isPrixAchatRequired() && !product.prix_achat && isEditing">
+                    <small class="text-red-500" *ngIf="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat) && isEditing">
                         Prix d'achat obligatoire pour ce type.
                     </small>
                 </div>
@@ -117,13 +119,21 @@
                         mode="currency"
                         currency="GNF"
                         locale="fr-GN"
+                        [min]="0"
                         [disabled]="fieldsDisabled"
-                        [invalid]="submitted && isPrixVenteRequired() && !product.prix_vente"
+                        [invalid]="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente)"
                         placeholder="0"
                         fluid>
                     </p-inputnumber>
-                    <small class="text-red-500" *ngIf="submitted && isPrixVenteRequired() && !product.prix_vente && isEditing">
+                    <small class="text-red-500" *ngIf="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente) && isEditing">
                         Prix de vente obligatoire pour ce type.
+                    </small>
+                </div>
+
+                <!-- Règle service: au moins un prix -->
+                <div class="col-span-12" *ngIf="showServicePriceError()">
+                    <small class="text-red-500">
+                        Pour un service, renseignez au moins un prix : achat ou vente.
                     </small>
                 </div>
 
@@ -205,10 +215,16 @@
                 </div>
             </div>
 
-            <!-- En stock -->
+            <!-- Statut actif/inactif -->
             <div class="border border-surface-200 dark:border-surface-700 flex justify-between items-center px-4 rounded">
-                <span class="text-surface-900 dark:text-surface-0 font-bold p-4">En stock</span>
-                <p-toggleswitch [(ngModel)]="product.in_stock" [disabled]="fieldsDisabled"></p-toggleswitch>
+                <span class="text-surface-900 dark:text-surface-0 font-bold p-4">
+                    {{ isActifSwitch ? 'Actif' : 'Inactif' }}
+                </span>
+                <p-toggleswitch
+                    [ngModel]="isActifSwitch"
+                    (ngModelChange)="onStatutToggleChange($event)"
+                    [disabled]="fieldsDisabled"
+                ></p-toggleswitch>
             </div>
 
             <!-- Quantité en stock -->

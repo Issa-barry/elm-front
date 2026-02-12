@@ -12,3 +12,4 @@ export default [
     { path: 'produits/:id/edit', component: ProduitsEdit },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
+ 
