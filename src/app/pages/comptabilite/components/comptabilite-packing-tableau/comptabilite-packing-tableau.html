@@ -16,11 +16,10 @@
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
-        styleClass="p-datatable-sm"
     >
         <!-- Caption = filters + search -->
         <ng-template #caption>
-            <div class="table-caption">
+            <div class="table-caption mb-4">
                 <div class="table-caption__filters">
                     <p-datepicker
                         [(ngModel)]="filtrePeriodeDebut"
