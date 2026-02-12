@@ -1,7 +1,7 @@
 import { User } from './user.model';
 
 export interface LoginRequest {
-  identifier: string;
+  phone: string;
   password: string;
   remember_me?: boolean;
 }

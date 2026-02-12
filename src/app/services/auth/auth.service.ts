@@ -77,7 +77,7 @@ export class AuthService {
 
   /**
    * Déconnexion
-   */
+   */ 
   logout(): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.API_URL}/logout`, {}).pipe(
       tap(() => {
@@ -90,7 +90,7 @@ export class AuthService {
         this.router.navigate(['/auth/login']);
         return this.handleError(error);
       })
-    );
+    ); 
   }
 
   /**

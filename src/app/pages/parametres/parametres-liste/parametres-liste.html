@@ -1,1 +1,78 @@
-<p>parametres-liste works!</p>
+<p-toast></p-toast>
+
+<div class="rounded-t-3xl bg-surface-0 dark:bg-surface-900 flex-auto py-6 lg:py-8 px-8 lg:px-20">
+  <div class="flex flex-col w-full pb-8 gap-2">
+    <h2 class="mt-0 text-surface-900 dark:text-surface-0 font-medium text-2xl leading-tight">Parametres</h2>
+    <p class="mt-0 text-surface-500 dark:text-surface-300 leading-tight">Gestion des parametres de l'application</p>
+  </div>
+
+  <p-divider></p-divider>
+
+  <div class="grid grid-cols-12 gap-4 py-6 lg:py-8">
+    <div class="col-span-12 lg:col-span-2">
+      <ul class="list-none m-0 p-0 hidden lg:flex flex-col justify-start">
+        <li class="border-l-2 border-surface-200 dark:border-surface-700 -ml-[2px]">
+          <a class="flex items-center py-3 px-4 text-surface-700 dark:text-surface-200 font-medium">
+            <i class="pi pi-user mr-2 text-base! leading-normal!"></i>
+            <span>General</span>
+          </a>
+        </li>
+        <li class="border-l-2 border-primary -ml-[2px]">
+          <a class="flex items-center py-3 px-4 text-primary font-medium">
+            <i class="pi pi-cog mr-2 text-base! leading-normal!"></i>
+            <span>Packing</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-span-12 lg:col-span-10 xl:col-span-10 bg-surface-0 dark:bg-surface-900 p-8 rounded-2xl flex-auto">
+      <div class="flex flex-col gap-8">
+        <div class="text-surface-900 dark:text-surface-0 font-semibold text-lg leading-tight">Parametres Packing</div>
+
+        <div *ngIf="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
+        <div *ngIf="successMessage" class="text-green-600 text-sm">{{ successMessage }}</div>
+
+        <div class="flex gap-12 flex-col-reverse md:flex-row">
+          <div class="flex-auto flex flex-col gap-6">
+            <div class="flex flex-col gap-2">
+              <label for="produit_rouleau_id" class="text-surface-900 dark:text-surface-0">ID du produit rouleau (packing)</label>
+              <input
+                id="produit_rouleau_id"
+                type="number"
+                min="0"
+                step="1"
+                pInputText
+                class="w-full"
+                [(ngModel)]="idRouleauPacking"
+                [disabled]="loading || saving"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="prix_rouleau_defaut" class="text-surface-900 dark:text-surface-0">Prix par defaut du rouleau de packing</label>
+              <input
+                id="prix_rouleau_defaut"
+                type="number"
+                pInputText
+                class="w-full"
+                [(ngModel)]="prixRouleauDefaut"
+                [disabled]="loading || saving"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p-button
+            label="Enregistrer"
+            icon="pi pi-save"
+            [loading]="saving"
+            [disabled]="loading || saving"
+            (onClick)="savePackingParametres()"
+          ></p-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

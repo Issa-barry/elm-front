@@ -120,12 +120,14 @@
               >
                 <ng-template let-country pTemplate="item">
                   <div class="flex items-center gap-2">
+                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
                     <span class="font-semibold text-primary">{{ country.dialCode }}</span>
                     <span>{{ country.name }}</span>
                   </div>
                 </ng-template>
                 <ng-template let-country pTemplate="selectedItem">
                   <div class="flex items-center gap-2" *ngIf="country">
+                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
                     <span class="font-semibold text-primary">{{ country.dialCode }}</span>
                     <span>{{ country.name }}</span>
                   </div>

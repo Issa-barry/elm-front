@@ -11,8 +11,8 @@
             ></path>
         </svg>
         <div class="z-20 relative text-white">
-            <div class="text-xl font-semibold mb-4">Total dû</div>
-            <div class="text-2xl mb-8 font-bold">{{ summary ? formatCurrency(summary.montant_global_du) : '...' }}</div>
+            <div class="text-xl font-semibold mb-4">Montant Total</div>
+            <div class="text-2xl mb-8 font-bold">{{ summary ? formatCurrency(summary.montant_total) : '...' }}</div>
         </div>
     </div>
 </div>
@@ -20,7 +20,7 @@
 <div class="col-span-12 md:col-span-6 xl:col-span-3">
     <div class="card relative overflow-hidden h-40">
         <div class="flex items-center justify-between mb-4">
-            <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold">Total versé</div>
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold">Total payé</div>
         </div>
         <div class="text-2xl text-green-600 mb-8 font-bold">{{ summary ? formatCurrency(summary.total_verse) : '...' }}</div>
     </div>
@@ -28,14 +28,14 @@
 
 <div class="col-span-12 md:col-span-6 xl:col-span-3">
     <div class="card relative overflow-hidden h-40 flex flex-col items-center justify-center">
-        <span class="text-surface-900 dark:text-surface-0 text-lg mb-6 font-medium">Non facturé</span>
-        <span class="text-2xl text-orange-500 font-bold">{{ summary ? formatCurrency(summary.total_non_facture) : '...' }}</span>
+        <span class="text-surface-900 dark:text-surface-0 text-lg mb-6 font-medium">Reste à payer</span>
+        <span class="text-2xl text-orange-500 font-bold">{{ summary ? formatCurrency(summary.montant_global_du) : '...' }}</span>
     </div>
 </div>
 
 <div class="col-span-12 md:col-span-6 xl:col-span-3">
     <div class="card relative overflow-hidden h-40 flex flex-col items-center justify-center">
-        <span class="text-surface-900 dark:text-surface-0 text-lg mb-6 font-medium">Prestataires</span>
+        <span class="text-surface-900 dark:text-surface-0 text-lg mb-6 font-medium">Prestataires à payer</span>
         <span class="text-2xl text-primary font-bold">{{ summary ? summary.nb_prestataires : '...' }}</span>
     </div>
 </div>

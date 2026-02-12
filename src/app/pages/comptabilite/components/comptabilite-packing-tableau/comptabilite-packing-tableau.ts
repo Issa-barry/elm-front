@@ -1,5 +1,6 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { Component, OnInit, Output, EventEmitter, signal, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,16 +18,18 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
-import { PackingPaiementService } from '@/services/comptabilite/packing-paiement/packing-paiement.service';
+import { InputNumberModule } from 'primeng/inputnumber';
+
+import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
 import {
   ComptabilitePrestataire,
   ComptabiliteSummary,
-  PreviewPaiementPacking,
-  StorePaiementPackingDto,
-  ModePaiement,
-  MODE_PAIEMENT_LABELS,
-} from '@/models/paiement-packing.model';
+  ComptabiliteFilters,
+  PreviewFacturePacking,
+  StoreFacturePackingDto,
+} from '@/models/facture-packing.model';
 
 interface Column {
   field: string;
@@ -36,11 +39,6 @@ interface Column {
 interface ExportColumn {
   title: string;
   dataKey: string;
-}
-
-interface ModePaiementOption {
-  label: string;
-  value: ModePaiement;
 }
 
 @Component({
@@ -66,60 +64,52 @@ interface ModePaiementOption {
     DatePickerModule,
     TextareaModule,
     TooltipModule,
+    InputNumberModule,
+    ToggleSwitchModule,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService],
 })
 export class ComptabilitePackingTableau implements OnInit {
+  @Output() dataChanged = new EventEmitter<ComptabiliteFilters>();
+
   filterFields: string[] = ['prestataire_nom', 'prestataire_phone', 'montant_total_du'];
 
   prestataires = signal<ComptabilitePrestataire[]>([]);
   selectedPrestataires: ComptabilitePrestataire[] | null = null;
   comptaSummary: ComptabiliteSummary | null = null;
   loading: boolean = false;
-  saving: boolean = false;
-  submitted: boolean = false;
 
   // Filtres période
   filtrePeriodeDebut: Date | null = null;
   filtrePeriodeFin: Date | null = null;
 
-  // Dialog paiement
-  paiementDialog: boolean = false;
-  selectedItem: ComptabilitePrestataire | null = null;
-  paiementData: {
-    periode_debut: Date | null;
-    periode_fin: Date | null;
-    date_paiement: Date | null;
-    mode_paiement: ModePaiement;
-    notes: string;
-  } = {
-    periode_debut: null,
-    periode_fin: null,
-    date_paiement: null,
-    mode_paiement: 'especes',
-    notes: '',
-  };
-
-  modesPaiement: ModePaiementOption[] = [
-    { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
-    { label: MODE_PAIEMENT_LABELS.virement, value: 'virement' },
-    { label: MODE_PAIEMENT_LABELS.cheque, value: 'cheque' },
-    { label: MODE_PAIEMENT_LABELS.mobile_money, value: 'mobile_money' },
+  // Filtre statut
+  filtreStatut: string | null = null;
+  statutOptions = [
+    { label: 'Tous', value: null },
+    { label: 'Impayé', value: 'impaye' },
+    { label: 'Partiel', value: 'partiel' },
+    { label: 'Soldé', value: 'solde' },
   ];
+
+  selectedItem: ComptabilitePrestataire | null = null;
 
   // Dialog prévisualisation
   previewDialog: boolean = false;
-  previewData: PreviewPaiementPacking | null = null;
+  previewData: PreviewFacturePacking | null = null;
   previewLoading: boolean = false;
+
+  // Facturation
+  facturerLoading: boolean = false;
 
   @ViewChild('dt') dt!: Table;
   exportColumns!: ExportColumn[];
   cols!: Column[];
 
   constructor(
-    private paiementService: PackingPaiementService,
+    private router: Router,
+    private factureService: FacturePaiementService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit() {
@@ -150,17 +140,18 @@ export class ComptabilitePackingTableau implements OnInit {
     const filters: any = {};
 
     if (this.filtrePeriodeDebut) {
-      filters.periode_debut = this.formatDate(this.filtrePeriodeDebut);
+      filters.date_debut = this.formatDate(this.filtrePeriodeDebut);
     }
     if (this.filtrePeriodeFin) {
-      filters.periode_fin = this.formatDate(this.filtrePeriodeFin);
+      filters.date_fin = this.formatDate(this.filtrePeriodeFin);
     }
 
-    this.paiementService.getComptabilite(filters).subscribe({
+    this.factureService.getComptabilite(filters).subscribe({
       next: (response) => {
         this.comptaSummary = new ComptabiliteSummary(response.data);
-        this.prestataires.set(this.comptaSummary.prestataires);
+        this.applyStatutFilter();
         this.loading = false;
+        this.dataChanged.emit(filters);
       },
       error: () => {
         this.messageService.add({
@@ -174,73 +165,23 @@ export class ComptabilitePackingTableau implements OnInit {
     });
   }
 
+  applyStatutFilter() {
+    if (!this.comptaSummary) return;
+    if (this.filtreStatut) {
+      this.prestataires.set(
+        this.comptaSummary.prestataires.filter(p => p.statut === this.filtreStatut)
+      );
+    } else {
+      this.prestataires.set(this.comptaSummary.prestataires);
+    }
+  }
+
   exportCSV() {
     this.dt.exportCSV();
   }
 
   onGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
-  openPaiement(item: ComptabilitePrestataire) {
-    this.selectedItem = item;
-    this.paiementData = {
-      periode_debut: this.filtrePeriodeDebut ? new Date(this.filtrePeriodeDebut) : null,
-      periode_fin: this.filtrePeriodeFin ? new Date(this.filtrePeriodeFin) : null,
-      date_paiement: new Date(),
-      mode_paiement: 'especes',
-      notes: '',
-    };
-    this.submitted = false;
-    this.paiementDialog = true;
-  }
-
-  hidePaiementDialog() {
-    this.paiementDialog = false;
-    this.submitted = false;
-  }
-
-  savePaiement() {
-    this.submitted = true;
-
-    if (!this.selectedItem || !this.paiementData.periode_debut || !this.paiementData.periode_fin || !this.paiementData.date_paiement || this.saving) {
-      return;
-    }
-
-    this.saving = true;
-
-    const dto: StorePaiementPackingDto = {
-      prestataire_id: this.selectedItem.prestataire_id,
-      periode_debut: this.formatDate(this.paiementData.periode_debut),
-      periode_fin: this.formatDate(this.paiementData.periode_fin),
-      date_paiement: this.formatDate(this.paiementData.date_paiement),
-      mode_paiement: this.paiementData.mode_paiement,
-      notes: this.paiementData.notes || undefined,
-    };
-
-    this.paiementService.createPaiement(dto).subscribe({
-      next: (response) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: `Paiement ${response.data.reference} créé avec succès`,
-          life: 3000,
-        });
-        this.paiementDialog = false;
-        this.saving = false;
-        this.loadComptabilite();
-      },
-      error: (error) => {
-        const msg = error?.error?.message || 'Impossible de créer le paiement';
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: msg,
-          life: 5000,
-        });
-        this.saving = false;
-      },
-    });
   }
 
   openPreview(item: ComptabilitePrestataire) {
@@ -252,9 +193,9 @@ export class ComptabilitePackingTableau implements OnInit {
     this.previewLoading = true;
     this.previewData = null;
 
-    this.paiementService.getPreview(item.prestataire_id, periodeDebut, periodeFin).subscribe({
+    this.factureService.getPreview(item.prestataire_id, periodeDebut, periodeFin).subscribe({
       next: (response) => {
-        this.previewData = new PreviewPaiementPacking(response.data);
+        this.previewData = new PreviewFacturePacking(response.data);
         this.previewLoading = false;
       },
       error: () => {
@@ -266,6 +207,50 @@ export class ComptabilitePackingTableau implements OnInit {
         });
         this.previewLoading = false;
         this.previewDialog = false;
+      },
+    });
+  }
+
+  // ========================= Facturation =========================
+
+  facturerNonFactures() {
+    if (!this.selectedItem || this.facturerLoading) return;
+
+    this.facturerLoading = true;
+
+    const periodeDebut = this.filtrePeriodeDebut ? this.formatDate(this.filtrePeriodeDebut) : '2000-01-01';
+    const periodeFin = this.filtrePeriodeFin ? this.formatDate(this.filtrePeriodeFin) : '2099-12-31';
+
+    const dto: StoreFacturePackingDto = {
+      prestataire_id: this.selectedItem.prestataire_id,
+      date_debut: periodeDebut,
+      date_fin: periodeFin,
+    };
+
+    this.factureService.createFacture(dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Facture ${response.data.reference} créée`,
+          life: 3000,
+        });
+        this.facturerLoading = false;
+        if (this.selectedItem) {
+          this.selectedItem.nb_packings_non_factures = 0;
+          this.selectedItem.montant_non_facture = 0;
+        }
+        this.loadComptabilite();
+      },
+      error: (error) => {
+        const msg = error?.error?.message || 'Impossible de créer la facture';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.facturerLoading = false;
       },
     });
   }
@@ -288,5 +273,14 @@ export class ComptabilitePackingTableau implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR');
+  }
+
+  goToDetail(item: ComptabilitePrestataire) {
+    this.router.navigate(['/comptabilite/comptabilite-packing-detail', item.prestataire_id], {
+      queryParams: {
+        prestataire_nom: item.prestataire_nom,
+        prestataire_phone: item.prestataire_phone,
+      },
+    });
   }
 }
