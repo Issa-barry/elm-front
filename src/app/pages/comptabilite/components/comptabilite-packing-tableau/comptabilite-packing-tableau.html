@@ -64,6 +64,9 @@
                     <span class="col-header">Prestataire <p-sortIcon field="prestataire_nom" /></span>
                 </th>
                 <th>Téléphone</th>
+                <th pSortableColumn="derniere_date">
+                    <span class="col-header">Date <p-sortIcon field="derniere_date" /></span>
+                </th>
                 <th pSortableColumn="montant_facture" class="text-right">
                     <span class="col-header justify-end">Total <p-sortIcon field="montant_facture" /></span>
                 </th>
@@ -91,6 +94,7 @@
                     </div>
                 </td>
                 <td class="cell-secondary">{{ item.prestataire_phone }}</td>
+                <td class="cell-secondary">{{ formatDateDisplay(item.derniere_date) }}</td>
                 <td class="text-right cell-mono">{{ formatCurrency(item.montant_facture) }}</td>
                 <td class="text-right cell-mono cell-success">{{ formatCurrency(item.montant_verse) }}</td>
                 <td class="text-right cell-mono cell-bold">{{ formatCurrency(item.montant_restant_facture) }}</td>
@@ -111,7 +115,7 @@
 
         <ng-template #emptymessage>
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     <div class="empty-state">
                         <i class="pi pi-inbox"></i>
                         <span>Aucun prestataire trouvé</span>

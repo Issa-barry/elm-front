@@ -190,6 +190,9 @@ export class ComptabilitePrestataire {
   // Total dû (non facturé + restant sur factures)
   montant_total_du: number;
 
+  // Dernière date d'activité
+  derniere_date: string | null;
+
   // Statut calculé
   statut: 'impaye' | 'partiel' | 'solde';
 
@@ -208,6 +211,7 @@ export class ComptabilitePrestataire {
     this.montant_restant_facture = data.montant_restant_facture ?? 0;
 
     this.montant_total_du = data.montant_total_du ?? 0;
+    this.derniere_date = data.derniere_date ?? null;
 
     this.statut = this.montant_total_du === 0 ? 'solde'
       : this.montant_verse > 0 ? 'partiel'
