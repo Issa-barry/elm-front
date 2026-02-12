@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,18 +33,10 @@ import {
   FacturePackingStatutSeverity,
 } from '@/models/facture-packing.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
-import { ComptabilitePackingPaiement } from '../components/comptabilite-packing-paiement/comptabilite-packing-paiement';
+import { ComptabilitePackingPaiement, PaiementPayload } from '../components/comptabilite-packing-paiement/comptabilite-packing-paiement';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
 import { ComptabilitePackingPaiementDialog } from '../components/comptabilite-packing-paiement-dialog/comptabilite-packing-paiement-dialog';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  quantity: number;
-  price: number;
-}
 
 interface ModePaiementOption {
   label: string;
@@ -92,14 +84,6 @@ export class ComptabilitePackingDetail implements OnInit {
   prestataireId: number = 0;
   prestataireNom: string = '';
   prestatairePhone: string = '';
-
-  // Slide-over products
-  products = signal<Product[]>([
-    { id: '0', name: 'Everlight Canvas Backpack', description: 'Light Grey', quantity: 1, price: 39.0 },
-    { id: '1', name: 'Stride Low-Top Sneakers', description: 'Crimson Sole', quantity: 1, price: 52.0 },
-    { id: '2', name: 'Cozy Knit Beanie', description: 'Mustard', quantity: 1, price: 21.0 },
-  ]);
-  subtotal = computed(() => this.products().reduce((sum, p) => sum + p.quantity * p.price, 0));
 
   factures = signal<FacturePacking[]>([]);
   loading: boolean = false;
@@ -366,23 +350,58 @@ export class ComptabilitePackingDetail implements OnInit {
     return date.toLocaleDateString('fr-FR');
   }
 
-  removeProduct(index: number, event: Event) {
-    event.stopPropagation();
-    const currentProducts = this.products();
-    currentProducts.splice(index, 1);
-    this.products.set([...currentProducts]);
-  }
-
   goBack() {
     this.router.navigate(['/comptabilite/comptabilite-packing-liste']);
   }
 
-  openPaiement() {
-    // Logique pour ouvrir le slide-over de paiement
-    // Par exemple, vous pouvez utiliser un service de communication ou un signal partagé
-    // Ici, on va juste afficher une alerte pour la démonstration
-    this.paiementDialog = true;
+  // Slide-over paiement
+  slideoverVisible: boolean = false;
+  slideoverFacture: FacturePacking | null = null;
+  slideoverSaving: boolean = false;
+
+  openSlideoverPaiement(facture: FacturePacking) {
+    this.slideoverFacture = facture;
+    this.slideoverVisible = true;
   }
 
-  paiementDialog: boolean = false;
+  closeSlideoverPaiement() {
+    this.slideoverVisible = false;
+    this.slideoverFacture = null;
+  }
+
+  onSlideoverPay(payload: PaiementPayload) {
+    if (!this.slideoverFacture || this.slideoverSaving) return;
+
+    this.slideoverSaving = true;
+
+    const dto: StoreVersementDto = {
+      montant: payload.montant,
+      date_versement: this.formatDate(new Date()),
+      mode_paiement: payload.mode_paiement,
+    };
+
+    this.factureService.createVersement(this.slideoverFacture.id, dto).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistré`,
+          life: 3000,
+        });
+        this.slideoverSaving = false;
+        this.closeSlideoverPaiement();
+        this.loadFactures();
+      },
+      error: (error) => {
+        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.slideoverSaving = false;
+      },
+    });
+  }
 }

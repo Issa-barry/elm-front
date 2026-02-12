@@ -1,16 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { StyleClassModule } from 'primeng/styleclass';
+import { FacturePacking, ModePaiement } from '@/models/facture-packing.model';
 
-interface Product {
-    id: string;
-    name: string;
-    description: string;
-    quantity: number;
-    price: number;
+export interface PaiementPayload {
+  montant: number;
+  mode_paiement: ModePaiement;
 }
 
 @Component({
@@ -20,25 +18,38 @@ interface Product {
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule, StyleClassModule, InputNumberModule],
 })
-export class ComptabilitePackingPaiement {
-    products = signal<Product[]>([
-        {
-            id: '0',
-            name: '20260201-0001',
-            description: 'Light Grey',
-            quantity: 1,
-            price: 39.0
-        },
-       
-        
-    ]);
+export class ComptabilitePackingPaiement implements OnChanges {
+  @Input() facture: FacturePacking | null = null;
+  @Input() saving: boolean = false;
+  @Output() onPay = new EventEmitter<PaiementPayload>();
+  @Output() onClose = new EventEmitter<void>();
 
-    subtotal = computed(() => this.products().reduce((sum, product) => sum + product.quantity * product.price, 0));
+  montant: number | null = null;
+  selectedMode: ModePaiement = 'especes';
 
-    removeProduct(index: number, event: Event) {
-        event.stopPropagation();
-        const currentProducts = this.products();
-        currentProducts.splice(index, 1);
-        this.products.set([...currentProducts]);
+  ngOnChanges() {
+    if (this.facture) {
+      this.montant = this.facture.montant_restant;
+      this.selectedMode = 'especes';
     }
+  }
+
+  selectMode(mode: ModePaiement) {
+    this.selectedMode = mode;
+  }
+
+  confirmer() {
+    if (!this.montant || this.montant <= 0 || !this.facture) return;
+    this.onPay.emit({
+      montant: this.montant,
+      mode_paiement: this.selectedMode,
+    });
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+    }).format(value) + ' GNF';
+  }
 }

@@ -23,7 +23,7 @@ export const PRODUIT_STATUT_LABELS: Record<ProduitStatut, string> = {
   brouillon: 'Brouillon',
   actif: 'Actif',
   inactif: 'Inactif',
-  archive: 'Archivé',
+  archive: 'Archivé', 
   rupture_stock: 'Rupture de stock'
 };
 
