@@ -11,6 +11,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { SkeletonModule } from 'primeng/skeleton';
 
 import { RoleService } from '@/services/role/role.service';
+import { AuthService } from '@/services/auth/auth.service';
 import {
   ModulePermission,
   PermissionAction,
@@ -50,7 +51,8 @@ export class RolesEdit implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private roleService: RoleService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -197,6 +199,7 @@ export class RolesEdit implements OnInit {
     this.roleService.updatePermissions(this.roleId, dto).subscribe({
       next: (response) => {
         this.modules = response.data.modules;
+        this.refreshCurrentUserPermissions();
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
@@ -244,7 +247,15 @@ export class RolesEdit implements OnInit {
     });
   }
 
+  private refreshCurrentUserPermissions() {
+    this.authService.me().subscribe({
+      next: () => {},
+      error: () => {},
+    });
+  }
+
   goBack() {
     this.router.navigate(['/parametres']);
   }
 }
+
