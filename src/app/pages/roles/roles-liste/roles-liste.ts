@@ -152,6 +152,10 @@ export class RolesListe implements OnInit {
     this.createDialog = true;
   }
 
+  goToParametres() {
+    this.router.navigate(['/parametres']);
+  }
+
   createRole() {
     if (!this.newRoleName.trim() || this.creating) return;
 
