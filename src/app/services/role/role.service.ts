@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import {
   RoleWithModules,
@@ -8,6 +8,8 @@ import {
   UpdateRoleDto,
   UpdatePermissionsDto,
   ModulePermission,
+  PermissionCatalogModule,
+  AssignedUserRoleData,
   UserRoles,
 } from '@/models/role.model';
 
@@ -54,12 +56,20 @@ export class RoleService {
     );
   }
 
-  getPermissions(): Observable<ApiResponse<ModulePermission[]>> {
-    return this.http.get<ApiResponse<ModulePermission[]>>(this.permissionsUrl);
+  getPermissions(): Observable<ApiResponse<PermissionCatalogModule[]>> {
+    return this.http.get<ApiResponse<PermissionCatalogModule[]>>(this.permissionsUrl).pipe(
+      catchError((error) => {
+        if (error?.status === 404) {
+          return this.http.get<ApiResponse<PermissionCatalogModule[]>>(`${this.apiUrl}/permissions`);
+        }
+
+        return throwError(() => error);
+      })
+    );
   }
 
-  assignRole(userId: number, role: string): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.usersUrl}/${userId}/assign-role`, { role });
+  assignRole(userId: number, role: string): Observable<ApiResponse<AssignedUserRoleData>> {
+    return this.http.post<ApiResponse<AssignedUserRoleData>>(`${this.apiUrl}/assign/${userId}`, { role });
   }
 
   getUserRoles(userId: number): Observable<ApiResponse<UserRoles>> {

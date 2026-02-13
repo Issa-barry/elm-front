@@ -17,4 +17,6 @@ export interface User {
   created_at: string;
   updated_at: string;
   nom_complet: string;
+  roles?: string[];
+  permissions?: string[];
 }

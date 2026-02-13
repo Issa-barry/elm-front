@@ -1,3 +1,5 @@
+import { User } from './user.model';
+
 export interface Role {
   id: number;
   name: string;
@@ -31,11 +33,21 @@ export interface UpdatePermissionsDto {
   permissions: Record<string, string[]>;
 }
 
+export interface AssignedUserRoleData {
+  user: User;
+  roles: string[];
+  permissions: string[];
+}
+
 export interface UserRoles {
   user_id: number;
   nom_complet: string;
   roles: string[];
   permissions: string[];
+}
+
+export interface PermissionCatalogModule extends ModulePermission {
+  actions: string[];
 }
 
 export type PermissionAction = 'create' | 'read' | 'update' | 'delete';

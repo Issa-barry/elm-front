@@ -66,7 +66,20 @@ export class RolesListe implements OnInit {
     this.loading = true;
     this.roleService.getRoles().subscribe({
       next: (response) => {
-        this.roles.set(Array.isArray(response.data) ? response.data : []);
+        const payload = response?.data as
+          | RoleWithModules[]
+          | { roles?: RoleWithModules[]; data?: RoleWithModules[] }
+          | undefined;
+
+        const roles = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.roles)
+          ? payload.roles
+          : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
+
+        this.roles.set(roles.map(item => this.normalizeRoleItem(item)));
         this.loading = false;
       },
       error: (err) => {
@@ -83,8 +96,51 @@ export class RolesListe implements OnInit {
 
   countPermissions(item: RoleWithModules): number {
     return item.modules.reduce((count, m) => {
-      return count + PERMISSION_ACTIONS.filter(a => (m.permissions as any)[a]).length;
+      return count + PERMISSION_ACTIONS.filter(a => m.permissions[a]).length;
     }, 0);
+  }
+
+  private normalizeRoleItem(item: any): RoleWithModules {
+    if (item?.role && Array.isArray(item?.modules)) {
+      return item as RoleWithModules;
+    }
+
+    const role = {
+      id: Number(item?.id ?? 0),
+      name: String(item?.name ?? ''),
+      created_at: String(item?.created_at ?? ''),
+    };
+
+    const permissionNames: string[] = Array.isArray(item?.permissions)
+      ? item.permissions
+          .map((p: any) => (typeof p === 'string' ? p : p?.name))
+          .filter((p: unknown): p is string => typeof p === 'string' && p.includes('.'))
+      : [];
+
+    const modulesMap = new Map<string, Set<string>>();
+    permissionNames.forEach((permission) => {
+      const [module, action] = permission.split('.');
+      if (!module || !action) {
+        return;
+      }
+
+      if (!modulesMap.has(module)) {
+        modulesMap.set(module, new Set<string>());
+      }
+      modulesMap.get(module)?.add(action);
+    });
+
+    const modules = Array.from(modulesMap.entries()).map(([module, actions]) => ({
+      module,
+      permissions: {
+        create: actions.has('create'),
+        read: actions.has('read'),
+        update: actions.has('update'),
+        delete: actions.has('delete'),
+      },
+    }));
+
+    return { role, modules };
   }
 
   onGlobalFilter(table: Table, event: Event) {

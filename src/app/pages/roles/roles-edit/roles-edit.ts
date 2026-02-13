@@ -62,10 +62,48 @@ export class RolesEdit implements OnInit {
     this.loading = true;
     this.roleService.getRole(this.roleId).subscribe({
       next: (response) => {
-        this.roleName = response.data.role.name;
-        this.originalName = response.data.role.name;
-        this.modules = response.data.modules;
-        this.loading = false;
+        const normalized = this.normalizeRolePayload(response?.data);
+
+        if (!normalized) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Format de réponse invalide pour le rôle',
+            life: 5000,
+          });
+          this.loading = false;
+          return;
+        }
+
+        this.roleName = normalized.role.name;
+        this.originalName = normalized.role.name;
+
+        if (normalized.modules.length > 0) {
+          this.modules = normalized.modules;
+          this.loading = false;
+          return;
+        }
+
+        this.roleService.getPermissions().subscribe({
+          next: (permissionsResponse) => {
+            this.modules = Array.isArray(permissionsResponse?.data)
+              ? permissionsResponse.data.map((module) => ({
+                  module: module.module,
+                  permissions: {
+                    create: !!module.permissions?.create,
+                    read: !!module.permissions?.read,
+                    update: !!module.permissions?.update,
+                    delete: !!module.permissions?.delete,
+                  },
+                }))
+              : [];
+            this.loading = false;
+          },
+          error: () => {
+            this.modules = [];
+            this.loading = false;
+          },
+        });
       },
       error: (err) => {
         this.messageService.add({
@@ -79,41 +117,64 @@ export class RolesEdit implements OnInit {
     });
   }
 
+  private normalizeRolePayload(data: any): { role: { id: number; name: string }; modules: ModulePermission[] } | null {
+    const payload = data?.data ?? data;
+
+    if (payload?.role?.name) {
+      return {
+        role: payload.role,
+        modules: Array.isArray(payload.modules) ? payload.modules : [],
+      };
+    }
+
+    if (payload?.name) {
+      return {
+        role: {
+          id: Number(payload.id ?? this.roleId),
+          name: String(payload.name),
+        },
+        modules: Array.isArray(payload.modules) ? payload.modules : [],
+      };
+    }
+
+    return null;
+  }
+
   // ─── Toggle helpers ────────────────────────────────────
 
   togglePermission(module: ModulePermission, action: PermissionAction) {
-    (module.permissions as any)[action] = !(module.permissions as any)[action];
+    module.permissions[action] = !module.permissions[action];
   }
 
   isRowAllChecked(module: ModulePermission): boolean {
-    return this.actions.every(a => (module.permissions as any)[a]);
+    return this.actions.every(a => module.permissions[a]);
   }
 
   isRowIndeterminate(module: ModulePermission): boolean {
-    const checked = this.actions.filter(a => (module.permissions as any)[a]).length;
+    const checked = this.actions.filter(a => module.permissions[a]).length;
     return checked > 0 && checked < this.actions.length;
   }
 
   toggleRow(module: ModulePermission) {
     const allChecked = this.isRowAllChecked(module);
     this.actions.forEach(a => {
-      (module.permissions as any)[a] = !allChecked;
+      module.permissions[a] = !allChecked;
     });
   }
 
   isColumnAllChecked(action: PermissionAction): boolean {
-    return this.modules.length > 0 && this.modules.every(m => (m.permissions as any)[action]);
+    return this.modules.length > 0 && this.modules.every(m => m.permissions[action]);
   }
 
   isColumnIndeterminate(action: PermissionAction): boolean {
-    const checked = this.modules.filter(m => (m.permissions as any)[action]).length;
+    const checked = this.modules.filter(m => m.permissions[action]).length;
     return checked > 0 && checked < this.modules.length;
   }
 
   toggleColumn(action: PermissionAction) {
     const allChecked = this.isColumnAllChecked(action);
     this.modules.forEach(m => {
-      (m.permissions as any)[action] = !allChecked;
+      m.permissions[action] = !allChecked;
     });
   }
 
@@ -125,7 +186,7 @@ export class RolesEdit implements OnInit {
 
     const permissions: Record<string, string[]> = {};
     this.modules.forEach(m => {
-      const active = this.actions.filter(a => (m.permissions as any)[a]);
+      const active = this.actions.filter(a => m.permissions[a]);
       if (active.length > 0) {
         permissions[m.module] = active;
       }
