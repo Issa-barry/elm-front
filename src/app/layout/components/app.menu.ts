@@ -121,17 +121,7 @@ export class AppMenu {
                     },
                 ],
             },
-            {
-                label: 'Administration',
-                icon: 'pi pi-cog',
-                items: [
-                    {
-                        label: 'Rôles & Permissions',
-                        icon: 'pi pi-fw pi-shield',
-                        routerLink: ['/roles'],
-                    },
-                ],
-            },
         ];
     }
 }
+

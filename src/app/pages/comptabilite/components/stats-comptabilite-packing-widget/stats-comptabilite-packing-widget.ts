@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
 import { ComptabiliteSummary, ComptabiliteFilters } from '@/models/facture-packing.model';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 @Component({
   selector: 'app-stats-comptabilite-packing-widget',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MoneyPipe],
   templateUrl: './stats-comptabilite-packing-widget.html',
   styleUrl: './stats-comptabilite-packing-widget.scss',
   host: {

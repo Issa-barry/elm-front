@@ -6,6 +6,7 @@ import { DividerModule } from 'primeng/divider';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { RouterModule } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Parametre } from '@/models/parametres.model';
@@ -14,7 +15,7 @@ import { ParametresService } from '@/services/parametres/parametres.service';
 @Component({
   selector: 'app-parametres-liste',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, DividerModule, InputTextModule, ToastModule],
+  imports: [CommonModule, FormsModule, ButtonModule, DividerModule, InputTextModule, ToastModule, RouterModule],
   providers: [MessageService],
   templateUrl: './parametres-liste.html',
   styleUrl: './parametres-liste.scss',

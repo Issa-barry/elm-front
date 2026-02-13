@@ -245,6 +245,6 @@ export class RolesEdit implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/roles']);
+    this.router.navigate(['/parametres']);
   }
 }
