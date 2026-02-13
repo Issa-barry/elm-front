@@ -4,9 +4,11 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
   ViewChildren
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -63,7 +65,7 @@ import {
     }
   `
 })
-export class ProduitsForm implements OnInit {
+export class ProduitsForm implements OnInit, OnChanges {
   @ViewChildren('buttonEl') buttonEl!: QueryList<ElementRef>;
 
   @Input() mode: 'create' | 'edit' = 'create';
@@ -144,6 +146,17 @@ export class ProduitsForm implements OnInit {
   isPrixVenteRequired(): boolean {
     // Obligatoire pour: fabricable, achat_vente
     return ['fabricable', 'achat_vente'].includes(this.product.type);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialData']?.currentValue) {
+      this.product = new Produit(changes['initialData'].currentValue);
+      this.imagePreview = changes['initialData'].currentValue.image_url ?? null;
+    }
+
+    if (changes['mode']?.currentValue === 'create') {
+      this.isEditing = true;
+    }
   }
 
   isPrixAchatRequired(): boolean {

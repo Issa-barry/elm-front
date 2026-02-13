@@ -24,7 +24,7 @@
                 [(selection)]="selectedProduits" 
                 [rowHover]="true"
                 dataKey="id"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} produits"
+                currentPageReportTemplate="  {first} à {last} sur {totalRecords} produits"
                 [showCurrentPageReport]="true"
                 [rowsPerPageOptions]="[10, 20, 30]"
             >
@@ -36,7 +36,7 @@
                             <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
                         </p-iconfield>
                     </div>
-                </ng-template>
+                </ng-template> 
               <ng-template #header>
                     <tr>
                         <th style="width: 3rem">
@@ -89,7 +89,15 @@
                             />
                         </td>
                         <td>
-                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(produit)" />
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-eye"
+                                class="p-button-rounded p-button-text p-button-sm mr-2"
+                                [pTooltip]="'Voir'"
+                                tooltipPosition="top"
+                                (click)="goToEditProduit($event, produit.id)"
+                            ></button>
                             <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(produit)" />
                         </td>
                     </tr>
