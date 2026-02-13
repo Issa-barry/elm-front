@@ -152,6 +152,12 @@ export class ProduitsForm implements OnInit, OnChanges {
     if (changes['initialData']?.currentValue) {
       this.product = new Produit(changes['initialData'].currentValue);
       this.imagePreview = changes['initialData'].currentValue.image_url ?? null;
+
+      if (this.mode === 'edit') {
+        this.isEditing = false;
+        this.submitted = false;
+        this.selectedImageFile = null;
+      }
     }
 
     if (changes['mode']?.currentValue === 'create') {
