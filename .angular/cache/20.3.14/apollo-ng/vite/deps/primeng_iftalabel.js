@@ -1,28 +1,28 @@
 import {
-  RouterModule
-} from "./chunk-MSTCVUB2.js";
-import {
   Bind,
   BindModule
-} from "./chunk-KUA6NCXA.js";
+} from "./chunk-7J3RN223.js";
 import {
   BaseComponent,
   PARENT_INSTANCE
-} from "./chunk-BNOUIGAB.js";
+} from "./chunk-VHLTMW64.js";
 import {
   BaseStyle
-} from "./chunk-QN4JZKO2.js";
+} from "./chunk-XDFKDIQ2.js";
 import {
   SharedModule
-} from "./chunk-MT6ARS6Q.js";
-import "./chunk-ZTU24O5S.js";
+} from "./chunk-4YW2PWNH.js";
+import {
+  RouterModule
+} from "./chunk-CVTLB5LA.js";
+import "./chunk-UYDK77RN.js";
 import "./chunk-AAQPR7NU.js";
-import "./chunk-WV7QNTAY.js";
-import "./chunk-5JZL66AI.js";
+import "./chunk-VKTFISRF.js";
+import "./chunk-OTTARZB5.js";
+import "./chunk-U4LT4ZJN.js";
 import {
   CommonModule
 } from "./chunk-OSSX5W73.js";
-import "./chunk-VKTFISRF.js";
 import "./chunk-R6U7IGMG.js";
 import {
   ChangeDetectionStrategy,

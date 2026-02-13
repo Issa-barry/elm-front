@@ -15,6 +15,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 
 @Component({
@@ -34,7 +35,8 @@ import { PrestataireService } from '@/services/prestataire/prestataire.service';
     TagModule,
     TooltipModule,
     SelectModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    PhoneFormatPipe
   ],
 })
 export class Prestateurs implements OnInit {

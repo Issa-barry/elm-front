@@ -1,0 +1,132 @@
+<p-toast />
+
+<div class="card">
+    <p-toolbar styleClass="mb-12">
+        <ng-template #start>
+            <p-button label="Ajouter un rôle" icon="pi pi-plus" severity="secondary" (onClick)="openCreateDialog()" />
+        </ng-template>
+    </p-toolbar>
+
+    <p-table
+        #dt
+        [value]="roles()"
+        [rows]="10"
+        [paginator]="true"
+        [globalFilterFields]="['role.name']"
+        [tableStyle]="{ 'min-width': '40rem' }"
+        [rowHover]="true"
+        dataKey="role.id"
+        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} rôles"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 20, 30]"
+        [loading]="loading"
+    >
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Gestion des Rôles</h5>
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
+                </p-iconfield>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="role.name">
+                    <span class="col-header">Nom <p-sortIcon field="role.name" /></span>
+                </th>
+                <th class="text-center">
+                    <span class="col-header justify-center">Permissions</span>
+                </th>
+                <th pSortableColumn="role.created_at">
+                    <span class="col-header">Date de création <p-sortIcon field="role.created_at" /></span>
+                </th>
+                <th class="text-center" style="width: 8rem"></th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-item>
+            <tr class="table-row" (dblclick)="editRole(item)">
+                <td>
+                    <div class="cell-role">
+                        <span class="cell-role__icon" [style.background]="'var(--p-primary-50)'" [style.color]="'var(--p-primary-600)'">
+                            <i class="pi pi-shield"></i>
+                        </span>
+                        <span class="cell-role__name">{{ item.role.name }}</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <p-tag [value]="countPermissions(item) + ' permissions'" severity="info" />
+                </td>
+                <td class="cell-secondary">{{ formatDate(item.role.created_at) }}</td>
+                <td class="text-center">
+                    <p-button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        [text]="true"
+                        [rounded]="true"
+                        pTooltip="Supprimer"
+                        (click)="deleteRole(item); $event.stopPropagation()"
+                        class="mr-2"
+                    />
+                    <p-button
+                        icon="pi pi-arrow-right"
+                        severity="secondary"
+                        [text]="true"
+                        [rounded]="true"
+                        pTooltip="Modifier"
+                        (click)="editRole(item)"
+                    />
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="4">
+                    <div class="empty-state">
+                        <i class="pi pi-shield"></i>
+                        <span>Aucun rôle trouvé</span>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<!-- Dialog Création -->
+<p-dialog
+    [(visible)]="createDialog"
+    [style]="{ width: '450px' }"
+    header="Nouveau rôle"
+    [modal]="true"
+>
+    <ng-template #content>
+        <div class="flex flex-col gap-4">
+            <div>
+                <label for="roleName" class="block font-bold mb-2">Nom du rôle</label>
+                <input
+                    pInputText
+                    id="roleName"
+                    [(ngModel)]="newRoleName"
+                    placeholder="Ex: editeur, manager..."
+                    class="w-full"
+                    (keydown.enter)="createRole()"
+                />
+            </div>
+        </div>
+    </ng-template>
+    <ng-template #footer>
+        <p-button label="Annuler" icon="pi pi-times" [text]="true" (click)="createDialog = false" [disabled]="creating" />
+        <p-button
+            label="Créer"
+            icon="pi pi-check"
+            (click)="createRole()"
+            [disabled]="creating || !newRoleName.trim()"
+            [loading]="creating"
+        />
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

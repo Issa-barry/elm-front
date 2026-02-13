@@ -1,0 +1,155 @@
+// ─── Header ──────────────────────────────────────────────
+.role-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    &__title {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.role-name-input {
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+
+    &:hover {
+        border-color: var(--p-surface-200);
+    }
+
+    &:focus {
+        border-color: var(--p-primary-500);
+        background: var(--p-surface-0);
+        box-shadow: 0 0 0 2px var(--p-primary-100);
+    }
+}
+
+// ─── Permission Title ────────────────────────────────────
+.permission-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--p-surface-800);
+}
+
+// ─── Permission Matrix ───────────────────────────────────
+.permission-matrix {
+    border: 1px solid var(--p-surface-100);
+    border-radius: 12px;
+    overflow: hidden;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        background: var(--p-surface-50);
+        border-bottom: 1px solid var(--p-surface-100);
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid var(--p-surface-50);
+        transition: background 0.12s ease;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background: var(--p-primary-50);
+        }
+
+        &--alt {
+            background: var(--p-surface-0);
+        }
+    }
+
+    &__module-col {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 160px;
+    }
+
+    &__module-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--p-surface-700);
+        text-transform: capitalize;
+    }
+
+    &__action-col {
+        width: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+    }
+
+    &__action-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--p-surface-400);
+    }
+}
+
+// ─── Dark mode ───────────────────────────────────────────
+:host-context(.dark) {
+    .role-name-input {
+        color: var(--p-surface-100);
+
+        &:hover {
+            border-color: var(--p-surface-600);
+        }
+
+        &:focus {
+            background: var(--p-surface-800);
+            box-shadow: 0 0 0 2px var(--p-primary-800);
+        }
+    }
+
+    .permission-title {
+        color: var(--p-surface-100);
+    }
+
+    .permission-matrix {
+        border-color: var(--p-surface-700);
+
+        &__header {
+            background: var(--p-surface-800);
+            border-bottom-color: var(--p-surface-700);
+        }
+
+        &__row {
+            border-bottom-color: var(--p-surface-800);
+
+            &:hover {
+                background: var(--p-surface-800);
+            }
+        }
+
+        &__module-name {
+            color: var(--p-surface-200);
+        }
+    }
+}

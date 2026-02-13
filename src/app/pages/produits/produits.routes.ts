@@ -9,7 +9,7 @@ export default [
     { path: '', component: ProduitsListe },
     { path: 'produits', component: ProduitsListe },
     { path: 'produits-new', component: ProduitsNew },
-    { path: 'produits/:id/edit', component: ProduitsEdit },
+    { path: 'produits-edit/:id', component: ProduitsEdit },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
  

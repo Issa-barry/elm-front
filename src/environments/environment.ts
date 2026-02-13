@@ -1,6 +1,6 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8000/api/v1',
+  production: true,
+  apiUrl: 'https://usine-eau-api.fr/api/v1',
   // Chemin de base pour les images produits
   productImagesPath: 'assets/demo/images/produits/'
 };

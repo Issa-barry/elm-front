@@ -30,6 +30,8 @@ import {
   PreviewFacturePacking,
   StoreFacturePackingDto,
 } from '@/models/facture-packing.model';
+import { pipe } from 'rxjs';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface Column {
   field: string;
@@ -66,6 +68,7 @@ interface ExportColumn {
     TooltipModule,
     InputNumberModule,
     ToggleSwitchModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService],
 })

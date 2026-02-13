@@ -1,0 +1,76 @@
+.product-form {
+  .form-header {
+    border-bottom: 1px solid var(--surface-200);
+    padding-bottom: 1rem;
+  }
+
+  .form-section {
+    border: 1px solid var(--surface-200);
+    border-radius: 0.875rem;
+    background: var(--surface-0);
+    padding: 1.25rem;
+  }
+
+  .section-title {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--text-color);
+  }
+
+  .side-title {
+    font-weight: 700;
+    color: var(--text-color);
+    padding: 1rem 1rem 0.875rem;
+    border-bottom: 1px solid var(--surface-200);
+    background: color-mix(in srgb, var(--surface-50) 70%, transparent);
+  }
+
+  .helper-chip {
+    background: color-mix(in srgb, var(--blue-100) 50%, transparent);
+    border-radius: 999px;
+    padding: 0.35rem 0.7rem;
+    font-weight: 500;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .status-pill-active {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .status-pill-inactive {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .service-alert {
+    display: flex;
+    align-items: center;
+    color: #991b1b;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .upload-dropzone {
+    cursor: pointer;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .upload-dropzone:hover {
+    background: color-mix(in srgb, var(--primary-50) 35%, transparent);
+  }
+}

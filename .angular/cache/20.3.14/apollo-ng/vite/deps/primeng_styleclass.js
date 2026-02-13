@@ -2,9 +2,9 @@ import {
   P,
   R,
   W,
-  c,
+  c2 as c,
   j
-} from "./chunk-5JZL66AI.js";
+} from "./chunk-U4LT4ZJN.js";
 import {
   Directive,
   ElementRef,

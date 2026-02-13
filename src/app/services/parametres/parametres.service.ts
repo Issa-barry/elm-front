@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { Parametre, UpdateParametreDto } from '@/models/parametres.model';
-import { environment } from 'src/environments/environment.development';
+import { environment } from 'src/environments/environment';
 
 export interface ApiResponse<T> {
   success: boolean;

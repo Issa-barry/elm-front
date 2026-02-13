@@ -1,44 +1,40 @@
 import {
   Tooltip,
   TooltipModule
-} from "./chunk-LLZIJZBU.js";
+} from "./chunk-MQF454EO.js";
 import {
   DomHandler
-} from "./chunk-HTZXBLDW.js";
+} from "./chunk-DRUBN77R.js";
 import {
   Badge,
   BadgeModule
-} from "./chunk-6X23T6XR.js";
+} from "./chunk-PKCVAE2D.js";
 import {
-  RouterLink,
-  RouterModule
-} from "./chunk-MSTCVUB2.js";
+  Ripple
+} from "./chunk-4SE23FUA.js";
 import {
   zindexutils
 } from "./chunk-BB55NINM.js";
 import {
-  Ripple
-} from "./chunk-B6OOAFTE.js";
-import {
   AngleRightIcon
-} from "./chunk-CXJ5ILB6.js";
-import "./chunk-RRCXUY37.js";
+} from "./chunk-XQADFLLP.js";
+import "./chunk-3NYDBTGQ.js";
 import {
   Bind,
   BindModule
-} from "./chunk-KUA6NCXA.js";
+} from "./chunk-7J3RN223.js";
 import {
   BaseComponent,
   PARENT_INSTANCE
-} from "./chunk-BNOUIGAB.js";
+} from "./chunk-VHLTMW64.js";
 import {
   BaseStyle
-} from "./chunk-QN4JZKO2.js";
+} from "./chunk-XDFKDIQ2.js";
 import {
   OverlayService,
   PrimeTemplate,
   SharedModule
-} from "./chunk-MT6ARS6Q.js";
+} from "./chunk-4YW2PWNH.js";
 import "./chunk-LR4OQNMI.js";
 import {
   animate,
@@ -46,27 +42,32 @@ import {
   transition,
   trigger
 } from "./chunk-YLKDNKK4.js";
-import "./chunk-ZTU24O5S.js";
+import {
+  RouterLink,
+  RouterModule
+} from "./chunk-CVTLB5LA.js";
+import "./chunk-UYDK77RN.js";
 import "./chunk-AAQPR7NU.js";
-import "./chunk-WV7QNTAY.js";
+import "./chunk-VKTFISRF.js";
+import "./chunk-OTTARZB5.js";
 import {
   $t,
-  G,
+  G2 as G,
   J,
   J2,
   K,
   M,
-  O,
+  O2 as O,
   Ut,
   bt,
-  h,
+  h2 as h,
   l,
   m,
-  s2 as s,
+  s,
   s3 as s2,
   v,
-  z
-} from "./chunk-5JZL66AI.js";
+  z2 as z
+} from "./chunk-U4LT4ZJN.js";
 import {
   CommonModule,
   NgForOf,
@@ -75,7 +76,6 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-OSSX5W73.js";
-import "./chunk-VKTFISRF.js";
 import "./chunk-R6U7IGMG.js";
 import {
   ChangeDetectionStrategy,
@@ -800,7 +800,7 @@ var ContextMenuSub = class _ContextMenuSub extends BaseComponent {
     const parentItem = sublist.parentElement.parentElement;
     const containerOffset = K(sublist.parentElement.parentElement);
     const viewport = h();
-    const sublistWidth = sublist.offsetParent ? sublist.offsetWidth : J(sublist);
+    const sublistWidth = sublist.offsetParent ? sublist.offsetWidth : J2(sublist);
     const itemOuterWidth = v(parentItem.children[0]);
     sublist.style.top = "0px";
     if (parseInt(containerOffset.left, 10) + itemOuterWidth + sublistWidth > viewport.width - O()) {
@@ -1539,7 +1539,7 @@ var ContextMenu = class _ContextMenu extends BaseComponent {
       case "ShiftRight":
         break;
       default:
-        if (!metaKey && J2(event.key)) {
+        if (!metaKey && J(event.key)) {
           this.searchItems(event, event.key);
         }
         break;
@@ -1783,7 +1783,7 @@ var ContextMenu = class _ContextMenu extends BaseComponent {
     if (!this.document.scrollingElement || !this.containerViewChild?.nativeElement) return;
     let left = this.pageX + 1;
     let top = this.pageY + 1;
-    let width = this.containerViewChild.nativeElement.offsetParent ? this.containerViewChild.nativeElement.offsetWidth : J(this.containerViewChild.nativeElement);
+    let width = this.containerViewChild.nativeElement.offsetParent ? this.containerViewChild.nativeElement.offsetWidth : J2(this.containerViewChild.nativeElement);
     let height = this.containerViewChild.nativeElement.offsetParent ? this.containerViewChild.nativeElement.offsetHeight : G(this.containerViewChild.nativeElement);
     let viewport = h();
     if (left + width - this.document.scrollingElement.scrollLeft > viewport.width) {

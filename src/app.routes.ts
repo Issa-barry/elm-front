@@ -40,6 +40,10 @@ export const appRoutes: Routes = [
                 loadChildren: () => import('@/pages/parametres/parametres.routes'),
             },
             {
+                path: 'roles',
+                loadChildren: () => import('@/pages/roles/roles.routes'),
+            },
+            {
                 path: 'dashboard-banking',
                 loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then(c => c.BankingDashboard),
                 data: { breadcrumb: 'Banking Dashboard' },
