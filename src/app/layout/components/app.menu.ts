@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AppMenuitem } from './app.menuitem';
+import { AuthService } from '@/services/auth/auth.service';
 
 @Component({
     selector: 'app-menu',
@@ -22,9 +23,17 @@ import { AppMenuitem } from './app.menuitem';
 })
 export class AppMenu {
     model: any[] = [];
+    private authService = inject(AuthService);
 
-    ngOnInit() {
-        this.model = [
+    constructor() {
+        effect(() => {
+            const permissions = this.authService.currentUser()?.permissions ?? [];
+            this.model = this.buildMenuModel(permissions);
+        });
+    }
+
+    private buildMenuModel(permissions: string[]) {
+        return [
             {
                 // label: 'Statistiques',
                 // icon: 'pi pi-home',
@@ -118,10 +127,45 @@ export class AppMenu {
                         label: 'Produits',
                         icon: 'pi pi-fw pi-barcode',
                         routerLink: ['/produits'],
+                        visible: this.hasAnyPermission(permissions, [
+                            'produits.read',
+                            'produit.read',
+                            'products.read',
+                            'product.read',
+                        ]),
                     },
                 ],
             },
         ];
+    }
+
+    private hasAnyPermission(userPermissions: unknown[] | undefined, required: string[]): boolean {
+        if (!userPermissions || userPermissions.length === 0) {
+            // Mode strict pour le menu: sans permission explicite, on masque l'entrée.
+            return false;
+        }
+
+        const normalized = new Set(
+            userPermissions
+                .map((permission) => {
+                    if (typeof permission === 'string') {
+                        return permission.trim().toLowerCase();
+                    }
+
+                    if (
+                        permission &&
+                        typeof permission === 'object' &&
+                        'name' in permission &&
+                        typeof (permission as { name?: string }).name === 'string'
+                    ) {
+                        return (permission as { name: string }).name.trim().toLowerCase();
+                    }
+
+                    return '';
+                })
+                .filter((permission) => permission.length > 0)
+        );
+        return required.some((permission) => normalized.has(permission.toLowerCase()));
     }
 }
 
