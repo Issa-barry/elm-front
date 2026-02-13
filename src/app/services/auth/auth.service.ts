@@ -29,7 +29,7 @@ export class AuthService {
   constructor() {
     // Initialiser l'état au démarrage
     this.initializeAuth();
-  }
+  } 
 
   /**
    * Initialiser l'authentification au démarrage

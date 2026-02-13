@@ -1,6 +1,45 @@
 <p-toast />
 
-<div class="card tableau-card">
+<div class="card">
+    <p-toolbar styleClass="mb-12">
+        <ng-template #start>
+            <div class="flex items-center gap-2">
+                <p-datepicker
+                    [(ngModel)]="filtrePeriodeDebut"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    placeholder="Date début"
+                    inputStyleClass="w-full"
+                    styleClass="w-40"
+                />
+                <p-datepicker
+                    [(ngModel)]="filtrePeriodeFin"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    placeholder="Date fin"
+                    inputStyleClass="w-full"
+                    styleClass="w-40"
+                />
+                <p-button icon="pi pi-filter" severity="primary" [rounded]="true" [outlined]="true" pTooltip="Appliquer les filtres" (onClick)="loadComptabilite()" />
+            </div>
+        </ng-template>
+
+        <ng-template #end>
+            <div class="flex items-center gap-2">
+                <p-select
+                    [(ngModel)]="filtreStatut"
+                    [options]="statutOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Statut"
+                    styleClass="w-40"
+                    (onChange)="applyStatutFilter()"
+                />
+                <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+            </div>
+        </ng-template>
+    </p-toolbar>
+
     <p-table
         #dt
         [value]="prestataires()"
@@ -12,49 +51,18 @@
         [(selection)]="selectedPrestataires"
         [rowHover]="true"
         dataKey="prestataire_id"
-        currentPageReportTemplate="{first} à {last} sur {totalRecords} prestataires"
+        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} prestataires"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
     >
-        <!-- Caption = filters + search -->
         <ng-template #caption>
-            <div class="table-caption mb-4">
-                <div class="table-caption__filters">
-                    <p-datepicker
-                        [(ngModel)]="filtrePeriodeDebut"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        placeholder="Date début"
-                        inputStyleClass="w-full"
-                        styleClass="w-40"
-                    />
-                    <p-datepicker
-                        [(ngModel)]="filtrePeriodeFin"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        placeholder="Date fin"
-                        inputStyleClass="w-full"
-                        styleClass="w-40"
-                    />
-                    <p-select
-                        [(ngModel)]="filtreStatut"
-                        [options]="statutOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Statut"
-                        styleClass="w-32"
-                        (onChange)="applyStatutFilter()"
-                    />
-                    <p-button icon="pi pi-filter" severity="primary" [rounded]="true" [outlined]="true" pTooltip="Appliquer les filtres" (onClick)="loadComptabilite()" />
-                </div>
-                <div class="table-caption__actions">
-                    <p-iconfield>
-                        <p-inputicon styleClass="pi pi-search" />
-                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
-                    </p-iconfield>
-                    <p-button icon="pi pi-download" severity="secondary" [rounded]="true" [text]="true" pTooltip="Exporter" (onClick)="exportCSV()" />
-                </div>
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Comptabilité Packing</h5>
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
+                </p-iconfield>
             </div>
         </ng-template>
 
@@ -91,9 +99,9 @@
                             {{ item.prestataire_nom?.charAt(0)?.toUpperCase() }}
                         </span>
                         <span class="cell-prestataire__name">{{ item.prestataire_nom }}</span>
-                    </div>
+                    </div> 
                 </td>
-                <td class="cell-secondary">{{ item.prestataire_phone }}</td>
+                <td class="cell-secondary">{{ item.prestataire_phone | phoneFormat:'INT' }}</td>
                 <td class="cell-secondary">{{ formatDateDisplay(item.derniere_date) }}</td>
                 <td class="text-right cell-mono">{{ formatCurrency(item.montant_facture) }}</td>
                 <td class="text-right cell-mono cell-success">{{ formatCurrency(item.montant_verse) }}</td>

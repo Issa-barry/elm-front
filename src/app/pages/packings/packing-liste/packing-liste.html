@@ -50,7 +50,7 @@
         [columns]="cols"
         [paginator]="true"
         [globalFilterFields]="filterFields"
-        [tableStyle]="{ 'min-width': '75rem' }"
+        [tableStyle]="{ 'min-width': '65rem' }"
         [(selection)]="selectedPackings"
         [rowHover]="true"
         dataKey="id"
@@ -68,62 +68,67 @@
                 </p-iconfield>
             </div>
         </ng-template>
+
         <ng-template #header>
             <tr>
-                <th style="width: 3rem">
-                    <p-tableHeaderCheckbox />
+                <th pSortableColumn="prestataire.nom">
+                    <span class="col-header">Prestataire <p-sortIcon field="prestataire.nom" /></span>
                 </th>
-                <th pSortableColumn="reference" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Référence
-                    <p-sortIcon field="reference" /></span>
+                <th><span class="col-header">Téléphone</span></th>
+                <th pSortableColumn="date">
+                    <span class="col-header">Date <p-sortIcon field="date" /></span>
                 </th>
-                <th pSortableColumn="prestataire.nom" style="min-width: 14rem">
-                    <span class="flex items-center gap-2">Prestataire
-                    <p-sortIcon field="prestataire.nom" /></span>
+                <th pSortableColumn="nb_rouleaux" class="text-right">
+                    <span class="col-header justify-end">Rouleaux <p-sortIcon field="nb_rouleaux" /></span>
                 </th>
-                <th style="min-width: 10rem">Phone</th>
-                <th pSortableColumn="date" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Date
-                    <p-sortIcon field="date" /></span>
+                <th pSortableColumn="montant" class="text-right">
+                    <span class="col-header justify-end">Montant <p-sortIcon field="montant" /></span>
                 </th>
-                <th pSortableColumn="nb_rouleaux" style="min-width: 8rem">
-                    <span class="flex items-center gap-2">Rouleaux
-                    <p-sortIcon field="nb_rouleaux" /></span>
+                <th pSortableColumn="statut" class="text-center">
+                    <span class="col-header justify-center">Statut <p-sortIcon field="statut" /></span>
                 </th>
-                <th pSortableColumn="montant" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Montant
-                    <p-sortIcon field="montant" /></span>
-                </th>
-                <th pSortableColumn="statut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Statut
-                    <p-sortIcon field="statut" /></span>
-                </th>
-                <th style="min-width: 10rem"></th>
+                <th class="text-center" style="width: 5rem"></th>
             </tr>
         </ng-template>
+
         <ng-template #body let-packing>
-            <tr>
-                <td style="width: 3rem">
-                    <p-tableCheckbox [value]="packing" />
-                </td>
-                <td>{{ packing.reference }}</td>
+            <tr class="table-row" (dblclick)="editPacking(packing)">
                 <td>
-                    <span *ngIf="packing.prestataire">
-                        {{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}
+                    <div class="cell-prestataire" *ngIf="packing.prestataire">
+                        <span class="cell-prestataire__avatar" [style.background]="'var(--p-primary-50)'" [style.color]="'var(--p-primary-600)'">
+                            {{ packing.prestataire.nom?.charAt(0)?.toUpperCase() }}
+                        </span>
+                        <span class="cell-prestataire__name">{{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}</span>
+                    </div>
+                </td>
+                <td class="cell-secondary">
+                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone | phoneFormat:'INT' }}</span>
+                </td>
+                <td class="cell-secondary">{{ formatDateDisplay(packing.date) }}</td>
+                <td class="text-right cell-mono">{{ packing.nb_rouleaux }}</td>
+                <td class="text-right cell-mono cell-bold">{{ formatCurrency(packing.montant) }}</td>
+                <td class="text-center">
+                    <span class="status-badge" [ngClass]="{
+                        'status-badge--warn': packing.statut === 'a_valider',
+                        'status-badge--success': packing.statut === 'valide',
+                        'status-badge--danger': packing.statut === 'annule'
+                    }">
+                        {{ getStatutLabel(packing.statut) }}
                     </span>
                 </td>
-                <td>
-                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone }}</span>
+                <td class="text-center">
+                    <p-button icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="Modifier" (click)="editPacking(packing)" />
                 </td>
-                <td>{{ formatDateDisplay(packing.date) }}</td>
-                <td>{{ packing.nb_rouleaux }}</td>
-                <td>{{ formatCurrency(packing.montant) }}</td>
-                <td>
-                    <p-tag [value]="getStatutLabel(packing.statut)" [severity]="getStatutSeverity(packing.statut)" />
-                </td>
-                <td>
-                    <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editPacking(packing)" />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deletePacking(packing)" />
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <i class="pi pi-inbox"></i>
+                        <span>Aucun packing trouvé</span>
+                    </div>
                 </td>
             </tr>
         </ng-template>

@@ -130,7 +130,7 @@ export class ProduitsForm implements OnInit {
   // =========================
   // RÃ¨gles mÃ©tier:
   // - materiel     â†’ prix_achat obligatoire
-  // - service      â†’ prix_vente obligatoire, qte_stock = 0 (dÃ©sactivÃ©)
+  // - service      -> prix_achat ou prix_vente (au moins un), qte_stock = 0
   // - fabricable   â†’ prix_usine + prix_vente obligatoires
   // - achat_vente  â†’ prix_achat + prix_vente obligatoires
 
@@ -141,19 +141,11 @@ export class ProduitsForm implements OnInit {
     return this.product.type === 'fabricable';
   }
 
-  isPrixVenteVisible(): boolean {
-    // Visible pour: service, fabricable, achat_vente
-    return ['service', 'fabricable', 'achat_vente'].includes(this.product.type);
-  }
   isPrixVenteRequired(): boolean {
     // Obligatoire pour: fabricable, achat_vente
     return ['fabricable', 'achat_vente'].includes(this.product.type);
   }
 
-  isPrixAchatVisible(): boolean {
-    // Visible pour: materiel, service, achat_vente
-    return ['materiel', 'service', 'achat_vente'].includes(this.product.type);
-  }
   isPrixAchatRequired(): boolean {
     // Obligatoire pour: materiel, achat_vente
     return ['materiel', 'achat_vente'].includes(this.product.type);
@@ -198,8 +190,6 @@ export class ProduitsForm implements OnInit {
   onTypeChange(): void {
     // RÃ©initialiser les prix non applicables
     if (!this.isPrixUsineVisible()) this.product.prix_usine = null;
-    if (!this.isPrixVenteVisible()) this.product.prix_vente = null;
-    if (!this.isPrixAchatVisible()) this.product.prix_achat = null;
 
     // Pour le type "service", forcer qte_stock Ã  0
     if (this.product.type === 'service') {
@@ -316,7 +306,7 @@ export class ProduitsForm implements OnInit {
       case 'materiel':
         return "Prix d'achat obligatoire";
       case 'service':
-        return 'Pour un service, renseignez au moins un prix: achat ou vente';
+        return 'Pour un service, renseignez au moins un prix : achat ou vente';
       case 'fabricable':
         return 'Prix usine et prix de vente obligatoires';
       case 'achat_vente':
@@ -351,5 +341,7 @@ export class ProduitsForm implements OnInit {
     });
   }
 }
+
+
 
 

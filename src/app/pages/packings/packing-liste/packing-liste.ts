@@ -27,6 +27,7 @@ import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PAC
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { Prestataire } from '@/models/prestataire.model';
 import { ParametresService } from '@/services/parametres/parametres.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface Column {
   field: string;
@@ -55,7 +56,7 @@ interface StatutOption {
     TableModule,
     FormsModule,
     ButtonModule,
-    RippleModule,
+    RippleModule, 
     ToastModule,
     ToolbarModule,
     InputTextModule,
@@ -70,7 +71,8 @@ interface StatutOption {
     AutoCompleteModule,
     TextareaModule,
     TooltipModule,
-    SkeletonModule
+    SkeletonModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService]
 })

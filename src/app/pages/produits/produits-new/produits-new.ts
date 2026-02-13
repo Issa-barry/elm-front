@@ -68,16 +68,30 @@ export class ProduitsNew {
   // =============================
   // ERROR
   // =============================
-  private handleError(message: string, error?: any): void {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Erreur',
-      detail: message,
-      life: 5000
-    });
+  private handleError(fallback: string, err?: any): void {
+    const detail = err?.error?.message || fallback;
+
+    if (err?.status === 422 && err?.error?.errors) {
+      const messages = Object.values(err.error.errors).flat() as string[];
+      messages.forEach(msg => {
+        this.messageService.add({
+          severity: 'error',
+          summary: detail,
+          detail: msg,
+          life: 5000
+        });
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail,
+        life: 5000
+      });
+    }
 
     this.loading = false;
-    console.error(error);
+    console.error(err);
   }
 
   // =============================

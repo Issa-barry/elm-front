@@ -121,42 +121,17 @@ export class AppMenu {
                     },
                 ],
             },
-             
-             
-             
-            // {
-            //     label: 'Administration',
-            //     icon: 'pi pi-fw pi-align-left',
-            //     items: [
-            //         {
-            //             label: 'Parametrage',
-            //             icon: 'pi pi-fw pi-align-left',
-            //             items: [
-            //                  {
-            //                             label: 'Contact Us',
-            //                             icon: 'pi pi-fw pi-phone',
-            //                             routerLink: ['/pages/contact'],
-            //                 },
-            //             ],
-            //         },
-            //     ],
-            // },
-            // {
-            //     label: 'Autre',
-            //     icon: 'pi pi-fw pi-download',
-            //     items: [
-            //             {
-            //                             label: 'Contact Us',
-            //                             icon: 'pi pi-fw pi-phone',
-            //                             routerLink: ['/pages/contact'],
-            //                 },
-            //         {
-            //             label: 'Documentation',
-            //             icon: 'pi pi-fw pi-info-circle',
-            //             routerLink: ['/documentation'],
-            //         },
-            //     ],
-            // },
+            {
+                label: 'Administration',
+                icon: 'pi pi-cog',
+                items: [
+                    {
+                        label: 'Rôles & Permissions',
+                        icon: 'pi pi-fw pi-shield',
+                        routerLink: ['/roles'],
+                    },
+                ],
+            },
         ];
     }
 }

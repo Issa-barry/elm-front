@@ -1,0 +1,79 @@
+// ─── Column Headers ──────────────────────────────────────
+.col-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--p-surface-400);
+}
+
+// ─── Row ─────────────────────────────────────────────────
+.table-row {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+// ─── Role Cell ───────────────────────────────────────────
+.cell-role {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    &__icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    &__name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--p-surface-800);
+        text-transform: capitalize;
+    }
+}
+
+// ─── Cell styles ─────────────────────────────────────────
+.cell-secondary {
+    color: var(--p-surface-400);
+    font-size: 0.9rem;
+}
+
+// ─── Empty state ─────────────────────────────────────────
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 3rem 0;
+    color: var(--p-surface-300);
+
+    i { font-size: 2.5rem; }
+    span { font-size: 0.9rem; }
+}
+
+// ─── Table overrides ─────────────────────────────────────
+:host ::ng-deep .p-datatable {
+    .p-datatable-thead > tr > th {
+        padding: 1rem 1.25rem;
+    }
+
+    .p-datatable-tbody > tr > td {
+        padding: 1.1rem 1.25rem;
+    }
+}
+
+// ─── Dark mode ───────────────────────────────────────────
+:host-context(.dark) {
+    .cell-role__name {
+        color: var(--p-surface-100);
+    }
+}

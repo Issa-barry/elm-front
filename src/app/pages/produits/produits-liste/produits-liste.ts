@@ -29,7 +29,7 @@ import {
     PRODUIT_TYPE_LABELS,
     ProduitStatut,
     ProduitStatutSeverity,
-    ProduitType
+    ProduitType 
 } from '@/models/produit.model';
 
 interface Column {
@@ -114,16 +114,16 @@ export class ProduitsListe implements OnInit {
     }
 
       loadProduits() {
+        this.loading = true;
         this.produitService.getAll().subscribe({
                 next: (produits) => {
                     this.produits = produits;
                     this.loading=false;
-                    console.log(this.produits);
-                    
                 },
                 error: (err) =>{
-                    console.error('Erreur lors du chargement des produits :', err),
-                this.loading = false;
+                    console.error('Erreur lors du chargement des produits :', err);
+                    this.loading = false;
+                    this.showApiError(err, 'Chargement des produits impossible');
                 }
                 });
     }
@@ -196,12 +196,7 @@ export class ProduitsListe implements OnInit {
                     },
                     error: (err) => {
                         console.error('Erreur lors de la suppression des produits :', err);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erreur',
-                            detail: 'Suppression impossible.',
-                            life: 3000
-                        });
+                        this.showApiError(err, 'Suppression impossible');
                     }
                 });
             }
@@ -232,12 +227,7 @@ export class ProduitsListe implements OnInit {
                     },
                     error: (err) => {
                         console.error('Erreur lors de la suppression du produit :', err);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erreur',
-                            detail: 'Suppression impossible.',
-                            life: 3000
-                        });
+                        this.showApiError(err, 'Suppression impossible');
                     }
                 });
             }
@@ -314,14 +304,15 @@ export class ProduitsListe implements OnInit {
     }
 
     private showApiError(err: any, fallback: string): void {
-        const summary = err.error?.message || fallback;
+        const summary = 'Erreur';
+        const detail = this.extractErrorMessage(err, fallback);
 
         if (err.status === 422 && err.error?.errors) {
             const messages = Object.values(err.error.errors).flat() as string[];
             messages.forEach(msg => {
                 this.messageService.add({
                     severity: 'error',
-                    summary,
+                    summary: 'Validation',
                     detail: msg,
                     life: 5000
                 });
@@ -330,10 +321,22 @@ export class ProduitsListe implements OnInit {
             this.messageService.add({
                 severity: 'error',
                 summary,
-                detail: '',
+                detail,
                 life: 5000
             });
         }
+    }
+
+    private extractErrorMessage(err: any, fallback: string): string {
+        if (typeof err?.error?.message === 'string' && err.error.message.trim().length > 0) {
+            return err.error.message;
+        }
+
+        if (typeof err?.message === 'string' && err.message.trim().length > 0) {
+            return err.message;
+        }
+
+        return fallback;
     }
 
      goToNewProduits() {
