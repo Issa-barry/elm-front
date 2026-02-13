@@ -101,6 +101,10 @@ export class AppProfileSidebar {
     onLogout(event: Event) {
         event.preventDefault();
         if (this.isLoggingOut) return;
+
+        // Fermer immédiatement le drawer pour ne pas conserver l'état après reconnexion.
+        this.onDrawerHide();
+
         this.isLoggingOut = true;
         this.authService.logout().pipe(
             finalize(() => {

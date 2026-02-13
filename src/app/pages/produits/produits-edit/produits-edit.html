@@ -1,1 +1,10 @@
-<p>produits-edit works!</p>
+<p-toast />
+
+<app-produits-form
+    *ngIf="initialData"
+    mode="edit"
+    [initialData]="initialData"
+    [loading]="loading"
+    (submitForm)="onSubmitForm($event)"
+    (cancel)="onCancel()">
+</app-produits-form>

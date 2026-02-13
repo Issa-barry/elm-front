@@ -52,7 +52,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: var(--p-surface-400);
+    color: var(--p-surface-500);
 }
 
 // ─── Row ─────────────────────────────────────────────────
@@ -88,7 +88,7 @@
 
 // ─── Cell styles ─────────────────────────────────────────
 .cell-secondary {
-    color: var(--p-surface-400);
+    color: var(--p-surface-600);
     font-size: 0.9rem;
 }
 
@@ -153,7 +153,7 @@
         color: var(--p-surface-400);
     }
 
-    .status-badge {
+    .status-badge { 
         &--danger  { background: rgba(220, 38, 38, 0.12); }
         &--warn    { background: rgba(217, 119, 6, 0.12); }
         &--success { background: rgba(5, 150, 105, 0.12); }

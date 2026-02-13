@@ -18,6 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { Router } from '@angular/router';
 import { ProduitService } from '@/services/produits/produits.service';
 import { forkJoin } from 'rxjs';
@@ -65,7 +66,8 @@ interface ExportColumn {
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        TooltipModule
     ],
         providers: [MessageService, ProduitService, ConfirmationService],
 
@@ -342,4 +344,12 @@ export class ProduitsListe implements OnInit {
      goToNewProduits() {
         this.router.navigate(['/produits/produits-new']);
     }
+ 
+   
+
+    goToEditProduit(event: Event, produitId: number) {
+        event.stopPropagation();
+        this.router.navigate(['/produits/produits-edit', produitId]);
+    }
+
 }

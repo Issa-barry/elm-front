@@ -47,6 +47,7 @@ export class PrestateursEdit implements OnInit {
           const prestataire = response.data;
           this.prestateursData = {
             id: prestataire.id,
+            reference: prestataire.reference,
             type: prestataire.type || undefined,
             nom: prestataire.nom,
             prenom: prestataire.prenom,
@@ -104,7 +105,10 @@ export class PrestateursEdit implements OnInit {
     this.prestataireService.updatePrestataire(this.prestateurId, payload).subscribe({
       next: (response) => {
         if (response.success) {
-          this.prestateursData = { ...data };
+          this.prestateursData = {
+            ...data,
+            reference: data.reference || this.prestateursData?.reference,
+          };
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',

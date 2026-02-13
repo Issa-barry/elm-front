@@ -80,6 +80,10 @@ private initializeModel() {
   
   // Créer une copie profonde des données
   this.model = this.initialData ? { ...this.initialData } : {};
+
+  if (this.mode === 'create' && !this.model.ville?.trim()) {
+    this.model.ville = 'Conakry';
+  }
   
   console.log("Model après initialisation:", this.model);
 
@@ -259,5 +263,20 @@ private initializeModel() {
     return (this.mode === 'edit' && !this.isEditing) || this.loading;
   }
 
+  get formTitle(): string {
+    if (this.mode === 'create') {
+      return 'Ajout prestataire';
+    }
+
+    const reference = this.model.reference?.trim();
+return reference
+      ? `Modification prestataire`
+      : 'Modification prestataire';
+    //pour afficher la reference
+    // return reference
+    //   ? `Modification prestataire : ${reference}`
+    //   : 'Modification prestataire';
+  }
 
 }
+

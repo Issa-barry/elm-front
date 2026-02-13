@@ -37,6 +37,7 @@ import { ComptabilitePackingPaiement, PaiementPayload } from '../components/comp
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
 import { ComptabilitePackingPaiementDialog } from '../components/comptabilite-packing-paiement-dialog/comptabilite-packing-paiement-dialog';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 interface ModePaiementOption {
   label: string;
@@ -71,11 +72,9 @@ interface ModePaiementOption {
     StyleClassModule,
     ComptabilitePackingPaiement,
     ComptabilitePackingPaiementDialog,
-
-       
         RatingModule,
-
         RadioButtonModule,
+        MoneyPipe
  
   ],
   providers: [MessageService, ConfirmationService],

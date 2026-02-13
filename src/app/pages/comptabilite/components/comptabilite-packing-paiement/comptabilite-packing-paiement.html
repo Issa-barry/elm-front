@@ -16,18 +16,18 @@
         <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col justify-start items-start gap-4">
             <div class="w-full flex justify-start items-start gap-6">
                 <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Total facture</div>
-                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatCurrency(facture.montant_total) }}</div>
+                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{  facture.montant_total | money :'GNF'}}</div>
             </div>
             <div class="w-full flex justify-start items-start gap-6">
                 <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Déjà versé</div>
-                <div class="text-base font-semibold leading-tight" style="color: #059669">{{ formatCurrency(facture.montant_verse) }}</div>
+                <div class="text-base font-semibold leading-tight" style="color: #059669">{{  facture.montant_verse | money :'GNF'}}</div>
             </div>
 
             <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
 
             <div class="w-full flex justify-start items-start gap-6">
                 <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Reste à payer</div>
-                <div class="text-lg font-bold leading-tight" style="color: #d97706">{{ formatCurrency(facture.montant_restant) }}</div>
+                <div class="text-lg font-bold leading-tight" style="color: #d97706">{{  facture.montant_restant | money :'GNF' }}</div>
             </div>
         </div>
 

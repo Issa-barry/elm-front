@@ -54,7 +54,7 @@
         [(selection)]="selectedPackings"
         [rowHover]="true"
         dataKey="id"
-        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} packings"
+        currentPageReportTemplate="  {first} à {last} sur {totalRecords} packings"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
@@ -101,11 +101,14 @@
                         <span class="cell-prestataire__name">{{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}</span>
                     </div>
                 </td>
-                <td class="cell-secondary">
+                <td class="cell-secondary cell-bold">
                     <span *ngIf="packing.prestataire">{{ packing.prestataire.phone | phoneFormat:'INT' }}</span>
                 </td>
-                <td class="cell-secondary">{{ formatDateDisplay(packing.date) }}</td>
-                <td class="text-right cell-mono">{{ packing.nb_rouleaux }}</td>
+
+                <td class="cell-secondary cell-bold">{{ formatDateDisplay(packing.date) }}</td>
+
+                <td class="text-right cell-mono cell-bold">{{ packing.nb_rouleaux }}</td>
+
                 <td class="text-right cell-mono cell-bold">{{ formatCurrency(packing.montant) }}</td>
                 <td class="text-center">
                     <span class="status-badge" [ngClass]="{

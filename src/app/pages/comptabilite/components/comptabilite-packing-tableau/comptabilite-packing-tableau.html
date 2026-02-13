@@ -51,7 +51,7 @@
         [(selection)]="selectedPrestataires"
         [rowHover]="true"
         dataKey="prestataire_id"
-        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} prestataires"
+        currentPageReportTemplate=" {first} à {last} sur {totalRecords} prestataires"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
@@ -101,9 +101,9 @@
                         <span class="cell-prestataire__name">{{ item.prestataire_nom }}</span>
                     </div> 
                 </td>
-                <td class="cell-secondary">{{ item.prestataire_phone | phoneFormat:'INT' }}</td>
-                <td class="cell-secondary">{{ formatDateDisplay(item.derniere_date) }}</td>
-                <td class="text-right cell-mono">{{ formatCurrency(item.montant_facture) }}</td>
+                <td class="cell-secondary cell-bold">{{ item.prestataire_phone | phoneFormat:'INT' }}</td>
+                <td class="cell-secondary cell-bold">{{ formatDateDisplay(item.derniere_date) }}</td>
+                <td class="text-right cell-mono cell-bold">{{ formatCurrency(item.montant_facture) }}</td>
                 <td class="text-right cell-mono cell-success">{{ formatCurrency(item.montant_verse) }}</td>
                 <td class="text-right cell-mono cell-bold">{{ formatCurrency(item.montant_restant_facture) }}</td>
                 <td class="text-center">

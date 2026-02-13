@@ -126,9 +126,9 @@ export class Prestateurs implements OnInit {
   /**
    * Voir les détails d'un prestataire
    */
-  viewPrestataire(event: Event, prestataireId: number) {
+  goToEdit(event: Event, prestataireId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/prestateurs', prestataireId]);
+    this.router.navigate(['contacts/prestateurs/edit/', prestataireId]);
   }
 
   /**
