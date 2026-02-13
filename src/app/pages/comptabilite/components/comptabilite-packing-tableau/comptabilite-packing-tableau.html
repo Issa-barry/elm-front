@@ -96,7 +96,7 @@
                 <td>
                     <div class="cell-prestataire">
                         <span class="cell-prestataire__avatar" [style.background]="'var(--p-primary-50)'" [style.color]="'var(--p-primary-600)'">
-                            {{ item.prestataire_nom?.charAt(0)?.toUpperCase() }}
+                            {{ getInitials(item.prestataire_nom) }}
                         </span>
                         <span class="cell-prestataire__name">{{ item.prestataire_nom }}</span>
                     </div> 

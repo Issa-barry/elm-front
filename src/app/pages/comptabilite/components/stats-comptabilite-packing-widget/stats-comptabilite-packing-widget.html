@@ -6,7 +6,7 @@
                 <i class="pi pi-wallet"></i>
             </div>
             <div>
-                <div class="stats-bar__value">{{ summary ? formatCurrency(summary.montant_total) : '--' }}</div>
+                <div class="stats-bar__value">{{ summary ? (summary.montant_total | money:'GNF') : '--' }}</div>
                 <div class="stats-bar__label">Montant total</div>
             </div>
         </div>
@@ -18,7 +18,7 @@
                 <i class="pi pi-check-circle"></i>
             </div>
             <div>
-                <div class="stats-bar__value stats-bar__value--success">{{ summary ? formatCurrency(summary.total_verse) : '--' }}</div>
+                <div class="stats-bar__value stats-bar__value--success">{{ summary ?  (summary.total_verse | money:'GNF') : '--' }}</div>
                 <div class="stats-bar__label">Total payé</div>
             </div>
         </div>
@@ -30,7 +30,7 @@
                 <i class="pi pi-arrow-right"></i>
             </div>
             <div>
-                <div class="stats-bar__value stats-bar__value--warning">{{ summary ? formatCurrency(summary.montant_global_du) : '--' }}</div>
+                <div class="stats-bar__value stats-bar__value--warning">{{ summary ?  (summary.montant_global_du | money:'GNF') : '--' }}</div>
                 <div class="stats-bar__label">Reste à payer</div>
             </div>
         </div>
