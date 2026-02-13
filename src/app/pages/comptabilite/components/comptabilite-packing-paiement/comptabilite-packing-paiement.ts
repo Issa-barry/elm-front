@@ -5,6 +5,8 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { StyleClassModule } from 'primeng/styleclass';
 import { FacturePacking, ModePaiement } from '@/models/facture-packing.model';
+import { MoneyPipe } from '@/pipes/money.pipe';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 export interface PaiementPayload {
   montant: number;
@@ -16,7 +18,7 @@ export interface PaiementPayload {
   templateUrl: './comptabilite-packing-paiement.html',
   styleUrl: './comptabilite-packing-paiement.scss',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, StyleClassModule, InputNumberModule],
+  imports: [CommonModule, FormsModule, ButtonModule, StyleClassModule, InputNumberModule, MoneyPipe, PhoneFormatPipe],
 })
 export class ComptabilitePackingPaiement implements OnChanges {
   @Input() facture: FacturePacking | null = null;

@@ -105,12 +105,12 @@
         <ng-template #body let-facture>
             <tr>
                 <td class="font-semibold">{{ facture.reference.replace('FACT-PACK-', '') }}</td>
-                <td class="cell-secondary">{{ formatDateDisplay(facture.date) }}</td>
-                <td class="text-right cell-mono">{{ facture.total_rouleaux }}</td>
-                <td class="text-right cell-mono">{{ formatCurrency(facture.prix_par_rouleau) }}</td>
-                <td class="text-right cell-mono">{{ formatCurrency(facture.montant_total) }}</td>
-                <td class="text-right cell-mono cell-success">{{ formatCurrency(facture.montant_verse) }}</td>
-                <td class="text-right cell-mono cell-bold">{{ formatCurrency(facture.montant_restant) }}</td>
+                <td class="cell-secondary font-semibold">{{ formatDateDisplay(facture.date) }}</td>
+                <td class="text-right cell-mono font-semibold">{{ facture.total_rouleaux }}</td>
+                <td class="text-right cell-mono font-semibold">{{  facture.prix_par_rouleau | money :'GNF'}}</td>
+                <td class="text-right cell-mono font-semibold">{{ facture.montant_total | money :'GNF'}}</td>
+                <td class="text-right cell-mono cell-success font-semibold">{{  facture.montant_verse | money :'GNF'}}</td>
+                <td class="text-right cell-mono cell-bold">{{ facture.montant_restant | money :'GNF'}}</td>
                 <td class="text-center">
                     <span class="status-badge" [ngClass]="{
                         'status-badge--danger': facture.statut === 'impayee',
@@ -191,11 +191,11 @@
             <div class="preview-summary">
                 <span class="font-bold">{{ selectedFacture.reference.replace('FACT-PACK-', '') }}</span>
                 <span class="preview-summary__sep"></span>
-                <span>Total: <strong>{{ formatCurrency(selectedFacture.montant_total) }}</strong></span>
+                <span>Total : <strong>{{  selectedFacture.montant_total | money :'GNF'}}</strong></span>
                 <span class="preview-summary__sep"></span>
-                <span class="cell-success">Versé: <strong>{{ formatCurrency(selectedFacture.montant_verse) }}</strong></span>
+                <span class="cell-success">Versé : <strong>{{  selectedFacture.montant_verse | money :'GNF'}}</strong></span>
                 <span class="preview-summary__sep"></span>
-                <span class="font-bold" style="color: #d97706">Restant: {{ formatCurrency(selectedFacture.montant_restant) }}</span>
+                <span class="font-bold" style="color: #d97706">Restant : {{ selectedFacture.montant_restant | money :'GNF'}}</span>
             </div>
 
             <div class="flex flex-col gap-4">
