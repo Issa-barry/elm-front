@@ -62,11 +62,27 @@ export class AppMenu {
                     {
                         label: 'Comptabilité',
                         icon: 'pi pi-fw pi-calculator',
+                        visible: this.hasAnyPermission(permissions, [
+                            'facture-packings.read',
+                            'facture-packing.read',
+                            'facture_packings.read',
+                            'facture_packing.read',
+                            'facturepackings.read',
+                            'facturepacking.read',
+                        ]),
                         items: [
                             {
                                 label: 'Salaire packing',
                                 icon: 'pi pi-fw pi-money-bill',
                                 routerLink: ['/comptabilite/comptabilite-packing-liste'],
+                                visible: this.hasAnyPermission(permissions, [
+                                    'facture-packings.read',
+                                    'facture-packing.read',
+                                    'facture_packings.read',
+                                    'facture_packing.read',
+                                    'facturepackings.read',
+                                    'facturepacking.read',
+                                ]),
                             },
                             // {
                             //     label: 'Sailaire véhicule',
@@ -103,12 +119,24 @@ export class AppMenu {
                     {
                         label: 'Contacts',
                         icon: 'pi pi-fw pi-address-book',
+                        visible: this.hasAnyPermission(permissions, [
+                            'prestataires.read',
+                            'prestataire.read',
+                            'prestateurs.read',
+                            'prestateur.read',
+                        ]),
                         items: [
                             
                             {
                                 label: 'Prestateurs-externes',
                                 icon: 'pi pi-fw pi-briefcase',
                                 routerLink: ['contacts/prestateurs'],
+                                visible: this.hasAnyPermission(permissions, [
+                                    'prestataires.read',
+                                    'prestataire.read',
+                                    'prestateurs.read',
+                                    'prestateur.read',
+                                ]),
                             },
                             // {
                             //     label: 'Fournisseurs',
@@ -172,4 +200,5 @@ export class AppMenu {
         return required.some((permission) => normalized.has(permission.toLowerCase()));
     }
 }
+
 
