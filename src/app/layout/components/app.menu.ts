@@ -95,6 +95,10 @@ export class AppMenu {
                         label: 'Packing',
                         icon: 'pi pi-fw pi-box',
                         routerLink: ['/packings'],
+                        visible: this.hasAnyPermission(permissions, [
+                            'packings.read',
+                            'packing.read',
+                        ]),
                     },
                     {
                         label: 'Contacts',
