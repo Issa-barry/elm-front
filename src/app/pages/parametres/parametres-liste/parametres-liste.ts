@@ -6,29 +6,30 @@ import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { ParametresPacking } from '../components/parametres-packing/parametres-packing';
 import { ParametresProfile } from '../components/parametres-profile/parametres-profile';
+import { ParametresAuth } from '../components/parametres-auth/parametres-auth';
 
 @Component({
   selector: 'app-parametres-liste',
   standalone: true,
-  imports: [CommonModule, DividerModule, ToastModule, RouterModule, ParametresPacking, ParametresProfile],
+  imports: [CommonModule, ParametresAuth, DividerModule, ToastModule, RouterModule, ParametresPacking, ParametresProfile],
   providers: [MessageService],
   templateUrl: './parametres-liste.html',
   styleUrl: './parametres-liste.scss',
 })
 export class ParametresListe {
-  activeSection: 'profile' | 'packing' = 'packing';
+   activeSection: 'profile' | 'auth' | 'packing' | 'roles' = 'profile';
 
-  setActiveSection(section: 'profile' | 'packing'): void {
+  setActiveSection(section: 'profile' | 'auth' | 'packing'): void {
     this.activeSection = section;
   }
 
-  onSectionClick(event: Event, section: 'profile' | 'packing'): void {
+  onSectionClick(event: Event, section: 'profile' | 'auth' | 'packing'): void {
     event.preventDefault();
     event.stopPropagation();
     this.setActiveSection(section);
   }
 
-  isActive(section: 'profile' | 'packing'): boolean {
+  isActive(section: 'profile' | 'auth' | 'packing'): boolean {
     return this.activeSection === section;
   }
 }
