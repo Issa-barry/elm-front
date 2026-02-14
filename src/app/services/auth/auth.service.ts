@@ -379,4 +379,15 @@ export class AuthService {
   isLoggedIn(): boolean {
     return this.hasToken() && this.currentUser() !== null;
   }
+
+  /**
+   * Vérifier si l'utilisateur possède une permission
+   */
+  hasPermission(permission: string): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    const permissions = user.permissions ?? [];
+    if (permissions.length === 0) return true; // Fallback permissif
+    return permissions.includes(permission);
+  }
 }

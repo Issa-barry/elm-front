@@ -21,6 +21,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { Router } from '@angular/router';
 import { ProduitService } from '@/services/produits/produits.service';
+import { AuthService } from '@/services/auth/auth.service';
 import { forkJoin } from 'rxjs';
 import {
     CreateProduitDto,
@@ -98,12 +99,21 @@ export class ProduitsListe implements OnInit {
 
     cols!: Column[];
 
+    canCreate = false;
+    canUpdate = false;
+    canDelete = false;
+
     constructor(
         private router: Router,
         private produitService: ProduitService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
-    ) {}
+        private confirmationService: ConfirmationService,
+        private authService: AuthService
+    ) {
+        this.canCreate = this.authService.hasPermission('produits.create');
+        this.canUpdate = this.authService.hasPermission('produits.update');
+        this.canDelete = this.authService.hasPermission('produits.delete');
+    }
 
     exportCSV() {
         this.dt.exportCSV();
