@@ -15,6 +15,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { AuthService } from '@/services/auth/auth.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 
 @Component({
@@ -34,7 +36,8 @@ import { PrestataireService } from '@/services/prestataire/prestataire.service';
     TagModule,
     TooltipModule,
     SelectModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    PhoneFormatPipe
   ],
 })
 export class Prestateurs implements OnInit {
@@ -48,12 +51,21 @@ export class Prestateurs implements OnInit {
     { label: 'Inactif', value: false }
   ];
 
+  canCreate = false;
+  canUpdate = false;
+  canDelete = false;
+
   constructor(
     private prestataireService: PrestataireService,
     private router: Router,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
+  ) {
+    this.canCreate = this.authService.hasPermission('prestataires.create');
+    this.canUpdate = this.authService.hasPermission('prestataires.update');
+    this.canDelete = this.authService.hasPermission('prestataires.delete');
+  }
 
   ngOnInit() {
     this.loadPrestataires();
@@ -124,9 +136,9 @@ export class Prestateurs implements OnInit {
   /**
    * Voir les détails d'un prestataire
    */
-  viewPrestataire(event: Event, prestataireId: number) {
+  goToEdit(event: Event, prestataireId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/prestateurs', prestataireId]);
+    this.router.navigate(['contacts/prestateurs/edit/', prestataireId]);
   }
 
   /**

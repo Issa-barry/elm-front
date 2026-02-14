@@ -19,11 +19,16 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
+import { SkeletonModule } from 'primeng/skeleton';
+import { forkJoin } from 'rxjs';
 
 import { PackingService } from '@/services/packing/packing.service';
 import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { Prestataire } from '@/models/prestataire.model';
+import { ParametresService } from '@/services/parametres/parametres.service';
+import { AuthService } from '@/services/auth/auth.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface Column {
   field: string;
@@ -52,7 +57,7 @@ interface StatutOption {
     TableModule,
     FormsModule,
     ButtonModule,
-    RippleModule,
+    RippleModule, 
     ToastModule,
     ToolbarModule,
     InputTextModule,
@@ -66,7 +71,9 @@ interface StatutOption {
     DatePickerModule,
     AutoCompleteModule,
     TextareaModule,
-    TooltipModule
+    TooltipModule,
+    SkeletonModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService]
 })
@@ -80,11 +87,14 @@ export class PackingListe implements OnInit {
   submitted: boolean = false;
   loading: boolean = false;
   saving: boolean = false;
+  dialogLoading: boolean = false;
 
   // Filtres
-  filterDateDebut: Date | null = null;
-  filterDateFin: Date | null = null;
+  filterDateRange: Date[] | null = null;
   filterStatut: string | null = null;
+
+  // Prix rouleau par défaut (depuis les paramètres)
+  prixRouleauDefaut: number = 0;
 
   // Pour l'autocomplete prestataire
   prestataires: Prestataire[] = [];
@@ -92,11 +102,15 @@ export class PackingListe implements OnInit {
   selectedPrestataire: Prestataire | null = null;
 
   statuses: StatutOption[] = [
-    { label: 'En cours', value: 'en_cours' },
-    { label: 'Terminé', value: 'termine' },
-    { label: 'Payé', value: 'paye' },
+    { label: 'À valider', value: 'a_valider' },
+    { label: 'Validé', value: 'valide' },
     { label: 'Annulé', value: 'annule' }
   ];
+
+  // Permissions
+  canCreate: boolean = false;
+  canUpdate: boolean = false;
+  canDelete: boolean = false;
 
   @ViewChild('dt') dt!: Table;
   exportColumns!: ExportColumn[];
@@ -105,13 +119,20 @@ export class PackingListe implements OnInit {
   constructor(
     private packingService: PackingService,
     private prestataireService: PrestataireService,
+    private parametresService: ParametresService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
+  ) {
+    this.canCreate = this.authService.hasPermission('packings.create');
+    this.canUpdate = this.authService.hasPermission('packings.update');
+    this.canDelete = this.authService.hasPermission('packings.delete');
+  }
 
   ngOnInit() {
     this.loadPackings();
     this.loadPrestataires();
+    this.loadPrixRouleauDefaut();
     this.initColumns();
   }
 
@@ -119,8 +140,7 @@ export class PackingListe implements OnInit {
     this.cols = [
       { field: 'reference', header: 'Référence' },
       { field: 'prestataire', header: 'Prestataire' },
-      { field: 'date_debut', header: 'Début' },
-      { field: 'date_fin', header: 'Fin' },
+      { field: 'date', header: 'Date' },
       { field: 'nb_rouleaux', header: 'Rouleaux' },
       { field: 'montant', header: 'Montant' },
       { field: 'statut', header: 'Statut' }
@@ -132,13 +152,18 @@ export class PackingListe implements OnInit {
     }));
   }
 
+  onDateRangeSelect() {
+    if (this.filterDateRange && this.filterDateRange[1]) {
+      this.loadPackings();
+    }
+  }
+
   onDateFilter() {
     this.loadPackings();
   }
 
   clearDateFilters() {
-    this.filterDateDebut = null;
-    this.filterDateFin = null;
+    this.filterDateRange = null;
     this.filterStatut = null;
     this.loadPackings();
   }
@@ -146,11 +171,11 @@ export class PackingListe implements OnInit {
   loadPackings() {
     this.loading = true;
     const filters: any = {};
-    if (this.filterDateDebut) {
-      filters.date_debut = this.formatDate(this.filterDateDebut);
+    if (this.filterDateRange?.[0]) {
+      filters.date_debut = this.formatDate(this.filterDateRange[0]);
     }
-    if (this.filterDateFin) {
-      filters.date_fin = this.formatDate(this.filterDateFin);
+    if (this.filterDateRange?.[1]) {
+      filters.date_fin = this.formatDate(this.filterDateRange[1]);
     }
     if (this.filterStatut) {
       filters.statut = this.filterStatut;
@@ -173,6 +198,17 @@ export class PackingListe implements OnInit {
           life: 3000
         });
         this.loading = false;
+      }
+    });
+  }
+
+  loadPrixRouleauDefaut() {
+    this.parametresService.getPrixRouleauDefaut().subscribe({
+      next: (prix) => {
+        this.prixRouleauDefaut = prix;
+      },
+      error: () => {
+        this.prixRouleauDefaut = 0;
       }
     });
   }
@@ -212,22 +248,44 @@ export class PackingListe implements OnInit {
   }
 
   openNew() {
-    this.packing = {
-      statut: 'en_cours',
-      nb_rouleaux: 0,
-      prix_par_rouleau: 0,
-      montant: 0
-    };
     this.selectedPrestataire = null;
     this.submitted = false;
     this.packingDialog = true;
+    this.dialogLoading = true;
+
+    forkJoin({
+      prixRouleauDefaut: this.parametresService.getPrixRouleauDefaut(),
+      prestataires: this.prestataireService.getActivePrestataires()
+    }).subscribe({
+      next: ({ prixRouleauDefaut, prestataires }) => {
+        this.prixRouleauDefaut = prixRouleauDefaut;
+        this.prestataires = prestataires.data.filter(p => p.type === 'machiniste');
+        this.packing = {
+          statut: 'valide',
+          date: new Date(),
+          nb_rouleaux: 0,
+          prix_par_rouleau: this.prixRouleauDefaut,
+          montant: 0
+        };
+        this.dialogLoading = false;
+      },
+      error: () => {
+        this.packing = {
+          statut: 'valide',
+          date: new Date(),
+          nb_rouleaux: 0,
+          prix_par_rouleau: this.prixRouleauDefaut,
+          montant: 0
+        };
+        this.dialogLoading = false;
+      }
+    });
   }
 
   editPacking(packing: Packing) {
     this.packing = {
       ...packing,
-      date_debut: packing.date_debut ? new Date(packing.date_debut) : undefined,
-      date_fin: packing.date_fin ? new Date(packing.date_fin) : undefined
+      date: packing.date ? new Date(packing.date) : undefined
     };
     this.selectedPrestataire = packing.prestataire || null;
     this.packingDialog = true;
@@ -298,20 +356,11 @@ export class PackingListe implements OnInit {
 
     this.saving = true;
 
-    this.messageService.add({
-      severity: 'info',
-      summary: 'En cours',
-      detail: 'Enregistrement en cours...',
-      life: 2000
-    });
-
     const packingData: CreatePackingDto | UpdatePackingDto = {
       prestataire_id: this.selectedPrestataire.id,
-      date_debut: this.formatDate(this.packing.date_debut),
-      date_fin: this.formatDate(this.packing.date_fin),
+      date: this.formatDate(this.packing.date),
       nb_rouleaux: this.packing.nb_rouleaux || 0,
       prix_par_rouleau: this.packing.prix_par_rouleau || 0,
-      montant: this.packing.montant || 0,
       statut: this.packing.statut,
       notes: this.packing.notes ?? undefined
     };
@@ -319,13 +368,7 @@ export class PackingListe implements OnInit {
     if (this.packing.id) {
       // Mise à jour
       this.packingService.updatePacking(this.packing.id, packingData).subscribe({
-        next: (response) => {
-          const index = this.packings().findIndex(p => p.id === this.packing.id);
-          if (index !== -1) {
-            const updatedPackings = [...this.packings()];
-            updatedPackings[index] = response.data;
-            this.packings.set(updatedPackings);
-          }
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
@@ -335,22 +378,17 @@ export class PackingListe implements OnInit {
           this.packingDialog = false;
           this.packing = {};
           this.saving = false;
+          this.loadPackings();
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de mettre à jour le packing',
-            life: 3000
-          });
+        error: (err) => {
+          this.showApiError(err, 'Impossible de mettre à jour le packing');
           this.saving = false;
         }
       });
     } else {
       // Création
       this.packingService.createPacking(packingData as CreatePackingDto).subscribe({
-        next: (response) => {
-          this.packings.set([...this.packings(), response.data]);
+        next: () => {
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
@@ -360,14 +398,10 @@ export class PackingListe implements OnInit {
           this.packingDialog = false;
           this.packing = {};
           this.saving = false;
+          this.loadPackings();
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de créer le packing',
-            life: 3000
-          });
+        error: (err) => {
+          this.showApiError(err, 'Impossible de créer le packing');
           this.saving = false;
         }
       });
@@ -406,5 +440,28 @@ export class PackingListe implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR');
+  }
+
+  private showApiError(err: any, fallback: string): void {
+    const summary = err.error?.message || fallback;
+
+    if (err.status === 422 && err.error?.errors) {
+      const messages = Object.values(err.error.errors).flat() as string[];
+      messages.forEach(msg => {
+        this.messageService.add({
+          severity: 'error',
+          summary,
+          detail: msg,
+          life: 5000
+        });
+      });
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary,
+        detail: '',
+        life: 5000
+      });
+    }
   }
 }

@@ -1,7 +1,7 @@
 <div class="card">
   <div class="flex justify-between items-center mb-6">
     <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
-      {{ mode === 'create' ? 'Ajout prestataire' : 'Modification prestataire' }}
+      {{ formTitle }}
     </span>
   </div>
   
@@ -120,12 +120,14 @@
               >
                 <ng-template let-country pTemplate="item">
                   <div class="flex items-center gap-2">
+                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
                     <span class="font-semibold text-primary">{{ country.dialCode }}</span>
                     <span>{{ country.name }}</span>
                   </div>
                 </ng-template>
                 <ng-template let-country pTemplate="selectedItem">
                   <div class="flex items-center gap-2" *ngIf="country">
+                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
                     <span class="font-semibold text-primary">{{ country.dialCode }}</span>
                     <span>{{ country.name }}</span>
                   </div>

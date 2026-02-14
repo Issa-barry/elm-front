@@ -25,7 +25,7 @@ export class PackingNew implements OnInit {
     private packingService: PackingService,
     private messageService: MessageService,
     private router: Router
-  ) {}
+  ) {} 
 
   ngOnInit(): void {
     this.loadPrestataires();

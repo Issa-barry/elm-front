@@ -45,6 +45,7 @@
 
           <!-- Bouton Nouveau -->
           <button
+            *ngIf="canCreate"
             (click)="navigateToCreate()"
             pButton
             outlined
@@ -99,13 +100,13 @@
             </div>
             <div>
               <div class="font-semibold">{{ prestataire.nom_complet }}</div>
-              <div class="text-sm text-surface-500">{{ prestataire.reference }}</div>
+              <div class="text-sm text-surface-500 mt-1">{{ prestataire.reference }}</div>
             </div>
           </div>
         </td> 
         <td>
           <div class="flex items-center gap-1">
-             <span class="text-surface-700">{{ formatPhone(prestataire.phone) }}</span>
+             <span class="text-surface-700">{{ prestataire.phone | phoneFormat:'INT' }}</span>
           </div>
         </td>
         <td>
@@ -132,28 +133,32 @@
           ></p-tag>
         </td>
         <td>
+          
           <div class="flex gap-2">
             <button
               pButton
               pRipple
               icon="pi pi-eye"
               class="p-button-rounded p-button-text p-button-sm"
-              [pTooltip]="'Voir'"
+              [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
               tooltipPosition="top"
-              (click)="viewPrestataire($event, prestataire.id)"
+              (click)="goToEdit($event, prestataire.id)"
+              [disabled]="!canUpdate"
             ></button>
             <button
+              *ngIf="canUpdate"
               pButton
               pRipple
-              [icon]="prestataire.is_active ? 'pi pi-times' : 'pi pi-check'"
+              [icon]="prestataire.is_active ? 'pi pi-lock-open' : 'pi pi-lock'"
               class="p-button-rounded p-button-text p-button-sm"
-              [class.p-button-danger]="prestataire.is_active"
-              [class.p-button-success]="!prestataire.is_active"
+              [class.p-button-success]="prestataire.is_active"
+              [class.p-button-danger]="!prestataire.is_active"
               [pTooltip]="prestataire.is_active ? 'Désactiver' : 'Activer'"
               tooltipPosition="top"
               (click)="toggleStatus($event, prestataire.id)"
             ></button>
             <button
+              *ngIf="canDelete"
               pButton
               pRipple
               icon="pi pi-trash"

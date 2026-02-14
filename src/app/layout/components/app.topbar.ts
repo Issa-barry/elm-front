@@ -26,7 +26,7 @@ import { InputIconModule } from 'primeng/inputicon';
                 <li class="topbar-search">
                     <p-iconfield>
                         <p-inputicon class="pi pi-search" />
-                        <input type="text" pInputText placeholder="Search" class="w-48 sm:w-full" />
+                        <input type="text" pInputText placeholder="Rechercher..." class="w-48 sm:w-full" />
                     </p-iconfield>
                 </li>
                 <li class="ml-3">

@@ -1,12 +1,14 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
   ViewChildren
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +26,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 import {
   Produit,
-  CreateProduitDto,
+  CreateProduitDto, 
   PRODUIT_TYPE_LABELS,
   PRODUIT_STATUT_LABELS,
   ProduitType,
@@ -63,7 +65,7 @@ import {
     }
   `
 })
-export class ProduitsForm implements OnInit {
+export class ProduitsForm implements OnInit, OnChanges {
   @ViewChildren('buttonEl') buttonEl!: QueryList<ElementRef>;
 
   @Input() mode: 'create' | 'edit' = 'create';
@@ -76,7 +78,7 @@ export class ProduitsForm implements OnInit {
   submitted = false;
   isEditing = false;
 
-  // Options de type avec labels français
+  // Options de type avec labels franÃ§ais
   typeOptions: { label: string; value: ProduitType }[] = [
     { label: PRODUIT_TYPE_LABELS.materiel, value: 'materiel' },
     { label: PRODUIT_TYPE_LABELS.service, value: 'service' },
@@ -84,7 +86,7 @@ export class ProduitsForm implements OnInit {
     { label: PRODUIT_TYPE_LABELS.achat_vente, value: 'achat_vente' }
   ];
 
-  // Options de statut avec labels français
+  // Options de statut avec labels franÃ§ais
   statutOptions: { label: string; value: ProduitStatut }[] = [
     { label: PRODUIT_STATUT_LABELS.brouillon, value: 'brouillon' },
     { label: PRODUIT_STATUT_LABELS.actif, value: 'actif' },
@@ -101,7 +103,7 @@ export class ProduitsForm implements OnInit {
     prix_vente: null,
     qte_stock: 0,
     cout: null,
-    statut: 'brouillon',
+    statut: 'actif',
     type: 'materiel',
     in_stock: true,
     is_archived: false,
@@ -113,26 +115,26 @@ export class ProduitsForm implements OnInit {
   imagePreview: string | null = null;
 
   ngOnInit(): void {
-    // ✅ Charger les données initiales si édition
+    // âœ… Charger les donnÃ©es initiales si Ã©dition
     if (this.initialData) {
-      this.product = new Produit(this.initialData); // ✅ garde les méthodes
+      this.product = new Produit(this.initialData); // âœ… garde les mÃ©thodes
       this.imagePreview = this.initialData.image_url;
     }
 
-    // ✅ En création, toujours éditable
+    // âœ… En crÃ©ation, toujours Ã©ditable
     if (this.mode === 'create') {
       this.isEditing = true;
     }
   }
 
   // =========================
-  // VISIBILITÉ / OBLIGATION
+  // VISIBILITÃ‰ / OBLIGATION
   // =========================
-  // Règles métier:
-  // - materiel     → prix_achat obligatoire
-  // - service      → prix_vente obligatoire, qte_stock = 0 (désactivé)
-  // - fabricable   → prix_usine + prix_vente obligatoires
-  // - achat_vente  → prix_achat + prix_vente obligatoires
+  // RÃ¨gles mÃ©tier:
+  // - materiel     â†’ prix_achat obligatoire
+  // - service      -> prix_achat ou prix_vente (au moins un), qte_stock = 0
+  // - fabricable   â†’ prix_usine + prix_vente obligatoires
+  // - achat_vente  â†’ prix_achat + prix_vente obligatoires
 
   isPrixUsineVisible(): boolean {
     return this.product.type === 'fabricable';
@@ -141,46 +143,74 @@ export class ProduitsForm implements OnInit {
     return this.product.type === 'fabricable';
   }
 
-  isPrixVenteVisible(): boolean {
-    // Visible pour: service, fabricable, achat_vente
-    return ['service', 'fabricable', 'achat_vente'].includes(this.product.type);
-  }
   isPrixVenteRequired(): boolean {
-    // Obligatoire pour: service, fabricable, achat_vente
-    return ['service', 'fabricable', 'achat_vente'].includes(this.product.type);
+    // Obligatoire pour: fabricable, achat_vente
+    return ['fabricable', 'achat_vente'].includes(this.product.type);
   }
 
-  isPrixAchatVisible(): boolean {
-    // Visible pour: materiel, achat_vente
-    return ['materiel', 'achat_vente'].includes(this.product.type);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialData']?.currentValue) {
+      this.product = new Produit(changes['initialData'].currentValue);
+      this.imagePreview = changes['initialData'].currentValue.image_url ?? null;
+
+      if (this.mode === 'edit') {
+        this.isEditing = false;
+        this.submitted = false;
+        this.selectedImageFile = null;
+      }
+    }
+
+    if (changes['mode']?.currentValue === 'create') {
+      this.isEditing = true;
+    }
   }
+
   isPrixAchatRequired(): boolean {
     // Obligatoire pour: materiel, achat_vente
     return ['materiel', 'achat_vente'].includes(this.product.type);
   }
 
-  // Pour le type "service", qte_stock doit être 0 et désactivé
+  // Pour le type "service", qte_stock doit Ãªtre 0 et dÃ©sactivÃ©
   isQteStockDisabled(): boolean {
     return this.product.type === 'service' || this.fieldsDisabled;
   }
 
   // =========================
-  // HELPERS NUMÉRIQUES
+  // HELPERS NUMÃ‰RIQUES
   // =========================
-  private isPositive(value: number | null | undefined): boolean {
-    return typeof value === 'number' && value > 0;
+  private isValidPrice(value: number | null | undefined): boolean {
+    return typeof value === 'number' && value >= 0;
+  }
+
+  isPriceMissing(value: number | null | undefined): boolean {
+    return value === null || value === undefined;
+  }
+
+  private hasServicePrice(): boolean {
+    return this.isValidPrice(this.product.prix_achat) || this.isValidPrice(this.product.prix_vente);
+  }
+
+  showServicePriceError(): boolean {
+    return this.submitted && this.isEditing && this.product.type === 'service' && !this.hasServicePrice();
+  }
+
+  // Switch statut (actif/inactif)
+  get isActifSwitch(): boolean {
+    return this.product.statut === 'actif';
+  }
+
+  onStatutToggleChange(value: boolean): void {
+    this.product.statut = value ? 'actif' : 'inactif';
   }
 
   // =========================
   // TYPE CHANGE
   // =========================
   onTypeChange(): void {
-    // Réinitialiser les prix non applicables
+    // RÃ©initialiser les prix non applicables
     if (!this.isPrixUsineVisible()) this.product.prix_usine = null;
-    if (!this.isPrixVenteVisible()) this.product.prix_vente = null;
-    if (!this.isPrixAchatVisible()) this.product.prix_achat = null;
 
-    // Pour le type "service", forcer qte_stock à 0
+    // Pour le type "service", forcer qte_stock Ã  0
     if (this.product.type === 'service') {
       this.product.qte_stock = 0;
     }
@@ -194,9 +224,12 @@ export class ProduitsForm implements OnInit {
     if (!this.product.nom?.trim() || !this.product.type) return false;
 
     // Validation des prix selon le type
-    if (this.isPrixUsineRequired() && !this.isPositive(this.product.prix_usine)) return false;
-    if (this.isPrixVenteRequired() && !this.isPositive(this.product.prix_vente)) return false;
-    if (this.isPrixAchatRequired() && !this.isPositive(this.product.prix_achat)) return false;
+    if (this.isPrixUsineRequired() && !this.isValidPrice(this.product.prix_usine)) return false;
+    if (this.isPrixVenteRequired() && !this.isValidPrice(this.product.prix_vente)) return false;
+    if (this.isPrixAchatRequired() && !this.isValidPrice(this.product.prix_achat)) return false;
+
+    // Service: au moins un prix (achat ou vente)
+    if (this.product.type === 'service' && !this.hasServicePrice()) return false;
 
     return true;
   }
@@ -214,7 +247,7 @@ export class ProduitsForm implements OnInit {
     this.selectedImageFile = null;
 
     if (this.initialData) {
-      this.product = new Produit(this.initialData); // ✅ pas de spread
+      this.product = new Produit(this.initialData); // âœ… pas de spread
       this.imagePreview = this.initialData.image_url;
     } else {
       this.resetForm();
@@ -257,13 +290,10 @@ export class ProduitsForm implements OnInit {
       description: this.product.description?.trim() || undefined,
       cout: this.product.cout ?? undefined
     };
+    // Statut piloté par le switch (actif/inactif)
+    dto.statut = this.product.statut;
 
-    // Statut uniquement en mode édition (le backend gère le statut initial)
-    if (this.mode === 'edit') {
-      dto.statut = this.product.statut;
-    }
-
-    // Prix seulement si définis
+    // Prix seulement si dÃ©finis
     if (this.product.prix_usine !== null) dto.prix_usine = this.product.prix_usine;
     if (this.product.prix_vente !== null) dto.prix_vente = this.product.prix_vente;
     if (this.product.prix_achat !== null) dto.prix_achat = this.product.prix_achat;
@@ -295,13 +325,13 @@ export class ProduitsForm implements OnInit {
       case 'materiel':
         return "Prix d'achat obligatoire";
       case 'service':
-        return 'Prix de vente obligatoire (stock désactivé)';
+        return 'Pour un service, renseignez au moins un prix : achat ou vente';
       case 'fabricable':
         return 'Prix usine et prix de vente obligatoires';
       case 'achat_vente':
         return "Prix d'achat et prix de vente obligatoires";
       default:
-        return 'Sélectionnez un type de produit';
+        return 'SÃ©lectionnez un type de produit';
     }
   }
 
@@ -321,7 +351,7 @@ export class ProduitsForm implements OnInit {
       prix_vente: null,
       qte_stock: 0,
       cout: null,
-      statut: 'brouillon',
+      statut: 'actif',
       type: 'materiel',
       in_stock: true,
       is_archived: false,
@@ -330,3 +360,7 @@ export class ProduitsForm implements OnInit {
     });
   }
 }
+
+
+
+

@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 import { Prestataire, PRESTATAIRE_TYPES } from '@/models/prestataire.model';
+import { COUNTRIES } from '@/models/country.model';
 
 @Component({
   selector: 'app-prestateurs-from',
@@ -49,37 +50,7 @@ export class PrestateursFrom implements OnInit, OnChanges {
   phoneCountry: string = 'GN'; // Guinée par défaut
 
   // Liste des pays pour le sélecteur
-  countries: { name: string; code: CountryCode; dialCode: string }[] = [
-    // Pays de l'Afrique de l'Ouest (Union du Fleuve Mano)
-    { name: 'Guinée', code: 'GN', dialCode: '+224' },
-    { name: 'Sierra Leone', code: 'SL', dialCode: '+232' },
-    { name: 'Liberia', code: 'LR', dialCode: '+231' },
-    { name: 'Côte d\'Ivoire', code: 'CI', dialCode: '+225' },
-    
-    // Autres pays de l'Afrique de l'Ouest
-    { name: 'Sénégal', code: 'SN', dialCode: '+221' },
-    { name: 'Mali', code: 'ML', dialCode: '+223' },
-    { name: 'Burkina Faso', code: 'BF', dialCode: '+226' },
-    { name: 'Niger', code: 'NE', dialCode: '+227' },
-    { name: 'Togo', code: 'TG', dialCode: '+228' },
-    { name: 'Bénin', code: 'BJ', dialCode: '+229' },
-    { name: 'Ghana', code: 'GH', dialCode: '+233' },
-    { name: 'Nigeria', code: 'NG', dialCode: '+234' },
-    { name: 'Gambie', code: 'GM', dialCode: '+220' },
-    { name: 'Guinée-Bissau', code: 'GW', dialCode: '+245' },
-    { name: 'Cap-Vert', code: 'CV', dialCode: '+238' },
-    { name: 'Mauritanie', code: 'MR', dialCode: '+222' },
-    
-    // Europe
-    { name: 'France', code: 'FR', dialCode: '+33' },
-    { name: 'Belgique', code: 'BE', dialCode: '+32' },
-    { name: 'Suisse', code: 'CH', dialCode: '+41' },
-    { name: 'Luxembourg', code: 'LU', dialCode: '+352' },
-    
-    // Amérique du Nord
-    { name: 'Canada', code: 'CA', dialCode: '+1' },
-    { name: 'États-Unis', code: 'US', dialCode: '+1' },
-  ];
+  countries = COUNTRIES;
 
   ngOnInit() {
     this.type_piece_identite = [
@@ -109,6 +80,10 @@ private initializeModel() {
   
   // Créer une copie profonde des données
   this.model = this.initialData ? { ...this.initialData } : {};
+
+  if (this.mode === 'create' && !this.model.ville?.trim()) {
+    this.model.ville = 'Conakry';
+  }
   
   console.log("Model après initialisation:", this.model);
 
@@ -191,14 +166,10 @@ private initializeModel() {
     return country ? country.dialCode : '';
   }
 
-  // Obtenir la classe CSS du drapeau
-  getFlagClass(code: string): string {
-    return `fi fi-${code.toLowerCase()}`;
-  }
-
-  // Ajouter cette méthode
+  // Obtenir le drapeau du pays
   getCountryFlag(code: string): string {
-    return `https://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`;
+    const country = this.countries.find(c => c.code === code);
+    return country ? country.flag : '';
   }
 
   // Événement déclenché lors du changement de pays
@@ -292,5 +263,20 @@ private initializeModel() {
     return (this.mode === 'edit' && !this.isEditing) || this.loading;
   }
 
+  get formTitle(): string {
+    if (this.mode === 'create') {
+      return 'Ajout prestataire';
+    }
+
+    const reference = this.model.reference?.trim();
+return reference
+      ? `Modification prestataire`
+      : 'Modification prestataire';
+    //pour afficher la reference
+    // return reference
+    //   ? `Modification prestataire : ${reference}`
+    //   : 'Modification prestataire';
+  }
 
 }
+

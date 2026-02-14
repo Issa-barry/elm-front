@@ -4,6 +4,7 @@ import { Landing } from '@/pages/landing/landing';
 import { Notfound } from '@/pages/notfound/notfound';
 import { guestGuard } from '@/guards/guest.guard';
 import { authGuard } from '@/guards/auth.guard';
+import { authorizationGuard } from '@/guards/authorization.guard';
  
  
 
@@ -34,6 +35,16 @@ export const appRoutes: Routes = [
             {
                 path: 'produits',
                 loadChildren: () => import('@/pages/produits/produits.routes'),
+            },
+             {
+                path: 'parametres',
+                loadChildren: () => import('@/pages/parametres/parametres.routes'),
+            },
+            {
+                path: 'roles',
+                canActivate: [authorizationGuard],
+                data: { roles: ['admin'] },
+                loadChildren: () => import('@/pages/roles/roles.routes'),
             },
             {
                 path: 'dashboard-banking',

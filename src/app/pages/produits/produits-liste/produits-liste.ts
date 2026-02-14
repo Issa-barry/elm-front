@@ -18,8 +18,10 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { Router } from '@angular/router';
 import { ProduitService } from '@/services/produits/produits.service';
+import { AuthService } from '@/services/auth/auth.service';
 import { forkJoin } from 'rxjs';
 import {
     CreateProduitDto,
@@ -29,7 +31,7 @@ import {
     PRODUIT_TYPE_LABELS,
     ProduitStatut,
     ProduitStatutSeverity,
-    ProduitType
+    ProduitType 
 } from '@/models/produit.model';
 
 interface Column {
@@ -65,7 +67,8 @@ interface ExportColumn {
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        TooltipModule
     ],
         providers: [MessageService, ProduitService, ConfirmationService],
 
@@ -76,6 +79,7 @@ export class ProduitsListe implements OnInit {
      produits: Produit[] = [];
      produit: Produit = new Produit();
     loading: boolean = true;
+    saving: boolean = false;
 
     ///
     filterFields: string[] = ['code', 'nom', 'description', 'type', 'statut', 'qte_stock'];
@@ -95,12 +99,21 @@ export class ProduitsListe implements OnInit {
 
     cols!: Column[];
 
+    canCreate = false;
+    canUpdate = false;
+    canDelete = false;
+
     constructor(
         private router: Router,
         private produitService: ProduitService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
-    ) {}
+        private confirmationService: ConfirmationService,
+        private authService: AuthService
+    ) {
+        this.canCreate = this.authService.hasPermission('produits.create');
+        this.canUpdate = this.authService.hasPermission('produits.update');
+        this.canDelete = this.authService.hasPermission('produits.delete');
+    }
 
     exportCSV() {
         this.dt.exportCSV();
@@ -113,16 +126,16 @@ export class ProduitsListe implements OnInit {
     }
 
       loadProduits() {
+        this.loading = true;
         this.produitService.getAll().subscribe({
                 next: (produits) => {
                     this.produits = produits;
                     this.loading=false;
-                    console.log(this.produits);
-                    
                 },
                 error: (err) =>{
-                    console.error('Erreur lors du chargement des produits :', err),
-                this.loading = false;
+                    console.error('Erreur lors du chargement des produits :', err);
+                    this.loading = false;
+                    this.showApiError(err, 'Chargement des produits impossible');
                 }
                 });
     }
@@ -195,12 +208,7 @@ export class ProduitsListe implements OnInit {
                     },
                     error: (err) => {
                         console.error('Erreur lors de la suppression des produits :', err);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erreur',
-                            detail: 'Suppression impossible.',
-                            life: 3000
-                        });
+                        this.showApiError(err, 'Suppression impossible');
                     }
                 });
             }
@@ -231,12 +239,7 @@ export class ProduitsListe implements OnInit {
                     },
                     error: (err) => {
                         console.error('Erreur lors de la suppression du produit :', err);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erreur',
-                            detail: 'Suppression impossible.',
-                            life: 3000
-                        });
+                        this.showApiError(err, 'Suppression impossible');
                     }
                 });
             }
@@ -268,9 +271,11 @@ export class ProduitsListe implements OnInit {
 
     saveProduit() {
         this.submitted = true;
-        if (!this.produit.nom?.trim() || !this.produit.type) {
+        if (!this.produit.nom?.trim() || !this.produit.type || this.saving) {
             return;
         }
+
+        this.saving = true;
 
         const dto: CreateProduitDto = {
             nom: this.produit.nom.trim(),
@@ -294,27 +299,67 @@ export class ProduitsListe implements OnInit {
                 this.produitDialog = false;
                 this.produit = new Produit();
                 this.submitted = false;
+                this.saving = false;
                 this.loadProduits();
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Successful',
-                    detail: isUpdate ? 'Product Updated' : 'Product Created',
+                    summary: 'Succès',
+                    detail: isUpdate ? 'Produit mis à jour' : 'Produit créé',
                     life: 3000
                 });
             },
             error: (err) => {
-                console.error('Erreur lors de la sauvegarde du produit :', err);
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erreur',
-                    detail: 'Sauvegarde impossible.',
-                    life: 3000
-                });
+                this.saving = false;
+                this.showApiError(err, 'Sauvegarde impossible');
             }
         });
+    }
+
+    private showApiError(err: any, fallback: string): void {
+        const summary = 'Erreur';
+        const detail = this.extractErrorMessage(err, fallback);
+
+        if (err.status === 422 && err.error?.errors) {
+            const messages = Object.values(err.error.errors).flat() as string[];
+            messages.forEach(msg => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Validation',
+                    detail: msg,
+                    life: 5000
+                });
+            });
+        } else {
+            this.messageService.add({
+                severity: 'error',
+                summary,
+                detail,
+                life: 5000
+            });
+        }
+    }
+
+    private extractErrorMessage(err: any, fallback: string): string {
+        if (typeof err?.error?.message === 'string' && err.error.message.trim().length > 0) {
+            return err.error.message;
+        }
+
+        if (typeof err?.message === 'string' && err.message.trim().length > 0) {
+            return err.message;
+        }
+
+        return fallback;
     }
 
      goToNewProduits() {
         this.router.navigate(['/produits/produits-new']);
     }
+ 
+   
+
+    goToEditProduit(event: Event, produitId: number) {
+        event.stopPropagation();
+        this.router.navigate(['/produits/produits-edit', produitId]);
+    }
+
 }

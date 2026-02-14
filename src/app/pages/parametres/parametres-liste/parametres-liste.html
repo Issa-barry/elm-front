@@ -1,0 +1,67 @@
+<p-toast></p-toast>
+
+<div class="rounded-t-3xl bg-surface-0 dark:bg-surface-900 flex-auto py-6 lg:py-8 px-8 lg:px-20">
+  <div class="flex flex-col w-full pb-8 gap-2">
+    <h2 class="mt-0 text-surface-900 dark:text-surface-0 font-medium text-2xl leading-tight">Parametres</h2>
+    <p class="mt-0 text-surface-500 dark:text-surface-300 leading-tight">Gestion des parametres de l'application</p>
+  </div>
+
+  <p-divider></p-divider>
+
+  <div class="grid grid-cols-12 gap-4 py-6 lg:py-8">
+    <div class="col-span-12 lg:col-span-2">
+      <ul class="list-none m-0 p-0 hidden lg:flex flex-col justify-start">
+        <li class="-ml-[2px]" [ngClass]="isActive('profile') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('profile') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'profile')"
+          >
+            <i class="pi pi-user mr-2 text-base! leading-normal!"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+        <li class="-ml-[2px]" [ngClass]="isActive('auth') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('auth') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'auth')"
+          >
+            <i class="pi pi-lock mr-2 text-base! leading-normal!"></i>
+            <span>Authentification</span>
+          </a>
+        </li>
+        <li class="-ml-[2px]" [ngClass]="isActive('packing') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('packing') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'packing')"
+          >
+            <i class="pi pi-cog mr-2 text-base! leading-normal!"></i>
+            <span>Packing</span>
+          </a>
+        </li>
+        <li class="-ml-[2px]" [ngClass]="isActive('roles') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('roles') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'roles')"
+          >
+            <i class="pi pi-shield mr-2 text-base! leading-normal!"></i>
+            <span>Rôles & Permissions</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="col-span-12 lg:col-span-10 xl:col-span-10 bg-surface-0 dark:bg-surface-900 p-8 rounded-2xl flex-auto">
+      <app-parametres-profile *ngIf="isActive('profile')"></app-parametres-profile>
+      <app-parametres-auth *ngIf="isActive('auth')"></app-parametres-auth>
+      <app-parametres-packing *ngIf="isActive('packing')"></app-parametres-packing>
+      <app-parametres-roles-permissions *ngIf="isActive('roles')"></app-parametres-roles-permissions>
+     </div>
+  </div>
+</div>

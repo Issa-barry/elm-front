@@ -2,9 +2,8 @@
   <div class="card">
             <p-toolbar styleClass="mb-12">
                 <ng-template #start>
-                    <!-- <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" /> -->
-                    <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-                    <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProduits || !selectedProduits.length" />
+                    <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" [disabled]="!canCreate" *ngIf="canCreate" />
+                    <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProduits || !selectedProduits.length" *ngIf="canDelete" />
                 </ng-template>
 
                 <ng-template #end>
@@ -20,23 +19,23 @@
                 [columns]="cols"
                 [paginator]="true"
                 [globalFilterFields]="filterFields"
-                [tableStyle]="{ 'min-width': '75rem' }"
+                [tableStyle]="{ 'min-width': '75rem' }" 
                 [(selection)]="selectedProduits" 
                 [rowHover]="true"
                 dataKey="id"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} produits"
+                currentPageReportTemplate="  {first} à {last} sur {totalRecords} produits"
                 [showCurrentPageReport]="true"
                 [rowsPerPageOptions]="[10, 20, 30]"
             >
                 <ng-template #caption>
                     <div class="flex items-center justify-between">
-                        <h5 class="m-0">Manage Products</h5>
+                        <h5 class="m-0">Gestion des Produits</h5>
                         <p-iconfield>
                             <p-inputicon styleClass="pi pi-search" />
-                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
                         </p-iconfield>
                     </div>
-                </ng-template>
+                </ng-template> 
               <ng-template #header>
                     <tr>
                         <th style="width: 3rem">
@@ -89,8 +88,17 @@
                             />
                         </td>
                         <td>
-                            <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(produit)" />
-                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(produit)" />
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-eye"
+                                class="p-button-rounded p-button-text p-button-sm mr-2"
+                                [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                                tooltipPosition="top"
+                                (click)="goToEditProduit($event, produit.id)"
+                                [disabled]="!canUpdate"
+                            ></button>
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(produit)" *ngIf="canDelete" />
                         </td>
                     </tr>
                 </ng-template> 
@@ -177,8 +185,13 @@
             </ng-template>
 
             <ng-template #footer>
-                <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" />
-                <p-button label="Enregistrer" icon="pi pi-check" (click)="saveProduit()" />
+                <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
+                <p-button
+                    label="Enregistrer"
+                    icon="pi pi-check"
+                    (click)="saveProduit()"
+                    [disabled]="saving"
+                    [loading]="saving" />
             </ng-template>
         </p-dialog>
 

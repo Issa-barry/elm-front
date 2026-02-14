@@ -29,7 +29,7 @@ export class AuthService {
   constructor() {
     // Initialiser l'état au démarrage
     this.initializeAuth();
-  }
+  } 
 
   /**
    * Initialiser l'authentification au démarrage
@@ -42,6 +42,7 @@ export class AuthService {
       this.currentUser.set(user);
       this.isAuthenticated.set(true);
       this.currentUserSubject.next(user);
+      this.refreshCurrentUserProfile();
     } else {
       this.clearAuth();
     }
@@ -77,7 +78,7 @@ export class AuthService {
 
   /**
    * Déconnexion
-   */
+   */ 
   logout(): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.API_URL}/logout`, {}).pipe(
       tap(() => {
@@ -90,7 +91,7 @@ export class AuthService {
         this.router.navigate(['/auth/login']);
         return this.handleError(error);
       })
-    );
+    ); 
   }
 
   /**
@@ -110,10 +111,13 @@ export class AuthService {
    * Obtenir le profil de l'utilisateur connecté
    */
   me(): Observable<ApiResponse<User>> {
-    return this.http.get<ApiResponse<User>>(`${this.API_URL}/me`).pipe(
+    return this.http.get<ApiResponse<any>>(`${this.API_URL}/me`).pipe(
       tap(response => {
         if (response.success && response.data) {
-          this.setUser(response.data);
+          const user = this.extractUserFromPayload(response.data);
+          if (user) {
+            this.setUser(user);
+          }
         }
       }),
       catchError(error => this.handleError(error))
@@ -174,12 +178,14 @@ export class AuthService {
     );
   }
 
-  /**
+  /** 
    * Gérer le succès de l'authentification
    */
   private handleAuthSuccess(data: { user: User; access_token: string }): void {
     this.setToken(data.access_token);
-    this.setUser(data.user);
+    const user = this.extractUserFromPayload(data) ?? data.user;
+    this.setUser(user);
+    this.refreshCurrentUserProfile();
   }
 
   /**
@@ -218,7 +224,127 @@ export class AuthService {
    */
   private getUserFromStorage(): User | null {
     const userJson = sessionStorage.getItem(this.USER_KEY);
-    return userJson ? JSON.parse(userJson) : null;
+    if (!userJson) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(userJson);
+      return this.extractUserFromPayload(parsed);
+    } catch {
+      return null;
+    }
+  }
+
+  private refreshCurrentUserProfile(): void {
+    this.me().subscribe({
+      next: () => {},
+      error: () => {},
+    });
+  }
+
+  private extractUserFromPayload(payload: any): User | null {
+    const source = payload?.user ?? payload;
+    if (!source || typeof source !== 'object') {
+      return null;
+    }
+
+    const user = { ...source } as User;
+
+    const permissions = this.mergeUniqueStrings(
+      this.normalizePermissions(source?.permissions),
+      this.normalizePermissions(payload?.permissions)
+    );
+    if (permissions.length > 0) {
+      user.permissions = permissions;
+    }
+
+    const roles = this.mergeUniqueStrings(
+      this.normalizeStringList(source?.roles),
+      this.normalizeStringList(payload?.roles)
+    );
+    if (roles.length > 0) {
+      user.roles = roles;
+    }
+
+    return user;
+  }
+
+  private normalizeStringList(value: any): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item.trim();
+        }
+
+        if (item && typeof item === 'object' && typeof item.name === 'string') {
+          return item.name.trim();
+        }
+
+        return '';
+      })
+      .filter((item) => item.length > 0);
+  }
+
+  private normalizePermissions(value: any): string[] {
+    if (!value) {
+      return [];
+    }
+
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => {
+          if (typeof item === 'string') {
+            return item.trim();
+          }
+
+          if (item && typeof item === 'object' && typeof item.name === 'string') {
+            return item.name.trim();
+          }
+
+          return '';
+        })
+        .filter((item) => item.length > 0);
+    }
+
+    if (typeof value === 'object') {
+      return Object.entries(value).flatMap(([module, actions]) => {
+        if (Array.isArray(actions)) {
+          return actions
+            .filter((action) => typeof action === 'string' && action.trim().length > 0)
+            .map((action) => `${module}.${action.trim()}`);
+        }
+
+        if (actions && typeof actions === 'object') {
+          return Object.entries(actions)
+            .filter(([, enabled]) => !!enabled)
+            .map(([action]) => `${module}.${action}`);
+        }
+
+        if (typeof actions === 'string' && actions.trim().length > 0) {
+          return [`${module}.${actions.trim()}`];
+        }
+
+        return [];
+      });
+    }
+
+    return [];
+  }
+
+  private mergeUniqueStrings(...arrays: string[][]): string[] {
+    const set = new Set<string>();
+    arrays.flat().forEach((item) => {
+      const value = item.trim();
+      if (value.length > 0) {
+        set.add(value);
+      }
+    });
+    return Array.from(set);
   }
 
   /**
@@ -252,5 +378,16 @@ export class AuthService {
  */
   isLoggedIn(): boolean {
     return this.hasToken() && this.currentUser() !== null;
+  }
+
+  /**
+   * Vérifier si l'utilisateur possède une permission
+   */
+  hasPermission(permission: string): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+    const permissions = user.permissions ?? [];
+    if (permissions.length === 0) return true; // Fallback permissif
+    return permissions.includes(permission);
   }
 }

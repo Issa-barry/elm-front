@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Packing, CreatePackingDto, UpdatePackingDto, PackingFilters, ChangePackingStatutDto } from '@/models/packing.model';
-import { environment } from 'src/environments/environment.development';
+import { environment } from 'src/environments/environment';
 
 // Interfaces pour les réponses API
 export interface ApiResponse<T> {

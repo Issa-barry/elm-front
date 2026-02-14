@@ -1,0 +1,84 @@
+<div class="flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="facture">
+    <!-- Header -->
+    <div class="w-full p-6 border-b border-surface-200 dark:border-surface-700 flex justify-start items-center">
+        <div class="flex-1">
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ facture.reference.replace('FACT-PACK-', '') }}</div>
+            <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Versement facture</div>
+        </div>
+        <button pButton [text]="true" [rounded]="true" class="w-10 h-10" (click)="onClose.emit()">
+            <i pButtonIcon class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 w-full p-6 flex flex-col justify-start items-start gap-6 overflow-y-auto">
+        <!-- Résumé facture -->
+        <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col justify-start items-start gap-4">
+            <div class="w-full flex justify-start items-start gap-6">
+                <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Total facture</div>
+                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{  facture.montant_total | money :'GNF'}}</div>
+            </div>
+            <div class="w-full flex justify-start items-start gap-6">
+                <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Déjà versé</div>
+                <div class="text-base font-semibold leading-tight" style="color: #059669">{{  facture.montant_verse | money :'GNF'}}</div>
+            </div>
+
+            <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
+
+            <div class="w-full flex justify-start items-start gap-6">
+                <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Reste à payer</div>
+                <div class="text-lg font-bold leading-tight" style="color: #d97706">{{  facture.montant_restant | money :'GNF' }}</div>
+            </div>
+        </div>
+
+        <!-- Montant à verser -->
+        <div class="w-full flex flex-col gap-3">
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Montant à verser</div>
+            <p-inputnumber
+                [(ngModel)]="montant"
+                [min]="1"
+                [max]="facture.montant_restant"
+                suffix=" GNF"
+                [useGrouping]="true"
+                locale="fr-FR"
+                inputStyleClass="w-full text-right text-xl font-bold py-4"
+                styleClass="w-full"
+                placeholder="0"
+            ></p-inputnumber>
+        </div>
+
+        <!-- Mode de paiement -->
+        <div class="w-full flex flex-col gap-3">
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Mode de paiement</div>
+            <div class="w-full flex gap-3">
+                <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'especes'" (click)="selectMode('especes')">
+                    <i class="pi pi-money-bill"></i>
+                    <span>Espèces</span>
+                </div>
+                <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'virement'" (click)="selectMode('virement')">
+                    <i class="pi pi-building"></i>
+                    <span>Virement</span>
+                </div>
+                <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'mobile_money'" (click)="selectMode('mobile_money')">
+                    <i class="pi pi-mobile"></i>
+                    <span>Mobile</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-5">
+        <div class="w-full flex justify-start items-start gap-4">
+            <div class="flex justify-start items-end gap-2">
+                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant à payer</div>
+            </div>
+            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? formatCurrency(montant) : '0 GNF' }}</div>
+        </div>
+
+        <button pButton class="w-full py-3" severity="contrast" (click)="confirmer()" [disabled]="saving || !montant" [loading]="saving">
+            <i pButtonIcon class="pi pi-check mr-2"></i>
+            <span pButtonLabel>Confirmer le paiement</span>
+        </button>
+    </div>
+</div>

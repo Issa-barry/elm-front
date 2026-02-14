@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AppMenuitem } from './app.menuitem';
+import { AuthService } from '@/services/auth/auth.service';
 
 @Component({
     selector: 'app-menu',
@@ -22,9 +23,17 @@ import { AppMenuitem } from './app.menuitem';
 })
 export class AppMenu {
     model: any[] = [];
+    private authService = inject(AuthService);
 
-    ngOnInit() {
-        this.model = [
+    constructor() {
+        effect(() => {
+            const permissions = this.authService.currentUser()?.permissions ?? [];
+            this.model = this.buildMenuModel(permissions);
+        });
+    }
+
+    private buildMenuModel(permissions: string[]) {
+        return [
             {
                 // label: 'Statistiques',
                 // icon: 'pi pi-home',
@@ -53,11 +62,27 @@ export class AppMenu {
                     {
                         label: 'Comptabilité',
                         icon: 'pi pi-fw pi-calculator',
+                        visible: this.hasAnyPermission(permissions, [
+                            'facture-packings.read',
+                            'facture-packing.read',
+                            'facture_packings.read',
+                            'facture_packing.read',
+                            'facturepackings.read',
+                            'facturepacking.read',
+                        ]),
                         items: [
                             {
-                                label: 'Salaire packing',
+                                label: 'Facture packing',
                                 icon: 'pi pi-fw pi-money-bill',
-                                routerLink: ['/comptabilite/comptabilite-packing'],
+                                routerLink: ['/comptabilite/comptabilite-packing-liste'],
+                                visible: this.hasAnyPermission(permissions, [
+                                    'facture-packings.read',
+                                    'facture-packing.read',
+                                    'facture_packings.read',
+                                    'facture_packing.read',
+                                    'facturepackings.read',
+                                    'facturepacking.read',
+                                ]),
                             },
                             // {
                             //     label: 'Sailaire véhicule',
@@ -86,16 +111,32 @@ export class AppMenu {
                         label: 'Packing',
                         icon: 'pi pi-fw pi-box',
                         routerLink: ['/packings'],
+                        visible: this.hasAnyPermission(permissions, [
+                            'packings.read',
+                            'packing.read',
+                        ]),
                     },
                     {
                         label: 'Contacts',
                         icon: 'pi pi-fw pi-address-book',
+                        visible: this.hasAnyPermission(permissions, [
+                            'prestataires.read',
+                            'prestataire.read',
+                            'prestateurs.read',
+                            'prestateur.read',
+                        ]),
                         items: [
                             
                             {
                                 label: 'Prestateurs-externes',
                                 icon: 'pi pi-fw pi-briefcase',
                                 routerLink: ['contacts/prestateurs'],
+                                visible: this.hasAnyPermission(permissions, [
+                                    'prestataires.read',
+                                    'prestataire.read',
+                                    'prestateurs.read',
+                                    'prestateur.read',
+                                ]),
                             },
                             // {
                             //     label: 'Fournisseurs',
@@ -118,45 +159,46 @@ export class AppMenu {
                         label: 'Produits',
                         icon: 'pi pi-fw pi-barcode',
                         routerLink: ['/produits'],
+                        visible: this.hasAnyPermission(permissions, [
+                            'produits.read',
+                            'produit.read',
+                            'products.read',
+                            'product.read',
+                        ]),
                     },
                 ],
             },
-             
-             
-             
-            // {
-            //     label: 'Administration',
-            //     icon: 'pi pi-fw pi-align-left',
-            //     items: [
-            //         {
-            //             label: 'Parametrage',
-            //             icon: 'pi pi-fw pi-align-left',
-            //             items: [
-            //                  {
-            //                             label: 'Contact Us',
-            //                             icon: 'pi pi-fw pi-phone',
-            //                             routerLink: ['/pages/contact'],
-            //                 },
-            //             ],
-            //         },
-            //     ],
-            // },
-            // {
-            //     label: 'Autre',
-            //     icon: 'pi pi-fw pi-download',
-            //     items: [
-            //             {
-            //                             label: 'Contact Us',
-            //                             icon: 'pi pi-fw pi-phone',
-            //                             routerLink: ['/pages/contact'],
-            //                 },
-            //         {
-            //             label: 'Documentation',
-            //             icon: 'pi pi-fw pi-info-circle',
-            //             routerLink: ['/documentation'],
-            //         },
-            //     ],
-            // },
         ];
     }
+
+    private hasAnyPermission(userPermissions: unknown[] | undefined, required: string[]): boolean {
+        if (!userPermissions || userPermissions.length === 0) {
+            // Mode strict pour le menu: sans permission explicite, on masque l'entrée.
+            return false;
+        }
+
+        const normalized = new Set(
+            userPermissions
+                .map((permission) => {
+                    if (typeof permission === 'string') {
+                        return permission.trim().toLowerCase();
+                    }
+
+                    if (
+                        permission &&
+                        typeof permission === 'object' &&
+                        'name' in permission &&
+                        typeof (permission as { name?: string }).name === 'string'
+                    ) {
+                        return (permission as { name: string }).name.trim().toLowerCase();
+                    }
+
+                    return '';
+                })
+                .filter((permission) => permission.length > 0)
+        );
+        return required.some((permission) => normalized.has(permission.toLowerCase()));
+    }
 }
+
+

@@ -1,0 +1,78 @@
+<div class="flex flex-col gap-8">
+  <div class="text-surface-900 dark:text-surface-0 font-semibold text-lg leading-tight">Parametres Profile</div>
+
+  <div *ngIf="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="text-green-600 text-sm">{{ successMessage }}</div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="flex flex-col gap-2">
+      <label for="profile_nom" class="text-surface-900 dark:text-surface-0">Nom</label>
+      <input
+        id="profile_nom"
+        type="text"
+        pInputText
+        class="w-full"
+        [(ngModel)]="form.nom"
+        [disabled]="loading || saving"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="profile_prenom" class="text-surface-900 dark:text-surface-0">Prenom</label>
+      <input
+        id="profile_prenom"
+        type="text"
+        pInputText
+        class="w-full"
+        [(ngModel)]="form.prenom"
+        [disabled]="loading || saving"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2 md:col-span-2">
+      <label for="profile_email" class="text-surface-900 dark:text-surface-0">Email</label>
+      <input
+        id="profile_email"
+        type="email"
+        pInputText
+        class="w-full"
+        [(ngModel)]="form.email"
+        [disabled]="loading || saving"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="profile_ville" class="text-surface-900 dark:text-surface-0">Ville</label>
+      <input
+        id="profile_ville"
+        type="text"
+        pInputText
+        class="w-full"
+        [(ngModel)]="form.ville"
+        [disabled]="loading || saving"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="profile_quartier" class="text-surface-900 dark:text-surface-0">Quartier</label>
+      <input
+        id="profile_quartier"
+        type="text"
+        pInputText
+        class="w-full"
+        [(ngModel)]="form.quartier"
+        [disabled]="loading || saving"
+      />
+    </div>
+  </div>
+
+  <div>
+    <p-button
+      label="Enregistrer"
+      icon="pi pi-save"
+      [loading]="saving"
+      [disabled]="loading || saving"
+      (onClick)="saveProfile()"
+    ></p-button>
+  </div>
+</div>

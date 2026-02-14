@@ -1,0 +1,88 @@
+<p-toast />
+
+<div class="card">
+    <!-- Header -->
+    <div class="role-header">
+        <div class="role-header__left">
+            <p-button icon="pi pi-arrow-left" severity="secondary" [text]="true" [rounded]="true" (click)="goBack()" pTooltip="Retour" />
+            <div class="role-header__title" *ngIf="!loading">
+                <input
+                    pInputText
+                    [(ngModel)]="roleName"
+                    class="role-name-input"
+                    (blur)="saveName()"
+                    (keydown.enter)="saveName()"
+                    [disabled]="originalName === 'admin'"
+                />
+            </div>
+            <p-skeleton *ngIf="loading" width="200px" height="2.2rem" />
+        </div>
+        <p-button
+            label="Sauvegarder"
+            icon="pi pi-save"
+            (click)="savePermissions()"
+            [loading]="saving"
+            [disabled]="loading || saving"
+        />
+    </div>
+</div>
+
+<!-- Permission Matrix -->
+<div class="card" *ngIf="!loading">
+    <h5 class="permission-title">Permissions du rôle "{{ originalName }}"</h5>
+
+    <div class="permission-matrix">
+        <!-- Header -->
+        <div class="permission-matrix__header">
+            <div class="permission-matrix__module-col"></div>
+            <div class="permission-matrix__action-col" *ngFor="let action of actions">
+                <span class="permission-matrix__action-label">{{ action | uppercase }}</span>
+                <p-checkbox
+                    [binary]="true"
+                    [ngModel]="isColumnAllChecked(action)"
+                    (onChange)="toggleColumn(action)"
+                    [indeterminate]="isColumnIndeterminate(action)"
+                    [disabled]="isColumnToggleDisabled(action)"
+                />
+            </div>
+        </div>
+
+        <!-- Rows -->
+        <div
+            class="permission-matrix__row"
+            *ngFor="let module of modules; let odd = odd"
+            [class.permission-matrix__row--alt]="odd"
+        >
+            <div class="permission-matrix__module-col">
+                <p-checkbox
+                    [binary]="true"
+                    [ngModel]="isRowAllChecked(module)"
+                    (onChange)="toggleRow(module)"
+                    [indeterminate]="isRowIndeterminate(module)"
+                    [disabled]="isRowToggleDisabled(module)"
+                />
+                <span class="permission-matrix__module-name">{{ module.module }}</span>
+            </div>
+            <div class="permission-matrix__action-col" *ngFor="let action of actions">
+                <p-checkbox
+                    [binary]="true"
+                    [ngModel]="module.permissions[action]"
+                    (onChange)="togglePermission(module, action)"
+                    [disabled]="!isActionAllowed(module, action)"
+                />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading skeleton -->
+<div class="card" *ngIf="loading">
+    <p-skeleton width="250px" height="1.5rem" styleClass="mb-6" />
+    <div *ngFor="let i of [1,2,3,4,5]" class="flex items-center gap-8 mb-4">
+        <p-skeleton width="140px" height="1.2rem" />
+        <p-skeleton width="24px" height="24px" />
+        <p-skeleton width="24px" height="24px" />
+        <p-skeleton width="24px" height="24px" />
+        <p-skeleton width="24px" height="24px" />
+    </div>
+</div>

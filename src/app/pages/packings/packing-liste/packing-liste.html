@@ -1,9 +1,9 @@
-<p-toast />
+﻿<p-toast />
 
 <div class="card">
     <p-toolbar styleClass="mb-12">
         <ng-template #start>
-            <p-button label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <p-button *ngIf="canCreate" label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
         </ng-template>
 
         <ng-template #end>
@@ -19,24 +19,15 @@
                     styleClass="w-40"
                 />
                 <p-datepicker
-                    [(ngModel)]="filterDateDebut"
+                    [(ngModel)]="filterDateRange"
+                    selectionMode="range"
                     dateFormat="dd/mm/yy"
-                    placeholder="Date début"
+                    placeholder="Période"
                     [showIcon]="true"
-                    [maxDate]="filterDateFin"
-                    (onSelect)="onDateFilter()"
+                    (onSelect)="onDateRangeSelect()"
                     inputStyleClass="w-full"
-                    styleClass="w-40"
-                />
-                <p-datepicker
-                    [(ngModel)]="filterDateFin"
-                    dateFormat="dd/mm/yy"
-                    placeholder="Date fin"
-                    [showIcon]="true"
-                    [minDate]="filterDateDebut"
-                    (onSelect)="onDateFilter()"
-                    inputStyleClass="w-full"
-                    styleClass="w-40"
+                    styleClass="w-56"
+                    [readonlyInput]="true"
                 />
                 <p-button
                     icon="pi pi-filter-slash"
@@ -44,7 +35,7 @@
                     [outlined]="true"
                     [rounded]="true"
                     (onClick)="clearDateFilters()"
-                    *ngIf="filterDateDebut || filterDateFin || filterStatut"
+                    *ngIf="filterDateRange || filterStatut"
                     pTooltip="Effacer les filtres"
                 />
                 <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
@@ -59,11 +50,11 @@
         [columns]="cols"
         [paginator]="true"
         [globalFilterFields]="filterFields"
-        [tableStyle]="{ 'min-width': '75rem' }"
+        [tableStyle]="{ 'min-width': '65rem' }"
         [(selection)]="selectedPackings"
         [rowHover]="true"
         dataKey="id"
-        currentPageReportTemplate="Affichage {first} à {last} sur {totalRecords} packings"
+        currentPageReportTemplate="  {first} à {last} sur {totalRecords} packings"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
@@ -77,79 +68,83 @@
                 </p-iconfield>
             </div>
         </ng-template>
+
         <ng-template #header>
             <tr>
-                <th style="width: 3rem">
-                    <p-tableHeaderCheckbox />
+                <th pSortableColumn="prestataire.nom">
+                    <span class="col-header">Prestataire <p-sortIcon field="prestataire.nom" /></span>
                 </th>
-                <th pSortableColumn="reference" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Référence
-                    <p-sortIcon field="reference" /></span>
+                <th><span class="col-header">Téléphone</span></th>
+                <th pSortableColumn="date">
+                    <span class="col-header">Date <p-sortIcon field="date" /></span>
                 </th>
-                <th pSortableColumn="prestataire.nom" style="min-width: 14rem">
-                    <span class="flex items-center gap-2">Prestataire
-                    <p-sortIcon field="prestataire.nom" /></span>
+                <th pSortableColumn="nb_rouleaux" class="text-right">
+                    <span class="col-header justify-end">Rouleaux <p-sortIcon field="nb_rouleaux" /></span>
                 </th>
-                <th style="min-width: 10rem">Phone</th>
-                <th pSortableColumn="date_debut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Début
-                    <p-sortIcon field="date_debut" /></span>
+                <th pSortableColumn="montant" class="text-right">
+                    <span class="col-header justify-end">Montant <p-sortIcon field="montant" /></span>
                 </th>
-                <th pSortableColumn="date_fin" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Fin
-                    <p-sortIcon field="date_fin" /></span>
+                <th pSortableColumn="statut" class="text-center">
+                    <span class="col-header justify-center">Statut <p-sortIcon field="statut" /></span>
                 </th>
-                <th pSortableColumn="nb_rouleaux" style="min-width: 8rem">
-                    <span class="flex items-center gap-2">Rouleaux
-                    <p-sortIcon field="nb_rouleaux" /></span>
-                </th>
-                <th pSortableColumn="montant" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Montant
-                    <p-sortIcon field="montant" /></span>
-                </th>
-                <th pSortableColumn="statut" style="min-width: 10rem">
-                    <span class="flex items-center gap-2">Statut
-                    <p-sortIcon field="statut" /></span>
-                </th>
-                <th style="min-width: 10rem"></th>
+                <th class="text-center" style="width: 5rem"></th>
             </tr>
         </ng-template>
+
         <ng-template #body let-packing>
-            <tr>
-                <td style="width: 3rem">
-                    <p-tableCheckbox [value]="packing" />
-                </td>
-                <td>{{ packing.reference }}</td>
+            <tr class="table-row" (dblclick)="canUpdate && editPacking(packing)">
                 <td>
-                    <span *ngIf="packing.prestataire">
-                        {{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}
+                    <div class="cell-prestataire" *ngIf="packing.prestataire">
+                        <span class="cell-prestataire__avatar" [style.background]="'var(--p-primary-50)'" [style.color]="'var(--p-primary-600)'">
+                            {{ packing.prestataire.nom?.charAt(0)?.toUpperCase() }}
+                        </span>
+                        <span class="cell-prestataire__name">{{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}</span>
+                    </div>
+                </td>
+                <td class="cell-secondary cell-bold">
+                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone | phoneFormat:'INT' }}</span>
+                </td>
+
+                <td class="cell-secondary cell-bold">{{ formatDateDisplay(packing.date) }}</td>
+
+                <td class="text-right cell-mono cell-bold">{{ packing.nb_rouleaux }}</td>
+
+                <td class="text-right cell-mono cell-bold">{{ formatCurrency(packing.montant) }}</td>
+                <td class="text-center">
+                    <span class="status-badge" [ngClass]="{
+                        'status-badge--warn': packing.statut === 'a_valider',
+                        'status-badge--success': packing.statut === 'valide',
+                        'status-badge--danger': packing.statut === 'annule'
+                    }">
+                        {{ getStatutLabel(packing.statut) }}
                     </span>
                 </td>
-                <td>
-                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone }}</span>
+                <td class="text-center">
+                    <p-button *ngIf="canUpdate" icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="Modifier" (click)="editPacking(packing)" />
                 </td>
-                <td>{{ formatDateDisplay(packing.date_debut) }}</td>
-                <td>{{ formatDateDisplay(packing.date_fin) }}</td>
-                <td>{{ packing.nb_rouleaux }}</td>
-                <td>{{ formatCurrency(packing.montant) }}</td>
-                <td>
-                    <p-tag [value]="getStatutLabel(packing.statut)" [severity]="getStatutSeverity(packing.statut)" />
-                </td>
-                <td>
-                    <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editPacking(packing)" />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deletePacking(packing)" />
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="7">
+                    <div class="empty-state">
+                        <i class="pi pi-inbox"></i>
+                        <span>Aucun packing trouvé</span>
+                    </div>
                 </td>
             </tr>
         </ng-template>
     </p-table>
 </div>
 
-<p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" header="Détails du packing" [modal]="true">
-    <ng-template #content>
+<p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" [header]="packing?.id ? 'Détails du packing' : 'Nouveau packing'" [modal]="true">
         <div class="flex flex-col gap-6">
+            <!-- Prestataire -->
             <div>
                 <label for="prestataire" class="block font-bold mb-4">Prestataire (Machiniste)</label>
-                <p-select
+                <p-skeleton *ngIf="dialogLoading" height="2.6rem" styleClass="w-full" />
+                <p-select *ngIf="!dialogLoading"
                     [(ngModel)]="selectedPrestataire"
                     [options]="prestataires"
                     optionLabel="nom"
@@ -171,32 +166,22 @@
                         </div>
                     </ng-template>
                 </p-select>
-                <small class="text-red-500" *ngIf="submitted && !selectedPrestataire">Le prestataire est requis.</small>
+                <small class="text-red-500" *ngIf="submitted && !selectedPrestataire && !dialogLoading">Le prestataire est requis.</small>
             </div>
 
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="date_debut" class="block font-bold mb-4">Date début</label>
-                    <p-datepicker
-                        [(ngModel)]="packing.date_debut"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                </div>
-                <div class="col-span-6">
-                    <label for="date_fin" class="block font-bold mb-4">Date fin</label>
-                    <p-datepicker
-                        [(ngModel)]="packing.date_fin"
-                        dateFormat="dd/mm/yy"
-                        [showIcon]="true"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                </div>
+            <!-- Date -->
+            <div>
+                <label for="date" class="block font-bold mb-4">Date</label>
+                <p-datepicker
+                    [(ngModel)]="packing.date"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    inputStyleClass="w-full"
+                    styleClass="w-full"
+                />
             </div>
 
+            <!-- Rouleaux & Prix -->
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-6">
                     <label for="nb_rouleaux" class="block font-bold mb-4">Nombre de rouleaux</label>
@@ -210,7 +195,8 @@
                 </div>
                 <div class="col-span-6">
                     <label for="prix_par_rouleau" class="block font-bold mb-4">Prix du rouleau (GNF)</label>
-                    <p-inputnumber
+                    <p-skeleton *ngIf="dialogLoading" height="2.6rem" styleClass="w-full" />
+                    <p-inputnumber *ngIf="!dialogLoading"
                         id="prix_par_rouleau"
                         [(ngModel)]="packing.prix_par_rouleau"
                         (onInput)="calculateMontant()"
@@ -220,52 +206,37 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="montant" class="block font-bold mb-4">Montant total (GNF)</label>
-                    <p-inputnumber
-                        id="montant"
-                        [(ngModel)]="packing.montant"
-                        [min]="0"
-                        [readonly]="true"
-                        styleClass="w-full"
-                    />
-                </div>
-                <div class="col-span-6">
-                    <label for="statut" class="block font-bold mb-4">Statut</label>
-                    <p-select
-                        [(ngModel)]="packing.statut"
-                        [options]="statuses"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Sélectionner un statut"
-                        styleClass="w-full"
-                    />
-                </div>
+            <!-- Statut -->
+            <div>
+                <label for="statut" class="block font-bold mb-4">Statut</label>
+                <p-select
+                    [(ngModel)]="packing.statut"
+                    [options]="statuses"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Sélectionner un statut"
+                    styleClass="w-full"
+                />
             </div>
 
-            <div>
-                <label for="notes" class="block font-bold mb-4">Notes</label>
-                <textarea
-                    pTextarea
-                    id="notes"
-                    [(ngModel)]="packing.notes"
-                    rows="3"
-                    class="w-full"
-                ></textarea>
+            <!-- Montant total -->
+            <div class="flex justify-between items-center p-4 mt-4 bg-surface-100 rounded-lg">
+                <span class="font-bold text-lg">Montant total</span>
+                <span class="text-2xl font-semibold text-primary">{{ formatCurrency(packing.montant || 0) }}</span>
             </div>
         </div>
-    </ng-template>
 
-    <ng-template #footer>
-        <p-button label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
+    <ng-template #footer class="mt-4">
+        <p-button class="mt-4" label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
         <p-button
-            [label]="saving ? 'Enregistrement...' : 'Enregistrer'"
-            [icon]="saving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+            class="mt-4"
+            label="Enregistrer"
+            icon="pi pi-check"
             (click)="savePacking()"
-            [disabled]="saving"
+            [disabled]="saving || dialogLoading"
             [loading]="saving" />
     </ng-template>
 </p-dialog>
 
 <p-confirmdialog [style]="{ width: '450px' }" />
+
