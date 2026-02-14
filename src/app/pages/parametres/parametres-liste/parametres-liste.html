@@ -11,14 +11,24 @@
   <div class="grid grid-cols-12 gap-4 py-6 lg:py-8">
     <div class="col-span-12 lg:col-span-2">
       <ul class="list-none m-0 p-0 hidden lg:flex flex-col justify-start">
-        <li class="border-l-2 border-surface-200 dark:border-surface-700 -ml-[2px]">
-          <a class="flex items-center py-3 px-4 text-surface-700 dark:text-surface-200 font-medium">
+        <li class="-ml-[2px]" [ngClass]="isActive('profile') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('profile') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'profile')"
+          >
             <i class="pi pi-user mr-2 text-base! leading-normal!"></i>
             <span>Profile</span>
           </a>
         </li>
-        <li class="border-l-2 border-primary -ml-[2px]">
-          <a class="flex items-center py-3 px-4 text-primary font-medium">
+        <li class="-ml-[2px]" [ngClass]="isActive('packing') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('packing') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'packing')"
+          >
             <i class="pi pi-cog mr-2 text-base! leading-normal!"></i>
             <span>Packing</span>
           </a>
@@ -35,7 +45,8 @@
       </ul>
     </div>
     <div class="col-span-12 lg:col-span-10 xl:col-span-10 bg-surface-0 dark:bg-surface-900 p-8 rounded-2xl flex-auto">
-          <app-parametres-packing></app-parametres-packing>
+      <app-parametres-profile *ngIf="isActive('profile')"></app-parametres-profile>
+      <app-parametres-packing *ngIf="isActive('packing')"></app-parametres-packing>
      </div>
   </div>
 </div>
