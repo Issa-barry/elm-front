@@ -178,7 +178,7 @@ export class AuthService {
     );
   }
 
-  /**
+  /** 
    * Gérer le succès de l'authentification
    */
   private handleAuthSuccess(data: { user: User; access_token: string }): void {

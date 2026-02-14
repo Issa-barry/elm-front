@@ -11,18 +11,17 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Parametre } from '@/models/parametres.model';
 import { ParametresService } from '@/services/parametres/parametres.service';
-import { ParametresPacking } from '../components/parametres-packing/parametres-packing';
 
 @Component({
-  selector: 'app-parametres-liste',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, DividerModule, InputTextModule, ToastModule, RouterModule, ParametresPacking],
-  providers: [MessageService],
-  templateUrl: './parametres-liste.html',
-  styleUrl: './parametres-liste.scss',
+    selector: 'app-parametres-packing',
+    templateUrl: './parametres-packing.html',
+    styleUrl: './parametres-packing.scss',
+    standalone: true,
+    imports: [CommonModule, FormsModule, ButtonModule, DividerModule, InputTextModule, ToastModule, RouterModule],
+    providers: [MessageService]
 })
-export class ParametresListe implements OnInit {
-  loading = false;
+export class ParametresPacking implements OnInit {
+   loading = false;
   saving = false;
   errorMessage = '';
   successMessage = '';

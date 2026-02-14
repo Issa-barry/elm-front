@@ -11,7 +11,7 @@ import { LayoutService } from '@/layout/service/layout.service';
         <div
             class="text-surface-900 dark:text-surface-0 text-xl font-semibold mb-12"
         >
-            Sales by Category
+             Categorie de véhicule
         </div>
         <p-chart
             type="pie"
@@ -45,7 +45,7 @@ export class SalesByCategoryWidget {
         const textColor = documentStyle.getPropertyValue('--text-color');
 
         this.pieData = {
-            labels: ['Electronics', 'Fashion', 'Household'],
+            labels: ['Camions', 'Vannes', 'Tri-cycles'],
             datasets: [
                 {
                     data: [300, 50, 100],
