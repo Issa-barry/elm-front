@@ -16,6 +16,7 @@ import {
   ModulePermission,
   PermissionAction,
   PERMISSION_ACTIONS,
+  PermissionCatalogModule,
   UpdatePermissionsDto,
 } from '@/models/role.model';
 
@@ -44,6 +45,7 @@ export class RolesEdit implements OnInit {
   loading = true;
   saving = false;
   savingName = false;
+  private availableActionsByModule = new Map<string, Set<PermissionAction>>();
 
   readonly actions = PERMISSION_ACTIONS;
 
@@ -79,33 +81,8 @@ export class RolesEdit implements OnInit {
 
         this.roleName = normalized.role.name;
         this.originalName = normalized.role.name;
-
-        if (normalized.modules.length > 0) {
-          this.modules = normalized.modules;
-          this.loading = false;
-          return;
-        }
-
-        this.roleService.getPermissions().subscribe({
-          next: (permissionsResponse) => {
-            this.modules = Array.isArray(permissionsResponse?.data)
-              ? permissionsResponse.data.map((module) => ({
-                  module: module.module,
-                  permissions: {
-                    create: !!module.permissions?.create,
-                    read: !!module.permissions?.read,
-                    update: !!module.permissions?.update,
-                    delete: !!module.permissions?.delete,
-                  },
-                }))
-              : [];
-            this.loading = false;
-          },
-          error: () => {
-            this.modules = [];
-            this.loading = false;
-          },
-        });
+        this.modules = normalized.modules;
+        this.loadPermissionsCatalog();
       },
       error: (err) => {
         this.messageService.add({
@@ -117,6 +94,79 @@ export class RolesEdit implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  private loadPermissionsCatalog() {
+    this.roleService.getPermissions().subscribe({
+      next: (permissionsResponse) => {
+        const catalog = Array.isArray(permissionsResponse?.data) ? permissionsResponse.data : [];
+        this.applyPermissionCatalog(catalog);
+        this.loading = false;
+      },
+      error: () => {
+        // Si le catalogue n'est pas disponible, on conserve le comportement existant.
+        if (!this.modules.length) {
+          this.modules = [];
+        }
+        this.loading = false;
+      },
+    });
+  }
+
+  private applyPermissionCatalog(catalog: PermissionCatalogModule[]) {
+    if (!catalog.length) {
+      return;
+    }
+
+    const roleModulesMap = new Map(
+      this.modules.map((module) => [this.normalizeModuleKey(module.module), module])
+    );
+
+    this.availableActionsByModule.clear();
+
+    const mergedModules: ModulePermission[] = catalog.map((catalogModule) => {
+      const moduleKey = this.normalizeModuleKey(catalogModule.module);
+      const roleModule = roleModulesMap.get(moduleKey);
+      const allowedActions = this.getAllowedActionsFromCatalog(catalogModule);
+
+      this.availableActionsByModule.set(moduleKey, allowedActions);
+      roleModulesMap.delete(moduleKey);
+
+      return {
+        module: catalogModule.module,
+        permissions: {
+          create: allowedActions.has('create') ? !!roleModule?.permissions?.create : false,
+          read: allowedActions.has('read') ? !!roleModule?.permissions?.read : false,
+          update: allowedActions.has('update') ? !!roleModule?.permissions?.update : false,
+          delete: allowedActions.has('delete') ? !!roleModule?.permissions?.delete : false,
+        },
+      };
+    });
+
+    // Cas rare: permission déjà liée au rôle, mais module absent du catalogue.
+    roleModulesMap.forEach((module, moduleKey) => {
+      this.availableActionsByModule.set(moduleKey, new Set(this.actions));
+      mergedModules.push(module);
+    });
+
+    this.modules = mergedModules;
+  }
+
+  private getAllowedActionsFromCatalog(module: PermissionCatalogModule): Set<PermissionAction> {
+    const rawActions = Array.isArray(module.actions) ? module.actions : [];
+    const normalizedActions = rawActions
+      .map((action) => action?.toLowerCase().trim())
+      .filter((action): action is PermissionAction => this.actions.includes(action as PermissionAction));
+
+    if (normalizedActions.length > 0) {
+      return new Set(normalizedActions);
+    }
+
+    return new Set(this.actions);
+  }
+
+  private normalizeModuleKey(moduleName: string): string {
+    return String(moduleName ?? '').trim().toLowerCase();
   }
 
   private normalizeRolePayload(data: any): { role: { id: number; name: string }; modules: ModulePermission[] } | null {
@@ -145,39 +195,86 @@ export class RolesEdit implements OnInit {
   // ─── Toggle helpers ────────────────────────────────────
 
   togglePermission(module: ModulePermission, action: PermissionAction) {
+    if (!this.isActionAllowed(module, action)) {
+      return;
+    }
+
     module.permissions[action] = !module.permissions[action];
   }
 
   isRowAllChecked(module: ModulePermission): boolean {
-    return this.actions.every(a => module.permissions[a]);
+    const applicableActions = this.actions.filter(a => this.isActionAllowed(module, a));
+    if (applicableActions.length === 0) {
+      return false;
+    }
+
+    return applicableActions.every(a => module.permissions[a]);
   }
 
   isRowIndeterminate(module: ModulePermission): boolean {
-    const checked = this.actions.filter(a => module.permissions[a]).length;
-    return checked > 0 && checked < this.actions.length;
+    const applicableActions = this.actions.filter(a => this.isActionAllowed(module, a));
+    if (applicableActions.length === 0) {
+      return false;
+    }
+
+    const checked = applicableActions.filter(a => module.permissions[a]).length;
+    return checked > 0 && checked < applicableActions.length;
   }
 
   toggleRow(module: ModulePermission) {
+    const applicableActions = this.actions.filter(a => this.isActionAllowed(module, a));
+    if (applicableActions.length === 0) {
+      return;
+    }
+
     const allChecked = this.isRowAllChecked(module);
-    this.actions.forEach(a => {
+    applicableActions.forEach(a => {
       module.permissions[a] = !allChecked;
     });
   }
 
   isColumnAllChecked(action: PermissionAction): boolean {
-    return this.modules.length > 0 && this.modules.every(m => m.permissions[action]);
+    const applicableModules = this.modules.filter(m => this.isActionAllowed(m, action));
+    return applicableModules.length > 0 && applicableModules.every(m => m.permissions[action]);
   }
 
   isColumnIndeterminate(action: PermissionAction): boolean {
-    const checked = this.modules.filter(m => m.permissions[action]).length;
-    return checked > 0 && checked < this.modules.length;
+    const applicableModules = this.modules.filter(m => this.isActionAllowed(m, action));
+    if (applicableModules.length === 0) {
+      return false;
+    }
+
+    const checked = applicableModules.filter(m => m.permissions[action]).length;
+    return checked > 0 && checked < applicableModules.length;
   }
 
   toggleColumn(action: PermissionAction) {
+    const applicableModules = this.modules.filter(m => this.isActionAllowed(m, action));
+    if (applicableModules.length === 0) {
+      return;
+    }
+
     const allChecked = this.isColumnAllChecked(action);
-    this.modules.forEach(m => {
+    applicableModules.forEach(m => {
       m.permissions[action] = !allChecked;
     });
+  }
+
+  isActionAllowed(module: ModulePermission, action: PermissionAction): boolean {
+    const allowedActions = this.availableActionsByModule.get(this.normalizeModuleKey(module.module));
+    if (!allowedActions || allowedActions.size === 0) {
+      return true;
+    }
+
+    return allowedActions.has(action);
+  }
+
+  isRowToggleDisabled(module: ModulePermission): boolean {
+    return this.actions.every(action => !this.isActionAllowed(module, action));
+  }
+
+  isColumnToggleDisabled(action: PermissionAction): boolean {
+    return !this.modules.some(module => this.isActionAllowed(module, action));
   }
 
   // ─── Save ──────────────────────────────────────────────
@@ -188,7 +285,7 @@ export class RolesEdit implements OnInit {
 
     const permissions: Record<string, string[]> = {};
     this.modules.forEach(m => {
-      const active = this.actions.filter(a => m.permissions[a]);
+      const active = this.actions.filter(a => this.isActionAllowed(m, a) && m.permissions[a]);
       if (active.length > 0) {
         permissions[m.module] = active;
       }
