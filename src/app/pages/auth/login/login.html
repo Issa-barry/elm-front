@@ -106,7 +106,7 @@
                     <p-inputicon class="pi pi-lock" />
                     <input
                         id="password"
-                        type="password"
+                        [type]="showPassword() ? 'text' : 'password'"
                         pInputText
                         formControlName="password"
                         class="w-full md:w-100"
@@ -114,6 +114,11 @@
                         [class.ng-dirty]="isFieldInvalid('password') || hasFieldError('password')"
                         placeholder="Mot de passe"
                         [disabled]="isLoading()"
+                    />
+                    <p-inputicon
+                        [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                        (click)="showPassword.set(!showPassword())"
+                        style="cursor: pointer"
                     />
                 </p-iconfield>
                 
