@@ -11,22 +11,45 @@
   <div class="grid grid-cols-12 gap-4 py-6 lg:py-8">
     <div class="col-span-12 lg:col-span-2">
       <ul class="list-none m-0 p-0 hidden lg:flex flex-col justify-start">
-        <li class="border-l-2 border-surface-200 dark:border-surface-700 -ml-[2px]">
-          <a class="flex items-center py-3 px-4 text-surface-700 dark:text-surface-200 font-medium">
+        <li class="-ml-[2px]" [ngClass]="isActive('profile') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('profile') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'profile')"
+          >
             <i class="pi pi-user mr-2 text-base! leading-normal!"></i>
-            <span>General</span>
+            <span>Profile</span>
           </a>
         </li>
-        <li class="border-l-2 border-primary -ml-[2px]">
-          <a class="flex items-center py-3 px-4 text-primary font-medium">
+        <li class="-ml-[2px]" [ngClass]="isActive('auth') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('auth') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'auth')"
+          >
+            <i class="pi pi-lock mr-2 text-base! leading-normal!"></i>
+            <span>Authentification</span>
+          </a>
+        </li>
+        <li class="-ml-[2px]" [ngClass]="isActive('packing') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('packing') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'packing')"
+          >
             <i class="pi pi-cog mr-2 text-base! leading-normal!"></i>
             <span>Packing</span>
           </a>
         </li>
-        <li class="border-l-2 border-surface-200 dark:border-surface-700 -ml-[2px]">
+        <li class="-ml-[2px]" [ngClass]="isActive('roles') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
           <a
-            [routerLink]="['/roles']"
-            class="flex items-center py-3 px-4 text-surface-700 dark:text-surface-200 font-medium hover:text-primary transition-colors"
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('roles') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'roles')"
           >
             <i class="pi pi-shield mr-2 text-base! leading-normal!"></i>
             <span>Rôles & Permissions</span>
@@ -34,54 +57,11 @@
         </li>
       </ul>
     </div>
-
     <div class="col-span-12 lg:col-span-10 xl:col-span-10 bg-surface-0 dark:bg-surface-900 p-8 rounded-2xl flex-auto">
-      <div class="flex flex-col gap-8">
-        <div class="text-surface-900 dark:text-surface-0 font-semibold text-lg leading-tight">Parametres Packing</div>
-
-        <div *ngIf="errorMessage" class="text-red-500 text-sm">{{ errorMessage }}</div>
-        <div *ngIf="successMessage" class="text-green-600 text-sm">{{ successMessage }}</div>
-
-        <div class="flex gap-12 flex-col-reverse md:flex-row">
-          <div class="flex-auto flex flex-col gap-6">
-            <div class="flex flex-col gap-2">
-              <label for="produit_rouleau_id" class="text-surface-900 dark:text-surface-0">ID du produit rouleau (packing)</label>
-              <input
-                id="produit_rouleau_id"
-                type="number"
-                min="0"
-                step="1"
-                pInputText
-                class="w-full"
-                [(ngModel)]="idRouleauPacking"
-                [disabled]="loading || saving"
-              />
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label for="prix_rouleau_defaut" class="text-surface-900 dark:text-surface-0">Prix par defaut du rouleau de packing</label>
-              <input
-                id="prix_rouleau_defaut"
-                type="number"
-                pInputText
-                class="w-full"
-                [(ngModel)]="prixRouleauDefaut"
-                [disabled]="loading || saving"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p-button
-            label="Enregistrer"
-            icon="pi pi-save"
-            [loading]="saving"
-            [disabled]="loading || saving"
-            (onClick)="savePackingParametres()"
-          ></p-button>
-        </div>
-      </div>
-    </div>
+      <app-parametres-profile *ngIf="isActive('profile')"></app-parametres-profile>
+      <app-parametres-auth *ngIf="isActive('auth')"></app-parametres-auth>
+      <app-parametres-packing *ngIf="isActive('packing')"></app-parametres-packing>
+      <app-parametres-roles-permissions *ngIf="isActive('roles')"></app-parametres-roles-permissions>
+     </div>
   </div>
 </div>

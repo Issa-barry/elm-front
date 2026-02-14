@@ -42,6 +42,7 @@
                     [ngModel]="isColumnAllChecked(action)"
                     (onChange)="toggleColumn(action)"
                     [indeterminate]="isColumnIndeterminate(action)"
+                    [disabled]="isColumnToggleDisabled(action)"
                 />
             </div>
         </div>
@@ -58,6 +59,7 @@
                     [ngModel]="isRowAllChecked(module)"
                     (onChange)="toggleRow(module)"
                     [indeterminate]="isRowIndeterminate(module)"
+                    [disabled]="isRowToggleDisabled(module)"
                 />
                 <span class="permission-matrix__module-name">{{ module.module }}</span>
             </div>
@@ -66,6 +68,7 @@
                     [binary]="true"
                     [ngModel]="module.permissions[action]"
                     (onChange)="togglePermission(module, action)"
+                    [disabled]="!isActionAllowed(module, action)"
                 />
             </div>
         </div>

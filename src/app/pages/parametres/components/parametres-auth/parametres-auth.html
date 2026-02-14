@@ -1,0 +1,62 @@
+<div class="flex flex-col gap-8">
+  <div class="text-surface-900 dark:text-surface-0 font-semibold text-lg leading-tight">Changer le mot de passe</div>
+
+  <div class="grid grid-cols-1 gap-6" style="max-width: 500px;">
+    <div class="flex flex-col gap-2">
+      <label for="current_password" class="text-surface-900 dark:text-surface-0">Mot de passe actuel</label>
+      <p-password
+        id="current_password"
+        [(ngModel)]="form.current_password"
+        [toggleMask]="true"
+        [feedback]="false"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [disabled]="saving"
+       ></p-password>
+      <small class="text-red-500" *ngIf="fieldErrors['current_password']">{{ fieldErrors['current_password'] }}</small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="new_password" class="text-surface-900 dark:text-surface-0">Nouveau mot de passe</label>
+      <p-password
+        id="new_password"
+        [(ngModel)]="form.new_password"
+        [toggleMask]="true"
+        [feedback]="true"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [disabled]="saving"
+         promptLabel="Entrez un mot de passe"
+        weakLabel="Faible"
+        mediumLabel="Moyen"
+        strongLabel="Fort"
+      ></p-password>
+      <small class="text-surface-500">Min. 8 caractères, majuscule, minuscule et chiffre</small>
+      <small class="text-red-500" *ngIf="fieldErrors['new_password']">{{ fieldErrors['new_password'] }}</small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="new_password_confirmation" class="text-surface-900 dark:text-surface-0">Confirmer le nouveau mot de passe</label>
+      <p-password
+        id="new_password_confirmation"
+        [(ngModel)]="form.new_password_confirmation"
+        [toggleMask]="true"
+        [feedback]="false"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [disabled]="saving"
+       ></p-password>
+      <small class="text-red-500" *ngIf="fieldErrors['new_password_confirmation']">{{ fieldErrors['new_password_confirmation'] }}</small>
+    </div>
+  </div>
+
+  <div>
+    <p-button
+      label="Modifier le mot de passe"
+      icon="pi pi-key"
+      [loading]="saving"
+      [disabled]="saving"
+      (onClick)="changePassword()"
+    ></p-button>
+  </div>
+</div>

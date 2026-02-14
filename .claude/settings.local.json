@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx ng build:*)",
       "Bash(find:*)",
-      "Read(//c/laragon/www/elm-api/app/**)"
+      "Read(//c/laragon/www/elm-api/app/**)",
+      "Bash(ls:*)"
     ]
   }
 }

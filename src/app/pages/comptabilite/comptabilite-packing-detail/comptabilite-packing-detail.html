@@ -130,7 +130,7 @@
                             [rounded]="true"
                             pTooltip="Payer (dialogue)"
                             (click)="openVersement(facture)"
-                            *ngIf="facture.statut !== 'payee'"
+                            *ngIf="canCreateVersement && facture.statut !== 'payee'"
                         />
                         <p-button
                             icon="pi pi-wallet"
@@ -139,7 +139,7 @@
                             [rounded]="true"
                             pTooltip="Payer (panneau)"
                             (click)="openSlideoverPaiement(facture)"
-                            *ngIf="facture.statut !== 'payee'"
+                            *ngIf="canCreateVersement && facture.statut !== 'payee'"
                         />
                         <p-button
                             icon="pi pi-list"
@@ -148,6 +148,7 @@
                             [rounded]="true"
                             pTooltip="Historique versements"
                             (click)="openHistorique(facture)"
+                            *ngIf="canReadVersement"
                         />
                         <p-button
                             icon="pi pi-trash"
@@ -156,7 +157,7 @@
                             [rounded]="true"
                             pTooltip="Supprimer"
                             (click)="confirmDeleteFacture(facture)"
-                            *ngIf="facture.montant_verse === 0"
+                            *ngIf="canDeleteFacture && facture.montant_verse === 0"
                         />
                     </div>
                 </td>
@@ -186,48 +187,46 @@
     [dismissableMask]="false"
     [closeOnEscape]="false"
 >
-    <ng-template #content>
-        <div class="flex flex-col gap-4" *ngIf="selectedFacture">
-            <div class="preview-summary">
-                <span class="font-bold">{{ selectedFacture.reference.replace('FACT-PACK-', '') }}</span>
-                <span class="preview-summary__sep"></span>
-                <span>Total : <strong>{{  selectedFacture.montant_total | money :'GNF'}}</strong></span>
-                <span class="preview-summary__sep"></span>
-                <span class="cell-success">Versé : <strong>{{  selectedFacture.montant_verse | money :'GNF'}}</strong></span>
-                <span class="preview-summary__sep"></span>
-                <span class="font-bold" style="color: #d97706">Restant : {{ selectedFacture.montant_restant | money :'GNF'}}</span>
+    <div class="flex flex-col gap-4" *ngIf="selectedFacture">
+        <div class="preview-summary">
+            <span class="font-bold">{{ selectedFacture.reference.replace('FACT-PACK-', '') }}</span>
+            <span class="preview-summary__sep"></span>
+            <span>Total : <strong>{{  selectedFacture.montant_total | money :'GNF'}}</strong></span>
+            <span class="preview-summary__sep"></span>
+            <span class="cell-success">Versé : <strong>{{  selectedFacture.montant_verse | money :'GNF'}}</strong></span>
+            <span class="preview-summary__sep"></span>
+            <span class="font-bold" style="color: #d97706">Restant : {{ selectedFacture.montant_restant | money :'GNF'}}</span>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <div class="mt-4">
+                <label class="block font-bold mb-2">Mode de paiement</label>
+                <p-select
+                    [(ngModel)]="versementData.mode_paiement"
+                    [options]="modesPaiement"
+                    optionLabel="label"
+                    optionValue="value"
+                    styleClass="w-full"
+                    appendTo="body"
+                />
             </div>
 
-            <div class="flex flex-col gap-4">
-                <div class="mt-4">
-                    <label class="block font-bold mb-2">Mode de paiement</label>
-                    <p-select
-                        [(ngModel)]="versementData.mode_paiement"
-                        [options]="modesPaiement"
-                        optionLabel="label"
-                        optionValue="value"
-                        styleClass="w-full"
-                        appendTo="body"
-                    />
-                </div>
-
-                <div class="mt-4">
-                    <label class="block font-bold mb-2">Montant à verser</label>
-                    <p-inputnumber
-                        [(ngModel)]="versementData.montant"
-                        [min]="1"
-                        [max]="selectedFacture.montant_restant"
-                        suffix=" GNF"
-                        [useGrouping]="true"
-                        locale="fr-FR"
-                        inputStyleClass="w-full"
-                        styleClass="w-full"
-                    />
-                    <small class="text-red-500" *ngIf="versementSubmitted && !versementData.montant">Montant requis.</small>
-                </div>
+            <div class="mt-4">
+                <label class="block font-bold mb-2">Montant à verser</label>
+                <p-inputnumber
+                    [(ngModel)]="versementData.montant"
+                    [min]="1"
+                    [max]="selectedFacture.montant_restant"
+                    suffix=" GNF"
+                    [useGrouping]="true"
+                    locale="fr-FR"
+                    inputStyleClass="w-full"
+                    styleClass="w-full"
+                />
+                <small class="text-red-500" *ngIf="versementSubmitted && !versementData.montant">Montant requis.</small>
             </div>
         </div>
-    </ng-template>
+    </div>
 
     <ng-template #footer class="mt-4">
         <button pButton [outlined]="true" (click)="hideVersementDialog()"> <span pButtonLabel>Annuler</span></button>
@@ -246,56 +245,54 @@
     [dismissableMask]="false"
     [closeOnEscape]="false"
 >
-    <ng-template #content>
-        <div *ngIf="historiqueLoading" class="flex items-center justify-center p-12">
-            <i class="pi pi-spin pi-spinner text-3xl text-surface-300"></i>
-        </div>
+    <div *ngIf="historiqueLoading" class="flex items-center justify-center p-12">
+        <i class="pi pi-spin pi-spinner text-3xl text-surface-300"></i>
+    </div>
 
-        <div *ngIf="historiqueData" class="flex flex-col gap-4">
-            <div class="preview-summary">
-                <span class="font-bold text-lg">{{ historiqueData.reference.replace('FACT-PACK-', '') }}</span>
-                <span class="preview-summary__sep"></span>
-                <span>Total: <strong>{{ formatCurrency(historiqueData.montant_total) }}</strong></span>
-                <span class="preview-summary__sep"></span>
-                <span class="cell-success">Versé: <strong>{{ formatCurrency(historiqueData.montant_verse) }}</strong></span>
-                <span class="preview-summary__sep"></span>
-                <span class="cell-bold">Restant: {{ formatCurrency(historiqueData.montant_restant) }}</span>
-                <span class="ml-auto">
-                    <span class="status-badge" [ngClass]="historiqueData.is_soldee ? 'status-badge--success' : 'status-badge--warn'">
-                        {{ historiqueData.is_soldee ? 'Soldé' : 'En cours' }}
-                    </span>
+    <div *ngIf="historiqueData" class="flex flex-col gap-4">
+        <div class="preview-summary">
+            <span class="font-bold text-lg">{{ historiqueData.reference.replace('FACT-PACK-', '') }}</span>
+            <span class="preview-summary__sep"></span>
+            <span>Total: <strong>{{ formatCurrency(historiqueData.montant_total) }}</strong></span>
+            <span class="preview-summary__sep"></span>
+            <span class="cell-success">Versé: <strong>{{ formatCurrency(historiqueData.montant_verse) }}</strong></span>
+            <span class="preview-summary__sep"></span>
+            <span class="cell-bold">Restant: {{ formatCurrency(historiqueData.montant_restant) }}</span>
+            <span class="ml-auto">
+                <span class="status-badge" [ngClass]="historiqueData.is_soldee ? 'status-badge--success' : 'status-badge--warn'">
+                    {{ historiqueData.is_soldee ? 'Soldé' : 'En cours' }}
                 </span>
-            </div>
-
-            <p-table [value]="historiqueData.versements" [rowHover]="true" *ngIf="historiqueData.versements.length > 0">
-                <ng-template #header>
-                    <tr>
-                        <th><span class="col-header">Date</span></th>
-                        <th class="text-right"><span class="col-header justify-end">Montant</span></th>
-                        <th><span class="col-header">Mode</span></th>
-                        <th><span class="col-header">Notes</span></th>
-                        <th style="width: 4rem"></th>
-                    </tr>
-                </ng-template>
-                <ng-template #body let-versement>
-                    <tr>
-                        <td class="cell-secondary">{{ formatDateDisplay(versement.date_versement) }}</td>
-                        <td class="text-right cell-mono cell-success font-bold">{{ formatCurrency(versement.montant) }}</td>
-                        <td>{{ versement.mode_paiement_label }}</td>
-                        <td class="cell-secondary">{{ versement.notes || '-' }}</td>
-                        <td class="text-center">
-                            <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" pTooltip="Supprimer" (click)="confirmDeleteVersement(historiqueData!.facture_id, versement)" />
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-
-            <div *ngIf="historiqueData.versements.length === 0" class="empty-state">
-                <i class="pi pi-inbox"></i>
-                <span>Aucun versement enregistré</span>
-            </div>
+            </span>
         </div>
-    </ng-template>
+
+        <p-table [value]="historiqueData.versements" [rowHover]="true" *ngIf="historiqueData.versements.length > 0">
+            <ng-template #header>
+                <tr>
+                    <th><span class="col-header">Date</span></th>
+                    <th class="text-right"><span class="col-header justify-end">Montant</span></th>
+                    <th><span class="col-header">Mode</span></th>
+                    <th><span class="col-header">Notes</span></th>
+                    <th style="width: 4rem" *ngIf="canDeleteVersement"></th>
+                </tr>
+            </ng-template>
+            <ng-template #body let-versement>
+                <tr>
+                    <td class="cell-secondary">{{ formatDateDisplay(versement.date_versement) }}</td>
+                    <td class="text-right cell-mono cell-success font-bold">{{ formatCurrency(versement.montant) }}</td>
+                    <td>{{ versement.mode_paiement_label }}</td>
+                    <td class="cell-secondary">{{ versement.notes || '-' }}</td>
+                    <td class="text-center" *ngIf="canDeleteVersement">
+                        <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" pTooltip="Supprimer" (click)="confirmDeleteVersement(historiqueData!.facture_id, versement)" />
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <div *ngIf="historiqueData.versements.length === 0" class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <span>Aucun versement enregistré</span>
+        </div>
+    </div>
 
     <ng-template #footer>
         <p-button label="Fermer" [text]="true" (click)="historiqueDialog = false" />

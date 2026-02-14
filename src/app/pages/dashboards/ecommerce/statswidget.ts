@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
     imports: [CommonModule, KnobModule, FormsModule],
     template: ` <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class="card h-full">
-                <span class="font-semibold text-lg">Sales</span>
+                <span class="font-semibold text-lg">Prestateurs</span>
                 <div class="flex justify-between items-start mt-4">
                     <div class="w-6/12">
                         <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">120</span>
@@ -35,10 +35,10 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class="card h-full">
-                <span class="font-semibold text-lg">Revenue</span>
+                <span class="font-semibold text-lg">Employes</span>
                 <div class="flex justify-between items-start mt-4">
                     <div class="w-6/12">
-                        <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">$4500</span>
+                        <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">45</span>
                         <div class="text-green-500">
                             <span class="font-medium">+20%</span>
                             <i class="pi pi-arrow-up text-xs ml-2"></i>
@@ -60,7 +60,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class="card h-full">
-                <span class="font-semibold text-lg">Visitors</span>
+                <span class="font-semibold text-lg">Véhicules</span>
                 <div class="flex justify-between items-start mt-4">
                     <div class="w-6/12">
                         <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">360</span>
@@ -85,7 +85,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class="card h-full">
-                <span class="font-semibold text-lg">Stock</span>
+                <span class="font-semibold text-lg">Rouleaux en stock</span>
                 <div class="flex justify-between items-start mt-4">
                     <div class="w-6/12">
                         <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">164</span>

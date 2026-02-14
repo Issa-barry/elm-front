@@ -20,24 +20,11 @@ import { finalize } from 'rxjs';
             styleClass="layout-profile-sidebar w-full sm:w-25rem"
         >
             <div class="flex flex-col mx-auto md:mx-0">
-                <span class="mb-2 font-semibold">Welcome</span>
-                <span class="text-surface-500 dark:text-surface-400 font-medium mb-8">Moussa Sidibé</span>
+                <span class="mb-2 font-semibold">Role : {{ userRole() }}</span>
+                <span class="text-surface-500 dark:text-surface-400 font-medium mb-2">{{ userName() }}</span>
+                <span class="text-surface-500 dark:text-surface-400 font-medium mb-8">{{ userReference() }}</span>
 
                 <ul class="list-none m-0 p-0">
-                    <li>
-                        <a
-                            class="cursor-pointer flex mb-4 p-4 items-center border border-surface-200 dark:border-surface-700 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors duration-150"
-                        >
-                            <span>
-                                <i class="pi pi-user text-xl text-primary"></i>
-                            </span>
-                            <div class="ml-4">
-                                <span class="mb-2 font-semibold">Profile</span>
-                                <p class="text-surface-500 dark:text-surface-400 m-0">Mon compte</p>
-                            </div>
-                        </a>
-                    </li>
-
                     <li>
                         <a
                             [routerLink]="['/parametres']"
@@ -90,6 +77,20 @@ export class AppProfileSidebar {
     ) {}
 
     visible = computed(() => this.layoutService.layoutState().profileSidebarVisible);
+
+    userRole = computed(() => {
+        const user = this.authService.currentUser();
+        return user?.roles?.length ? user.roles.join(', ') : '';
+    });
+
+    userName = computed(() => {
+        const user = this.authService.currentUser();
+        if (user?.nom_complet) return user.nom_complet;
+        if (user?.prenom || user?.nom) return `${user?.prenom ?? ''} ${user?.nom ?? ''}`.trim();
+        return '';
+    });
+
+    userReference = computed(() => this.authService.currentUser()?.reference ?? '');
 
     onDrawerHide() {
         this.layoutService.layoutState.update((state) => ({

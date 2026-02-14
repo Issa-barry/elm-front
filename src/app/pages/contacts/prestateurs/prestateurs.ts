@@ -15,6 +15,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 
@@ -50,12 +51,21 @@ export class Prestateurs implements OnInit {
     { label: 'Inactif', value: false }
   ];
 
+  canCreate = false;
+  canUpdate = false;
+  canDelete = false;
+
   constructor(
     private prestataireService: PrestataireService,
     private router: Router,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
+  ) {
+    this.canCreate = this.authService.hasPermission('prestataires.create');
+    this.canUpdate = this.authService.hasPermission('prestataires.update');
+    this.canDelete = this.authService.hasPermission('prestataires.delete');
+  }
 
   ngOnInit() {
     this.loadPrestataires();

@@ -38,5 +38,5 @@ export const authorizationGuard: CanActivateFn = (route): boolean | UrlTree => {
     return true;
   }
 
-  return router.createUrlTree(['/notfound']);
+  return router.createUrlTree(['/']);
 };

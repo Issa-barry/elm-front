@@ -43,6 +43,7 @@ export class Login {
 
     // Signaux pour gérer l'état
     isLoading = signal(false);
+    showPassword = signal(false);
     errorMessage = signal<string | null>(null);
     fieldErrors = signal<Record<string, string[]>>({});
 
