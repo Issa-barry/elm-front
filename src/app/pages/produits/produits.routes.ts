@@ -5,8 +5,18 @@ import { ProduitsEdit } from './produits-edit/produits-edit';
 import { authorizationGuard } from '@/guards/authorization.guard';
 
 export default [
-    { path: '', component: ProduitsListe },
-    { path: 'produits', component: ProduitsListe },
+    {
+        path: '',
+        component: ProduitsListe,
+        canActivate: [authorizationGuard],
+        data: { permissions: ['produits.read'] },
+    },
+    {
+        path: 'produits',
+        component: ProduitsListe,
+        canActivate: [authorizationGuard],
+        data: { permissions: ['produits.read'] },
+    },
     {
         path: 'produits-new',
         component: ProduitsNew,

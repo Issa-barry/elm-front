@@ -21,6 +21,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { StyleClassModule } from 'primeng/styleclass';
 
+import { AuthService } from '@/services/auth/auth.service';
 import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
 import {
   FacturePacking,
@@ -122,13 +123,25 @@ export class ComptabilitePackingDetail implements OnInit {
   historiqueData: VersementIndexResponse | null = null;
   historiqueLoading: boolean = false;
 
+  // Permissions
+  canReadVersement: boolean = false;
+  canCreateVersement: boolean = false;
+  canDeleteVersement: boolean = false;
+  canDeleteFacture: boolean = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private factureService: FacturePaiementService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
+  ) {
+    this.canReadVersement = this.authService.hasPermission('versements.read');
+    this.canCreateVersement = this.authService.hasPermission('versements.create');
+    this.canDeleteVersement = this.authService.hasPermission('versements.delete');
+    this.canDeleteFacture = this.authService.hasPermission('facture-packings.delete');
+  }
 
   ngOnInit() {
     this.route.params.subscribe((params) => {

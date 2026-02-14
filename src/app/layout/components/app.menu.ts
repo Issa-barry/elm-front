@@ -72,7 +72,7 @@ export class AppMenu {
                         ]),
                         items: [
                             {
-                                label: 'Salaire packing',
+                                label: 'Facture packing',
                                 icon: 'pi pi-fw pi-money-bill',
                                 routerLink: ['/comptabilite/comptabilite-packing-liste'],
                                 visible: this.hasAnyPermission(permissions, [

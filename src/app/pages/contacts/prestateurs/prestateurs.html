@@ -45,6 +45,7 @@
 
           <!-- Bouton Nouveau -->
           <button
+            *ngIf="canCreate"
             (click)="navigateToCreate()"
             pButton
             outlined
@@ -139,11 +140,13 @@
               pRipple
               icon="pi pi-eye"
               class="p-button-rounded p-button-text p-button-sm"
-              [pTooltip]="'Voir'"
+              [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
               tooltipPosition="top"
               (click)="goToEdit($event, prestataire.id)"
+              [disabled]="!canUpdate"
             ></button>
-            <button 
+            <button
+              *ngIf="canUpdate"
               pButton
               pRipple
               [icon]="prestataire.is_active ? 'pi pi-lock-open' : 'pi pi-lock'"
@@ -155,6 +158,7 @@
               (click)="toggleStatus($event, prestataire.id)"
             ></button>
             <button
+              *ngIf="canDelete"
               pButton
               pRipple
               icon="pi pi-trash"

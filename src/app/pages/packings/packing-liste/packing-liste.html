@@ -3,7 +3,7 @@
 <div class="card">
     <p-toolbar styleClass="mb-12">
         <ng-template #start>
-            <p-button label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <p-button *ngIf="canCreate" label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
         </ng-template>
 
         <ng-template #end>
@@ -92,7 +92,7 @@
         </ng-template>
 
         <ng-template #body let-packing>
-            <tr class="table-row" (dblclick)="editPacking(packing)">
+            <tr class="table-row" (dblclick)="canUpdate && editPacking(packing)">
                 <td>
                     <div class="cell-prestataire" *ngIf="packing.prestataire">
                         <span class="cell-prestataire__avatar" [style.background]="'var(--p-primary-50)'" [style.color]="'var(--p-primary-600)'">
@@ -120,7 +120,7 @@
                     </span>
                 </td>
                 <td class="text-center">
-                    <p-button icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="Modifier" (click)="editPacking(packing)" />
+                    <p-button *ngIf="canUpdate" icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="Modifier" (click)="editPacking(packing)" />
                 </td>
             </tr>
         </ng-template>
@@ -139,7 +139,6 @@
 </div>
 
 <p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" [header]="packing?.id ? 'Détails du packing' : 'Nouveau packing'" [modal]="true">
-    <ng-template #content>
         <div class="flex flex-col gap-6">
             <!-- Prestataire -->
             <div>
@@ -226,7 +225,6 @@
                 <span class="text-2xl font-semibold text-primary">{{ formatCurrency(packing.montant || 0) }}</span>
             </div>
         </div>
-    </ng-template>
 
     <ng-template #footer class="mt-4">
         <p-button class="mt-4" label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />

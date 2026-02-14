@@ -27,6 +27,7 @@ import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PAC
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { Prestataire } from '@/models/prestataire.model';
 import { ParametresService } from '@/services/parametres/parametres.service';
+import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface Column {
@@ -106,6 +107,11 @@ export class PackingListe implements OnInit {
     { label: 'Annulé', value: 'annule' }
   ];
 
+  // Permissions
+  canCreate: boolean = false;
+  canUpdate: boolean = false;
+  canDelete: boolean = false;
+
   @ViewChild('dt') dt!: Table;
   exportColumns!: ExportColumn[];
   cols!: Column[];
@@ -115,8 +121,13 @@ export class PackingListe implements OnInit {
     private prestataireService: PrestataireService,
     private parametresService: ParametresService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
+  ) {
+    this.canCreate = this.authService.hasPermission('packings.create');
+    this.canUpdate = this.authService.hasPermission('packings.update');
+    this.canDelete = this.authService.hasPermission('packings.delete');
+  }
 
   ngOnInit() {
     this.loadPackings();
