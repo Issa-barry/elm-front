@@ -1,0 +1,141 @@
+<div class="flex flex-col gap-6">
+  <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+    <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold mb-4 md:mb-0">
+      Rôles & Permissions
+    </div>
+    <div class="inline-flex items-center gap-2">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="onFilterGlobal($event)"
+          placeholder="Rechercher..."
+          [style]="{ borderRadius: '2rem' }"
+          class="w-full"
+        />
+      </p-iconfield>
+      <p-button
+        icon="pi pi-plus"
+        rounded
+        pTooltip="Ajouter un rôle"
+        (click)="openCreateDialog()"
+      />
+    </div>
+  </div>
+
+  <p-table
+    #dt
+    [value]="roles()"
+    [paginator]="true"
+    [rows]="5"
+    [globalFilterFields]="['role.name']"
+    responsiveLayout="scroll"
+    [rowHover]="true"
+    dataKey="role.id"
+    [loading]="loading"
+    [showCurrentPageReport]="false"
+     [rowsPerPageOptions]="[5, 10]"
+  >
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="role.name">
+          <span class="flex items-center gap-2">Nom <p-sortIcon field="role.name"></p-sortIcon></span>
+        </th>
+        <th pSortableColumn="role.created_at">
+          <span class="flex items-center gap-2">Date de création <p-sortIcon field="role.created_at"></p-sortIcon></span>
+        </th>
+        <th class="text-center">
+          <span class="flex items-center justify-center gap-2">Permissions</span>
+        </th>
+        <th style="width: 8rem;"></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-item>
+      <tr>
+        <td style="min-width: 10rem;">
+          <div class="flex items-center gap-3">
+            <span
+              class="flex items-center justify-center w-9 h-9 rounded-lg text-sm flex-shrink-0"
+              [style.background]="'var(--p-primary-50)'"
+              [style.color]="'var(--p-primary-600)'"
+            >
+              <i class="pi pi-shield"></i>
+            </span>
+            <span class="font-semibold text-surface-800 dark:text-surface-100 capitalize">{{ item.role.name }}</span>
+          </div>
+        </td>
+        <td style="min-width: 8rem;" class="text-surface-500">
+          {{ formatDate(item.role.created_at) }}
+        </td>
+        <td class="text-center" style="min-width: 8rem;">
+          <p-tag [value]="countPermissions(item) + ' permissions'" severity="info" />
+        </td>
+        <td>
+          <div class="flex items-center justify-end gap-1">
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              [rounded]="true"
+              pTooltip="Supprimer"
+              (click)="deleteRole(item); $event.stopPropagation()"
+            />
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              pTooltip="Modifier"
+              (click)="editRole(item)"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="4">
+          <div class="flex flex-col items-center gap-3 py-12 text-surface-300">
+            <i class="pi pi-shield text-4xl"></i>
+            <span class="text-sm">Aucun rôle trouvé</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Dialog Création -->
+<p-dialog
+  [(visible)]="createDialog"
+  [style]="{ width: '450px' }"
+  header="Nouveau rôle"
+  [modal]="true"
+>
+  <div class="flex flex-col gap-4 pt-2">
+    <div>
+      <label for="roleName" class="block font-bold mb-2">Nom du rôle</label>
+      <input
+        pInputText
+        id="roleName"
+        [(ngModel)]="newRoleName"
+        placeholder="Ex: editeur, manager..."
+        class="w-full"
+        (keydown.enter)="createRole()"
+      />
+    </div>
+  </div>
+  <ng-template #footer>
+    <p-button label="Annuler" icon="pi pi-times" [text]="true" (click)="createDialog = false" [disabled]="creating" />
+    <p-button
+      label="Créer"
+      icon="pi pi-check"
+      (click)="createRole()"
+      [disabled]="creating || !newRoleName.trim()"
+      [loading]="creating"
+    />
+  </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

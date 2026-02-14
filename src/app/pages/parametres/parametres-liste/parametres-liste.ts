@@ -7,29 +7,32 @@ import { ToastModule } from 'primeng/toast';
 import { ParametresPacking } from '../components/parametres-packing/parametres-packing';
 import { ParametresProfile } from '../components/parametres-profile/parametres-profile';
 import { ParametresAuth } from '../components/parametres-auth/parametres-auth';
+import { ParametresRolesPermissions } from '../components/parametres-roles-permissions/parametres-roles-permissions';
+
+type Section = 'profile' | 'auth' | 'packing' | 'roles';
 
 @Component({
   selector: 'app-parametres-liste',
   standalone: true,
-  imports: [CommonModule, ParametresAuth, DividerModule, ToastModule, RouterModule, ParametresPacking, ParametresProfile],
+  imports: [CommonModule, ParametresAuth, DividerModule, ToastModule, RouterModule, ParametresPacking, ParametresProfile, ParametresRolesPermissions],
   providers: [MessageService],
   templateUrl: './parametres-liste.html',
   styleUrl: './parametres-liste.scss',
 })
 export class ParametresListe {
-   activeSection: 'profile' | 'auth' | 'packing' | 'roles' = 'profile';
+  activeSection: Section = 'profile';
 
-  setActiveSection(section: 'profile' | 'auth' | 'packing'): void {
+  setActiveSection(section: Section): void {
     this.activeSection = section;
   }
 
-  onSectionClick(event: Event, section: 'profile' | 'auth' | 'packing'): void {
+  onSectionClick(event: Event, section: Section): void {
     event.preventDefault();
     event.stopPropagation();
     this.setActiveSection(section);
   }
 
-  isActive(section: 'profile' | 'auth' | 'packing'): boolean {
+  isActive(section: Section): boolean {
     return this.activeSection === section;
   }
 }

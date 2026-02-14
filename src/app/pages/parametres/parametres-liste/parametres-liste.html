@@ -44,10 +44,12 @@
             <span>Packing</span>
           </a>
         </li>
-        <li class="border-l-2 border-surface-200 dark:border-surface-700 -ml-[2px]">
+        <li class="-ml-[2px]" [ngClass]="isActive('roles') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
           <a
-            [routerLink]="['/roles']"
-            class="flex items-center py-3 px-4 text-surface-700 dark:text-surface-200 font-medium hover:text-primary transition-colors"
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('roles') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'roles')"
           >
             <i class="pi pi-shield mr-2 text-base! leading-normal!"></i>
             <span>Rôles & Permissions</span>
@@ -59,6 +61,7 @@
       <app-parametres-profile *ngIf="isActive('profile')"></app-parametres-profile>
       <app-parametres-auth *ngIf="isActive('auth')"></app-parametres-auth>
       <app-parametres-packing *ngIf="isActive('packing')"></app-parametres-packing>
+      <app-parametres-roles-permissions *ngIf="isActive('roles')"></app-parametres-roles-permissions>
      </div>
   </div>
 </div>
