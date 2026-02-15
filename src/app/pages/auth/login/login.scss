@@ -1,0 +1,6 @@
+// Safe area pour les encoches mobiles (iPhone etc.)
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .login-card {
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+}
