@@ -2,20 +2,26 @@ import {
   transformToBoolean
 } from "./chunk-BB55NINM.js";
 import {
+  BaseComponent,
+  PARENT_INSTANCE
+} from "./chunk-TS6YUM3R.js";
+import {
+  BaseStyle
+} from "./chunk-YHNO6YHF.js";
+import {
   Bind,
   BindModule
 } from "./chunk-7J3RN223.js";
-import {
-  BaseComponent,
-  PARENT_INSTANCE
-} from "./chunk-VHLTMW64.js";
-import {
-  BaseStyle
-} from "./chunk-XDFKDIQ2.js";
+import "./chunk-OTTARZB5.js";
 import {
   PrimeTemplate,
   SharedModule
 } from "./chunk-4YW2PWNH.js";
+import {
+  Y2 as Y,
+  h,
+  s3 as s
+} from "./chunk-U4LT4ZJN.js";
 import "./chunk-LR4OQNMI.js";
 import {
   animate,
@@ -24,12 +30,6 @@ import {
   transition,
   trigger
 } from "./chunk-YLKDNKK4.js";
-import "./chunk-OTTARZB5.js";
-import {
-  Y2 as Y,
-  h,
-  s3 as s
-} from "./chunk-U4LT4ZJN.js";
 import {
   CommonModule,
   NgTemplateOutlet
