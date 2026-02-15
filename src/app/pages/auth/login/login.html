@@ -30,13 +30,13 @@
 
 <!-- Mobile: plein écran, pas de card / Desktop: card centrée comme avant -->
 <div class="login-shell min-h-screen flex flex-col md:justify-center md:items-center md:px-8">
-    <div class="login-card flex-1 flex flex-col px-6 pt-16 pb-8
+    <div class="login-card flex-1 flex flex-col px-6 pt-16 pb-0
                 md:flex-initial md:border md:border-surface-200 md:dark:border-surface-700
                 bg-surface-0 dark:bg-surface-900
                 md:rounded md:py-16 md:px-16 md:z-10">
 
         <!-- Titre : centré sur mobile, aligné gauche sur desktop -->
-        <div class="mb-8 text-center md:text-left">
+        <div class="mb-10 text-center md:text-left">
             <div class="text-surface-900 dark:text-surface-0 text-2xl md:text-xl font-bold">
                 Connexion
             </div>
@@ -51,20 +51,20 @@
             />
         }
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 md:flex-initial">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form flex flex-col flex-1 min-w-0 md:flex-initial">
             <!-- Champ Téléphone avec code pays -->
-            <div class="mb-5">
+            <div class="mb-7">
                 <label for="phone" class="block text-surface-600 dark:text-surface-300 text-sm mb-2 md:hidden">
                     Numéro de téléphone
                 </label>
-                <div class="flex gap-2">
+                <div class="login-phone-row flex gap-3 min-w-0">
                     <p-select
                         [(ngModel)]="selectedCountry"
                         [ngModelOptions]="{standalone: true}"
                         [options]="countries"
                         optionLabel="name"
                         [disabled]="isLoading()"
-                        class="w-36"
+                        class="w-32 sm:w-36 shrink-0"
                     >
                         <ng-template let-country pTemplate="selectedItem">
                             <div class="flex items-center gap-2" *ngIf="country">
@@ -86,7 +86,7 @@
                         type="tel"
                         pInputText
                         formControlName="phone"
-                        class="flex-1"
+                        class="flex-1 min-w-0"
                         [class.ng-invalid]="isFieldInvalid('phone') || hasFieldError('phone')"
                         [class.ng-dirty]="isFieldInvalid('phone') || hasFieldError('phone')"
                         placeholder="Numéro de téléphone"
@@ -108,7 +108,7 @@
             </div>
 
             <!-- Champ Mot de passe -->
-            <div class="mb-2">
+            <div class="mb-6">
                 <label for="password" class="block text-surface-600 dark:text-surface-300 text-sm mb-2 md:hidden">
                     Mot de passe
                 </label>
@@ -146,7 +146,7 @@
             </div>
 
             <!-- Mot de passe oublié (mobile) + Se souvenir de moi -->
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-8">
                 <div class="flex items-center gap-2">
                     <p-checkbox
                         formControlName="remember_me"
@@ -163,18 +163,20 @@
                 </a>
             </div>
 
-            <!-- Spacer mobile : pousse le bouton en bas -->
-            <div class="flex-1 md:hidden"></div>
-
-            <!-- Bouton de connexion -->
-            <button
-                pButton
-                pRipple
-                type="submit"
-                label="Me connecter"
-                class="w-full border-round-xl md:border-round"
-                [loading]="isLoading()"
-            ></button>
+            <div
+                class="login-submit px-6 pt-5 pb-3 border-t border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900
+                        md:px-0 md:pt-0 md:pb-0 md:border-0"
+            >
+                <!-- Bouton de connexion -->
+                <button
+                    pButton
+                    pRipple
+                    type="submit"
+                    label="Me connecter"
+                    class="login-submit-button w-full border-round-xl md:border-round"
+                    [loading]="isLoading()"
+                ></button>
+            </div>
         </form>
     </div>
 </div>
