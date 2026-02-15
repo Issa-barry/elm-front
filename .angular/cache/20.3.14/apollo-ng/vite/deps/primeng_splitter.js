@@ -1,19 +1,19 @@
 import {
+  BaseComponent,
+  PARENT_INSTANCE
+} from "./chunk-TS6YUM3R.js";
+import {
+  BaseStyle
+} from "./chunk-YHNO6YHF.js";
+import {
   Bind,
   BindModule
 } from "./chunk-7J3RN223.js";
-import {
-  BaseComponent,
-  PARENT_INSTANCE
-} from "./chunk-VHLTMW64.js";
-import {
-  BaseStyle
-} from "./chunk-XDFKDIQ2.js";
+import "./chunk-OTTARZB5.js";
 import {
   PrimeTemplate,
   SharedModule
 } from "./chunk-4YW2PWNH.js";
-import "./chunk-OTTARZB5.js";
 import {
   C2 as C,
   P,
