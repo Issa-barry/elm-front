@@ -26,7 +26,7 @@ import { forkJoin } from 'rxjs';
 import {
     CreateProduitDto,
     Produit,
-    PRODUIT_STATUT_LABELS, 
+    PRODUIT_STATUT_LABELS,  
     PRODUIT_STATUT_SEVERITY,
     PRODUIT_TYPE_LABELS,
     ProduitStatut,

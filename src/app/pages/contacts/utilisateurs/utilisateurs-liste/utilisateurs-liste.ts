@@ -18,14 +18,12 @@ import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
-
 @Component({
-  selector: 'app-prestateurs',
+  selector: 'app-utilisateurs-liste',
   standalone: true,
-  providers: [MessageService, ConfirmationService],
-  templateUrl: './prestateurs.html',
-  styleUrl: './prestateurs.scss',
-  imports: [
+   templateUrl: './utilisateurs-liste.html',
+  styleUrl: './utilisateurs-liste.scss',
+   imports: [
     CommonModule,
     FormsModule,
     TableModule,
@@ -39,8 +37,9 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     ConfirmDialogModule,
     PhoneFormatPipe
   ],
+  providers: [MessageService, ConfirmationService],
 })
-export class Prestateurs implements OnInit {
+export class UtilisateursListe implements OnInit {
   prestataires: Prestataire[] = [];
   selectedPrestataire: Prestataire | null = null;
   loading = false;
@@ -123,7 +122,7 @@ export class Prestateurs implements OnInit {
    * Naviguer vers la création d'un prestataire
    */
   navigateToCreate() {
-    this.router.navigate(['contacts/prestateurs/new']);
+    this.router.navigate(['contacts/utilisateurs/new']);
   }
 
   /**

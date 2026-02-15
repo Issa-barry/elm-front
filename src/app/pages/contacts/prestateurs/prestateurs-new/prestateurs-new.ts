@@ -3,9 +3,9 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { PrestateursFrom } from '../prestateurs-from/prestateurs-from';
-import { Prestataire, CreatePrestataireDto } from '@/models/prestataire.model';
+ import { Prestataire, CreatePrestataireDto } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { PrestateursFrom } from '../prestateurs-from/prestateurs-from';
 
 @Component({
   selector: 'app-prestateurs-new',
