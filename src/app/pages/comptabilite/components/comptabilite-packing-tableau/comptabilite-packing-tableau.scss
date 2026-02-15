@@ -1,11 +1,38 @@
-// ─── Card ────────────────────────────────────────────────
 .tableau-card {
     border-radius: 14px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
     overflow: hidden;
 }
 
-// ─── Caption (Filters + Search) ──────────────────────────
+.compta-table-card {
+    margin-bottom: 0;
+}
+
+:host ::ng-deep .compta-toolbar.p-toolbar {
+    padding: 1rem;
+    border: 1px solid var(--p-surface-200);
+    border-radius: 12px;
+    background: var(--p-surface-50);
+}
+
+.compta-toolbar__start,
+.compta-toolbar__end {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+:host ::ng-deep .compta-toolbar__date.p-datepicker,
+:host ::ng-deep .compta-toolbar__status.p-select {
+    width: 10rem;
+}
+
+:host ::ng-deep .compta-toolbar__filter-btn.p-button,
+:host ::ng-deep .compta-toolbar__export-btn.p-button {
+    height: 2.5rem;
+}
+
 :host ::ng-deep .p-datatable .p-datatable-caption {
     padding: 1.5rem 1.75rem 1.75rem;
     border-bottom: 1px solid var(--p-surface-100);
@@ -18,21 +45,17 @@
     justify-content: space-between;
     gap: 1.5rem;
     flex-wrap: wrap;
-
-    &__filters {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    &__actions {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
 }
 
-// ─── Table spacing overrides ─────────────────────────────
+:host ::ng-deep .table-caption__search .p-iconfield,
+:host ::ng-deep .table-caption__search .p-inputtext {
+    width: 100%;
+}
+
+:host ::ng-deep .compta-data-table .p-datatable-table {
+    min-width: 55rem;
+}
+
 :host ::ng-deep .p-datatable {
     .p-datatable-thead > tr > th {
         padding: 1rem 1.25rem;
@@ -43,7 +66,6 @@
     }
 }
 
-// ─── Column Headers ──────────────────────────────────────
 .col-header {
     display: inline-flex;
     align-items: center;
@@ -55,13 +77,11 @@
     color: var(--p-surface-500);
 }
 
-// ─── Row ─────────────────────────────────────────────────
 .table-row {
     cursor: pointer;
     transition: background 0.15s ease;
 }
 
-// ─── Prestataire Cell ────────────────────────────────────
 .cell-prestataire {
     display: flex;
     align-items: center;
@@ -86,7 +106,6 @@
     }
 }
 
-// ─── Cell styles ─────────────────────────────────────────
 .cell-secondary {
     color: var(--p-surface-400);
     font-size: 0.9rem;
@@ -106,7 +125,6 @@
     color: var(--p-surface-800);
 }
 
-// ─── Status Badge ────────────────────────────────────────
 .status-badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -119,17 +137,18 @@
         background: #fef2f2;
         color: #dc2626;
     }
+
     &--warn {
         background: #fffbeb;
         color: #d97706;
     }
+
     &--success {
         background: #ecfdf5;
         color: #059669;
     }
 }
 
-// ─── Empty state ─────────────────────────────────────────
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -138,11 +157,15 @@
     padding: 3rem 0;
     color: var(--p-surface-300);
 
-    i { font-size: 2.5rem; }
-    span { font-size: 0.9rem; }
+    i {
+        font-size: 2.5rem;
+    }
+
+    span {
+        font-size: 0.9rem;
+    }
 }
 
-// ─── Preview dialog ──────────────────────────────────────
 .preview-summary {
     display: flex;
     align-items: center;
@@ -161,28 +184,92 @@
     }
 }
 
-// ─── Dark mode ───────────────────────────────────────────
-:host-context(.dark) {
-    .cell-prestataire__name,
-    .cell-bold {
-        color: var(--p-surface-100);
+@media (max-width: 768px) {
+    :host ::ng-deep .compta-table-card.card {
+        padding: 1rem;
+        border-radius: 16px;
     }
 
-    .col-header {
-        color: var(--p-surface-400);
+    :host ::ng-deep .compta-toolbar.p-toolbar {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        gap: 0.625rem;
     }
 
-    .status-badge {
-        &--danger  { background: rgba(220, 38, 38, 0.12); }
-        &--warn    { background: rgba(217, 119, 6, 0.12); }
-        &--success { background: rgba(5, 150, 105, 0.12); }
+    :host ::ng-deep .compta-toolbar .p-toolbar-start,
+    :host ::ng-deep .compta-toolbar .p-toolbar-end {
+        width: 100%;
     }
 
-    .preview-summary {
-        background: var(--p-surface-700);
+    .compta-toolbar__start {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+        gap: 0.5rem;
+    }
+
+    .compta-toolbar__end {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.5rem;
+    }
+
+    :host ::ng-deep .compta-toolbar__date.p-datepicker,
+    :host ::ng-deep .compta-toolbar__status.p-select {
+        width: 100%;
+    }
+
+    .table-caption {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
     }
 
     :host ::ng-deep .p-datatable .p-datatable-caption {
-        border-bottom-color: var(--p-surface-700);
+        padding: 1rem;
     }
+
+    :host ::ng-deep .compta-data-table .p-datatable-table {
+        min-width: 46rem;
+    }
+
+    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th,
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+        padding: 0.85rem 0.9rem;
+    }
+}
+
+:host-context(.dark) .cell-prestataire__name,
+:host-context(.dark) .cell-bold {
+    color: var(--p-surface-100);
+}
+
+:host-context(.dark) .col-header {
+    color: var(--p-surface-400);
+}
+
+:host-context(.dark) .status-badge--danger {
+    background: rgba(220, 38, 38, 0.12);
+}
+
+:host-context(.dark) .status-badge--warn {
+    background: rgba(217, 119, 6, 0.12);
+}
+
+:host-context(.dark) .status-badge--success {
+    background: rgba(5, 150, 105, 0.12);
+}
+
+:host-context(.dark) .preview-summary {
+    background: var(--p-surface-700);
+}
+
+:host-context(.dark) ::ng-deep .compta-toolbar.p-toolbar {
+    background: var(--p-surface-700);
+    border-color: var(--p-surface-600);
+}
+
+:host-context(.dark) ::ng-deep .p-datatable .p-datatable-caption {
+    border-bottom-color: var(--p-surface-700);
 }
