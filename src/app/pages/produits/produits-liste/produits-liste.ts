@@ -426,7 +426,7 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.router.navigate(['/produits/produits-new']);
     }
 
-    goHome() {
+    goHome(): void {
         this.router.navigate(['/']);
     }
 

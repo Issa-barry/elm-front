@@ -2,12 +2,12 @@
 
 <div class="produits-mobile-app">
     <header class="mobile-header">
-        <button
+        <button 
             pButton
             pRipple
             icon="pi pi-arrow-left"
             class="p-button-rounded p-button-text mobile-back"
-            aria-label="Retour a l'accueil"
+            aria-label="Retour à l'accueil"
             (click)="goHome()"
         ></button>
 
@@ -17,16 +17,16 @@
         </div>
 
         <button
-            *ngIf="canCreate"
             pButton
             pRipple
-            icon="pi pi-plus"
+            icon="pi pi-upload"
             class="p-button-rounded p-button-text mobile-add"
-            aria-label="Nouveau produit"
-            (click)="goToNewProduits()"
+            aria-label="Export"
+            (click)="exportCSV()"
         ></button>
     </header>
 
+    <div class="mobile-scroll">
     <section class="mobile-search">
         <p-iconfield>
             <p-inputicon styleClass="pi pi-search" />
@@ -40,33 +40,23 @@
         </p-iconfield>
     </section>
 
-    <section class="mobile-quick-actions">
-        <p-button
-            *ngIf="canCreate"
-            label="Nouveau"
-            icon="pi pi-plus"
-            severity="secondary"
-            styleClass="mobile-action-btn"
-            (onClick)="goToNewProduits()"
-        />
-
-        <p-button
-            label="Export"
-            icon="pi pi-upload"
-            severity="secondary"
-            styleClass="mobile-action-btn"
-            (onClick)="exportCSV()"
-        />
-    </section>
-
     <section class="mobile-list" *ngIf="!loading && mobileVisibleProduits.length; else mobileListState">
-        <article class="mobile-produit-card" *ngFor="let produit of mobileVisibleProduits; trackBy: trackByProduitId">
+        <article 
+            class="mobile-produit-card" 
+            *ngFor="let produit of mobileVisibleProduits; trackBy: trackByProduitId"
+            (click)="goToEditProduit($event, produit.id)"
+        >
+            <div class="mobile-card-media">
+                <div class="mobile-card-image-placeholder" aria-hidden="true">
+                    <i class="pi pi-box"></i>
+                </div>
+            </div>
+            <div class="mobile-card-body">
             <div class="mobile-card-top">
-                <div>
+                <div class="mobile-card-main">
                     <div class="mobile-code">{{ produit.code || 'Sans code' }}</div>
                     <div class="mobile-name">{{ produit.nom }}</div>
                 </div>
-
                 <p-tag
                     styleClass="mobile-status-tag"
                     [value]="getStatutLabel(produit.statut)"
@@ -74,29 +64,9 @@
                 />
             </div>
 
-            <div class="mobile-meta-grid">
-                <div>
-                    <span class="mobile-meta-label">Type</span>
-                    <span class="mobile-meta-value">{{ getTypeLabel(produit.type) }}</span>
-                </div>
-
-                <div>
-                    <span class="mobile-meta-label">Stock</span>
-                    <span class="mobile-meta-value">{{ produit.qte_stock }}</span>
-                </div>
-
-                <div>
-                    <span class="mobile-meta-label">Prix vente</span>
-                    <span class="mobile-meta-value">{{ formatCurrency(produit.prix_vente) }}</span>
-                </div>
-
-                <div>
-                    <span class="mobile-meta-label">Prix achat</span>
-                    <span class="mobile-meta-value">{{ formatCurrency(produit.prix_achat) }}</span>
-                </div>
-            </div>
-
-            <div class="mobile-card-actions">
+            <div class="mobile-card-footer">
+                <span class="mobile-card-summary">{{ produit.qte_stock }} en stock · {{ formatCurrency(produit.prix_vente) }}</span>
+                <div class="mobile-card-actions">
                 <button
                     pButton
                     pRipple
@@ -115,8 +85,10 @@
                     [rounded]="true"
                     [outlined]="true"
                     styleClass="mobile-delete-action"
-                    (click)="deleteProduct(produit)"
+                    (click)="$event.stopPropagation(); deleteProduct(produit)"
                 />
+                </div>
+            </div>
             </div>
         </article>
     </section>
@@ -134,6 +106,18 @@
             (onClick)="loadMoreMobile()"
         />
     </div>
+    </div>
+
+    <button
+        *ngIf="canCreate"
+        type="button"
+        class="mobile-fab"
+        aria-label="Nouveau produit"
+        (click)="goToNewProduits()"
+    >
+        <i class="pi pi-plus"></i>
+        <span class="mobile-fab-label">Nouveau produit</span>
+    </button>
 </div>
 
   <div class="card produits-desktop">
