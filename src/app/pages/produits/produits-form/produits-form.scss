@@ -1,4 +1,12 @@
+// ================================
+// DESKTOP — inchangé
+// ================================
 .product-form {
+  // Mobile container hidden on desktop
+  .mobile-form-container {
+    display: none;
+  }
+
   .form-header {
     border-bottom: 1px solid var(--surface-200);
     padding-bottom: 1rem;
@@ -72,5 +80,284 @@
 
   .upload-dropzone:hover {
     background: color-mix(in srgb, var(--primary-50) 35%, transparent);
+  }
+}
+
+// ================================
+// MOBILE
+// ================================
+@media screen and (max-width: 768px) {
+  .product-form {
+    // Kill card shell
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #f8f9fc !important;
+    margin: -0.5rem -0.875rem calc(-0.5rem - env(safe-area-inset-bottom));
+    padding: 0;
+    min-height: 100dvh;
+
+    // Show mobile, hide desktop
+    .mobile-form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: calc(0.75rem + env(safe-area-inset-top)) 1rem calc(5.5rem + env(safe-area-inset-bottom));
+      animation: mobileFade 0.24s ease-out;
+    }
+
+    .desktop-form-container {
+      display: none !important;
+    }
+
+    // ---- Header ----
+    .mobile-form-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .mobile-form-back,
+    .mobile-form-edit {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 999px;
+      flex-shrink: 0;
+      color: #1e293b !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .mobile-form-title-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mobile-form-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1e293b;
+      letter-spacing: -0.01em;
+    }
+
+    // ---- Image card ----
+    .mobile-image-card {
+      background: #fff;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    :host ::ng-deep .mobile-uploader {
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+
+      .p-fileupload-header { display: none; }
+      .p-fileupload-file-list { display: none; }
+      .p-fileupload-content {
+        padding: 0;
+        border: 0;
+        min-height: auto;
+        height: auto !important;
+      }
+    }
+
+    .mobile-upload-zone {
+      cursor: pointer;
+      min-height: 11rem;
+    }
+
+    .mobile-upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 11rem;
+      color: #94a3b8;
+      gap: 0.5rem;
+
+      i {
+        font-size: 2rem;
+        color: #cbd5e1;
+      }
+
+      span {
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+    }
+
+    .mobile-upload-preview {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      padding: 0.75rem;
+
+      img {
+        max-height: 12rem;
+        width: auto;
+        border-radius: 0.75rem;
+        object-fit: contain;
+      }
+    }
+
+    .mobile-remove-img {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 1.75rem !important;
+      height: 1.75rem !important;
+      border-radius: 999px !important;
+
+      i { font-size: 0.7rem; }
+    }
+
+    // ---- Section cards ----
+    .mobile-section-card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .mobile-field-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    // ---- Price grid: 2 cols ----
+    .mobile-price-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .mobile-price-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .mobile-price-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .mobile-service-alert {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.6rem;
+      padding: 0.5rem 0.65rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 0.65rem;
+      font-size: 0.8rem;
+      color: #991b1b;
+    }
+
+    // ---- Meta row: type + stock side by side ----
+    .mobile-meta-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .mobile-meta-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mobile-info-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    // ---- Status row ----
+    .mobile-status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mobile-status-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .mobile-status-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94a3b8;
+
+      &.active {
+        color: #16a34a;
+      }
+    }
+
+    // ---- Inputs: iOS zoom prevention + touch targets ----
+    :host ::ng-deep .p-inputtext,
+    :host ::ng-deep .p-inputnumber-input,
+    :host ::ng-deep .p-select-label {
+      font-size: 16px !important;
+      min-height: 2.65rem;
+    }
+
+    // ---- Sticky bottom actions ----
+    .mobile-bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .mobile-btn-save {
+      flex: 1;
+      border-radius: 0.75rem !important;
+      font-weight: 700 !important;
+      min-height: 2.75rem;
+    }
+
+    .mobile-btn-cancel {
+      flex: 0 0 auto;
+      border-radius: 0.75rem !important;
+      font-weight: 600 !important;
+      min-height: 2.75rem;
+    }
+  }
+}
+
+@keyframes mobileFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -140,6 +140,27 @@
             display: block;
         }
     }
+
+    body.produits-mobile-pwa {
+        .layout-container {
+            .layout-topbar {
+                display: none;
+            }
+
+            .layout-content-wrapper {
+                padding-top: calc(0.25rem + env(safe-area-inset-top));
+            }
+
+            .layout-content {
+                padding-top: 0;
+            }
+
+            .content-breadcrumb,
+            .topbar-breadcrumb {
+                display: none;
+            }
+        }
+    }
 }
 
 @media screen and (min-width: 1960px) {

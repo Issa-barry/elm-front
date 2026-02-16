@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
@@ -75,7 +75,7 @@ interface ExportColumn {
   templateUrl: './produits-liste.html',
   styleUrl: './produits-liste.scss',
 })
-export class ProduitsListe implements OnInit {
+export class ProduitsListe implements OnInit, OnDestroy {
      produits: Produit[] = [];
      produit: Produit = new Produit();
     loading: boolean = true;
@@ -102,13 +102,19 @@ export class ProduitsListe implements OnInit {
     canCreate = false;
     canUpdate = false;
     canDelete = false;
+    mobileSearchTerm = '';
+    readonly mobilePageSize = 8;
+    mobileVisibleCount = this.mobilePageSize;
+    private readonly mobileBreakpoint = 768;
+    private readonly mobilePwaClass = 'produits-mobile-pwa';
 
     constructor(
         private router: Router,
         private produitService: ProduitService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
-        private authService: AuthService
+        private authService: AuthService,
+        @Inject(DOCUMENT) private document: Document
     ) {
         this.canCreate = this.authService.hasPermission('produits.create');
         this.canUpdate = this.authService.hasPermission('produits.update');
@@ -123,6 +129,16 @@ export class ProduitsListe implements OnInit {
         this.initOptions();
         this.initColumns();
         this.loadProduits();
+        this.syncMobilePwaMode();
+    }
+
+    ngOnDestroy(): void {
+        this.clearMobilePwaMode();
+    }
+
+    @HostListener('window:resize')
+    onWindowResize(): void {
+        this.syncMobilePwaMode();
     }
 
       loadProduits() {
@@ -130,6 +146,7 @@ export class ProduitsListe implements OnInit {
         this.produitService.getAll().subscribe({
                 next: (produits) => {
                     this.produits = produits;
+                    this.resetMobilePagination();
                     this.loading=false;
                 },
                 error: (err) =>{
@@ -173,6 +190,46 @@ export class ProduitsListe implements OnInit {
 
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    onMobileSearchChange(_value?: string): void {
+        this.mobileVisibleCount = this.mobilePageSize;
+    }
+
+    get mobileFilteredProduits(): Produit[] {
+        const term = this.mobileSearchTerm.trim().toLowerCase();
+        if (!term) {
+            return this.produits;
+        }
+
+        return this.produits.filter((produit) => {
+            const values = [
+                produit.code,
+                produit.nom,
+                produit.description,
+                this.getTypeLabel(produit.type),
+                this.getStatutLabel(produit.statut),
+                produit.qte_stock
+            ];
+
+            return values.some((value) => this.searchableValue(value).includes(term));
+        });
+    }
+
+    get mobileVisibleProduits(): Produit[] {
+        return this.mobileFilteredProduits.slice(0, this.mobileVisibleCount);
+    }
+
+    get canLoadMoreMobile(): boolean {
+        return this.mobileVisibleCount < this.mobileFilteredProduits.length;
+    }
+
+    loadMoreMobile(): void {
+        this.mobileVisibleCount += this.mobilePageSize;
+    }
+
+    trackByProduitId(index: number, produit: Produit): number | string {
+        return produit.id || produit.code || index;
     }
 
     openNew() {
@@ -269,6 +326,20 @@ export class ProduitsListe implements OnInit {
         return PRODUIT_STATUT_LABELS[statut] ?? PRODUIT_STATUT_LABELS.brouillon;
     }
 
+    getTypeLabel(type?: ProduitType): string {
+        if (!type) return '-';
+        return PRODUIT_TYPE_LABELS[type] ?? type;
+    }
+
+    formatCurrency(value?: number | null): string {
+        if (typeof value !== 'number') {
+            return '-';
+        }
+
+        const formatted = new Intl.NumberFormat('fr-GN', { maximumFractionDigits: 0 }).format(value);
+        return `${formatted} GNF`;
+    }
+
     saveProduit() {
         this.submitted = true;
         if (!this.produit.nom?.trim() || !this.produit.type || this.saving) {
@@ -354,12 +425,42 @@ export class ProduitsListe implements OnInit {
      goToNewProduits() {
         this.router.navigate(['/produits/produits-new']);
     }
- 
-   
+
+    goHome() {
+        this.router.navigate(['/']);
+    }
 
     goToEditProduit(event: Event, produitId: number) {
         event.stopPropagation();
         this.router.navigate(['/produits/produits-edit', produitId]);
+    }
+
+    private resetMobilePagination(): void {
+        this.mobileVisibleCount = this.mobilePageSize;
+    }
+
+    private searchableValue(value: unknown): string {
+        if (value === null || value === undefined) {
+            return '';
+        }
+
+        return String(value).toLowerCase();
+    }
+
+    private syncMobilePwaMode(): void {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        if (window.innerWidth <= this.mobileBreakpoint) {
+            this.document.body.classList.add(this.mobilePwaClass);
+        } else {
+            this.clearMobilePwaMode();
+        }
+    }
+
+    private clearMobilePwaMode(): void {
+        this.document.body.classList.remove(this.mobilePwaClass);
     }
 
 }

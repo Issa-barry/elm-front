@@ -13,17 +13,17 @@ import { SelectModule } from 'primeng/select';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
-import { Prestataire, PrestataireType } from '@/models/prestataire.model';
-import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { User } from '@/models/user.model';
+import { UserService } from '@/services/users/users.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-utilisateurs-liste',
   standalone: true,
-   templateUrl: './utilisateurs-liste.html',
+  templateUrl: './utilisateurs-liste.html',
   styleUrl: './utilisateurs-liste.scss',
-   imports: [
+  imports: [
     CommonModule,
     FormsModule,
     TableModule,
@@ -40,8 +40,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
   providers: [MessageService, ConfirmationService],
 })
 export class UtilisateursListe implements OnInit {
-  prestataires: Prestataire[] = [];
-  selectedPrestataire: Prestataire | null = null;
+  users: User[] = [];
+  selectedUser: User | null = null;
   loading = false;
   selectedStatus: boolean | null = null;
 
@@ -55,108 +55,84 @@ export class UtilisateursListe implements OnInit {
   canDelete = false;
 
   constructor(
-    private prestataireService: PrestataireService,
+    private userService: UserService,
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService
   ) {
-    this.canCreate = this.authService.hasPermission('prestataires.create');
-    this.canUpdate = this.authService.hasPermission('prestataires.update');
-    this.canDelete = this.authService.hasPermission('prestataires.delete');
+    this.canCreate = this.authService.hasPermission('users.create');
+    this.canUpdate = this.authService.hasPermission('users.update');
+    this.canDelete = this.authService.hasPermission('users.delete');
   }
 
   ngOnInit() {
-    this.loadPrestataires();
+    this.loadUsers();
   }
 
-  /**
-   * Charger la liste des prestataires
-   */
-  loadPrestataires() {
+  loadUsers() {
     this.loading = true;
 
     const filters = this.selectedStatus !== null
       ? { is_active: this.selectedStatus }
       : undefined;
 
-    this.prestataireService.getPrestataires(filters).subscribe({
+    this.userService.getUsers(filters).subscribe({
       next: (response) => {
         if (response.success) {
-          // Gérer pagination ou liste simple
-          this.prestataires = Array.isArray(response.data)
+          this.users = Array.isArray(response.data)
             ? response.data
             : response.data.data;
         }
-        console.log(response);
-        
         this.loading = false;
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des prestataires:', error);
+        console.error('Erreur lors du chargement des utilisateurs:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les prestataires'
+          detail: 'Impossible de charger les utilisateurs'
         });
         this.loading = false;
       }
     });
   }
 
-  /**
-   * Recherche globale dans le tableau
-   */
   onGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
-  /**
-   * Filtrer par statut
-   */
   filterByStatus() {
-    this.loadPrestataires();
+    this.loadUsers();
   }
 
-  /**
-   * Naviguer vers la création d'un prestataire
-   */
   navigateToCreate() {
     this.router.navigate(['contacts/utilisateurs/new']);
   }
 
-  /**
-   * Sélection d'une ligne - navigation vers l'édition
-   */
   onRowSelect(event: any) {
-    this.router.navigate(['contacts/prestateurs/edit', event.data.id]);
+    this.router.navigate(['contacts/utilisateurs/edit', event.data.id]);
   }
 
-  /**
-   * Voir les détails d'un prestataire
-   */
-  goToEdit(event: Event, prestataireId: number) {
+  goToEdit(event: Event, userId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/prestateurs/edit/', prestataireId]);
+    this.router.navigate(['contacts/utilisateurs/edit/', userId]);
   }
 
-  /**
-   * Basculer le statut actif/inactif
-   */
-  toggleStatus(event: Event, prestataireId: number) {
+  toggleStatus(event: Event, userId: number) {
     event.stopPropagation();
 
-    const prestataire = this.prestataires.find(p => p.id === prestataireId);
-    const action = prestataire?.is_active ? 'désactiver' : 'activer';
+    const user = this.users.find(u => u.id === userId);
+    const action = user?.is_active ? 'désactiver' : 'activer';
 
     this.confirmationService.confirm({
-      message: `Voulez-vous vraiment ${action} ce prestataire ?`,
+      message: `Voulez-vous vraiment ${action} cet utilisateur ?`,
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       accept: () => {
-        this.prestataireService.togglePrestataireStatus(prestataireId).subscribe({
+        this.userService.toggleUserStatus(userId).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
@@ -164,7 +140,7 @@ export class UtilisateursListe implements OnInit {
                 summary: 'Succès',
                 detail: response.message
               });
-              this.loadPrestataires();
+              this.loadUsers();
             }
           },
           error: (error) => {
@@ -172,7 +148,7 @@ export class UtilisateursListe implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de changer le statut du prestataire'
+              detail: 'Impossible de changer le statut de l\'utilisateur'
             });
           }
         });
@@ -180,29 +156,26 @@ export class UtilisateursListe implements OnInit {
     });
   }
 
-  /**
-   * Supprimer un prestataire
-   */
-  deletePrestataire(event: Event, prestataireId: number) {
+  deleteUser(event: Event, userId: number) {
     event.stopPropagation();
 
     this.confirmationService.confirm({
-      message: 'Êtes-vous sûr de vouloir supprimer ce prestataire ? Cette action est irréversible.',
+      message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.',
       header: 'Confirmation de suppression',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui, supprimer',
       rejectLabel: 'Annuler',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.prestataireService.deletePrestataire(prestataireId).subscribe({
+        this.userService.deleteUser(userId).subscribe({
           next: (response) => {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
                 summary: 'Succès',
-                detail: 'Prestataire supprimé avec succès'
+                detail: 'Utilisateur supprimé avec succès'
               });
-              this.loadPrestataires();
+              this.loadUsers();
             }
           },
           error: (error) => {
@@ -210,7 +183,7 @@ export class UtilisateursListe implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de supprimer le prestataire'
+              detail: 'Impossible de supprimer l\'utilisateur'
             });
           }
         });
@@ -218,9 +191,6 @@ export class UtilisateursListe implements OnInit {
     });
   }
 
-  /**
-   * Obtenir les initiales du nom complet
-   */
   getInitials(nomComplet: string): string {
     if (!nomComplet) return '??';
 
@@ -231,29 +201,13 @@ export class UtilisateursListe implements OnInit {
     return nomComplet.substring(0, 2).toUpperCase();
   }
 
-  /**
-   * Formater le numéro de téléphone
-   */
-  formatPhone(phone: string): string {
-    if (!phone) return '-';
-
-    // Supprimer le code pays s'il existe au début (1-3 chiffres après +)
-    const cleanPhone = phone.replace(/^\+\d{1,3}/, '').trim();
-
-    // Formater par groupe de 2 chiffres
-    return cleanPhone.replace(/(\d{2})(?=\d)/g, '$1 ');
-  }
-
-  /**
-   * Obtenir la couleur du tag selon le type
-   */
-  getTypeSeverity(type: PrestataireType | null): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
-    const severities: Record<PrestataireType, 'success' | 'info' | 'warn' | 'danger'> = {
-      'machiniste': 'info',
-      'mecanicien': 'warn',
-      'consultant': 'success',
-      'fournisseur': 'danger'
+  getRoleSeverity(role: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    const severities: Record<string, 'success' | 'info' | 'warn' | 'danger'> = {
+      'admin': 'danger',
+      'manager': 'warn',
+      'employe': 'info',
+      'superviseur': 'success',
     };
-    return type ? severities[type] : 'secondary';
+    return severities[role?.toLowerCase()] || 'secondary';
   }
 }

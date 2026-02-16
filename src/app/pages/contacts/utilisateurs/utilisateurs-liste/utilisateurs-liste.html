@@ -3,7 +3,7 @@
 <div class="card">
   <p-table
     #dt
-    [value]="prestataires"
+    [value]="users"
     [paginator]="true"
     paginatorDropdownAppendTo="body"
     [rows]="10"
@@ -12,9 +12,9 @@
     responsiveLayout="scroll"
     currentPageReportTemplate="  {first} / {last} de {totalRecords} entrées"
     [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="['nom_complet', 'email', 'phone', 'reference', 'pays', 'ville', 'specialite', 'type', 'type_label']"
+    [globalFilterFields]="['nom_complet', 'email', 'phone', 'reference', 'pays', 'ville']"
     selectionMode="single"
-    [(selection)]="selectedPrestataire"
+    [(selection)]="selectedUser"
     (onRowSelect)="onRowSelect($event)"
     [rowHover]="true"
     styleClass="cursor-pointer"
@@ -24,10 +24,10 @@
         <p-icon-field class="w-full sm:w-80 order-1 sm:order-0">
           <p-inputicon class="pi pi-search" />
           <input
-            pInputText 
+            pInputText
             type="text"
             (input)="onGlobalFilter(dt, $event)"
-            placeholder="Rechercher un prestataire..."
+            placeholder="Rechercher un utilisateur..."
             class="w-full"
           />
         </p-icon-field>
@@ -64,15 +64,15 @@
             Nom complet <p-sortIcon field="nom_complet"></p-sortIcon>
           </span>
         </th>
-        
+
         <th pSortableColumn="phone" class="white-space-nowrap" style="width:15%">
           <span class="flex items-center gap-2">
             Téléphone <p-sortIcon field="phone"></p-sortIcon>
           </span>
         </th>
-        <th pSortableColumn="type" class="white-space-nowrap" style="width:12%">
+        <th class="white-space-nowrap" style="width:12%">
           <span class="flex items-center gap-2">
-            Type <p-sortIcon field="type"></p-sortIcon>
+            Rôle
           </span>
         </th>
         <th pSortableColumn="pays" class="white-space-nowrap" style="width:18%">
@@ -91,49 +91,53 @@
       </tr>
     </ng-template>
 
-    <ng-template #body let-prestataire>
-      <tr [pSelectableRow]="prestataire">
+    <ng-template #body let-user>
+      <tr [pSelectableRow]="user">
         <td>
           <div class="flex items-center gap-2">
             <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 text-primary-700 font-semibold">
-              {{ getInitials(prestataire.nom_complet) }}
+              {{ getInitials(user.nom_complet) }}
             </div>
             <div>
-              <div class="font-semibold">{{ prestataire.nom_complet }}</div>
-              <div class="text-sm text-surface-500 mt-1">{{ prestataire.reference }}</div>
+              <div class="font-semibold">{{ user.nom_complet }}</div>
+              <div class="text-sm text-surface-500 mt-1">{{ user.reference }}</div>
             </div>
-          </div>
-        </td> 
-        <td>
-          <div class="flex items-center gap-1">
-             <span class="text-surface-700">{{ prestataire.phone | phoneFormat:'INT' }}</span>
           </div>
         </td>
         <td>
-          <p-tag
-            *ngIf="prestataire.type_label"
-            [value]="prestataire.type_label"
-            [severity]="getTypeSeverity(prestataire.type)"
-          ></p-tag>
-          <span *ngIf="!prestataire.type_label" class="text-surface-400">-</span>
+          <div class="flex items-center gap-1">
+             <span class="text-surface-700">{{ user.phone | phoneFormat:'INT' }}</span>
+          </div>
+        </td>
+        <td>
+          <ng-container *ngIf="(user.role_names?.length || user.roles?.length); else noRole">
+            <p-tag
+              *ngFor="let role of (user.role_names || user.roles)"
+              [value]="role"
+              [severity]="getRoleSeverity(role)"
+              class="mr-1"
+            ></p-tag>
+          </ng-container>
+          <ng-template #noRole>
+            <span class="text-surface-400">-</span>
+          </ng-template>
         </td>
         <td>
           <div class="flex items-center gap-2">
-            <span class="fi fi-{{ prestataire.code_pays?.toLowerCase() }} text-xl"></span>
+            <span class="fi fi-{{ user.code_pays?.toLowerCase() }} text-xl"></span>
             <div>
-              <div class="font-medium">{{ prestataire.ville }}</div>
-              <div class="text-sm text-surface-500">{{ prestataire.quartier }}</div>
+              <div class="font-medium">{{ user.ville }}</div>
+              <div class="text-sm text-surface-500">{{ user.quartier }}</div>
             </div>
           </div>
         </td>
         <td>
           <p-tag
-            [value]="prestataire.is_active ? 'Actif' : 'Inactif'"
-            [severity]="prestataire.is_active ? 'success' : 'danger'"
+            [value]="user.is_active ? 'Actif' : 'Inactif'"
+            [severity]="user.is_active ? 'success' : 'danger'"
           ></p-tag>
         </td>
         <td>
-          
           <div class="flex gap-2">
             <button
               pButton
@@ -142,20 +146,20 @@
               class="p-button-rounded p-button-text p-button-sm"
               [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
               tooltipPosition="top"
-              (click)="goToEdit($event, prestataire.id)"
+              (click)="goToEdit($event, user.id)"
               [disabled]="!canUpdate"
             ></button>
             <button
               *ngIf="canUpdate"
               pButton
               pRipple
-              [icon]="prestataire.is_active ? 'pi pi-lock-open' : 'pi pi-lock'"
+              [icon]="user.is_active ? 'pi pi-lock-open' : 'pi pi-lock'"
               class="p-button-rounded p-button-text p-button-sm"
-              [class.p-button-success]="prestataire.is_active"
-              [class.p-button-danger]="!prestataire.is_active"
-              [pTooltip]="prestataire.is_active ? 'Désactiver' : 'Activer'"
+              [class.p-button-success]="user.is_active"
+              [class.p-button-danger]="!user.is_active"
+              [pTooltip]="user.is_active ? 'Désactiver' : 'Activer'"
               tooltipPosition="top"
-              (click)="toggleStatus($event, prestataire.id)"
+              (click)="toggleStatus($event, user.id)"
             ></button>
             <button
               *ngIf="canDelete"
@@ -165,7 +169,7 @@
               class="p-button-rounded p-button-text p-button-danger p-button-sm"
               [pTooltip]="'Supprimer'"
               tooltipPosition="top"
-              (click)="deletePrestataire($event, prestataire.id)"
+              (click)="deleteUser($event, user.id)"
             ></button>
           </div>
         </td>
@@ -177,7 +181,7 @@
         <td colspan="6" class="text-center py-8">
           <div class="flex flex-col items-center gap-3 text-surface-500">
             <i class="pi pi-users text-4xl"></i>
-            <span>Aucun prestataire trouvé</span>
+            <span>Aucun utilisateur trouvé</span>
           </div>
         </td>
       </tr>

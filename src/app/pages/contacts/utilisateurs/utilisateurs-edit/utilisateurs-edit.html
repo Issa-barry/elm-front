@@ -1,1 +1,16 @@
-<p>utilisateurs-edit works!</p>
+<p-toast></p-toast>
+
+<div class="p-4">
+  <div *ngIf="loading && !userData" class="flex justify-center items-center h-96">
+    <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+  </div>
+
+  <app-utilisateurs-form
+    *ngIf="userData"
+    [mode]="'edit'"
+    [initialData]="userData"
+    [loading]="loading"
+    (submitForm)="onSubmit($event)"
+    (cancel)="onCancel()"
+  ></app-utilisateurs-form>
+</div>
