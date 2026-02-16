@@ -1,295 +1,506 @@
 <div class="card product-form">
-    <div class="flex justify-between items-start gap-4 mb-8 form-header">
-        <div>
-            <span class="block text-surface-900 dark:text-surface-0 font-bold text-2xl">
-                {{ mode === 'create' ? 'Créer un produit' : 'Détails du produit' }}
-            </span>
-            <small class="text-surface-500 dark:text-surface-300">
-                Renseignez les informations principales, les prix et le statut de publication.
+    <!-- ==================== MOBILE LAYOUT ==================== -->
+    <div class="mobile-form-container">
+        <header class="mobile-form-header">
+            <button
+                pButton
+                pRipple
+                icon="pi pi-arrow-left"
+                class="p-button-rounded p-button-text mobile-form-back"
+                (click)="onCancel()"
+            ></button>
+            <div class="mobile-form-title-wrap">
+                <h1 class="mobile-form-title">
+                    {{ mode === 'create' ? 'Nouveau produit' : 'Détails du produit' }}
+                </h1>
+            </div>
+            <button
+                *ngIf="mode === 'edit' && !isEditing"
+                pButton
+                pRipple
+                icon="pi pi-pencil"
+                class="p-button-rounded p-button-text mobile-form-edit"
+                (click)="enableEditing()"
+            ></button>
+        </header>
+
+        <!-- Image en premier -->
+        <div class="mobile-image-card">
+            <div *ngIf="isEditing">
+                <p-fileUpload
+                    #mobileFileUploader
+                    name="image"
+                    (onSelect)="onUpload($event)"
+                    [customUpload]="true"
+                    [multiple]="false"
+                    accept="image/*"
+                    [showUploadButton]="false"
+                    [showCancelButton]="false"
+                    [auto]="true"
+                    [disabled]="fieldsDisabled"
+                    styleClass="mobile-uploader"
+                >
+                    <ng-template #content>
+                        <div
+                            class="mobile-upload-zone"
+                            (click)="!fieldsDisabled && mobileFileUploader.advancedFileInput.nativeElement.click()"
+                        >
+                            <div *ngIf="!imagePreview && !product.image_url" class="mobile-upload-placeholder">
+                                <i class="pi pi-camera"></i>
+                                <span>Ajouter une photo</span>
+                            </div>
+
+                            <div *ngIf="imagePreview || product.image_url" class="mobile-upload-preview">
+                                <img
+                                    [src]="imagePreview || product.getImageUrl()"
+                                    alt="Image du produit"
+                                />
+                                <button
+                                    *ngIf="!fieldsDisabled"
+                                    pButton
+                                    pRipple
+                                    rounded
+                                    type="button"
+                                    severity="danger"
+                                    class="mobile-remove-img"
+                                    (click)="removeImage($event)"
+                                >
+                                    <i class="pi pi-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-fileUpload>
+            </div>
+            <div *ngIf="!isEditing && product.image_url" class="mobile-upload-preview">
+                <img [src]="product.getImageUrl()" alt="Image du produit" />
+            </div>
+            <div *ngIf="!isEditing && !product.image_url" class="mobile-upload-placeholder">
+                <i class="pi pi-image"></i>
+                <span>Aucune image</span>
+            </div>
+        </div>
+
+        <!-- Nom du produit -->
+        <div class="mobile-section-card">
+            <label class="mobile-field-label">Nom du produit</label>
+            <input
+                pInputText
+                type="text"
+                placeholder="Nom du produit"
+                [(ngModel)]="product.nom"
+                [disabled]="fieldsDisabled"
+                [invalid]="submitted && !product.nom?.trim()"
+                fluid
+            />
+            <small class="text-red-500" *ngIf="submitted && !product.nom?.trim() && isEditing">
+                Nom du produit obligatoire.
             </small>
         </div>
 
-        <button
-            *ngIf="mode === 'edit' && !isEditing"
-            pButton
-            pRipple
-            label="Modifier"
-            icon="pi pi-pencil"
-            severity="warn"
-            (click)="enableEditing()"
-            class="w-auto"
-        ></button>
+        <!-- Prix en grille 2 colonnes -->
+        <div class="mobile-section-card">
+            <label class="mobile-field-label">Prix</label>
+            <div class="mobile-price-grid">
+                <div class="mobile-price-item">
+                    <span class="mobile-price-label">Achat</span>
+                    <p-inputnumber
+                        [(ngModel)]="product.prix_achat"
+                        mode="currency"
+                        currency="GNF"
+                        locale="fr-GN"
+                        [min]="0"
+                        [disabled]="fieldsDisabled"
+                        [invalid]="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat)"
+                        placeholder="0"
+                        fluid
+                    ></p-inputnumber>
+                    <small class="text-red-500" *ngIf="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat) && isEditing">
+                        Obligatoire
+                    </small>
+                </div>
+                <div class="mobile-price-item">
+                    <span class="mobile-price-label">Vente</span>
+                    <p-inputnumber
+                        [(ngModel)]="product.prix_vente"
+                        mode="currency"
+                        currency="GNF"
+                        locale="fr-GN"
+                        [min]="0"
+                        [disabled]="fieldsDisabled"
+                        [invalid]="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente)"
+                        placeholder="0"
+                        fluid
+                    ></p-inputnumber>
+                    <small class="text-red-500" *ngIf="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente) && isEditing">
+                        Obligatoire
+                    </small>
+                </div>
+                <div class="mobile-price-item">
+                    <span class="mobile-price-label">Coût</span>
+                    <p-inputnumber
+                        [(ngModel)]="product.cout"
+                        mode="currency"
+                        currency="GNF"
+                        locale="fr-GN"
+                        [min]="0"
+                        [disabled]="fieldsDisabled"
+                        placeholder="0"
+                        fluid
+                    ></p-inputnumber>
+                </div>
+                <div class="mobile-price-item" *ngIf="isPrixUsineVisible()">
+                    <span class="mobile-price-label">Usine</span>
+                    <p-inputnumber
+                        [(ngModel)]="product.prix_usine"
+                        mode="currency"
+                        currency="GNF"
+                        locale="fr-GN"
+                        [min]="0"
+                        [disabled]="fieldsDisabled"
+                        [invalid]="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine)"
+                        placeholder="0"
+                        fluid
+                    ></p-inputnumber>
+                    <small class="text-red-500" *ngIf="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine) && isEditing">
+                        Obligatoire
+                    </small>
+                </div>
+            </div>
+            <div class="mobile-service-alert" *ngIf="showServicePriceError()">
+                <i class="pi pi-exclamation-circle"></i>
+                Au moins un prix requis pour un service.
+            </div>
+        </div>
+
+        <!-- Type + Statut + Stock en rangée compacte -->
+        <div class="mobile-section-card">
+            <div class="mobile-meta-row">
+                <div class="mobile-meta-field">
+                    <label class="mobile-field-label">Type</label>
+                    <p-select
+                        [options]="typeOptions"
+                        [(ngModel)]="product.type"
+                        (onChange)="onTypeChange()"
+                        [disabled]="fieldsDisabled"
+                        placeholder="Type"
+                        fluid
+                    ></p-select>
+                </div>
+                <div class="mobile-meta-field">
+                    <label class="mobile-field-label">Stock</label>
+                    <p-inputnumber
+                        [(ngModel)]="product.qte_stock"
+                        [showButtons]="true"
+                        [min]="0"
+                        [disabled]="isQteStockDisabled()"
+                        placeholder="0"
+                        fluid
+                    ></p-inputnumber>
+                </div>
+            </div>
+            <small class="mobile-info-hint" *ngIf="product.type === 'service'">
+                <i class="pi pi-info-circle"></i> Stock non géré pour les services
+            </small>
+        </div>
+
+        <!-- Status toggle -->
+        <div class="mobile-section-card mobile-status-row">
+            <span class="mobile-status-label">Status</span>
+            <span class="mobile-status-value" [class.active]="isActifSwitch">{{ isActifSwitch ? 'Actif' : 'Inactif' }}</span>
+            <p-toggleswitch
+                [ngModel]="isActifSwitch"
+                (ngModelChange)="onStatutToggleChange($event)"
+                [disabled]="fieldsDisabled"
+                class="ml-auto"
+            ></p-toggleswitch>
+        </div>
+
+        <!-- Boutons sticky en bas -->
+        <div class="mobile-bottom-actions" *ngIf="isEditing">
+            <button
+                pButton
+                pRipple
+                [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
+                icon="pi pi-check"
+                (click)="onSubmit()"
+                [loading]="loading"
+                [disabled]="!isValid() || loading"
+                class="mobile-btn-save"
+            ></button>
+            <button
+                pButton
+                pRipple
+                label="Annuler"
+                icon="pi pi-times"
+                severity="secondary"
+                (click)="mode === 'create' ? onCancel() : cancelEditing()"
+                [disabled]="loading"
+                class="mobile-btn-cancel"
+            ></button>
+        </div>
     </div>
 
-    <p-fluid class="grid grid-cols-12 gap-6 flex-wrap">
-        <div class="col-span-12 lg:col-span-8">
-            <div class="form-section mb-6">
-  
+    <!-- ==================== DESKTOP LAYOUT ==================== -->
+    <div class="desktop-form-container">
+        <div class="flex justify-between items-start gap-4 mb-8 form-header">
+            <div>
+                <span class="block text-surface-900 dark:text-surface-0 font-bold text-2xl">
+                    {{ mode === 'create' ? 'Créer un produit' : 'Détails du produit' }}
+                </span>
+                <small class="text-surface-500 dark:text-surface-300">
+                    Renseignez les informations principales, les prix et le statut de publication.
+                </small>
+            </div>
 
-                <div class="grid grid-cols-12 gap-4">
-                    <!-- <div class="col-span-12">
-                        <label class="mb-3 text-surface-900 dark:text-surface-0 font-bold block">
-                            Type de produit <span class="text-red-500" *ngIf="isEditing">*</span>
-                        </label>
+            <button
+                *ngIf="mode === 'edit' && !isEditing"
+                pButton
+                pRipple
+                label="Modifier"
+                icon="pi pi-pencil"
+                severity="warn"
+                (click)="enableEditing()"
+                class="w-auto"
+            ></button>
+        </div>
+
+        <p-fluid class="grid grid-cols-12 gap-6 flex-wrap">
+            <div class="col-span-12 lg:col-span-8">
+                <div class="form-section mb-6">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 mt-2">
+                            <input
+                                id="nom"
+                                pInputText
+                                type="text"
+                                placeholder="Nom du produit"
+                                [(ngModel)]="product.nom"
+                                [disabled]="fieldsDisabled"
+                                [invalid]="submitted && !product.nom?.trim()"
+                                fluid
+                            />
+                            <small class="text-red-500" *ngIf="submitted && !product.nom?.trim() && isEditing">
+                                Nom du produit obligatoire.
+                            </small>
+                        </div>
+
+                        <div class="col-span-12 mt-4">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-12 lg:col-span-4">
+                                    <p-inputnumber
+                                        inputId="prix_achat"
+                                        [(ngModel)]="product.prix_achat"
+                                        mode="currency"
+                                        currency="GNF"
+                                        locale="fr-GN"
+                                        [min]="0"
+                                        [disabled]="fieldsDisabled"
+                                        [invalid]="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat)"
+                                        placeholder="prix d'achat"
+                                        fluid
+                                    ></p-inputnumber>
+                                    <small class="text-red-500" *ngIf="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat) && isEditing">
+                                        Prix d'achat obligatoire pour ce type.
+                                    </small>
+                                </div>
+
+                                <div class="col-span-12 lg:col-span-4">
+                                    <p-inputnumber
+                                        inputId="prix_vente"
+                                        [(ngModel)]="product.prix_vente"
+                                        mode="currency"
+                                        currency="GNF"
+                                        locale="fr-GN"
+                                        [min]="0"
+                                        [disabled]="fieldsDisabled"
+                                        [invalid]="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente)"
+                                        placeholder="Prix de vente"
+                                        fluid
+                                    ></p-inputnumber>
+                                    <small class="text-red-500" *ngIf="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente) && isEditing">
+                                        Prix de vente obligatoire pour ce type.
+                                    </small>
+                                </div>
+
+                                <div class="col-span-12 lg:col-span-4">
+                                    <p-inputnumber
+                                        inputId="cout"
+                                        [(ngModel)]="product.cout"
+                                        mode="currency"
+                                        currency="GNF"
+                                        locale="fr-GN"
+                                        [min]="0"
+                                        [disabled]="fieldsDisabled"
+                                        placeholder="coût"
+                                        fluid
+                                    ></p-inputnumber>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-12 lg:col-span-4 mt-4" *ngIf="isPrixUsineVisible()">
+                            <p-inputnumber
+                                inputId="prix_usine"
+                                [(ngModel)]="product.prix_usine"
+                                mode="currency"
+                                currency="GNF"
+                                locale="fr-GN"
+                                [min]="0"
+                                [disabled]="fieldsDisabled"
+                                [invalid]="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine)"
+                                placeholder="Prix usine"
+                                fluid
+                            ></p-inputnumber>
+                            <small class="text-red-500" *ngIf="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine) && isEditing">
+                                Prix usine obligatoire pour "Fabricable".
+                            </small>
+                        </div>
+
+                        <div class="col-span-12 service-alert" *ngIf="showServicePriceError()">
+                            <i class="pi pi-exclamation-circle mr-2"></i>
+                            Pour un service, renseignez au moins un prix : achat ou vente.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="pi pi-image mr-2"></i>
+                        Visuel du produit
+                    </div>
+
+                    <div *ngIf="isEditing">
+                        <p-fileUpload
+                            #fileUploader
+                            name="image"
+                            (onSelect)="onUpload($event)"
+                            [customUpload]="true"
+                            [multiple]="false"
+                            accept="image/*"
+                            [showUploadButton]="false"
+                            [showCancelButton]="false"
+                            [auto]="true"
+                            [disabled]="fieldsDisabled"
+                            styleClass="product-uploader border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 p-0 rounded-lg"
+                        >
+                            <ng-template #content>
+                                <div
+                                    class="w-full py-4 upload-dropzone"
+                                    (click)="!fieldsDisabled && fileUploader.advancedFileInput.nativeElement.click()"
+                                >
+                                    <div *ngIf="!imagePreview && !product.image_url" class="h-48 flex flex-col justify-center items-center">
+                                        <i class="pi pi-image text-primary text-4xl mb-4"></i>
+                                        <span class="block font-semibold text-surface-900 dark:text-surface-0 text-lg">Ajouter une image</span>
+                                        <span class="text-surface-500 text-sm mt-1">Cliquez pour sélectionner</span>
+                                    </div>
+
+                                    <div *ngIf="imagePreview || product.image_url" class="relative w-full flex justify-center py-3">
+                                        <div class="relative">
+                                            <img
+                                                [src]="imagePreview || product.getImageUrl()"
+                                                alt="Image du produit"
+                                                class="max-h-72 rounded shadow object-contain"
+                                            />
+                                            <button
+                                                *ngIf="!fieldsDisabled"
+                                                pButton
+                                                pRipple
+                                                rounded
+                                                type="button"
+                                                severity="danger"
+                                                class="absolute -top-2 -right-2"
+                                                (click)="removeImage($event)"
+                                            >
+                                                <i class="pi pi-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </p-fileUpload>
+                    </div>
+
+                    <div class="flex justify-center mt-2" *ngIf="!isEditing && product.image_url">
+                        <img [src]="product.getImageUrl()" alt="Image du produit" class="max-h-72 rounded shadow object-contain" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-y-4 mt-7">
+                <div class="border border-surface-200 dark:border-surface-700 rounded">
+                    <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Etat du produit</span>
+                    <div class="p-4">
+                        <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded">
+                            <span class="text-black/90 dark:text-surface-0! font-bold mr-4">Status:</span>
+                            <span class="text-black/60 dark:text-surface-0! font-semibold">{{ isActifSwitch ? 'Actif' : 'Inactif' }}</span>
+                            <p-toggleswitch
+                                [ngModel]="isActifSwitch"
+                                (ngModelChange)="onStatutToggleChange($event)"
+                                [disabled]="fieldsDisabled"
+                                class="ml-auto"
+                            ></p-toggleswitch>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border border-surface-200 dark:border-surface-700 rounded">
+                    <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Type</span>
+                    <div class="p-4">
                         <p-select
                             [options]="typeOptions"
                             [(ngModel)]="product.type"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Selectionner le type"
                             (onChange)="onTypeChange()"
                             [disabled]="fieldsDisabled"
-                            [invalid]="submitted && !product.type"
-                            fluid
+                            placeholder="Sélectionner un type"
                         ></p-select>
-                        <small class="text-red-500" *ngIf="submitted && !product.type && isEditing">
-                            Type de produit obligatoire.
-                        </small>
-                        <small class="text-blue-600 block mt-2 inline-flex items-center gap-2 helper-chip" *ngIf="product.type && isEditing">
-                            <i class="pi pi-info-circle"></i>{{ getPrixHelperText() }}
-                        </small>
-                    </div> -->
-
-                    <div class="col-span-12 mt-2"> 
-                        <input
-                            id="nom"
-                            pInputText
-                            type="text"
-                            placeholder="Nom du produit"
-                            [(ngModel)]="product.nom"
-                            [disabled]="fieldsDisabled"
-                            [invalid]="submitted && !product.nom?.trim()"
-                            fluid
-                        />
-                        <small class="text-red-500" *ngIf="submitted && !product.nom?.trim() && isEditing">
-                            Nom du produit obligatoire.
-                        </small>
                     </div>
+                </div>
 
-                    <div class="col-span-12 mt-4">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 lg:col-span-4"> 
-                                <p-inputnumber
-                                    inputId="prix_achat"
-                                    [(ngModel)]="product.prix_achat"
-                                    mode="currency"
-                                    currency="GNF"
-                                    locale="fr-GN"
-                                    [min]="0"
-                                    [disabled]="fieldsDisabled"
-                                    [invalid]="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat)"
-                                    placeholder="prix d'achat"
-                                    fluid
-                                ></p-inputnumber>
-                                <small class="text-red-500" *ngIf="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat) && isEditing">
-                                    Prix d'achat obligatoire pour ce type.
-                                </small>
-                            </div>
-
-                            <div class="col-span-12 lg:col-span-4 "> 
-                                <p-inputnumber
-                                    inputId="prix_vente"
-                                    [(ngModel)]="product.prix_vente"
-                                    mode="currency"
-                                    currency="GNF"
-                                    locale="fr-GN"
-                                    [min]="0"
-                                    [disabled]="fieldsDisabled"
-                                    [invalid]="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente)"
-                                    placeholder="Prix de vente"
-                                    fluid
-                                ></p-inputnumber>
-                                <small class="text-red-500" *ngIf="submitted && isPrixVenteRequired() && isPriceMissing(product.prix_vente) && isEditing">
-                                    Prix de vente obligatoire pour ce type.
-                                </small>
-                            </div>
-
-                            <div class="col-span-12 lg:col-span-4"> 
-                                <p-inputnumber
-                                    inputId="cout"
-                                    [(ngModel)]="product.cout"
-                                    mode="currency"
-                                    currency="GNF"
-                                    locale="fr-GN"
-                                    [min]="0"
-                                    [disabled]="fieldsDisabled"
-                                    placeholder="coût"
-                                    fluid
-                                ></p-inputnumber>
-                            </div>
-                        </div>
-                    </div>
-
-                    
-
-                    <div class="col-span-12 lg:col-span-4 mt-4" *ngIf="isPrixUsineVisible()">
- 
+                <div class="border border-surface-200 dark:border-surface-700 rounded">
+                    <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Quantité en stock</span>
+                    <div class="p-4">
                         <p-inputnumber
-                            inputId="prix_usine"
-                            [(ngModel)]="product.prix_usine"
-                            mode="currency"
-                            currency="GNF"
-                            locale="fr-GN"
+                            [(ngModel)]="product.qte_stock"
+                            [showButtons]="true"
                             [min]="0"
-                            [disabled]="fieldsDisabled"
-                            [invalid]="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine)"
-                            placeholder="Prix usine"
+                            [disabled]="isQteStockDisabled()"
+                            placeholder="0"
                             fluid
                         ></p-inputnumber>
-                        <small class="text-red-500" *ngIf="submitted && isPrixUsineRequired() && isPriceMissing(product.prix_usine) && isEditing">
-                            Prix usine obligatoire pour "Fabricable".
-                        </small>
                     </div>
+                    <small class="text-gray-500 block mt-2 mb-2 ml-4" *ngIf="product.type === 'service'">
+                        <i class="pi pi-info-circle mr-1"></i>Le stock n'est pas géré pour les services.
+                    </small>
+                </div>
 
-                    <div class="col-span-12 service-alert" *ngIf="showServicePriceError()">
-                        <i class="pi pi-exclamation-circle mr-2"></i>
-                        Pour un service, renseignez au moins un prix : achat ou vente.
+                <div class="sticky top-6 flex flex-col gap-4">
+                    <div class="form-section p-4" *ngIf="isEditing">
+                        <div class="flex gap-3">
+                            <button
+                                pButton
+                                pRipple
+                                [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
+                                icon="pi pi-check"
+                                (click)="onSubmit()"
+                                [loading]="loading"
+                                [disabled]="!isValid() || loading"
+                                class="flex-1"
+                            ></button>
+                            <button
+                                pButton
+                                pRipple
+                                label="Annuler"
+                                icon="pi pi-times"
+                                severity="secondary"
+                                (click)="mode === 'create' ? onCancel() : cancelEditing()"
+                                [disabled]="loading"
+                                class="flex-1"
+                            ></button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="form-section">
-                <div class="section-title">
-                    <i class="pi pi-image mr-2"></i>
-                    Visuel du produit
-                </div>
-
-                <div *ngIf="isEditing">
-                    <p-fileUpload
-                        #fileUploader
-                        name="image"
-                        (onSelect)="onUpload($event)"
-                        [customUpload]="true"
-                        [multiple]="false"
-                        accept="image/*"
-                        [showUploadButton]="false"
-                        [showCancelButton]="false"
-                        [auto]="true"
-                        [disabled]="fieldsDisabled"
-                        styleClass="product-uploader border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 p-0 rounded-lg"
-                    >
-                        <ng-template #content>
-                            <div
-                                class="w-full py-4 upload-dropzone"
-                                (click)="!fieldsDisabled && fileUploader.advancedFileInput.nativeElement.click()"
-                            >
-                                <div *ngIf="!imagePreview && !product.image_url" class="h-48 flex flex-col justify-center items-center">
-                                    <i class="pi pi-image text-primary text-4xl mb-4"></i>
-                                    <span class="block font-semibold text-surface-900 dark:text-surface-0 text-lg">Ajouter une image</span>
-                                    <span class="text-surface-500 text-sm mt-1">Cliquez pour sélectionner</span>
-                                </div>
-
-                                <div *ngIf="imagePreview || product.image_url" class="relative w-full flex justify-center py-3">
-                                    <div class="relative">
-                                        <img
-                                            [src]="imagePreview || product.getImageUrl()"
-                                            alt="Image du produit"
-                                            class="max-h-72 rounded shadow object-contain"
-                                        />
-                                        <button
-                                            *ngIf="!fieldsDisabled"
-                                            pButton
-                                            pRipple
-                                            rounded
-                                            type="button"
-                                            severity="danger"
-                                            class="absolute -top-2 -right-2"
-                                            (click)="removeImage($event)"
-                                        >
-                                            <i class="pi pi-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </ng-template>
-                    </p-fileUpload>
-                </div>
-
-                <div class="flex justify-center mt-2" *ngIf="!isEditing && product.image_url">
-                    <img [src]="product.getImageUrl()" alt="Image du produit" class="max-h-72 rounded shadow object-contain" />
-                </div>
-            </div>
-        </div>
-
-        <div class="col-span-12 lg:col-span-4 flex flex-col gap-y-4 mt-7">
-                    <div class="border border-surface-200 dark:border-surface-700 rounded">
-                        <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Etat du produit</span>
-                        <div class="p-4">
-                            <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded">
-                                <span class="text-black/90 dark:text-surface-0! font-bold mr-4">Status:</span>
-                                <span class="text-black/60 dark:text-surface-0! font-semibold " >{{ isActifSwitch ? 'Actif' : 'Inactif' }}</span>
-                                <!-- <button pButton pRipple type="button" icon="pi pi-fw pi-pencil" text rounded class="ml-auto"></button> -->
-                                   <p-toggleswitch
-                                        [ngModel]="isActifSwitch"
-                                        (ngModelChange)="onStatutToggleChange($event)"
-                                        [disabled]="fieldsDisabled"
-                                        class="ml-auto"
-                                        >
-                                </p-toggleswitch>
-                            </div>
-                        </div>
-                    </div>
-
-                    
-                    <div class="border border-surface-200 dark:border-surface-700 rounded">
-                        <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Type</span>
-                        <div class="p-4">
-                            <p-select
-                                [options]="typeOptions"
-                                [(ngModel)]="product.type"
-                                (onChange)="onTypeChange()"
-                                [disabled]="fieldsDisabled"
-                                placeholder="Sélectionner un type"
-                            ></p-select>
-                        </div>
-                    </div>
-
-                    <div class="border border-surface-200 dark:border-surface-700 rounded">
-                        <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Quantité en stock</span>
-                        <div class="p-4">
-                            <p-inputnumber
-                                [(ngModel)]="product.qte_stock"
-                                [showButtons]="true"
-                                [min]="0"
-                                [disabled]="isQteStockDisabled()"
-                                placeholder="0"
-                                fluid
-                            ></p-inputnumber>
-                        </div>
-                         <small class="text-gray-500 block mt-2 mb-2 ml-4" *ngIf="product.type === 'service'">
-                            <i class="pi pi-info-circle mr-1"></i>Le stock n'est pas géré pour les services.
-                        </small>
-
-                    </div>
-
-
-            <div class="sticky top-6 flex flex-col gap-4"> 
-
-                <div class="form-section p-4" *ngIf="isEditing">
-                    <div class="flex gap-3">
-                        <button
-                            pButton
-                            pRipple
-                            [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
-                            icon="pi pi-check"
-                            (click)="onSubmit()"
-                            [loading]="loading"
-                            [disabled]="!isValid() || loading"
-                            class="flex-1"
-                        ></button>
-                        <button
-                            pButton
-                            pRipple
-                            label="Annuler"
-                            icon="pi pi-times"
-                            severity="secondary"
-                            (click)="mode === 'create' ? onCancel() : cancelEditing()"
-                            [disabled]="loading"
-                            class="flex-1"
-                        ></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </p-fluid>
+        </p-fluid>
+    </div>
 </div>

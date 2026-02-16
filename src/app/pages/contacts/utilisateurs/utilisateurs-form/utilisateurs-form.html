@@ -1,0 +1,271 @@
+<div class="card">
+  <div class="flex justify-between items-center mb-6">
+    <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
+      {{ formTitle }}
+    </span>
+  </div>
+
+  <div class="grid grid-cols-12 gap-4">
+    <div class="col-span-12 lg:col-span-2">
+      <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">
+        <!-- Utilisateur -->
+      </div>
+      <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
+       <!-- Renseignez les informations du compte utilisateur. -->
+      </p>
+    </div>
+
+    <div class="col-span-12 lg:col-span-10">
+      <div class="grid grid-cols-12 gap-4">
+        <!-- Rôle de l'utilisateur -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="role" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+           Rôle <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <p-select
+            id="role"
+            [(ngModel)]="model.role"
+            [options]="availableRoles"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner un rôle"
+            [disabled]="fieldsDisabled"
+            [invalid]="submitted && !model.role"
+            fluid
+          ></p-select>
+          <small class="text-red-500" *ngIf="submitted && !model.role && isEditing">
+            Rôle obligatoire.
+          </small>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="email" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            pInputText
+            fluid
+            [(ngModel)]="model.email"
+            [disabled]="fieldsDisabled"
+            placeholder="exemple@email.com"
+          />
+        </div>
+
+
+        <!-- Nom -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="nom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Nom <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <input
+            id="nom"
+            type="text"
+            pInputText
+            fluid
+            [(ngModel)]="model.nom"
+            [invalid]="submitted && !model.nom?.trim()"
+            [disabled]="fieldsDisabled"
+          />
+          <small class="text-red-500" *ngIf="submitted && !model.nom?.trim() && isEditing">
+            Nom obligatoire.
+          </small>
+        </div>
+
+        <!-- Prénom -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Prénom <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <input
+            id="prenom"
+            type="text"
+            pInputText
+            fluid
+            [(ngModel)]="model.prenom"
+            [invalid]="submitted && !model.prenom?.trim()"
+            [disabled]="fieldsDisabled"
+          />
+          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
+            Prénom obligatoire.
+          </small>
+        </div>
+
+        
+        <!-- Téléphone avec sélecteur de pays -->
+        <div class="mb-6 col-span-12">
+          <div class="grid grid-cols-12 gap-3">
+            <!-- Sélecteur de pays -->
+            <div class="col-span-12 md:col-span-4">
+              <label for="codePays" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+                Pays <span class="text-red-500" *ngIf="isEditing">*</span>
+              </label>
+              <p-select
+                id="codePays"
+                [(ngModel)]="phoneCountry"
+                [options]="countries"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Sélectionner un pays"
+                [disabled]="fieldsDisabled"
+                (onChange)="onCountryChange()"
+                fluid
+              >
+                <ng-template let-country pTemplate="item">
+                  <div class="flex items-center gap-2">
+                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
+                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
+                  </div>
+                </ng-template>
+                <ng-template let-country pTemplate="selectedItem">
+                  <div class="flex items-center gap-2" *ngIf="country">
+                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
+                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <!-- Champ téléphone -->
+            <div class="col-span-12 md:col-span-8">
+              <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+                Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                pInputText
+                fluid
+                [(ngModel)]="model.phone"
+                [invalid]="(submitted || phoneError) && (!model.phone?.trim() || !!phoneError)"
+                [disabled]="fieldsDisabled"
+                (input)="onPhoneInput()"
+                (blur)="onPhoneBlur()"
+                placeholder="Exemple: 622 00 00 00"
+              />
+            </div>
+          </div>
+
+          <!-- Messages d'erreur pour le téléphone -->
+          <small class="text-red-500 block mt-2" *ngIf="submitted && !model.phone?.trim() && isEditing">
+            Téléphone obligatoire.
+          </small>
+          <small class="text-red-500 block mt-2" *ngIf="phoneError && model.phone?.trim() && isEditing">
+            {{ phoneError }}
+          </small>
+        </div>
+
+        <!-- Ville -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="ville" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Ville <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <input
+            id="ville"
+            type="text"
+            pInputText
+            fluid
+            [(ngModel)]="model.ville"
+            [invalid]="submitted && !model.ville?.trim()"
+            [disabled]="fieldsDisabled"
+          />
+          <small class="text-red-500" *ngIf="submitted && !model.ville?.trim() && isEditing">
+            Ville obligatoire.
+          </small>
+        </div>
+
+        <!-- Quartier -->
+        <div class="mb-6 col-span-12 md:col-span-6">
+          <label for="quartier" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Quartier <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <input
+            id="quartier"
+            type="text"
+            pInputText
+            fluid
+            [(ngModel)]="model.quartier"
+            [invalid]="submitted && !model.quartier?.trim()"
+            [disabled]="fieldsDisabled"
+          />
+          <small class="text-red-500" *ngIf="submitted && !model.quartier?.trim() && isEditing">
+            Quartier obligatoire.
+          </small>
+        </div>
+
+        <!-- Mot de passe (uniquement en création) -->
+        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="mode === 'create'">
+          <label for="password" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Mot de passe <span class="text-red-500">*</span>
+          </label>
+          <p-password
+            id="password"
+            [(ngModel)]="model.password"
+            [toggleMask]="true"
+            [feedback]="true"
+            [invalid]="submitted && !!passwordError"
+            [disabled]="fieldsDisabled"
+            fluid
+            placeholder="Min. 8 caractères, majuscules, minuscules et chiffres"
+            promptLabel="Entrez un mot de passe"
+            weakLabel="Faible"
+            mediumLabel="Moyen"
+            strongLabel="Fort"
+          ></p-password>
+          <small class="text-red-500" *ngIf="submitted && passwordError && isEditing">
+            {{ passwordError }}
+          </small>
+        </div>
+
+        <!-- Confirmation mot de passe (uniquement en création) -->
+        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="mode === 'create'">
+          <label for="password_confirmation" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Confirmer le mot de passe <span class="text-red-500">*</span>
+          </label>
+          <p-password
+            id="password_confirmation"
+            [(ngModel)]="model.password_confirmation"
+            [toggleMask]="true"
+            [feedback]="false"
+            [invalid]="submitted && model.password !== model.password_confirmation"
+            [disabled]="fieldsDisabled"
+            fluid
+            placeholder="Confirmez le mot de passe"
+          ></p-password>
+          <small class="text-red-500" *ngIf="submitted && model.password !== model.password_confirmation && isEditing">
+            Les mots de passe ne correspondent pas.
+          </small>
+        </div>
+
+        <!-- Boutons -->
+        <div class="col-span-12 flex gap-2" *ngIf="isEditing">
+          <button
+            pButton
+            pRipple
+            [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
+            icon="pi pi-check"
+            (click)="onSubmit()"
+            [loading]="loading"
+            [disabled]="!isValid() || loading"
+            class="w-auto"
+          ></button>
+
+          <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            severity="secondary"
+            (click)="onCancel()"
+            [disabled]="loading"
+            class="w-auto"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -18,5 +18,21 @@ export interface User {
   updated_at: string;
   nom_complet: string;
   roles?: string[];
+  role_names?: string[];
   permissions?: string[];
+}
+
+export interface CreateUserDto {
+  nom: string;
+  prenom: string;
+  phone: string;
+  email?: string | null;
+  pays: string;
+  code_pays: string;
+  code_phone_pays: string;
+  ville: string;
+  quartier: string;
+  password: string;
+  password_confirmation: string;
+  role: string;
 }

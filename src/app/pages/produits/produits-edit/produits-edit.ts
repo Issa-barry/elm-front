@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
@@ -16,19 +16,23 @@ import { ProduitService } from '@/services/produits/produits.service';
   templateUrl: './produits-edit.html',
   styleUrl: './produits-edit.scss',
 })
-export class ProduitsEdit implements OnInit {
+export class ProduitsEdit implements OnInit, OnDestroy {
   loading = false;
   produitId: number | null = null;
   initialData: Produit | null = null;
+  private readonly mobileBreakpoint = 768;
+  private readonly mobilePwaClass = 'produits-mobile-pwa';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private produitService: ProduitService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
+    this.updateMobilePwaMode();
     const idParam = this.route.snapshot.paramMap.get('id');
     const parsedId = idParam ? Number(idParam) : NaN;
 
@@ -80,6 +84,24 @@ export class ProduitsEdit implements OnInit {
         this.showApiError(error, 'Erreur lors du chargement du produit');
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.document.body.classList.remove(this.mobilePwaClass);
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateMobilePwaMode();
+  }
+
+  private updateMobilePwaMode(): void {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth <= this.mobileBreakpoint) {
+      this.document.body.classList.add(this.mobilePwaClass);
+    } else {
+      this.document.body.classList.remove(this.mobilePwaClass);
+    }
   }
 
   private showApiError(error: any, fallback: string): void {

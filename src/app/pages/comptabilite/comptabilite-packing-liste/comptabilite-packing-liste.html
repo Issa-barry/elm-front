@@ -1,6 +1,10 @@
+<section class="compta-mobile-shell">
+  <div class="compta-mobile-shell__stats grid grid-cols-12 gap-6 mb-6">
+    <app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
+  </div>
 
-<div class="grid grid-cols-12 gap-6 mb-6">
-  <app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
-</div>
-
-<app-comptabilite-packing-tableau (dataChanged)="statsWidget.loadStats($event)"></app-comptabilite-packing-tableau>
+  <app-comptabilite-packing-tableau
+    class="compta-mobile-shell__table"
+    (dataChanged)="statsWidget.loadStats($event)"
+  ></app-comptabilite-packing-tableau>
+</section>
