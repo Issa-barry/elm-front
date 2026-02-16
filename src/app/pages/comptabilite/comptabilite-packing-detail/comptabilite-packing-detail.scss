@@ -1,4 +1,52 @@
-// ─── Detail Header ───────────────────────────────────────
+// ─── Slideover paiement : full screen sur mobile ─────────
+.detail-paiement-slideover {
+    @media (max-width: 768px) {
+        left: 0;
+        right: 0;
+        width: 100%;
+        min-height: 100dvh;
+        min-height: 100vh;
+        height: 100%;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        box-sizing: border-box;
+    }
+}
+
+// ─── Full screen mobile (wrapper + scroll) ───────────────
+.detail-page-wrap {
+    @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+        min-height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        margin: calc(-0.25rem - env(safe-area-inset-top)) -0.875rem 0;
+        margin-bottom: calc(-0.875rem - env(safe-area-inset-bottom));
+        padding: 0 0.875rem calc(0.875rem + env(safe-area-inset-bottom));
+        padding-left: calc(0.875rem + env(safe-area-inset-left));
+        padding-right: calc(0.875rem + env(safe-area-inset-right));
+    }
+}
+
+.detail-mobile-scroll {
+    @media (max-width: 768px) {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+// ─── Mobile header (visible ≤768px) ──────────────────────
+.detail-mobile-header {
+    display: none;
+}
+
+// ─── Detail Header (desktop) ─────────────────────────────
 .detail-header {
     display: flex;
     align-items: center;
@@ -65,10 +113,8 @@
         justify-content: center;
         flex-shrink: 0;
         font-size: 1.1rem;
-
-        &--primary { background: var(--p-primary-50); color: var(--p-primary-500); }
-        &--success { background: #ecfdf5; color: #10b981; }
-        &--warning { background: #fff7ed; color: #f59e0b; }
+        background: var(--p-surface-100);
+        color: var(--p-surface-600);
     }
 
     &__value {
@@ -77,9 +123,6 @@
         color: var(--p-surface-900);
         letter-spacing: -0.02em;
         line-height: 1.2;
-
-        &--success { color: #059669; }
-        &--warning { color: #d97706; }
     }
 
     &__label {
@@ -195,8 +238,177 @@
     }
 }
 
+// ─── Mobile factures (visible ≤768px) ────────────────────
+.detail-factures-mobile {
+    display: none;
+}
+
+.detail-factures-mobile__title {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--p-surface-800);
+}
+
+.detail-factures-mobile__state {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    color: var(--p-surface-500);
+    font-size: 0.9rem;
+}
+
+.detail-factures-mobile__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-facture-card {
+    background: var(--p-surface-0);
+    border: 1px solid var(--p-surface-200);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-facture-card__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+.detail-facture-card__ref {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--p-surface-900);
+}
+
+.detail-facture-card__date {
+    font-size: 0.9rem;
+    color: var(--p-surface-500);
+}
+
+.detail-facture-card__rouleaux {
+    font-size: 0.85rem;
+    color: var(--p-surface-500);
+}
+
+.detail-facture-card__amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.detail-facture-card__total {
+    font-weight: 700;
+    color: var(--p-surface-800);
+}
+
+.detail-facture-card__verse,
+.detail-facture-card__restant {
+    color: var(--p-surface-600);
+    font-weight: 500;
+}
+
+.detail-facture-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--p-surface-100);
+}
+
+.detail-facture-card__badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+}
+
+.detail-facture-card__badge--danger,
+.detail-facture-card__badge--warn,
+.detail-facture-card__badge--success,
+.detail-facture-card__badge--secondary {
+    background: var(--p-surface-100);
+    color: var(--p-surface-600);
+}
+
+.detail-facture-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.detail-facture-card__actions .p-button {
+    color: var(--p-surface-500) !important;
+}
+
 // ─── Responsive ──────────────────────────────────────────
 @media (max-width: 768px) {
+    .detail-mobile-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: calc(0.5rem + env(safe-area-inset-top)) 0.5rem 0.6rem 0.25rem;
+        margin: 0 -0.875rem 0;
+        margin-left: calc(-0.875rem - env(safe-area-inset-left));
+        margin-right: calc(-0.875rem - env(safe-area-inset-right));
+        padding-left: calc(0.875rem + env(safe-area-inset-left));
+        padding-right: calc(0.875rem + env(safe-area-inset-right));
+        flex-shrink: 0;
+        background: var(--p-surface-0);
+        border-bottom: 1px solid var(--p-surface-200);
+        position: sticky;
+        top: 0;
+        z-index: 25;
+    }
+
+    :host-context(.app-dark) .detail-mobile-header {
+        background: var(--p-surface-800);
+        border-bottom-color: var(--p-surface-700);
+    }
+
+    .detail-mobile-back {
+        color: var(--p-primary-600) !important;
+    }
+
+    .detail-mobile-title-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .detail-mobile-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--p-surface-900);
+        line-height: 1.2;
+    }
+
+    .detail-mobile-subtitle {
+        font-size: 0.8rem;
+        color: var(--p-surface-500);
+        margin: 0.15rem 0 0;
+    }
+
+    .detail-header--desktop {
+        display: none !important;
+    }
+
+    .detail-factures-mobile {
+        display: block;
+    }
+
+    .detail-tableau-desktop {
+        display: none !important;
+    }
+
     .stats-bar {
         flex-direction: column;
         gap: 0.5rem;
@@ -208,7 +420,27 @@
 }
 
 // ─── Dark mode ───────────────────────────────────────────
-:host-context(.dark) {
+:host-context(.app-dark) {
+    .detail-mobile-title {
+        color: var(--p-surface-0);
+    }
+    .detail-mobile-subtitle {
+        color: var(--p-surface-400);
+    }
+    .detail-facture-card {
+        background: var(--p-surface-800);
+        border-color: var(--p-surface-600);
+    }
+    .detail-facture-card__ref,
+    .detail-facture-card__total {
+        color: var(--p-surface-100);
+    }
+    .detail-facture-card__footer {
+        border-top-color: var(--p-surface-600);
+    }
+    .detail-factures-mobile__title {
+        color: var(--p-surface-200);
+    }
     .detail-header {
         background: var(--p-surface-800);
         &__name { color: var(--p-surface-0); }
@@ -219,11 +451,27 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
         &__divider { background: var(--p-surface-600); }
         &__icon {
-            &--primary { background: rgba(59, 130, 246, 0.12); }
-            &--success { background: rgba(16, 185, 129, 0.12); }
-            &--warning { background: rgba(245, 158, 11, 0.12); }
+            background: var(--p-surface-700);
+            color: var(--p-surface-400);
         }
         &__value { color: var(--p-surface-0); }
+    }
+
+    .detail-facture-card__verse,
+    .detail-facture-card__restant {
+        color: var(--p-surface-400);
+    }
+
+    .detail-facture-card__badge--danger,
+    .detail-facture-card__badge--warn,
+    .detail-facture-card__badge--success,
+    .detail-facture-card__badge--secondary {
+        background: var(--p-surface-700);
+        color: var(--p-surface-300);
+    }
+
+    .detail-facture-card__actions .p-button {
+        color: var(--p-surface-400) !important;
     }
 
     .cell-prestataire__name, .cell-bold { color: var(--p-surface-100); }

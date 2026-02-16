@@ -24,6 +24,10 @@ export class PrestateursNew {
     private router: Router
   ) {}
 
+  onCancel() {
+    this.router.navigate(['contacts/prestateurs']);
+  }
+
   onSubmit(data: Partial<Prestataire>) {
     this.loading = true;
 

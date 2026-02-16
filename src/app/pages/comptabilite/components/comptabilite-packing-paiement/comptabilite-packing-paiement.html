@@ -50,7 +50,7 @@
         <!-- Mode de paiement -->
         <div class="w-full flex flex-col gap-3">
             <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Mode de paiement</div>
-            <div class="w-full flex gap-3">
+            <div class="w-full flex gap-3 paiement-modes">
                 <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'especes'" (click)="selectMode('especes')">
                     <i class="pi pi-money-bill"></i>
                     <span>Espèces</span>

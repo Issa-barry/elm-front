@@ -1,0 +1,1 @@
+import"./chunk-GAL4ENT6.js";var t=[{path:"prestateurs",loadChildren:()=>import("./chunk-3U6EU5ES.js")},{path:"utilisateurs",loadChildren:()=>import("./chunk-C7WQVTPN.js")},{path:"**",redirectTo:"/notfound"}];export{t as default};

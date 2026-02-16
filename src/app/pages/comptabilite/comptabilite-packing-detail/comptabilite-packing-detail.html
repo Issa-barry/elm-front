@@ -1,7 +1,24 @@
 <p-toast position="top-right" appendTo="body" [baseZIndex]="1100" [preventOpenDuplicates]="true" />
 
-<!-- Header prestataire -->
-<div class="detail-header">
+<div class="detail-page-wrap">
+<!-- Mobile-only header (visible ≤768px) -->
+<header class="detail-mobile-header">
+    <button
+        pButton
+        pRipple
+        icon="pi pi-arrow-left"
+        class="p-button-rounded p-button-text detail-mobile-back"
+        aria-label="Retour à la liste"
+        (click)="goBack()"
+    ></button>
+    <div class="detail-mobile-title-wrap">
+        <h1 class="detail-mobile-title">{{ prestataireNom || 'Détail' }}</h1>
+        <p class="detail-mobile-subtitle" *ngIf="prestatairePhone">{{ prestatairePhone | phoneFormat:'INT' }}</p>
+    </div>
+</header>
+
+<!-- Desktop header -->
+<div class="detail-header detail-header--desktop">
     <div class="detail-header__left">
         <p-button icon="pi pi-arrow-left" severity="secondary" [rounded]="true" [text]="true" pTooltip="Retour" (click)="goBack()" />
         <div>
@@ -14,10 +31,10 @@
     <div></div>
 </div>
 
-<!-- Slide-over paiement -->
+<!-- Slide-over paiement (full screen sur mobile) -->
 <div class="fixed inset-0 z-50" *ngIf="slideoverVisible">
     <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeSlideoverPaiement()"></div>
-    <div class="bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
+    <div class="detail-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
          <app-comptabilite-packing-paiement
             [facture]="slideoverFacture"
             [saving]="slideoverSaving"
@@ -27,10 +44,12 @@
     </div>
 </div>
 
+<!-- Contenu scrollable (full screen sur mobile) -->
+<div class="detail-mobile-scroll">
 <!-- Stats bar -->
 <div class="stats-bar mb-6">
     <div class="stats-bar__item">
-        <div class="stats-bar__icon stats-bar__icon--primary"><i class="pi pi-wallet"></i></div>
+        <div class="stats-bar__icon"><i class="pi pi-wallet"></i></div>
         <div>
             <div class="stats-bar__value">{{ formatCurrency(totalFacture) }}</div>
             <div class="stats-bar__label">Total à payer</div>
@@ -38,24 +57,88 @@
     </div>
     <div class="stats-bar__divider"></div>
     <div class="stats-bar__item">
-        <div class="stats-bar__icon stats-bar__icon--success"><i class="pi pi-check-circle"></i></div>
+        <div class="stats-bar__icon"><i class="pi pi-check-circle"></i></div>
         <div>
-            <div class="stats-bar__value stats-bar__value--success">{{ formatCurrency(totalVerse) }}</div>
+            <div class="stats-bar__value">{{ formatCurrency(totalVerse) }}</div>
             <div class="stats-bar__label">Total versé</div>
         </div>
     </div>
     <div class="stats-bar__divider"></div>
     <div class="stats-bar__item">
-        <div class="stats-bar__icon stats-bar__icon--warning"><i class="pi pi-arrow-right"></i></div>
+        <div class="stats-bar__icon"><i class="pi pi-arrow-right"></i></div>
         <div>
-            <div class="stats-bar__value" [class.stats-bar__value--warning]="totalRestant > 0">{{ formatCurrency(totalRestant) }}</div>
+            <div class="stats-bar__value">{{ formatCurrency(totalRestant) }}</div>
             <div class="stats-bar__label">Reste à payer</div>
         </div>
     </div>
 </div>
 
-<!-- Table des factures -->
-<div class="card tableau-card">
+<!-- Mobile: factures en cartes (≤768px) -->
+<div class="detail-factures-mobile">
+    <h3 class="detail-factures-mobile__title">Factures</h3>
+    <div class="detail-factures-mobile__state" *ngIf="loading">Chargement...</div>
+    <div class="detail-factures-mobile__state" *ngIf="!loading && factures().length === 0">Aucune facture pour ce prestataire.</div>
+    <div class="detail-factures-mobile__list" *ngIf="!loading && factures().length">
+        <article
+            class="detail-facture-card"
+            *ngFor="let facture of factures()"
+        >
+            <div class="detail-facture-card__main">
+                <span class="detail-facture-card__ref">{{ getReferenceShort(facture.reference) }}</span>
+                <span class="detail-facture-card__date">{{ formatDateDisplay(facture.date) }}</span>
+                <span class="detail-facture-card__rouleaux">{{ facture.total_rouleaux }} rouleaux</span>
+            </div>
+            <div class="detail-facture-card__amounts">
+                <span class="detail-facture-card__total">{{ facture.montant_total | money:'GNF' }}</span>
+                <span class="detail-facture-card__verse">Versé : {{ facture.montant_verse | money:'GNF' }}</span>
+                <span class="detail-facture-card__restant">Restant : {{ facture.montant_restant | money:'GNF' }}</span>
+            </div>
+            <div class="detail-facture-card__footer">
+                <span
+                    class="detail-facture-card__badge"
+                    [ngClass]="{
+                        'detail-facture-card__badge--danger': facture.statut === 'impayee',
+                        'detail-facture-card__badge--warn': facture.statut === 'partielle',
+                        'detail-facture-card__badge--success': facture.statut === 'payee',
+                        'detail-facture-card__badge--secondary': facture.statut === 'annulee'
+                    }"
+                >{{ facture.statut_label }}</span>
+                <div class="detail-facture-card__actions">
+                    <p-button
+                        icon="pi pi-money-bill"
+                        severity="secondary"
+                        [text]="true"
+                        [rounded]="true"
+                        pTooltip="Payer"
+                        (click)="openSlideoverPaiement(facture)"
+                        *ngIf="canCreateVersement && facture.statut !== 'payee'"
+                    />
+                    <p-button
+                        icon="pi pi-list"
+                        severity="info"
+                        [text]="true"
+                        [rounded]="true"
+                        pTooltip="Historique"
+                        (click)="openHistorique(facture)"
+                        *ngIf="canReadVersement"
+                    />
+                    <p-button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        [text]="true"
+                        [rounded]="true"
+                        pTooltip="Supprimer"
+                        (click)="confirmDeleteFacture(facture)"
+                        *ngIf="canDeleteFacture && facture.montant_verse === 0"
+                    />
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
+<!-- Desktop: table des factures -->
+<div class="card tableau-card detail-tableau-desktop">
     <p-table
         [value]="factures()"
         [rows]="10"
@@ -104,7 +187,7 @@
         </ng-template>
         <ng-template #body let-facture>
             <tr>
-                <td class="font-semibold">{{ facture.reference.replace('FACT-PACK-', '') }}</td>
+                <td class="font-semibold">{{ getReferenceShort(facture.reference) }}</td>
                 <td class="cell-secondary font-semibold">{{ formatDateDisplay(facture.date) }}</td>
                 <td class="text-right cell-mono font-semibold">{{ facture.total_rouleaux }}</td>
                 <td class="text-right cell-mono font-semibold">{{  facture.prix_par_rouleau | money :'GNF'}}</td>
@@ -125,25 +208,16 @@
                     <div class="flex items-center justify-end gap-1">
                         <p-button
                             icon="pi pi-money-bill"
-                            severity="success"
+                            severity="secondary"
                             [text]="true"
                             [rounded]="true"
-                            pTooltip="Payer (dialogue)"
-                            (click)="openVersement(facture)"
-                            *ngIf="canCreateVersement && facture.statut !== 'payee'"
-                        />
-                        <p-button
-                            icon="pi pi-wallet"
-                            severity="warn"
-                            [text]="true"
-                            [rounded]="true"
-                            pTooltip="Payer (panneau)"
+                            pTooltip="Payer"
                             (click)="openSlideoverPaiement(facture)"
                             *ngIf="canCreateVersement && facture.statut !== 'payee'"
                         />
                         <p-button
                             icon="pi pi-list"
-                            severity="info"
+                            severity="secondary"
                             [text]="true"
                             [rounded]="true"
                             pTooltip="Historique versements"
@@ -152,7 +226,7 @@
                         />
                         <p-button
                             icon="pi pi-trash"
-                            severity="danger"
+                            severity="secondary"
                             [text]="true"
                             [rounded]="true"
                             pTooltip="Supprimer"
@@ -175,6 +249,8 @@
         </ng-template>
     </p-table>
 </div>
+</div><!-- /.detail-mobile-scroll -->
+</div><!-- /.detail-page-wrap -->
 
 <!-- Dialog Versement -->
 <p-dialog
@@ -189,7 +265,7 @@
 >
     <div class="flex flex-col gap-4" *ngIf="selectedFacture">
         <div class="preview-summary">
-            <span class="font-bold">{{ selectedFacture.reference.replace('FACT-PACK-', '') }}</span>
+            <span class="font-bold">{{ getReferenceShort(selectedFacture.reference) }}</span>
             <span class="preview-summary__sep"></span>
             <span>Total : <strong>{{  selectedFacture.montant_total | money :'GNF'}}</strong></span>
             <span class="preview-summary__sep"></span>
@@ -251,7 +327,7 @@
 
     <div *ngIf="historiqueData" class="flex flex-col gap-4">
         <div class="preview-summary">
-            <span class="font-bold text-lg">{{ historiqueData.reference.replace('FACT-PACK-', '') }}</span>
+            <span class="font-bold text-lg">{{ getReferenceShort(historiqueData.reference) }}</span>
             <span class="preview-summary__sep"></span>
             <span>Total: <strong>{{ formatCurrency(historiqueData.montant_total) }}</strong></span>
             <span class="preview-summary__sep"></span>

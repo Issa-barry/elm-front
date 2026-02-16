@@ -1,3 +1,11 @@
+// ─── Full height dans le slideover (full screen mobile) ──
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
 // ─── Payment mode cards ──────────────────────────────────
 .slideover-mode {
     flex: 1;
@@ -32,7 +40,7 @@
     }
 }
 
-:host-context(.dark) {
+:host-context(.app-dark) {
     .slideover-mode {
         border-color: var(--p-surface-600);
         color: var(--p-surface-300);

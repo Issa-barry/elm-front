@@ -1,23 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MenuModule } from 'primeng/menu';
 
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
-
 
 @Component({
   selector: 'app-prestateurs-liste',
@@ -31,24 +32,38 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TableModule,
     InputTextModule,
     ButtonModule,
+    RippleModule,
     IconField,
     InputIcon,
     TagModule,
     TooltipModule,
     SelectModule,
     ConfirmDialogModule,
+    MenuModule,
     PhoneFormatPipe
   ],
 })
-export class PrestateursListe implements OnInit {
+export class PrestateursListe implements OnInit, OnDestroy {
   prestataires: Prestataire[] = [];
   selectedPrestataire: Prestataire | null = null;
   loading = false;
   selectedStatus: boolean | null = null;
 
+  mobileSearchTerm = '';
+  readonly mobilePageSize = 10;
+  mobileVisibleCount = this.mobilePageSize;
+  private readonly mobileBreakpoint = 768;
+  private readonly mobilePwaClass = 'prestateurs-mobile-pwa';
+
   statusOptions = [
     { label: 'Actif', value: true },
     { label: 'Inactif', value: false }
+  ];
+
+  mobileStatusMenuItems: MenuItem[] = [
+    { label: 'Tous les statuts', command: () => this.applyMobileStatusFilter(null) },
+    { label: 'Actif', command: () => this.applyMobileStatusFilter(true) },
+    { label: 'Inactif', command: () => this.applyMobileStatusFilter(false) },
   ];
 
   canCreate = false;
@@ -60,7 +75,8 @@ export class PrestateursListe implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('prestataires.create');
     this.canUpdate = this.authService.hasPermission('prestataires.update');
@@ -69,6 +85,62 @@ export class PrestateursListe implements OnInit {
 
   ngOnInit() {
     this.loadPrestataires();
+    this.syncMobilePwaMode();
+  }
+
+  ngOnDestroy() {
+    this.document.body.classList.remove(this.mobilePwaClass);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncMobilePwaMode();
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
+
+  onMobileSearchChange() {
+    this.mobileVisibleCount = this.mobilePageSize;
+  }
+
+  get mobileFilteredPrestataires(): Prestataire[] {
+    const term = this.mobileSearchTerm.trim().toLowerCase();
+    if (!term) return this.prestataires;
+    return this.prestataires.filter(
+      (p) =>
+        (p.nom_complet && p.nom_complet.toLowerCase().includes(term)) ||
+        (p.email && p.email.toLowerCase().includes(term)) ||
+        (p.phone && p.phone.replace(/\s/g, '').includes(term)) ||
+        (p.reference && p.reference.toLowerCase().includes(term)) ||
+        (p.type_label && p.type_label.toLowerCase().includes(term))
+    );
+  }
+
+  get mobileVisiblePrestataires(): Prestataire[] {
+    return this.mobileFilteredPrestataires.slice(0, this.mobileVisibleCount);
+  }
+
+  get canLoadMoreMobile(): boolean {
+    return this.mobileVisibleCount < this.mobileFilteredPrestataires.length;
+  }
+
+  loadMoreMobile() {
+    this.mobileVisibleCount += this.mobilePageSize;
+  }
+
+  trackByPrestataireId(_index: number, p: Prestataire): number {
+    return p.id;
+  }
+
+  private syncMobilePwaMode() {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth <= this.mobileBreakpoint) {
+      this.document.body.classList.add(this.mobilePwaClass);
+    } else {
+      this.document.body.classList.remove(this.mobilePwaClass);
+    }
   }
 
   /**
@@ -88,9 +160,8 @@ export class PrestateursListe implements OnInit {
           this.prestataires = Array.isArray(response.data)
             ? response.data
             : response.data.data;
+          this.mobileVisibleCount = this.mobilePageSize;
         }
-        console.log(response);
-        
         this.loading = false;
       },
       error: (error) => {
@@ -116,6 +187,11 @@ export class PrestateursListe implements OnInit {
    * Filtrer par statut
    */
   filterByStatus() {
+    this.loadPrestataires();
+  }
+
+  applyMobileStatusFilter(status: boolean | null) {
+    this.selectedStatus = status;
     this.loadPrestataires();
   }
 

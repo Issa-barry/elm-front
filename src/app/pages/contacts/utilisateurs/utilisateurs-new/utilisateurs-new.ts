@@ -25,6 +25,10 @@ export class UtilisateursNew {
     private router: Router
   ) {}
 
+  onCancel() {
+    this.router.navigate(['contacts/utilisateurs']);
+  }
+
   onSubmit(data: UserFormData) {
     this.loading = true;
 

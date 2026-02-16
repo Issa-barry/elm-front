@@ -1,6 +1,120 @@
 <p-confirmDialog></p-confirmDialog>
 
-<div class="card">
+<!-- Mobile: app-like list (≤768px) -->
+<div class="utilisateurs-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton
+      pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goHome()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Utilisateurs</h1>
+      <p class="mobile-subtitle">{{ mobileFilteredUsers.length }} utilisateur{{ mobileFilteredUsers.length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #statusMenu
+      [model]="mobileStatusMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton
+      pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="statusMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-icon-field>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="mobileSearchTerm"
+          (ngModelChange)="onMobileSearchChange()"
+          placeholder="Nom, email, téléphone..."
+          class="w-full"
+        />
+      </p-icon-field>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && mobileVisibleUsers.length; else mobileListState">
+      <article
+        class="mobile-user-card"
+        *ngFor="let user of mobileVisibleUsers; trackBy: trackByUserId"
+        (click)="goToEdit($event, user.id)"
+      >
+        <div class="mobile-card-avatar" aria-hidden="true">
+          {{ getInitials(user.nom_complet) }}
+        </div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ user.nom_complet }}</div>
+          <div class="mobile-card-meta">{{ user.email || (user.phone | phoneFormat:'INT') }}</div>
+          <div class="mobile-card-footer">
+            <p-tag
+              [value]="user.is_active ? 'Actif' : 'Inactif'"
+              [severity]="user.is_active ? 'success' : 'danger'"
+              styleClass="mobile-status-tag"
+            />
+            <div class="mobile-card-actions">
+              <button
+                pButton
+                pRipple
+                icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-sm"
+                [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                tooltipPosition="top"
+                (click)="goToEdit($event, user.id)"
+                [disabled]="!canUpdate"
+              ></button>
+              <button
+                *ngIf="canDelete"
+                pButton
+                pRipple
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                [pTooltip]="'Supprimer'"
+                tooltipPosition="top"
+                (click)="$event.stopPropagation(); deleteUser($event, user.id)"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !mobileFilteredUsers.length">Aucun utilisateur.</div>
+    </ng-template>
+
+    <div class="mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+      <button pButton label="Charger plus" icon="pi pi-angle-down" class="mobile-load-more-btn" (click)="loadMoreMobile()"></button>
+    </div>
+  </div>
+
+  <button
+    *ngIf="canCreate"
+    type="button"
+    class="mobile-fab"
+    aria-label="Nouveau utilisateur"
+    (click)="navigateToCreate()"
+  >
+    <i class="pi pi-user-plus"></i>
+  </button>
+</div>
+
+<!-- Desktop: table -->
+<div class="card utilisateurs-desktop">
   <p-table
     #dt
     [value]="users"
@@ -26,7 +140,7 @@
           <input
             pInputText
             type="text"
-            (input)="onGlobalFilter(dt, $event)"
+            (input)="onGlobalFilter(dt, $event)" 
             placeholder="Rechercher un utilisateur..."
             class="w-full"
           />

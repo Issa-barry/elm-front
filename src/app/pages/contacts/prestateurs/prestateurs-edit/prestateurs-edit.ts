@@ -29,8 +29,6 @@ export class PrestateursEdit implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    console.log("id=",id);
-    
     if (id) {
       this.prestateurId = parseInt(id, 10);
       this.loadPrestataire(this.prestateurId);
@@ -42,7 +40,6 @@ export class PrestateursEdit implements OnInit {
 
     this.prestataireService.getPrestataire(id).subscribe({
       next: (response) => {
-        console.log("bonjour", response);
         if (response.success && response.data) {
           const prestataire = response.data;
           this.prestateursData = {

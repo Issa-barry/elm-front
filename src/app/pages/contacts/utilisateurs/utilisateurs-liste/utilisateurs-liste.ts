@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { SelectModule } from 'primeng/select';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MenuModule } from 'primeng/menu';
 
 import { User } from '@/models/user.model';
 import { UserService } from '@/services/users/users.service';
@@ -29,25 +31,39 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TableModule,
     InputTextModule,
     ButtonModule,
+    RippleModule,
     IconField,
     InputIcon,
     TagModule,
     TooltipModule,
     SelectModule,
     ConfirmDialogModule,
+    MenuModule,
     PhoneFormatPipe
   ],
   providers: [MessageService, ConfirmationService],
 })
-export class UtilisateursListe implements OnInit {
+export class UtilisateursListe implements OnInit, OnDestroy {
   users: User[] = [];
   selectedUser: User | null = null;
   loading = false;
   selectedStatus: boolean | null = null;
 
+  mobileSearchTerm = '';
+  readonly mobilePageSize = 10;
+  mobileVisibleCount = this.mobilePageSize;
+  private readonly mobileBreakpoint = 768;
+  private readonly mobilePwaClass = 'utilisateurs-mobile-pwa';
+
   statusOptions = [
     { label: 'Actif', value: true },
     { label: 'Inactif', value: false }
+  ];
+
+  mobileStatusMenuItems: MenuItem[] = [
+    { label: 'Tous les statuts', command: () => this.applyMobileStatusFilter(null) },
+    { label: 'Actif', command: () => this.applyMobileStatusFilter(true) },
+    { label: 'Inactif', command: () => this.applyMobileStatusFilter(false) },
   ];
 
   canCreate = false;
@@ -59,7 +75,8 @@ export class UtilisateursListe implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('users.create');
     this.canUpdate = this.authService.hasPermission('users.update');
@@ -68,6 +85,61 @@ export class UtilisateursListe implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
+    this.syncMobilePwaMode();
+  }
+
+  ngOnDestroy() {
+    this.document.body.classList.remove(this.mobilePwaClass);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncMobilePwaMode();
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
+
+  onMobileSearchChange() {
+    this.mobileVisibleCount = this.mobilePageSize;
+  }
+
+  get mobileFilteredUsers(): User[] {
+    const term = this.mobileSearchTerm.trim().toLowerCase();
+    if (!term) return this.users;
+    return this.users.filter(
+      (u) =>
+        (u.nom_complet && u.nom_complet.toLowerCase().includes(term)) ||
+        (u.email && u.email.toLowerCase().includes(term)) ||
+        (u.phone && u.phone.replace(/\s/g, '').includes(term)) ||
+        (u.reference && u.reference.toLowerCase().includes(term))
+    );
+  }
+
+  get mobileVisibleUsers(): User[] {
+    return this.mobileFilteredUsers.slice(0, this.mobileVisibleCount);
+  }
+
+  get canLoadMoreMobile(): boolean {
+    return this.mobileVisibleCount < this.mobileFilteredUsers.length;
+  }
+
+  loadMoreMobile() {
+    this.mobileVisibleCount += this.mobilePageSize;
+  }
+
+  trackByUserId(_index: number, user: User): number {
+    return user.id;
+  }
+
+  private syncMobilePwaMode() {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth <= this.mobileBreakpoint) {
+      this.document.body.classList.add(this.mobilePwaClass);
+    } else {
+      this.document.body.classList.remove(this.mobilePwaClass);
+    }
   }
 
   loadUsers() {
@@ -83,6 +155,7 @@ export class UtilisateursListe implements OnInit {
           this.users = Array.isArray(response.data)
             ? response.data
             : response.data.data;
+          this.mobileVisibleCount = this.mobilePageSize;
         }
         this.loading = false;
       },
@@ -103,6 +176,11 @@ export class UtilisateursListe implements OnInit {
   }
 
   filterByStatus() {
+    this.loadUsers();
+  }
+
+  applyMobileStatusFilter(status: boolean | null) {
+    this.selectedStatus = status;
     this.loadUsers();
   }
 

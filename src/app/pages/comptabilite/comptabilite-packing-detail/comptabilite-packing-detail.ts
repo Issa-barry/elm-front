@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, Inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -80,7 +80,10 @@ interface ModePaiementOption {
   ],
   providers: [MessageService, ConfirmationService],
 })
-export class ComptabilitePackingDetail implements OnInit {
+export class ComptabilitePackingDetail implements OnInit, OnDestroy {
+  private readonly mobileBreakpoint = 768;
+  private readonly mobilePwaClass = 'comptabilite-packing-detail-mobile-pwa';
+
   prestataireId: number = 0;
   prestataireNom: string = '';
   prestatairePhone: string = '';
@@ -135,7 +138,8 @@ export class ComptabilitePackingDetail implements OnInit {
     private factureService: FacturePaiementService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.canReadVersement = this.authService.hasPermission('versements.read');
     this.canCreateVersement = this.authService.hasPermission('versements.create');
@@ -144,6 +148,7 @@ export class ComptabilitePackingDetail implements OnInit {
   }
 
   ngOnInit() {
+    this.syncMobilePwaMode();
     this.route.params.subscribe((params) => {
       this.prestataireId = +params['id'] || 0;
     });
@@ -153,6 +158,24 @@ export class ComptabilitePackingDetail implements OnInit {
     });
     if (this.prestataireId) {
       this.loadFactures();
+    }
+  }
+
+  ngOnDestroy() {
+    this.document.body.classList.remove(this.mobilePwaClass);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncMobilePwaMode();
+  }
+
+  private syncMobilePwaMode() {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth <= this.mobileBreakpoint) {
+      this.document.body.classList.add(this.mobilePwaClass);
+    } else {
+      this.document.body.classList.remove(this.mobilePwaClass);
     }
   }
 
@@ -360,6 +383,10 @@ export class ComptabilitePackingDetail implements OnInit {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR');
+  }
+
+  getReferenceShort(ref: string): string {
+    return (ref || '').replace('FACT-PACK-', '');
   }
 
   goBack() {
