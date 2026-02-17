@@ -1,1 +1,106 @@
- 
+:host {
+    display: block;
+}
+
+.compta-mobile-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.compta-mobile-shell__stats {
+    margin-bottom: 0;
+}
+
+// Header mobile (masqué sur desktop)
+.compta-packing-mobile-header {
+    display: none;
+}
+
+// Full screen mobile (même style que Versement facture)
+@media (max-width: 768px) {
+    .compta-packing-mobile-app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+        min-height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        margin: calc(-0.25rem - env(safe-area-inset-top)) -0.875rem 0;
+        margin-bottom: calc(-0.875rem - env(safe-area-inset-bottom));
+        padding: 0 0.875rem calc(0.875rem + env(safe-area-inset-bottom));
+        padding-left: calc(0.875rem + env(safe-area-inset-left));
+        padding-right: calc(0.875rem + env(safe-area-inset-right));
+        background: var(--p-surface-50);
+    }
+
+    :host-context(.app-dark) .compta-packing-mobile-app {
+        background: var(--p-surface-900);
+    }
+
+    .compta-mobile-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-top: 0.75rem;
+    }
+
+    .compta-packing-mobile-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: calc(0.5rem + env(safe-area-inset-top)) 0.5rem 0.6rem 0.25rem;
+        margin: 0 -0.875rem 0;
+        margin-left: calc(-0.875rem - env(safe-area-inset-left));
+        margin-right: calc(-0.875rem - env(safe-area-inset-right));
+        padding-left: calc(0.875rem + env(safe-area-inset-left));
+        padding-right: calc(0.875rem + env(safe-area-inset-right));
+        flex-shrink: 0;
+        background: var(--p-surface-0);
+        border-bottom: 1px solid var(--p-surface-200);
+        position: sticky;
+        top: 0;
+        z-index: 30;
+    }
+
+    :host-context(.app-dark) .compta-packing-mobile-header {
+        background: var(--p-surface-800);
+        border-bottom-color: var(--p-surface-700);
+    }
+
+    .compta-mobile-back {
+        color: var(--p-primary-600) !important;
+    }
+
+    .compta-mobile-title-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .compta-mobile-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--p-surface-900);
+        line-height: 1.2;
+    }
+
+    :host-context(.app-dark) .compta-mobile-title {
+        color: var(--p-surface-0);
+    }
+
+    .compta-mobile-subtitle {
+        font-size: 0.8rem;
+        color: var(--p-surface-500);
+        margin: 0.15rem 0 0;
+    }
+
+    .compta-mobile-filter-btn {
+        color: var(--p-primary-600) !important;
+    }
+
+    .compta-mobile-shell__stats {
+        margin-bottom: 0 !important;
+    }
+}

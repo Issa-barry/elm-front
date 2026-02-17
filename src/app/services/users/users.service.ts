@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
- import { User } from '@/models/user.model';
+ import { User, CreateUserDto } from '@/models/user.model';
 import { environment } from 'src/environments/environment';
 
 // Interfaces pour les réponses API
@@ -62,7 +62,16 @@ export interface UpdateUserDto {
 export class UserService {
   private readonly apiUrl = `${environment.apiUrl}/users`;
 
+  private readonly authUrl = `${environment.apiUrl}/auth`;
+
   constructor(private http: HttpClient) {}
+
+  /**
+   * Créer un nouvel utilisateur (via le endpoint register)
+   */
+  createUser(data: CreateUserDto): Observable<ApiResponse<{ user: User; access_token: string }>> {
+    return this.http.post<ApiResponse<{ user: User; access_token: string }>>(`${this.authUrl}/register`, data);
+  }
 
   /**
    * Récupérer la liste des utilisateurs avec filtres optionnels

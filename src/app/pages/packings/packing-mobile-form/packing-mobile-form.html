@@ -1,0 +1,120 @@
+<div class="packing-mobile-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900">
+    <!-- Header -->
+    <div class="packing-mobile-header w-full flex-shrink-0 p-6 border-b border-surface-200 dark:border-surface-700 flex justify-start items-center">
+        <div class="flex-1">
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">
+                {{ packing?.id ? 'Détails du packing' : 'Nouveau packing' }}
+            </div>
+            <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1" *ngIf="packing?.id && selectedPrestataire">
+                {{ selectedPrestataire.prenom }} {{ selectedPrestataire.nom }}
+            </div>
+        </div>
+        <button pButton [text]="true" [rounded]="true" class="w-10 h-10" (click)="onClose.emit()">
+            <i pButtonIcon class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <!-- Body (scrollable) -->
+    <div class="packing-mobile-body flex-1 min-h-0 w-full p-6 flex flex-col justify-start items-start gap-6 overflow-y-auto">
+        <!-- Section Prestataire -->
+        <div class="w-full flex flex-col gap-3">
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Prestataire</div>
+            <div class="w-full flex flex-col gap-1">
+                <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Machiniste</label>
+                <p-skeleton *ngIf="dialogLoading" height="2.75rem" styleClass="w-full" />
+                <p-select
+                    *ngIf="!dialogLoading"
+                    [(ngModel)]="selectedPrestataire"
+                    [options]="prestataires"
+                    optionLabel="nom"
+                    [filter]="true"
+                    filterBy="nom,prenom,phone"
+                    placeholder="Sélectionner un prestataire"
+                    styleClass="w-full"
+                >
+                    <ng-template let-prestataire pTemplate="item">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} · {{ prestataire.phone }}</span>
+                        </div>
+                    </ng-template>
+                    <ng-template let-prestataire pTemplate="selectedItem">
+                        <div class="flex items-center gap-2" *ngIf="prestataire">
+                            <i class="pi pi-user text-primary"></i>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
+                <small class="text-red-500 text-xs" *ngIf="submitted && !selectedPrestataire && !dialogLoading">Le prestataire est requis.</small>
+            </div>
+        </div>
+
+        <!-- Section Informations -->
+        <div class="w-full flex flex-col gap-4">
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Informations</div>
+
+            <!-- Date -->
+            <div class="w-full flex flex-col gap-1">
+                <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Date</label>
+                <p-datepicker
+                    [(ngModel)]="packing.date"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    inputStyleClass="w-full"
+                    styleClass="w-full"
+                />
+            </div>
+
+            <!-- Nombre de rouleaux -->
+            <div class="w-full flex flex-col gap-1">
+                <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Nombre de rouleaux</label>
+                <p-inputnumber
+                    [(ngModel)]="packing.nb_rouleaux"
+                    (onInput)="calculateMontant()"
+                    [min]="0"
+                    styleClass="w-full"
+                />
+            </div>
+
+            <!-- Prix / rouleau -->
+            <div class="w-full flex flex-col gap-1">
+                <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Prix / rouleau (GNF)</label>
+                <p-skeleton *ngIf="dialogLoading" height="2.75rem" styleClass="w-full" />
+                <p-inputnumber
+                    *ngIf="!dialogLoading"
+                    [(ngModel)]="packing.prix_par_rouleau"
+                    (onInput)="calculateMontant()"
+                    [min]="0"
+                    styleClass="w-full"
+                />
+            </div>
+
+            <!-- Statut -->
+            <div class="w-full flex flex-col gap-1">
+                <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Statut</label>
+                <p-select
+                    [(ngModel)]="packing.statut"
+                    [options]="statuses"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Sélectionner un statut"
+                    styleClass="w-full"
+                />
+            </div>
+        </div>
+
+        <!-- Montant total -->
+        <div class="w-full p-4 bg-surface-50 dark:bg-surface-800 rounded-xl flex items-center justify-between">
+            <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Montant total</span>
+            <span class="text-lg font-bold leading-tight" style="color: var(--p-primary-600)">{{ formatCurrency(packing.montant || 0) }}</span>
+        </div>
+    </div>
+
+    <!-- Footer (toujours visible) -->
+    <div class="packing-mobile-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-3 flex-shrink-0">
+        <button pButton class="w-full py-3" (click)="onSave()" [disabled]="saving || dialogLoading || !selectedPrestataire" [loading]="saving">
+            <i pButtonIcon class="pi pi-check mr-2"></i>
+            <span pButtonLabel>{{ packing?.id ? 'Sauvegarder' : 'Enregistrer' }}</span>
+        </button>
+    </div>
+</div>

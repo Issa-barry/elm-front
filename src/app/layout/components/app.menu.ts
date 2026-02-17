@@ -138,6 +138,19 @@ export class AppMenu {
                                     'prestateur.read',
                                 ]),
                             },
+                            {
+                                label: 'Utilisateurs',
+                                icon: 'pi pi-fw pi-briefcase',
+                                routerLink: ['contacts/utilisateurs'],
+                                visible: this.hasAnyPermission(permissions, [
+                                    'users.read',
+                                    'users.read',
+                                    'users.read',
+                                    'user.read',
+                                    'utilisateurs.read',
+                                    'utilisateur.read',
+                                ]),
+                            },
                             // {
                             //     label: 'Fournisseurs',
                             //     icon: 'pi pi-fw pi-users',

@@ -1,0 +1,8 @@
+<p-toast></p-toast>
+
+<app-utilisateurs-form
+  [mode]="'create'"
+  [loading]="loading"
+  (submitForm)="onSubmit($event)"
+  (cancel)="onCancel()"
+></app-utilisateurs-form>

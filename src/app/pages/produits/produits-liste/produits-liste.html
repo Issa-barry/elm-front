@@ -1,5 +1,126 @@
 <p-toast></p-toast>
-  <div class="card">
+
+<div class="produits-mobile-app">
+    <header class="mobile-header">
+        <button 
+            pButton
+            pRipple
+            icon="pi pi-arrow-left"
+            class="p-button-rounded p-button-text mobile-back"
+            aria-label="Retour à l'accueil"
+            (click)="goHome()"
+        ></button>
+
+        <div class="mobile-title-wrap">
+            <h1 class="mobile-title">Produits</h1>
+            <p class="mobile-subtitle">{{ mobileFilteredProduits.length }} produit{{ mobileFilteredProduits.length > 1 ? 's' : '' }}</p>
+        </div>
+
+        <button
+            pButton
+            pRipple
+            icon="pi pi-upload"
+            class="p-button-rounded p-button-text mobile-add"
+            aria-label="Export"
+            (click)="exportCSV()"
+        ></button>
+    </header>
+
+    <div class="mobile-scroll">
+    <section class="mobile-search">
+        <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+                pInputText
+                type="text"
+                [(ngModel)]="mobileSearchTerm"
+                (ngModelChange)="onMobileSearchChange($event)"
+                placeholder="Rechercher un produit..."
+            />
+        </p-iconfield>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && mobileVisibleProduits.length; else mobileListState">
+        <article 
+            class="mobile-produit-card" 
+            *ngFor="let produit of mobileVisibleProduits; trackBy: trackByProduitId"
+            (click)="goToEditProduit($event, produit.id)"
+        >
+            <div class="mobile-card-media">
+                <div class="mobile-card-image-placeholder" aria-hidden="true">
+                    <i class="pi pi-box"></i>
+                </div>
+            </div>
+            <div class="mobile-card-body">
+            <div class="mobile-card-top">
+                <div class="mobile-card-main">
+                    <div class="mobile-code">{{ produit.code || 'Sans code' }}</div>
+                    <div class="mobile-name">{{ produit.nom }}</div>
+                </div>
+                <p-tag
+                    styleClass="mobile-status-tag"
+                    [value]="getStatutLabel(produit.statut)"
+                    [severity]="getStatutSeverity(produit.statut)"
+                />
+            </div>
+
+            <div class="mobile-card-footer">
+                <span class="mobile-card-summary">{{ produit.qte_stock }} en stock · {{ formatCurrency(produit.prix_vente) }}</span>
+                <div class="mobile-card-actions">
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-eye"
+                    class="p-button-rounded p-button-text p-button-sm mobile-eye-action"
+                    [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                    tooltipPosition="top"
+                    (click)="goToEditProduit($event, produit.id)"
+                    [disabled]="!canUpdate"
+                ></button>
+
+                <p-button
+                    *ngIf="canDelete"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [rounded]="true"
+                    [outlined]="true"
+                    styleClass="mobile-delete-action"
+                    (click)="$event.stopPropagation(); deleteProduct(produit)"
+                />
+                </div>
+            </div>
+            </div>
+        </article>
+    </section>
+
+    <ng-template #mobileListState>
+        <div class="mobile-state" *ngIf="loading">Chargement des produits...</div>
+        <div class="mobile-state" *ngIf="!loading && !mobileFilteredProduits.length">Aucun produit trouve.</div>
+    </ng-template>
+
+    <div class="mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+        <p-button
+            label="Charger plus"
+            icon="pi pi-angle-down"
+            styleClass="mobile-load-more-btn"
+            (onClick)="loadMoreMobile()"
+        />
+    </div>
+    </div>
+
+    <button
+        *ngIf="canCreate"
+        type="button"
+        class="mobile-fab"
+        aria-label="Nouveau produit"
+        (click)="goToNewProduits()"
+    >
+        <i class="pi pi-plus"></i>
+        <span class="mobile-fab-label">Nouveau produit</span>
+    </button>
+</div>
+
+  <div class="card produits-desktop">
             <p-toolbar styleClass="mb-12">
                 <ng-template #start>
                     <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" [disabled]="!canCreate" *ngIf="canCreate" />
@@ -198,3 +319,4 @@
         <p-confirmdialog [style]="{ width: '450px' }" />
 
 
+ 

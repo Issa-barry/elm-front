@@ -1,0 +1,59 @@
+// ─── Phone country select (compact) ─────────────────────
+.phone-country-select {
+    flex-shrink: 0;
+    width: 8rem;
+}
+
+// ─── Desktop: buttons inline ────────────────────────────
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.form-action-submit,
+.form-action-cancel {
+    width: auto;
+}
+
+// ─── Mobile ─────────────────────────────────────────────
+@media (max-width: 768px) {
+    // Hide card title on mobile (already shown in edit-mobile-header)
+    .utilisateurs-form-title {
+        display: none;
+    }
+
+    // Hide empty sidebar on mobile
+    .utilisateurs-form-sidebar {
+        display: none;
+    }
+
+    // Remove card style on mobile
+    .utilisateurs-form-card {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        background: transparent;
+    }
+
+    // Compact phone country select
+    .phone-country-select {
+        width: 7rem;
+    }
+
+    // Full-width action button
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 0.5rem;
+    }
+
+    .form-action-submit {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-action-cancel {
+        display: none;
+    }
+}

@@ -3,13 +3,18 @@ import {
   TooltipModule
 } from "./chunk-62POK3LC.js";
 import {
+  ConnectedOverlayScrollHandler,
+  DomHandler
+} from "./chunk-DRUBN77R.js";
+import {
   Badge,
   BadgeModule
 } from "./chunk-4H4X577R.js";
 import {
-  ConnectedOverlayScrollHandler,
-  DomHandler
-} from "./chunk-DRUBN77R.js";
+  RouterLink,
+  RouterLinkActive,
+  RouterModule
+} from "./chunk-MXXOYR55.js";
 import {
   zindexutils
 } from "./chunk-BB55NINM.js";
@@ -49,11 +54,6 @@ import {
   transition,
   trigger
 } from "./chunk-YLKDNKK4.js";
-import {
-  RouterLink,
-  RouterLinkActive,
-  RouterModule
-} from "./chunk-MXXOYR55.js";
 import {
   DomSanitizer
 } from "./chunk-I3TQTHWJ.js";
@@ -135,8 +135,8 @@ import {
   ɵɵtextInterpolate,
   ɵɵviewQuery
 } from "./chunk-T3DH5CBL.js";
-import "./chunk-HWYXSU2G.js";
 import "./chunk-JRFR6BLO.js";
+import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
 import "./chunk-4MWRP73S.js";
 

@@ -2,7 +2,7 @@
 <div class="col-span-12">
     <div class="stats-bar">
         <div class="stats-bar__item">
-            <div class="stats-bar__icon stats-bar__icon--primary">
+            <div class="stats-bar__icon">
                 <i class="pi pi-wallet"></i>
             </div>
             <div>
@@ -14,11 +14,11 @@
         <div class="stats-bar__divider"></div>
 
         <div class="stats-bar__item">
-            <div class="stats-bar__icon stats-bar__icon--success">
+            <div class="stats-bar__icon">
                 <i class="pi pi-check-circle"></i>
             </div>
             <div>
-                <div class="stats-bar__value stats-bar__value--success">{{ summary ?  (summary.total_verse | money:'GNF') : '--' }}</div>
+                <div class="stats-bar__value">{{ summary ?  (summary.total_verse | money:'GNF') : '--' }}</div>
                 <div class="stats-bar__label">Total payé</div>
             </div>
         </div>
@@ -26,11 +26,11 @@
         <div class="stats-bar__divider"></div>
 
         <div class="stats-bar__item">
-            <div class="stats-bar__icon stats-bar__icon--warning">
+            <div class="stats-bar__icon">
                 <i class="pi pi-arrow-right"></i>
             </div>
             <div>
-                <div class="stats-bar__value stats-bar__value--warning">{{ summary ?  (summary.montant_global_du | money:'GNF') : '--' }}</div>
+                <div class="stats-bar__value">{{ summary ?  (summary.montant_global_du | money:'GNF') : '--' }}</div>
                 <div class="stats-bar__label">Reste à payer</div>
             </div>
         </div>
@@ -38,11 +38,11 @@
         <div class="stats-bar__divider"></div>
 
         <div class="stats-bar__item">
-            <div class="stats-bar__icon stats-bar__icon--info">
+            <div class="stats-bar__icon">
                 <i class="pi pi-users"></i>
             </div>
             <div>
-                <div class="stats-bar__value stats-bar__value--info">{{ summary ? summary.nb_prestataires : '--' }}</div>
+                <div class="stats-bar__value">{{ summary ? summary.nb_prestataires : '--' }}</div>
                 <div class="stats-bar__label">Prestataires</div>
             </div>
         </div>

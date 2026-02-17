@@ -1,16 +1,79 @@
 <p-toast />
 
-<div class="card">
-    <p-toolbar styleClass="mb-12">
+<!-- Mobile: list as cards (≤768px) -->
+<div class="compta-tableau-mobile">
+    <section class="compta-mobile-search">
+        <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+                pInputText
+                type="text"
+                [(ngModel)]="mobileSearchTerm"
+                (ngModelChange)="onMobileSearchChange()"
+                placeholder="Prestataire, téléphone..."
+                class="w-full"
+            />
+        </p-iconfield>
+    </section>
+
+    <section class="compta-mobile-list" *ngIf="!loading && mobileVisiblePrestataires.length; else mobileListState">
+        <article
+            class="compta-mobile-card"
+            *ngFor="let item of mobileVisiblePrestataires; trackBy: trackByPrestataireId"
+            (click)="goToDetail(item)"
+        >
+            <div class="compta-mobile-card-avatar" aria-hidden="true">
+                {{ getInitials(item.prestataire_nom) }}
+            </div>
+            <div class="compta-mobile-card-body">
+                <div class="compta-mobile-card-name">{{ item.prestataire_nom }}</div>
+                <div class="compta-mobile-card-meta">{{ item.prestataire_phone | phoneFormat:'INT' }} · {{ formatDateDisplay(item.derniere_date) }}</div>
+                <div class="compta-mobile-card-footer">
+                    <span class="compta-mobile-card-summary">{{ formatCurrency(item.montant_facture) }}</span>
+                    <span
+                        class="compta-mobile-status-badge"
+                        [ngClass]="{
+                            'compta-mobile-status-badge--danger': item.statut === 'impaye',
+                            'compta-mobile-status-badge--warn': item.statut === 'partiel',
+                            'compta-mobile-status-badge--success': item.statut === 'solde'
+                        }"
+                    >{{ getStatutLabel(item.statut) }}</span>
+                    <button
+                        pButton
+                        pRipple
+                        icon="pi pi-arrow-right"
+                        class="p-button-rounded p-button-text p-button-sm compta-mobile-action-btn"
+                        pTooltip="Détail"
+                        tooltipPosition="top"
+                        (click)="$event.stopPropagation(); goToDetail(item)"
+                    ></button>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <ng-template #mobileListState>
+        <div class="compta-mobile-state" *ngIf="loading">Chargement...</div>
+        <div class="compta-mobile-state" *ngIf="!loading && !mobileFilteredPrestataires.length">Aucun prestataire.</div>
+    </ng-template>
+
+    <div class="compta-mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+        <button pButton label="Charger plus" icon="pi pi-angle-down" class="compta-mobile-load-more-btn" (click)="loadMoreMobile()"></button>
+    </div>
+</div>
+
+<!-- Desktop: toolbar + table -->
+<div class="card tableau-card compta-table-card compta-tableau-desktop">
+    <p-toolbar styleClass="mb-6 compta-toolbar">
         <ng-template #start>
-            <div class="flex items-center gap-2">
+            <div class="compta-toolbar__start">
                 <p-datepicker
                     [(ngModel)]="filtrePeriodeDebut"
                     dateFormat="dd/mm/yy"
                     [showIcon]="true"
-                    placeholder="Date début"
+                    placeholder="Date d&eacute;but"
                     inputStyleClass="w-full"
-                    styleClass="w-40"
+                    styleClass="compta-toolbar__date"
                 />
                 <p-datepicker
                     [(ngModel)]="filtrePeriodeFin"
@@ -18,24 +81,38 @@
                     [showIcon]="true"
                     placeholder="Date fin"
                     inputStyleClass="w-full"
-                    styleClass="w-40"
+                    styleClass="compta-toolbar__date"
                 />
-                <p-button icon="pi pi-filter" severity="primary" [rounded]="true" [outlined]="true" pTooltip="Appliquer les filtres" (onClick)="loadComptabilite()" />
+                <p-button
+                    icon="pi pi-filter"
+                    severity="primary"
+                    [rounded]="true"
+                    [outlined]="true"
+                    styleClass="compta-toolbar__filter-btn"
+                    pTooltip="Appliquer les filtres"
+                    (onClick)="loadComptabilite()"
+                />
             </div>
         </ng-template>
 
         <ng-template #end>
-            <div class="flex items-center gap-2">
+            <div class="compta-toolbar__end">
                 <p-select
                     [(ngModel)]="filtreStatut"
                     [options]="statutOptions"
                     optionLabel="label"
                     optionValue="value"
                     placeholder="Statut"
-                    styleClass="w-40"
+                    styleClass="compta-toolbar__status"
                     (onChange)="applyStatutFilter()"
                 />
-                <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+                <p-button
+                    label="Export"
+                    icon="pi pi-download"
+                    severity="secondary"
+                    styleClass="compta-toolbar__export-btn"
+                    (onClick)="exportCSV()"
+                />
             </div>
         </ng-template>
     </p-toolbar>
@@ -47,19 +124,19 @@
         [columns]="cols"
         [paginator]="true"
         [globalFilterFields]="filterFields"
-        [tableStyle]="{ 'min-width': '55rem' }"
+        styleClass="compta-data-table"
         [(selection)]="selectedPrestataires"
         [rowHover]="true"
         dataKey="prestataire_id"
-        currentPageReportTemplate=" {first} à {last} sur {totalRecords} prestataires"
+        currentPageReportTemplate=" {first} &agrave; {last} sur {totalRecords} prestataires"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
     >
         <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <h5 class="m-0">Comptabilité Packing</h5>
-                <p-iconfield>
+            <div class="table-caption">
+                <h5 class="m-0">Comptabilit&eacute; Packing</h5>
+                <p-iconfield class="table-caption__search">
                     <p-inputicon styleClass="pi pi-search" />
                     <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
                 </p-iconfield>
@@ -71,7 +148,7 @@
                 <th pSortableColumn="prestataire_nom">
                     <span class="col-header">Prestataire <p-sortIcon field="prestataire_nom" /></span>
                 </th>
-                <th><span class="col-header">Téléphone</span></th>
+                <th><span class="col-header">T&eacute;l&eacute;phone</span></th>
                 <th pSortableColumn="derniere_date">
                     <span class="col-header">Date <p-sortIcon field="derniere_date" /></span>
                 </th>
@@ -79,10 +156,10 @@
                     <span class="col-header justify-end">Total <p-sortIcon field="montant_facture" /></span>
                 </th>
                 <th pSortableColumn="montant_verse" class="text-right">
-                    <span class="col-header justify-end">Payé <p-sortIcon field="montant_verse" /></span>
+                    <span class="col-header justify-end">Pay&eacute; <p-sortIcon field="montant_verse" /></span>
                 </th>
                 <th pSortableColumn="montant_restant_facture" class="text-right">
-                    <span class="col-header justify-end">Reste dû <p-sortIcon field="montant_restant_facture" /></span>
+                    <span class="col-header justify-end">Reste d&ucirc; <p-sortIcon field="montant_restant_facture" /></span>
                 </th>
                 <th pSortableColumn="statut" class="text-center">
                     <span class="col-header justify-center">Statut <p-sortIcon field="statut" /></span>
@@ -99,7 +176,7 @@
                             {{ getInitials(item.prestataire_nom) }}
                         </span>
                         <span class="cell-prestataire__name">{{ item.prestataire_nom }}</span>
-                    </div> 
+                    </div>
                 </td>
                 <td class="cell-secondary cell-bold">{{ item.prestataire_phone | phoneFormat:'INT' }}</td>
                 <td class="cell-secondary cell-bold">{{ formatDateDisplay(item.derniere_date) }}</td>
@@ -112,11 +189,11 @@
                         'status-badge--warn': item.statut === 'partiel',
                         'status-badge--success': item.statut === 'solde'
                     }">
-                        {{ item.statut === 'impaye' ? 'Impayé' : item.statut === 'partiel' ? 'Partiel' : 'Soldé' }}
+                        {{ item.statut === 'impaye' ? 'Impay&eacute;' : item.statut === 'partiel' ? 'Partiel' : 'Sold&eacute;' }}
                     </span>
                 </td>
                 <td class="text-center">
-                    <p-button icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="Détail" (click)="goToDetail(item)" />
+                    <p-button icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="D&eacute;tail" (click)="goToDetail(item)" />
                 </td>
             </tr>
         </ng-template>
@@ -126,7 +203,7 @@
                 <td colspan="8">
                     <div class="empty-state">
                         <i class="pi pi-inbox"></i>
-                        <span>Aucun prestataire trouvé</span>
+                        <span>Aucun prestataire trouv&eacute;</span>
                     </div>
                 </td>
             </tr>
@@ -134,8 +211,7 @@
     </p-table>
 </div>
 
-<!-- Dialog Prévisualisation -->
-<p-dialog [(visible)]="previewDialog" [style]="{ width: '800px' }" header="Prévisualisation" [modal]="true" [draggable]="false">
+<p-dialog [(visible)]="previewDialog" [style]="{ width: '800px' }" header="Pr&eacute;visualisation" [modal]="true" [draggable]="false">
     <ng-template #content>
         <div class="flex flex-col gap-4" *ngIf="previewData">
             <div class="preview-summary">
@@ -148,7 +224,7 @@
             <p-table [value]="previewData.packings" [rows]="10" [paginator]="previewData.packings.length > 10" [rowHover]="true" styleClass="p-datatable-sm">
                 <ng-template #header>
                     <tr>
-                        <th>Référence</th>
+                        <th>R&eacute;f&eacute;rence</th>
                         <th>Date</th>
                         <th class="text-right">Rouleaux</th>
                         <th class="text-right">Montant</th>

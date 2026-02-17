@@ -1,6 +1,6 @@
-<div class="flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="facture">
+<div class="paiement-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="facture">
     <!-- Header -->
-    <div class="w-full p-6 border-b border-surface-200 dark:border-surface-700 flex justify-start items-center">
+    <div class="paiement-header w-full flex-shrink-0 p-6 border-b border-surface-200 dark:border-surface-700 flex justify-start items-center">
         <div class="flex-1">
             <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ facture.reference.replace('FACT-PACK-', '') }}</div>
             <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Versement facture</div>
@@ -10,8 +10,8 @@
         </button>
     </div>
 
-    <!-- Body -->
-    <div class="flex-1 w-full p-6 flex flex-col justify-start items-start gap-6 overflow-y-auto">
+    <!-- Body (scroll sur mobile, footer reste visible) -->
+    <div class="paiement-body flex-1 min-h-0 w-full p-6 flex flex-col justify-start items-start gap-6 overflow-y-auto">
         <!-- Résumé facture -->
         <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col justify-start items-start gap-4">
             <div class="w-full flex justify-start items-start gap-6">
@@ -29,7 +29,7 @@
                 <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Reste à payer</div>
                 <div class="text-lg font-bold leading-tight" style="color: #d97706">{{  facture.montant_restant | money :'GNF' }}</div>
             </div>
-        </div>
+        </div> 
 
         <!-- Montant à verser -->
         <div class="w-full flex flex-col gap-3">
@@ -50,7 +50,7 @@
         <!-- Mode de paiement -->
         <div class="w-full flex flex-col gap-3">
             <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Mode de paiement</div>
-            <div class="w-full flex gap-3">
+            <div class="w-full flex gap-3 paiement-modes">
                 <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'especes'" (click)="selectMode('especes')">
                     <i class="pi pi-money-bill"></i>
                     <span>Espèces</span>
@@ -67,8 +67,8 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-5">
+    <!-- Footer (toujours visible sur mobile) -->
+    <div class="paiement-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-5 flex-shrink-0">
         <div class="w-full flex justify-start items-start gap-4">
             <div class="flex justify-start items-end gap-2">
                 <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant à payer</div>

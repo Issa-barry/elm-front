@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
@@ -11,6 +12,7 @@ import { ProduitService } from '@/services/produits/produits.service';
   selector: 'app-produits-new',
   standalone: true,
   imports: [
+    CommonModule,
     ProduitsForm,
     ToastModule
   ],
@@ -18,14 +20,39 @@ import { ProduitService } from '@/services/produits/produits.service';
   templateUrl: './produits-new.html',
   styleUrl: './produits-new.scss',
 })
-export class ProduitsNew {
+export class ProduitsNew implements OnInit, OnDestroy {
   loading = false;
+  private readonly mobileBreakpoint = 768;
+  private readonly mobilePwaClass = 'produits-mobile-pwa';
 
   constructor(
     private router: Router,
     private messageService: MessageService,
-    private produitService: ProduitService
+    private produitService: ProduitService,
+    @Inject(DOCUMENT) private document: Document
   ) {}
+
+  ngOnInit(): void {
+    this.updateMobilePwaMode();
+  }
+
+  ngOnDestroy(): void {
+    this.document.body.classList.remove(this.mobilePwaClass);
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateMobilePwaMode();
+  }
+
+  private updateMobilePwaMode(): void {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth <= this.mobileBreakpoint) {
+      this.document.body.classList.add(this.mobilePwaClass);
+    } else {
+      this.document.body.classList.remove(this.mobilePwaClass);
+    }
+  }
 
   // =============================
   // SUBMIT

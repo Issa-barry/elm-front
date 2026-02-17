@@ -1,6 +1,113 @@
-﻿<p-toast />
+<p-toast />
 
-<div class="card">
+<!-- Mobile: app-like list (≤768px) -->
+<div class="packing-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton
+      pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goHome()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Packings</h1>
+      <p class="mobile-subtitle">{{ mobileFilteredPackings.length }} packing{{ mobileFilteredPackings.length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #statusMenu
+      [model]="mobileStatusMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton
+      pRipple 
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="statusMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="mobileSearchTerm"
+          (ngModelChange)="onMobileSearchChange()"
+          placeholder="Prestataire, référence..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && mobileVisiblePackings.length; else mobileListState">
+      <article
+        class="mobile-packing-card"
+        *ngFor="let packing of mobileVisiblePackings; trackBy: trackByPackingId"
+        (click)="canUpdate && editPacking(packing)"
+      >
+        <div class="mobile-card-avatar" aria-hidden="true" *ngIf="packing.prestataire">
+          {{ getPrestataireInitials(packing.prestataire) }}
+        </div>
+        <div class="mobile-card-avatar mobile-card-avatar--fallback" *ngIf="!packing.prestataire" aria-hidden="true">?</div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ packing.prestataire ? packing.prestataire.prenom + ' ' + packing.prestataire.nom : packing.reference || 'Packing' }}</div>
+          <div class="mobile-card-meta">{{ formatDateDisplay(packing.date) }} · {{ packing.nb_rouleaux }} rouleaux</div>
+          <div class="mobile-card-footer">
+            <span class="mobile-card-summary">{{ formatCurrency(packing.montant) }}</span>
+            <span
+              class="mobile-status-badge"
+              [ngClass]="{
+                'mobile-status-badge--warn': packing.statut === 'a_valider',
+                'mobile-status-badge--success': packing.statut === 'valide',
+                'mobile-status-badge--danger': packing.statut === 'annule'
+              }"
+            >{{ getStatutLabel(packing.statut) }}</span>
+            <button
+              *ngIf="canUpdate"
+              pButton
+              pRipple
+              icon="pi pi-arrow-right"
+              class="p-button-rounded p-button-text p-button-sm mobile-action-btn"
+              pTooltip="Modifier"
+              tooltipPosition="top"
+              (click)="$event.stopPropagation(); editPacking(packing)"
+            ></button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !mobileFilteredPackings.length">Aucun packing.</div>
+    </ng-template>
+
+    <div class="mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+      <button pButton label="Charger plus" icon="pi pi-angle-down" class="mobile-load-more-btn" (click)="loadMoreMobile()"></button>
+    </div>
+  </div>
+
+  <button
+    *ngIf="canCreate"
+    type="button"
+    class="mobile-fab"
+    aria-label="Nouveau packing"
+    (click)="openNew()"
+  >
+    <i class="pi pi-plus"></i>
+  </button>
+</div>
+
+<!-- Desktop: toolbar + table -->
+<div class="card packing-desktop">
     <p-toolbar styleClass="mb-12">
         <ng-template #start>
             <p-button *ngIf="canCreate" label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
@@ -19,7 +126,7 @@
                     styleClass="w-40"
                 />
                 <p-datepicker
-                    [(ngModel)]="filterDateRange"
+                    [(ngModel)]="filterDateRange" 
                     selectionMode="range"
                     dateFormat="dd/mm/yy"
                     placeholder="Période"
@@ -138,25 +245,37 @@
     </p-table>
 </div>
 
-<p-dialog [(visible)]="packingDialog" [style]="{ width: '750px' }" [header]="packing?.id ? 'Détails du packing' : 'Nouveau packing'" [modal]="true">
-        <div class="flex flex-col gap-6">
-            <!-- Prestataire -->
-            <div>
-                <label for="prestataire" class="block font-bold mb-4">Prestataire (Machiniste)</label>
-                <p-skeleton *ngIf="dialogLoading" height="2.6rem" styleClass="w-full" />
-                <p-select *ngIf="!dialogLoading"
+<p-dialog
+    [(visible)]="packingDialog"
+    [style]="{ width: '750px', maxWidth: '95vw' }"
+    [contentStyle]="{ overflow: 'visible' }"
+    [header]="packing?.id ? 'Détails du packing' : 'Nouveau packing'"
+    [modal]="true"
+    styleClass="packing-dialog"
+    [breakpoints]="{ '960px': '95vw', '768px': '100vw', '480px': '100vw' }"
+    [maximizable]="false"
+>
+    <div class="packing-dialog-content">
+        <section class="packing-dialog-section">
+            <h3 class="packing-dialog-section-title">Prestataire</h3>
+            <div class="packing-dialog-field">
+                <label for="prestataire">Machiniste</label>
+                <p-skeleton *ngIf="dialogLoading" height="2.75rem" styleClass="w-full" />
+                <p-select
+                    *ngIf="!dialogLoading"
+                    id="prestataire"
                     [(ngModel)]="selectedPrestataire"
                     [options]="prestataires"
                     optionLabel="nom"
                     [filter]="true"
                     filterBy="nom,prenom,phone"
                     placeholder="Sélectionner un prestataire"
-                    styleClass="w-full"
+                    styleClass="w-full packing-dialog-select"
                 >
                     <ng-template let-prestataire pTemplate="item">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-user text-primary"></i>
-                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} - {{ prestataire.phone }}</span>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} · {{ prestataire.phone }}</span>
                         </div>
                     </ng-template>
                     <ng-template let-prestataire pTemplate="selectedItem">
@@ -166,13 +285,16 @@
                         </div>
                     </ng-template>
                 </p-select>
-                <small class="text-red-500" *ngIf="submitted && !selectedPrestataire && !dialogLoading">Le prestataire est requis.</small>
+                <small class="packing-dialog-error" *ngIf="submitted && !selectedPrestataire && !dialogLoading">Le prestataire est requis.</small>
             </div>
+        </section>
 
-            <!-- Date -->
-            <div>
-                <label for="date" class="block font-bold mb-4">Date</label>
+        <section class="packing-dialog-section">
+            <h3 class="packing-dialog-section-title">Informations</h3>
+            <div class="packing-dialog-field">
+                <label for="date">Date</label>
                 <p-datepicker
+                    id="date"
                     [(ngModel)]="packing.date"
                     dateFormat="dd/mm/yy"
                     [showIcon]="true"
@@ -180,11 +302,9 @@
                     styleClass="w-full"
                 />
             </div>
-
-            <!-- Rouleaux & Prix -->
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-6">
-                    <label for="nb_rouleaux" class="block font-bold mb-4">Nombre de rouleaux</label>
+            <div class="packing-dialog-row">
+                <div class="packing-dialog-field">
+                    <label for="nb_rouleaux">Nombre de rouleaux</label>
                     <p-inputnumber
                         id="nb_rouleaux"
                         [(ngModel)]="packing.nb_rouleaux"
@@ -193,10 +313,11 @@
                         styleClass="w-full"
                     />
                 </div>
-                <div class="col-span-6">
-                    <label for="prix_par_rouleau" class="block font-bold mb-4">Prix du rouleau (GNF)</label>
-                    <p-skeleton *ngIf="dialogLoading" height="2.6rem" styleClass="w-full" />
-                    <p-inputnumber *ngIf="!dialogLoading"
+                <div class="packing-dialog-field">
+                    <label for="prix_par_rouleau">Prix / rouleau (GNF)</label>
+                    <p-skeleton *ngIf="dialogLoading" height="2.75rem" styleClass="w-full" />
+                    <p-inputnumber
+                        *ngIf="!dialogLoading"
                         id="prix_par_rouleau"
                         [(ngModel)]="packing.prix_par_rouleau"
                         (onInput)="calculateMontant()"
@@ -205,38 +326,49 @@
                     />
                 </div>
             </div>
-
-            <!-- Statut -->
-            <div>
-                <label for="statut" class="block font-bold mb-4">Statut</label>
+            <div class="packing-dialog-field">
+                <label for="statut">Statut</label>
                 <p-select
+                    id="statut"
                     [(ngModel)]="packing.statut"
                     [options]="statuses"
                     optionLabel="label"
                     optionValue="value"
                     placeholder="Sélectionner un statut"
-                    styleClass="w-full"
+                    styleClass="w-full packing-dialog-select"
                 />
             </div>
+        </section>
 
-            <!-- Montant total -->
-            <div class="flex justify-between items-center p-4 mt-4 bg-surface-100 rounded-lg">
-                <span class="font-bold text-lg">Montant total</span>
-                <span class="text-2xl font-semibold text-primary">{{ formatCurrency(packing.montant || 0) }}</span>
-            </div>
+        <div class="packing-dialog-total">
+            <span class="packing-dialog-total-label">Montant total</span>
+            <span class="packing-dialog-total-value">{{ formatCurrency(packing.montant || 0) }}</span>
         </div>
+    </div>
 
-    <ng-template #footer class="mt-4">
-        <p-button class="mt-4" label="Annuler" icon="pi pi-times" text (click)="hideDialog()" [disabled]="saving" />
-        <p-button
-            class="mt-4"
-            label="Enregistrer"
-            icon="pi pi-check"
-            (click)="savePacking()"
-            [disabled]="saving || dialogLoading"
-            [loading]="saving" />
+    <ng-template #footer>
+        <div class="packing-dialog-footer">
+            <p-button label="Annuler" icon="pi pi-times" severity="secondary" [outlined]="true" (click)="hideDialog()" [disabled]="saving" />
+            <p-button label="Enregistrer" icon="pi pi-check" (click)="savePacking()" [disabled]="saving || dialogLoading" [loading]="saving" />
+        </div>
     </ng-template>
 </p-dialog>
 
 <p-confirmdialog [style]="{ width: '450px' }" />
 
+<!-- Mobile slideover form (full screen, comme comptabilite-packing-paiement) -->
+<div class="fixed inset-0 z-50" *ngIf="mobileFormVisible">
+    <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeMobileForm()"></div>
+    <div class="packing-mobile-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full h-full animate-fadeinright">
+        <app-packing-mobile-form
+            [packing]="packing"
+            [prestataires]="prestataires"
+            [selectedPrestataire]="selectedPrestataire"
+            [saving]="saving"
+            [dialogLoading]="dialogLoading"
+            [submitted]="submitted"
+            (onSaveEvent)="onMobileFormSave($event)"
+            (onClose)="closeMobileForm()"
+        ></app-packing-mobile-form>
+    </div>
+</div>

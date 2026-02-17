@@ -1,4 +1,7 @@
 import {
+  RouterModule
+} from "./chunk-MXXOYR55.js";
+import {
   BaseComponent,
   PARENT_INSTANCE
 } from "./chunk-TS6YUM3R.js";
@@ -14,9 +17,6 @@ import {
   SharedModule
 } from "./chunk-4YW2PWNH.js";
 import "./chunk-U4LT4ZJN.js";
-import {
-  RouterModule
-} from "./chunk-MXXOYR55.js";
 import "./chunk-I3TQTHWJ.js";
 import "./chunk-VKTFISRF.js";
 import "./chunk-AAQPR7NU.js";
@@ -45,8 +45,8 @@ import {
   ɵɵprojection,
   ɵɵprojectionDef
 } from "./chunk-T3DH5CBL.js";
-import "./chunk-HWYXSU2G.js";
 import "./chunk-JRFR6BLO.js";
+import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
 import "./chunk-4MWRP73S.js";
 

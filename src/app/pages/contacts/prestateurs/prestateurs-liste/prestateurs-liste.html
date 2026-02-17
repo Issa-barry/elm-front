@@ -1,0 +1,300 @@
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Mobile: app-like list (≤768px) -->
+<div class="prestateurs-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton
+      pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goHome()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Prestataires</h1>
+      <p class="mobile-subtitle">{{ mobileFilteredPrestataires.length }} prestataire{{ mobileFilteredPrestataires.length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #statusMenu
+      [model]="mobileStatusMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton
+      pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="statusMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-icon-field>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="mobileSearchTerm"
+          (ngModelChange)="onMobileSearchChange()"
+          placeholder="Nom, email, téléphone..."
+          class="w-full"
+        />
+      </p-icon-field>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && mobileVisiblePrestataires.length; else mobileListState">
+      <article
+        class="mobile-user-card"
+        *ngFor="let prestataire of mobileVisiblePrestataires; trackBy: trackByPrestataireId"
+        (click)="goToEdit($event, prestataire.id)"
+      >
+        <div class="mobile-card-avatar" aria-hidden="true">
+          {{ getInitials(prestataire.nom_complet) }}
+        </div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ prestataire.nom_complet }}</div>
+          <div class="mobile-card-meta">{{ prestataire.email || (prestataire.phone | phoneFormat:'INT') }}</div>
+          <div class="mobile-card-footer">
+            <p-tag
+              [value]="prestataire.is_active ? 'Actif' : 'Inactif'"
+              [severity]="prestataire.is_active ? 'success' : 'danger'"
+              styleClass="mobile-status-tag"
+            />
+            <div class="mobile-card-actions">
+              <button
+                pButton
+                pRipple
+                icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-sm"
+                [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                tooltipPosition="top"
+                (click)="goToEdit($event, prestataire.id)"
+                [disabled]="!canUpdate"
+              ></button>
+              <button
+                *ngIf="canDelete"
+                pButton
+                pRipple
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                [pTooltip]="'Supprimer'"
+                tooltipPosition="top"
+                (click)="$event.stopPropagation(); deletePrestataire($event, prestataire.id)"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !mobileFilteredPrestataires.length">Aucun prestataire.</div>
+    </ng-template>
+
+    <div class="mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+      <button pButton label="Charger plus" icon="pi pi-angle-down" class="mobile-load-more-btn" (click)="loadMoreMobile()"></button>
+    </div>
+  </div>
+
+  <button
+    *ngIf="canCreate"
+    type="button"
+    class="mobile-fab"
+    aria-label="Nouveau prestataire"
+    (click)="navigateToCreate()"
+  >
+    <i class="pi pi-user-plus"></i>
+  </button>
+</div>
+
+<!-- Desktop: table -->
+<div class="card prestateurs-desktop">
+  <p-table
+    #dt
+    [value]="prestataires"
+    [paginator]="true"
+    paginatorDropdownAppendTo="body"
+    [rows]="10"
+    [showCurrentPageReport]="true"
+    [loading]="loading"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="  {first} / {last} de {totalRecords} entrées"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['nom_complet', 'email', 'phone', 'reference', 'pays', 'ville', 'specialite', 'type', 'type_label']"
+    selectionMode="single"
+    [(selection)]="selectedPrestataire"
+    (onRowSelect)="onRowSelect($event)"
+    [rowHover]="true"
+    styleClass="cursor-pointer"
+  >
+    <ng-template #caption>
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <p-icon-field class="w-full sm:w-80 order-1 sm:order-0">
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText 
+            type="text"
+            (input)="onGlobalFilter(dt, $event)"
+            placeholder="Rechercher un prestataire..."
+            class="w-full"
+          />
+        </p-icon-field>
+
+        <div class="flex gap-2 w-full sm:w-auto flex-order-0 sm:flex-order-1">
+          <!-- Filtre par statut -->
+          <p-select
+            [options]="statusOptions"
+            [(ngModel)]="selectedStatus"
+            (onChange)="filterByStatus()"
+            placeholder="Tous les statuts"
+            [style]="{ 'min-width': '150px' }"
+            [showClear]="true"
+          ></p-select>
+
+          <!-- Bouton Nouveau -->
+          <button
+            *ngIf="canCreate"
+            (click)="navigateToCreate()"
+            pButton
+            outlined
+            class="flex-shrink-0"
+            icon="pi pi-user-plus"
+            label="Nouveau"
+          ></button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="nom_complet" class="white-space-nowrap" style="width:25%">
+          <span class="flex items-center gap-2">
+            Nom complet <p-sortIcon field="nom_complet"></p-sortIcon>
+          </span>
+        </th>
+        
+        <th pSortableColumn="phone" class="white-space-nowrap" style="width:15%">
+          <span class="flex items-center gap-2">
+            Téléphone <p-sortIcon field="phone"></p-sortIcon>
+          </span>
+        </th>
+        <th pSortableColumn="type" class="white-space-nowrap" style="width:12%">
+          <span class="flex items-center gap-2">
+            Type <p-sortIcon field="type"></p-sortIcon>
+          </span>
+        </th>
+        <th pSortableColumn="pays" class="white-space-nowrap" style="width:18%">
+          <span class="flex items-center gap-2">
+            Adresse <p-sortIcon field="pays"></p-sortIcon>
+          </span>
+        </th>
+        <th pSortableColumn="is_active" class="white-space-nowrap" style="width:10%">
+          <span class="flex items-center gap-2">
+            Statut <p-sortIcon field="is_active"></p-sortIcon>
+          </span>
+        </th>
+        <th class="white-space-nowrap" style="width:10%">
+          Actions
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-prestataire>
+      <tr [pSelectableRow]="prestataire">
+        <td>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 text-primary-700 font-semibold">
+              {{ getInitials(prestataire.nom_complet) }}
+            </div>
+            <div>
+              <div class="font-semibold">{{ prestataire.nom_complet }}</div>
+              <div class="text-sm text-surface-500 mt-1">{{ prestataire.reference }}</div>
+            </div>
+          </div>
+        </td> 
+        <td>
+          <div class="flex items-center gap-1">
+             <span class="text-surface-700">{{ prestataire.phone | phoneFormat:'INT' }}</span>
+          </div>
+        </td>
+        <td>
+          <p-tag
+            *ngIf="prestataire.type_label"
+            [value]="prestataire.type_label"
+            [severity]="getTypeSeverity(prestataire.type)"
+          ></p-tag>
+          <span *ngIf="!prestataire.type_label" class="text-surface-400">-</span>
+        </td>
+        <td>
+          <div class="flex items-center gap-2">
+            <span class="fi fi-{{ prestataire.code_pays?.toLowerCase() }} text-xl"></span>
+            <div>
+              <div class="font-medium">{{ prestataire.ville }}</div>
+              <div class="text-sm text-surface-500">{{ prestataire.quartier }}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <p-tag
+            [value]="prestataire.is_active ? 'Actif' : 'Inactif'"
+            [severity]="prestataire.is_active ? 'success' : 'danger'"
+          ></p-tag>
+        </td>
+        <td>
+          
+          <div class="flex gap-2">
+            <button
+              pButton
+              pRipple
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text p-button-sm"
+              [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+              tooltipPosition="top"
+              (click)="goToEdit($event, prestataire.id)"
+              [disabled]="!canUpdate"
+            ></button>
+            <button
+              *ngIf="canUpdate"
+              pButton
+              pRipple
+              [icon]="prestataire.is_active ? 'pi pi-lock-open' : 'pi pi-lock'"
+              class="p-button-rounded p-button-text p-button-sm"
+              [class.p-button-success]="prestataire.is_active"
+              [class.p-button-danger]="!prestataire.is_active"
+              [pTooltip]="prestataire.is_active ? 'Désactiver' : 'Activer'"
+              tooltipPosition="top"
+              (click)="toggleStatus($event, prestataire.id)"
+            ></button>
+            <button
+              *ngIf="canDelete"
+              pButton
+              pRipple
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-danger p-button-sm"
+              [pTooltip]="'Supprimer'"
+              tooltipPosition="top"
+              (click)="deletePrestataire($event, prestataire.id)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="6" class="text-center py-8">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-users text-4xl"></i>
+            <span>Aucun prestataire trouvé</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
