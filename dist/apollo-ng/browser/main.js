@@ -3161,11 +3161,11 @@ var appRoutes = [
       },
       {
         path: "contacts",
-        loadChildren: () => import("./chunk-ZSWHYLDZ.js")
+        loadChildren: () => import("./chunk-2NZ4BIBT.js")
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-3TELEI7K.js")
+        loadChildren: () => import("./chunk-5Y3YO25E.js")
       },
       {
         path: "produits",

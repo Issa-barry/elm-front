@@ -1346,58 +1346,58 @@ var UtilisateursListe = class _UtilisateursListe {
 // src/app/pages/contacts/utilisateurs/utilisateurs-form/utilisateurs-form.ts
 function UtilisateursForm_span_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 34);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
 function UtilisateursForm_small_15_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1, " R\xF4le obligatoire. ");
     \u0275\u0275elementEnd();
   }
 }
 function UtilisateursForm_span_23_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 34);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
 function UtilisateursForm_small_25_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1, " Nom obligatoire. ");
     \u0275\u0275elementEnd();
   }
 }
 function UtilisateursForm_span_29_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 34);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
 function UtilisateursForm_small_31_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1, " Pr\xE9nom obligatoire. ");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_span_37_Template(rf, ctx) {
+function UtilisateursForm_span_35_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 34);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
 function UtilisateursForm_ng_template_39_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 36);
-    \u0275\u0275element(1, "img", 37);
-    \u0275\u0275elementStart(2, "span", 38);
+    \u0275\u0275elementStart(0, "div", 35);
+    \u0275\u0275element(1, "img", 36);
+    \u0275\u0275elementStart(2, "span", 37);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(4, "span");
@@ -1416,13 +1416,10 @@ function UtilisateursForm_ng_template_39_Template(rf, ctx) {
 }
 function UtilisateursForm_ng_template_40_div_0_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 36);
-    \u0275\u0275element(1, "img", 37);
-    \u0275\u0275elementStart(2, "span", 38);
+    \u0275\u0275elementStart(0, "div", 35);
+    \u0275\u0275element(1, "img", 36);
+    \u0275\u0275elementStart(2, "span", 37);
     \u0275\u0275text(3);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "span");
-    \u0275\u0275text(5);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
@@ -1431,36 +1428,27 @@ function UtilisateursForm_ng_template_40_div_0_Template(rf, ctx) {
     \u0275\u0275property("src", country_r2.flag, \u0275\u0275sanitizeUrl)("alt", country_r2.name);
     \u0275\u0275advance(2);
     \u0275\u0275textInterpolate(country_r2.dialCode);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(country_r2.name);
   }
 }
 function UtilisateursForm_ng_template_40_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275template(0, UtilisateursForm_ng_template_40_div_0_Template, 6, 4, "div", 39);
+    \u0275\u0275template(0, UtilisateursForm_ng_template_40_div_0_Template, 4, 3, "div", 38);
   }
   if (rf & 2) {
     const country_r2 = ctx.$implicit;
     \u0275\u0275property("ngIf", country_r2);
   }
 }
-function UtilisateursForm_span_44_Template(rf, ctx) {
+function UtilisateursForm_small_43_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
-    \u0275\u0275text(1, "*");
-    \u0275\u0275elementEnd();
-  }
-}
-function UtilisateursForm_small_46_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 40);
+    \u0275\u0275elementStart(0, "small", 39);
     \u0275\u0275text(1, " T\xE9l\xE9phone obligatoire. ");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_small_47_Template(rf, ctx) {
+function UtilisateursForm_small_44_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 40);
+    \u0275\u0275elementStart(0, "small", 39);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -1470,37 +1458,37 @@ function UtilisateursForm_small_47_Template(rf, ctx) {
     \u0275\u0275textInterpolate1(" ", ctx_r2.phoneError, " ");
   }
 }
-function UtilisateursForm_span_51_Template(rf, ctx) {
+function UtilisateursForm_span_48_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 34);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_small_53_Template(rf, ctx) {
+function UtilisateursForm_small_50_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1, " Ville obligatoire. ");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_span_57_Template(rf, ctx) {
+function UtilisateursForm_span_54_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275elementStart(0, "span", 34);
     \u0275\u0275text(1, "*");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_small_59_Template(rf, ctx) {
+function UtilisateursForm_small_56_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1, " Quartier obligatoire. ");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_div_60_small_6_Template(rf, ctx) {
+function UtilisateursForm_div_57_small_6_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -1510,23 +1498,23 @@ function UtilisateursForm_div_60_small_6_Template(rf, ctx) {
     \u0275\u0275textInterpolate1(" ", ctx_r2.passwordError, " ");
   }
 }
-function UtilisateursForm_div_60_Template(rf, ctx) {
+function UtilisateursForm_div_57_Template(rf, ctx) {
   if (rf & 1) {
     const _r4 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 8)(1, "label", 41);
+    \u0275\u0275elementStart(0, "div", 8)(1, "label", 40);
     \u0275\u0275text(2, " Mot de passe ");
-    \u0275\u0275elementStart(3, "span", 35);
+    \u0275\u0275elementStart(3, "span", 34);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "p-password", 42);
-    \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_div_60_Template_p_password_ngModelChange_5_listener($event) {
+    \u0275\u0275elementStart(5, "p-password", 41);
+    \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_div_57_Template_p_password_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r4);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.model.password, $event) || (ctx_r2.model.password = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275template(6, UtilisateursForm_div_60_small_6_Template, 2, 1, "small", 10);
+    \u0275\u0275template(6, UtilisateursForm_div_57_small_6_Template, 2, 1, "small", 10);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -1538,30 +1526,30 @@ function UtilisateursForm_div_60_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.submitted && ctx_r2.passwordError && ctx_r2.isEditing);
   }
 }
-function UtilisateursForm_div_61_small_6_Template(rf, ctx) {
+function UtilisateursForm_div_58_small_6_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 35);
+    \u0275\u0275elementStart(0, "small", 34);
     \u0275\u0275text(1, " Les mots de passe ne correspondent pas. ");
     \u0275\u0275elementEnd();
   }
 }
-function UtilisateursForm_div_61_Template(rf, ctx) {
+function UtilisateursForm_div_58_Template(rf, ctx) {
   if (rf & 1) {
     const _r5 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 8)(1, "label", 43);
+    \u0275\u0275elementStart(0, "div", 8)(1, "label", 42);
     \u0275\u0275text(2, " Confirmer le mot de passe ");
-    \u0275\u0275elementStart(3, "span", 35);
+    \u0275\u0275elementStart(3, "span", 34);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "p-password", 44);
-    \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_div_61_Template_p_password_ngModelChange_5_listener($event) {
+    \u0275\u0275elementStart(5, "p-password", 43);
+    \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_div_58_Template_p_password_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.model.password_confirmation, $event) || (ctx_r2.model.password_confirmation = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275template(6, UtilisateursForm_div_61_small_6_Template, 2, 0, "small", 10);
+    \u0275\u0275template(6, UtilisateursForm_div_58_small_6_Template, 2, 0, "small", 10);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -1573,18 +1561,18 @@ function UtilisateursForm_div_61_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.submitted && ctx_r2.model.password !== ctx_r2.model.password_confirmation && ctx_r2.isEditing);
   }
 }
-function UtilisateursForm_div_62_Template(rf, ctx) {
+function UtilisateursForm_div_59_Template(rf, ctx) {
   if (rf & 1) {
     const _r6 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 45)(1, "button", 46);
-    \u0275\u0275listener("click", function UtilisateursForm_div_62_Template_button_click_1_listener() {
+    \u0275\u0275elementStart(0, "div", 44)(1, "button", 45);
+    \u0275\u0275listener("click", function UtilisateursForm_div_59_Template_button_click_1_listener() {
       \u0275\u0275restoreView(_r6);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onSubmit());
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(2, "button", 47);
-    \u0275\u0275listener("click", function UtilisateursForm_div_62_Template_button_click_2_listener() {
+    \u0275\u0275elementStart(2, "button", 46);
+    \u0275\u0275listener("click", function UtilisateursForm_div_59_Template_button_click_2_listener() {
       \u0275\u0275restoreView(_r6);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onCancel());
@@ -1825,7 +1813,7 @@ var UtilisateursForm = class _UtilisateursForm {
   static \u0275fac = function UtilisateursForm_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _UtilisateursForm)(\u0275\u0275directiveInject(RoleService));
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _UtilisateursForm, selectors: [["app-utilisateurs-form"]], inputs: { mode: "mode", initialData: "initialData", loading: "loading" }, outputs: { submitForm: "submitForm", cancel: "cancel" }, features: [\u0275\u0275NgOnChangesFeature], decls: 63, vars: 42, consts: [[1, "card"], [1, "flex", "justify-between", "items-center", "mb-6"], [1, "text-surface-900", "dark:text-surface-0", "text-xl", "font-bold"], [1, "grid", "grid-cols-12", "gap-4"], [1, "col-span-12", "lg:col-span-2"], [1, "text-surface-900", "dark:text-surface-0", "font-medium", "text-xl", "mb-4"], [1, "m-0", "p-0", "text-surface-600", "dark:text-surface-200", "leading-normal", "mr-4"], [1, "col-span-12", "lg:col-span-10"], [1, "mb-6", "col-span-12", "md:col-span-6"], ["for", "role", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["class", "text-red-500", 4, "ngIf"], ["id", "role", "optionLabel", "label", "optionValue", "value", "placeholder", "S\xE9lectionner un r\xF4le", "fluid", "", 3, "ngModelChange", "ngModel", "options", "disabled", "invalid"], ["for", "email", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "email", "type", "email", "pInputText", "", "fluid", "", "placeholder", "exemple@email.com", 3, "ngModelChange", "ngModel", "disabled"], ["for", "nom", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "nom", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], ["for", "prenom", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "prenom", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], [1, "mb-6", "col-span-12"], [1, "grid", "grid-cols-12", "gap-3"], [1, "col-span-12", "md:col-span-4"], ["for", "codePays", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-3", "block"], ["id", "codePays", "optionLabel", "name", "optionValue", "code", "placeholder", "S\xE9lectionner un pays", "fluid", "", 3, "ngModelChange", "onChange", "ngModel", "options", "disabled"], ["pTemplate", "item"], ["pTemplate", "selectedItem"], [1, "col-span-12", "md:col-span-8"], ["for", "phone", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-3", "block"], ["id", "phone", "type", "tel", "pInputText", "", "fluid", "", "placeholder", "Exemple: 622 00 00 00", 3, "ngModelChange", "input", "blur", "ngModel", "invalid", "disabled"], ["class", "text-red-500 block mt-2", 4, "ngIf"], ["for", "ville", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "ville", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], ["for", "quartier", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "quartier", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], ["class", "mb-6 col-span-12 md:col-span-6", 4, "ngIf"], ["class", "col-span-12 flex gap-2", 4, "ngIf"], [1, "text-red-500"], [1, "flex", "items-center", "gap-2"], [1, "w-5", "h-auto", "rounded-sm", 3, "src", "alt"], [1, "font-semibold", "text-primary"], ["class", "flex items-center gap-2", 4, "ngIf"], [1, "text-red-500", "block", "mt-2"], ["for", "password", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "password", "fluid", "", "placeholder", "Min. 8 caract\xE8res, majuscules, minuscules et chiffres", "promptLabel", "Entrez un mot de passe", "weakLabel", "Faible", "mediumLabel", "Moyen", "strongLabel", "Fort", 3, "ngModelChange", "ngModel", "toggleMask", "feedback", "invalid", "disabled"], ["for", "password_confirmation", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "password_confirmation", "fluid", "", "placeholder", "Confirmez le mot de passe", 3, "ngModelChange", "ngModel", "toggleMask", "feedback", "invalid", "disabled"], [1, "col-span-12", "flex", "gap-2"], ["pButton", "", "pRipple", "", "icon", "pi pi-check", 1, "w-auto", 3, "click", "label", "loading", "disabled"], ["pButton", "", "pRipple", "", "label", "Annuler", "icon", "pi pi-times", "severity", "secondary", 1, "w-auto", 3, "click", "disabled"]], template: function UtilisateursForm_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _UtilisateursForm, selectors: [["app-utilisateurs-form"]], inputs: { mode: "mode", initialData: "initialData", loading: "loading" }, outputs: { submitForm: "submitForm", cancel: "cancel" }, features: [\u0275\u0275NgOnChangesFeature], decls: 60, vars: 41, consts: [[1, "card", "utilisateurs-form-card"], [1, "flex", "justify-between", "items-center", "mb-6", "utilisateurs-form-title"], [1, "text-surface-900", "dark:text-surface-0", "text-xl", "font-bold"], [1, "grid", "grid-cols-12", "gap-4"], [1, "col-span-12", "lg:col-span-2", "utilisateurs-form-sidebar"], [1, "text-surface-900", "dark:text-surface-0", "font-medium", "text-xl", "mb-4"], [1, "m-0", "p-0", "text-surface-600", "dark:text-surface-200", "leading-normal", "mr-4"], [1, "col-span-12", "lg:col-span-10"], [1, "mb-6", "col-span-12", "md:col-span-6"], ["for", "role", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["class", "text-red-500", 4, "ngIf"], ["id", "role", "optionLabel", "label", "optionValue", "value", "placeholder", "S\xE9lectionner un r\xF4le", "fluid", "", 3, "ngModelChange", "ngModel", "options", "disabled", "invalid"], ["for", "email", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "email", "type", "email", "pInputText", "", "fluid", "", "placeholder", "exemple@email.com", 3, "ngModelChange", "ngModel", "disabled"], ["for", "nom", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "nom", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], ["for", "prenom", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "prenom", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], [1, "mb-6", "col-span-12"], ["for", "phone", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], [1, "flex", "gap-2", "items-start"], [1, "phone-country-select"], ["id", "codePays", "optionLabel", "name", "optionValue", "code", "placeholder", "Pays", 3, "ngModelChange", "onChange", "ngModel", "options", "disabled"], ["pTemplate", "item"], ["pTemplate", "selectedItem"], [1, "flex-1"], ["id", "phone", "type", "tel", "pInputText", "", "fluid", "", "placeholder", "622 00 00 00", 3, "ngModelChange", "input", "blur", "ngModel", "invalid", "disabled"], ["class", "text-red-500 block mt-2", 4, "ngIf"], ["for", "ville", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "ville", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], ["for", "quartier", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "quartier", "type", "text", "pInputText", "", "fluid", "", 3, "ngModelChange", "ngModel", "invalid", "disabled"], ["class", "mb-6 col-span-12 md:col-span-6", 4, "ngIf"], ["class", "col-span-12 form-actions", 4, "ngIf"], [1, "text-red-500"], [1, "flex", "items-center", "gap-2"], [1, "w-5", "h-auto", "rounded-sm", 3, "src", "alt"], [1, "font-semibold", "text-primary"], ["class", "flex items-center gap-2", 4, "ngIf"], [1, "text-red-500", "block", "mt-2"], ["for", "password", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "password", "fluid", "", "placeholder", "Min. 8 caract\xE8res, majuscules, minuscules et chiffres", "promptLabel", "Entrez un mot de passe", "weakLabel", "Faible", "mediumLabel", "Moyen", "strongLabel", "Fort", 3, "ngModelChange", "ngModel", "toggleMask", "feedback", "invalid", "disabled"], ["for", "password_confirmation", 1, "font-medium", "text-surface-900", "dark:text-surface-0", "mb-2", "block"], ["id", "password_confirmation", "fluid", "", "placeholder", "Confirmez le mot de passe", 3, "ngModelChange", "ngModel", "toggleMask", "feedback", "invalid", "disabled"], [1, "col-span-12", "form-actions"], ["pButton", "", "pRipple", "", "icon", "pi pi-check", 1, "form-action-submit", 3, "click", "label", "loading", "disabled"], ["pButton", "", "pRipple", "", "label", "Annuler", "icon", "pi pi-times", "severity", "secondary", 1, "form-action-cancel", 3, "click", "disabled"]], template: function UtilisateursForm_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275elementStart(0, "div", 0)(1, "div", 1)(2, "span", 2);
       \u0275\u0275text(3);
@@ -1878,11 +1866,11 @@ var UtilisateursForm = class _UtilisateursForm {
       \u0275\u0275elementEnd();
       \u0275\u0275template(31, UtilisateursForm_small_31_Template, 2, 0, "small", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(32, "div", 18)(33, "div", 19)(34, "div", 20)(35, "label", 21);
-      \u0275\u0275text(36, " Pays ");
-      \u0275\u0275template(37, UtilisateursForm_span_37_Template, 2, 0, "span", 10);
+      \u0275\u0275elementStart(32, "div", 18)(33, "label", 19);
+      \u0275\u0275text(34, " T\xE9l\xE9phone ");
+      \u0275\u0275template(35, UtilisateursForm_span_35_Template, 2, 0, "span", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(38, "p-select", 22);
+      \u0275\u0275elementStart(36, "div", 20)(37, "div", 21)(38, "p-select", 22);
       \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_p_select_ngModelChange_38_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.phoneCountry, $event) || (ctx.phoneCountry = $event);
         return $event;
@@ -1892,48 +1880,44 @@ var UtilisateursForm = class _UtilisateursForm {
       });
       \u0275\u0275template(39, UtilisateursForm_ng_template_39_Template, 6, 4, "ng-template", 23)(40, UtilisateursForm_ng_template_40_Template, 1, 1, "ng-template", 24);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(41, "div", 25)(42, "label", 26);
-      \u0275\u0275text(43, " T\xE9l\xE9phone ");
-      \u0275\u0275template(44, UtilisateursForm_span_44_Template, 2, 0, "span", 10);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(45, "input", 27);
-      \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_input_ngModelChange_45_listener($event) {
+      \u0275\u0275elementStart(41, "div", 25)(42, "input", 26);
+      \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_input_ngModelChange_42_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.model.phone, $event) || (ctx.model.phone = $event);
         return $event;
       });
-      \u0275\u0275listener("input", function UtilisateursForm_Template_input_input_45_listener() {
+      \u0275\u0275listener("input", function UtilisateursForm_Template_input_input_42_listener() {
         return ctx.onPhoneInput();
-      })("blur", function UtilisateursForm_Template_input_blur_45_listener() {
+      })("blur", function UtilisateursForm_Template_input_blur_42_listener() {
         return ctx.onPhoneBlur();
       });
       \u0275\u0275elementEnd()()();
-      \u0275\u0275template(46, UtilisateursForm_small_46_Template, 2, 0, "small", 28)(47, UtilisateursForm_small_47_Template, 2, 1, "small", 28);
+      \u0275\u0275template(43, UtilisateursForm_small_43_Template, 2, 0, "small", 27)(44, UtilisateursForm_small_44_Template, 2, 1, "small", 27);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(48, "div", 8)(49, "label", 29);
-      \u0275\u0275text(50, " Ville ");
-      \u0275\u0275template(51, UtilisateursForm_span_51_Template, 2, 0, "span", 10);
+      \u0275\u0275elementStart(45, "div", 8)(46, "label", 28);
+      \u0275\u0275text(47, " Ville ");
+      \u0275\u0275template(48, UtilisateursForm_span_48_Template, 2, 0, "span", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(52, "input", 30);
-      \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_input_ngModelChange_52_listener($event) {
+      \u0275\u0275elementStart(49, "input", 29);
+      \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_input_ngModelChange_49_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.model.ville, $event) || (ctx.model.ville = $event);
         return $event;
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275template(53, UtilisateursForm_small_53_Template, 2, 0, "small", 10);
+      \u0275\u0275template(50, UtilisateursForm_small_50_Template, 2, 0, "small", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(54, "div", 8)(55, "label", 31);
-      \u0275\u0275text(56, " Quartier ");
-      \u0275\u0275template(57, UtilisateursForm_span_57_Template, 2, 0, "span", 10);
+      \u0275\u0275elementStart(51, "div", 8)(52, "label", 30);
+      \u0275\u0275text(53, " Quartier ");
+      \u0275\u0275template(54, UtilisateursForm_span_54_Template, 2, 0, "span", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(58, "input", 32);
-      \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_input_ngModelChange_58_listener($event) {
+      \u0275\u0275elementStart(55, "input", 31);
+      \u0275\u0275twoWayListener("ngModelChange", function UtilisateursForm_Template_input_ngModelChange_55_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.model.quartier, $event) || (ctx.model.quartier = $event);
         return $event;
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275template(59, UtilisateursForm_small_59_Template, 2, 0, "small", 10);
+      \u0275\u0275template(56, UtilisateursForm_small_56_Template, 2, 0, "small", 10);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(60, UtilisateursForm_div_60_Template, 7, 6, "div", 33)(61, UtilisateursForm_div_61_Template, 7, 6, "div", 33)(62, UtilisateursForm_div_62_Template, 3, 4, "div", 34);
+      \u0275\u0275template(57, UtilisateursForm_div_57_Template, 7, 6, "div", 32)(58, UtilisateursForm_div_58_Template, 7, 6, "div", 32)(59, UtilisateursForm_div_59_Template, 3, 4, "div", 33);
       \u0275\u0275elementEnd()()()();
     }
     if (rf & 2) {
@@ -1963,14 +1947,12 @@ var UtilisateursForm = class _UtilisateursForm {
       \u0275\u0275property("invalid", ctx.submitted && !(ctx.model.prenom == null ? null : ctx.model.prenom.trim()))("disabled", ctx.fieldsDisabled);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.submitted && !(ctx.model.prenom == null ? null : ctx.model.prenom.trim()) && ctx.isEditing);
-      \u0275\u0275advance(6);
+      \u0275\u0275advance(4);
       \u0275\u0275property("ngIf", ctx.isEditing);
-      \u0275\u0275advance();
+      \u0275\u0275advance(3);
       \u0275\u0275twoWayProperty("ngModel", ctx.phoneCountry);
       \u0275\u0275property("options", ctx.countries)("disabled", ctx.fieldsDisabled);
-      \u0275\u0275advance(6);
-      \u0275\u0275property("ngIf", ctx.isEditing);
-      \u0275\u0275advance();
+      \u0275\u0275advance(4);
       \u0275\u0275twoWayProperty("ngModel", ctx.model.phone);
       \u0275\u0275property("invalid", (ctx.submitted || ctx.phoneError) && (!(ctx.model.phone == null ? null : ctx.model.phone.trim()) || !!ctx.phoneError))("disabled", ctx.fieldsDisabled);
       \u0275\u0275advance();
@@ -2014,7 +1996,7 @@ var UtilisateursForm = class _UtilisateursForm {
     NgModel,
     PasswordModule,
     Password
-  ], encapsulation: 2 });
+  ], styles: ["\n\n.phone-country-select[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  width: 8rem;\n}\n.form-actions[_ngcontent-%COMP%] {\n  display: flex;\n  gap: 0.5rem;\n}\n.form-action-submit[_ngcontent-%COMP%], \n.form-action-cancel[_ngcontent-%COMP%] {\n  width: auto;\n}\n@media (max-width: 768px) {\n  .utilisateurs-form-title[_ngcontent-%COMP%] {\n    display: none;\n  }\n  .utilisateurs-form-sidebar[_ngcontent-%COMP%] {\n    display: none;\n  }\n  .utilisateurs-form-card[_ngcontent-%COMP%] {\n    box-shadow: none;\n    border: none;\n    border-radius: 0;\n    padding: 0;\n    background: transparent;\n  }\n  .phone-country-select[_ngcontent-%COMP%] {\n    width: 7rem;\n  }\n  .form-actions[_ngcontent-%COMP%] {\n    flex-direction: column;\n    gap: 0.75rem;\n    padding-top: 0.5rem;\n  }\n  .form-action-submit[_ngcontent-%COMP%] {\n    width: 100%;\n    justify-content: center;\n  }\n  .form-action-cancel[_ngcontent-%COMP%] {\n    display: none;\n  }\n}\n/*# sourceMappingURL=utilisateurs-form.css.map */"] });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(UtilisateursForm, [{
@@ -2027,15 +2009,15 @@ var UtilisateursForm = class _UtilisateursForm {
       RippleModule,
       FormsModule,
       PasswordModule
-    ], template: `<div class="card">\r
-  <div class="flex justify-between items-center mb-6">\r
+    ], template: `<div class="card utilisateurs-form-card">\r
+  <div class="flex justify-between items-center mb-6 utilisateurs-form-title">\r
     <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">\r
       {{ formTitle }}\r
     </span>\r
   </div>\r
 \r
   <div class="grid grid-cols-12 gap-4">\r
-    <div class="col-span-12 lg:col-span-2">\r
+    <div class="col-span-12 lg:col-span-2 utilisateurs-form-sidebar">\r
       <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">\r
         <!-- Utilisateur -->\r
       </div>\r
@@ -2125,22 +2107,21 @@ var UtilisateursForm = class _UtilisateursForm {
         \r
         <!-- T\xE9l\xE9phone avec s\xE9lecteur de pays -->\r
         <div class="mb-6 col-span-12">\r
-          <div class="grid grid-cols-12 gap-3">\r
-            <!-- S\xE9lecteur de pays -->\r
-            <div class="col-span-12 md:col-span-4">\r
-              <label for="codePays" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">\r
-                Pays <span class="text-red-500" *ngIf="isEditing">*</span>\r
-              </label>\r
+          <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">\r
+            T\xE9l\xE9phone <span class="text-red-500" *ngIf="isEditing">*</span>\r
+          </label>\r
+          <div class="flex gap-2 items-start">\r
+            <!-- S\xE9lecteur de pays (compact : drapeau + code) -->\r
+            <div class="phone-country-select">\r
               <p-select\r
                 id="codePays"\r
                 [(ngModel)]="phoneCountry"\r
                 [options]="countries"\r
                 optionLabel="name"\r
                 optionValue="code"\r
-                placeholder="S\xE9lectionner un pays"\r
+                placeholder="Pays"\r
                 [disabled]="fieldsDisabled"\r
                 (onChange)="onCountryChange()"\r
-                fluid\r
               >\r
                 <ng-template let-country pTemplate="item">\r
                   <div class="flex items-center gap-2">\r
@@ -2153,17 +2134,13 @@ var UtilisateursForm = class _UtilisateursForm {
                   <div class="flex items-center gap-2" *ngIf="country">\r
                     <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />\r
                     <span class="font-semibold text-primary">{{ country.dialCode }}</span>\r
-                    <span>{{ country.name }}</span>\r
                   </div>\r
                 </ng-template>\r
               </p-select>\r
             </div>\r
 \r
             <!-- Champ t\xE9l\xE9phone -->\r
-            <div class="col-span-12 md:col-span-8">\r
-              <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">\r
-                T\xE9l\xE9phone <span class="text-red-500" *ngIf="isEditing">*</span>\r
-              </label>\r
+            <div class="flex-1">\r
               <input\r
                 id="phone"\r
                 type="tel"\r
@@ -2174,7 +2151,7 @@ var UtilisateursForm = class _UtilisateursForm {
                 [disabled]="fieldsDisabled"\r
                 (input)="onPhoneInput()"\r
                 (blur)="onPhoneBlur()"\r
-                placeholder="Exemple: 622 00 00 00"\r
+                placeholder="622 00 00 00"\r
               />\r
             </div>\r
           </div>\r
@@ -2271,7 +2248,7 @@ var UtilisateursForm = class _UtilisateursForm {
         </div>\r
 \r
         <!-- Boutons -->\r
-        <div class="col-span-12 flex gap-2" *ngIf="isEditing">\r
+        <div class="col-span-12 form-actions" *ngIf="isEditing">\r
           <button\r
             pButton\r
             pRipple\r
@@ -2280,7 +2257,7 @@ var UtilisateursForm = class _UtilisateursForm {
             (click)="onSubmit()"\r
             [loading]="loading"\r
             [disabled]="!isValid() || loading"\r
-            class="w-auto"\r
+            class="form-action-submit"\r
           ></button>\r
 \r
           <button\r
@@ -2291,14 +2268,14 @@ var UtilisateursForm = class _UtilisateursForm {
             severity="secondary"\r
             (click)="onCancel()"\r
             [disabled]="loading"\r
-            class="w-auto"\r
+            class="form-action-cancel"\r
           ></button>\r
         </div>\r
       </div>\r
     </div>\r
   </div>\r
 </div>\r
-` }]
+`, styles: ["/* src/app/pages/contacts/utilisateurs/utilisateurs-form/utilisateurs-form.scss */\n.phone-country-select {\n  flex-shrink: 0;\n  width: 8rem;\n}\n.form-actions {\n  display: flex;\n  gap: 0.5rem;\n}\n.form-action-submit,\n.form-action-cancel {\n  width: auto;\n}\n@media (max-width: 768px) {\n  .utilisateurs-form-title {\n    display: none;\n  }\n  .utilisateurs-form-sidebar {\n    display: none;\n  }\n  .utilisateurs-form-card {\n    box-shadow: none;\n    border: none;\n    border-radius: 0;\n    padding: 0;\n    background: transparent;\n  }\n  .phone-country-select {\n    width: 7rem;\n  }\n  .form-actions {\n    flex-direction: column;\n    gap: 0.75rem;\n    padding-top: 0.5rem;\n  }\n  .form-action-submit {\n    width: 100%;\n    justify-content: center;\n  }\n  .form-action-cancel {\n    display: none;\n  }\n}\n/*# sourceMappingURL=utilisateurs-form.css.map */\n"] }]
   }], () => [{ type: RoleService }], { mode: [{
     type: Input
   }], initialData: [{
@@ -2658,4 +2635,4 @@ var utilisateurs_routes_default = [
 export {
   utilisateurs_routes_default as default
 };
-//# sourceMappingURL=chunk-BM75XJ5X.js.map
+//# sourceMappingURL=chunk-7B4HSW2J.js.map

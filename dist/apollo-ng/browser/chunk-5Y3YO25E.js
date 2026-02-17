@@ -227,7 +227,7 @@ var PACKING_STATUT_SEVERITY = {
 // src/app/pages/packings/packing-mobile-form/packing-mobile-form.ts
 function PackingMobileForm_div_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 29);
+    \u0275\u0275elementStart(0, "div", 27);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -239,13 +239,13 @@ function PackingMobileForm_div_5_Template(rf, ctx) {
 }
 function PackingMobileForm_p_skeleton_15_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "p-skeleton", 30);
+    \u0275\u0275element(0, "p-skeleton", 28);
   }
 }
 function PackingMobileForm_p_select_16_ng_template_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 34);
-    \u0275\u0275element(1, "i", 35);
+    \u0275\u0275elementStart(0, "div", 32);
+    \u0275\u0275element(1, "i", 33);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3);
     \u0275\u0275elementEnd()();
@@ -258,8 +258,8 @@ function PackingMobileForm_p_select_16_ng_template_1_Template(rf, ctx) {
 }
 function PackingMobileForm_p_select_16_ng_template_2_div_0_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 34);
-    \u0275\u0275element(1, "i", 35);
+    \u0275\u0275elementStart(0, "div", 32);
+    \u0275\u0275element(1, "i", 33);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3);
     \u0275\u0275elementEnd()();
@@ -272,7 +272,7 @@ function PackingMobileForm_p_select_16_ng_template_2_div_0_Template(rf, ctx) {
 }
 function PackingMobileForm_p_select_16_ng_template_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275template(0, PackingMobileForm_p_select_16_ng_template_2_div_0_Template, 4, 2, "div", 36);
+    \u0275\u0275template(0, PackingMobileForm_p_select_16_ng_template_2_div_0_Template, 4, 2, "div", 34);
   }
   if (rf & 2) {
     const prestataire_r4 = ctx.$implicit;
@@ -282,14 +282,14 @@ function PackingMobileForm_p_select_16_ng_template_2_Template(rf, ctx) {
 function PackingMobileForm_p_select_16_Template(rf, ctx) {
   if (rf & 1) {
     const _r2 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-select", 31);
+    \u0275\u0275elementStart(0, "p-select", 29);
     \u0275\u0275twoWayListener("ngModelChange", function PackingMobileForm_p_select_16_Template_p_select_ngModelChange_0_listener($event) {
       \u0275\u0275restoreView(_r2);
       const ctx_r0 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r0.selectedPrestataire, $event) || (ctx_r0.selectedPrestataire = $event);
       return \u0275\u0275resetView($event);
     });
-    \u0275\u0275template(1, PackingMobileForm_p_select_16_ng_template_1_Template, 4, 3, "ng-template", 32)(2, PackingMobileForm_p_select_16_ng_template_2_Template, 1, 1, "ng-template", 33);
+    \u0275\u0275template(1, PackingMobileForm_p_select_16_ng_template_1_Template, 4, 3, "ng-template", 30)(2, PackingMobileForm_p_select_16_ng_template_2_Template, 1, 1, "ng-template", 31);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -300,14 +300,14 @@ function PackingMobileForm_p_select_16_Template(rf, ctx) {
 }
 function PackingMobileForm_small_17_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 37);
+    \u0275\u0275elementStart(0, "small", 35);
     \u0275\u0275text(1, "Le prestataire est requis.");
     \u0275\u0275elementEnd();
   }
 }
 function PackingMobileForm_p_skeleton_32_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "p-skeleton", 30);
+    \u0275\u0275element(0, "p-skeleton", 28);
   }
 }
 function PackingMobileForm_p_inputnumber_33_Template(rf, ctx) {
@@ -370,7 +370,7 @@ var PackingMobileForm = class _PackingMobileForm {
   static \u0275fac = function PackingMobileForm_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _PackingMobileForm)();
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _PackingMobileForm, selectors: [["app-packing-mobile-form"]], inputs: { packing: "packing", prestataires: "prestataires", selectedPrestataire: "selectedPrestataire", saving: "saving", dialogLoading: "dialogLoading", submitted: "submitted" }, outputs: { onSaveEvent: "onSaveEvent", onClose: "onClose", selectedPrestataireChange: "selectedPrestataireChange" }, decls: 52, vars: 21, consts: [[1, "packing-mobile-panel", "flex", "flex-col", "h-full", "bg-surface-0", "dark:bg-surface-900"], [1, "packing-mobile-header", "w-full", "flex-shrink-0", "p-6", "border-b", "border-surface-200", "dark:border-surface-700", "flex", "justify-start", "items-center"], [1, "flex-1"], [1, "text-surface-900", "dark:text-surface-0", "text-xl", "font-medium", "leading-tight"], ["class", "text-surface-500 dark:text-surface-400 text-sm font-normal mt-1", 4, "ngIf"], ["pButton", "", 1, "w-10", "h-10", 3, "click", "text", "rounded"], ["pButtonIcon", "", 1, "pi", "pi-times"], [1, "packing-mobile-body", "flex-1", "min-h-0", "w-full", "p-6", "flex", "flex-col", "justify-start", "items-start", "gap-6", "overflow-y-auto"], [1, "w-full", "flex", "flex-col", "gap-3"], [1, "text-surface-500", "dark:text-surface-400", "text-xs", "font-semibold", "uppercase", "tracking-wider"], [1, "w-full", "flex", "flex-col", "gap-1"], [1, "text-sm", "font-medium", "text-surface-700", "dark:text-surface-300"], ["height", "2.75rem", "styleClass", "w-full", 4, "ngIf"], ["optionLabel", "nom", "filterBy", "nom,prenom,phone", "placeholder", "S\xE9lectionner un prestataire", "styleClass", "w-full", 3, "ngModel", "options", "filter", "ngModelChange", 4, "ngIf"], ["class", "text-red-500 text-xs", 4, "ngIf"], [1, "w-full", "flex", "flex-col", "gap-4"], ["dateFormat", "dd/mm/yy", "inputStyleClass", "w-full", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "showIcon"], ["styleClass", "w-full", 3, "ngModelChange", "onInput", "ngModel", "min"], ["styleClass", "w-full", 3, "ngModel", "min", "ngModelChange", "onInput", 4, "ngIf"], ["optionLabel", "label", "optionValue", "value", "placeholder", "S\xE9lectionner un statut", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "options"], [1, "w-full", "p-4", "bg-surface-50", "dark:bg-surface-800", "rounded-xl", "flex", "items-center", "justify-between"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-semibold"], [1, "text-lg", "font-bold", "leading-tight", 2, "color", "var(--p-primary-600)"], [1, "packing-mobile-footer", "w-full", "border-t", "border-surface-200", "dark:border-surface-700", "p-6", "flex", "flex-col", "gap-3", "flex-shrink-0"], ["pButton", "", "severity", "contrast", 1, "w-full", "py-3", 3, "click", "disabled", "loading"], ["pButtonIcon", "", 1, "pi", "pi-check", "mr-2"], ["pButtonLabel", ""], ["pButton", "", "severity", "secondary", 1, "w-full", "py-3", 3, "click", "outlined", "disabled"], ["pButtonIcon", "", 1, "pi", "pi-times", "mr-2"], [1, "text-surface-500", "dark:text-surface-400", "text-sm", "font-normal", "mt-1"], ["height", "2.75rem", "styleClass", "w-full"], ["optionLabel", "nom", "filterBy", "nom,prenom,phone", "placeholder", "S\xE9lectionner un prestataire", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "options", "filter"], ["pTemplate", "item"], ["pTemplate", "selectedItem"], [1, "flex", "items-center", "gap-2"], [1, "pi", "pi-user", "text-primary"], ["class", "flex items-center gap-2", 4, "ngIf"], [1, "text-red-500", "text-xs"]], template: function PackingMobileForm_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _PackingMobileForm, selectors: [["app-packing-mobile-form"]], inputs: { packing: "packing", prestataires: "prestataires", selectedPrestataire: "selectedPrestataire", saving: "saving", dialogLoading: "dialogLoading", submitted: "submitted" }, outputs: { onSaveEvent: "onSaveEvent", onClose: "onClose", selectedPrestataireChange: "selectedPrestataireChange" }, decls: 48, vars: 19, consts: [[1, "packing-mobile-panel", "flex", "flex-col", "h-full", "bg-surface-0", "dark:bg-surface-900"], [1, "packing-mobile-header", "w-full", "flex-shrink-0", "p-6", "border-b", "border-surface-200", "dark:border-surface-700", "flex", "justify-start", "items-center"], [1, "flex-1"], [1, "text-surface-900", "dark:text-surface-0", "text-xl", "font-medium", "leading-tight"], ["class", "text-surface-500 dark:text-surface-400 text-sm font-normal mt-1", 4, "ngIf"], ["pButton", "", 1, "w-10", "h-10", 3, "click", "text", "rounded"], ["pButtonIcon", "", 1, "pi", "pi-times"], [1, "packing-mobile-body", "flex-1", "min-h-0", "w-full", "p-6", "flex", "flex-col", "justify-start", "items-start", "gap-6", "overflow-y-auto"], [1, "w-full", "flex", "flex-col", "gap-3"], [1, "text-surface-500", "dark:text-surface-400", "text-xs", "font-semibold", "uppercase", "tracking-wider"], [1, "w-full", "flex", "flex-col", "gap-1"], [1, "text-sm", "font-medium", "text-surface-700", "dark:text-surface-300"], ["height", "2.75rem", "styleClass", "w-full", 4, "ngIf"], ["optionLabel", "nom", "filterBy", "nom,prenom,phone", "placeholder", "S\xE9lectionner un prestataire", "styleClass", "w-full", 3, "ngModel", "options", "filter", "ngModelChange", 4, "ngIf"], ["class", "text-red-500 text-xs", 4, "ngIf"], [1, "w-full", "flex", "flex-col", "gap-4"], ["dateFormat", "dd/mm/yy", "inputStyleClass", "w-full", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "showIcon"], ["styleClass", "w-full", 3, "ngModelChange", "onInput", "ngModel", "min"], ["styleClass", "w-full", 3, "ngModel", "min", "ngModelChange", "onInput", 4, "ngIf"], ["optionLabel", "label", "optionValue", "value", "placeholder", "S\xE9lectionner un statut", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "options"], [1, "w-full", "p-4", "bg-surface-50", "dark:bg-surface-800", "rounded-xl", "flex", "items-center", "justify-between"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-semibold"], [1, "text-lg", "font-bold", "leading-tight", 2, "color", "var(--p-primary-600)"], [1, "packing-mobile-footer", "w-full", "border-t", "border-surface-200", "dark:border-surface-700", "p-6", "flex", "flex-col", "gap-3", "flex-shrink-0"], ["pButton", "", 1, "w-full", "py-3", 3, "click", "disabled", "loading"], ["pButtonIcon", "", 1, "pi", "pi-check", "mr-2"], ["pButtonLabel", ""], [1, "text-surface-500", "dark:text-surface-400", "text-sm", "font-normal", "mt-1"], ["height", "2.75rem", "styleClass", "w-full"], ["optionLabel", "nom", "filterBy", "nom,prenom,phone", "placeholder", "S\xE9lectionner un prestataire", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "options", "filter"], ["pTemplate", "item"], ["pTemplate", "selectedItem"], [1, "flex", "items-center", "gap-2"], [1, "pi", "pi-user", "text-primary"], ["class", "flex items-center gap-2", 4, "ngIf"], [1, "text-red-500", "text-xs"]], template: function PackingMobileForm_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275elementStart(0, "div", 0)(1, "div", 1)(2, "div", 2)(3, "div", 3);
       \u0275\u0275text(4);
@@ -442,14 +442,6 @@ var PackingMobileForm = class _PackingMobileForm {
       \u0275\u0275element(45, "i", 25);
       \u0275\u0275elementStart(46, "span", 26);
       \u0275\u0275text(47);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(48, "button", 27);
-      \u0275\u0275listener("click", function PackingMobileForm_Template_button_click_48_listener() {
-        return ctx.onClose.emit();
-      });
-      \u0275\u0275element(49, "i", 28);
-      \u0275\u0275elementStart(50, "span", 26);
-      \u0275\u0275text(51, "Annuler");
       \u0275\u0275elementEnd()()()();
     }
     if (rf & 2) {
@@ -484,8 +476,6 @@ var PackingMobileForm = class _PackingMobileForm {
       \u0275\u0275property("disabled", ctx.saving || ctx.dialogLoading || !ctx.selectedPrestataire)("loading", ctx.saving);
       \u0275\u0275advance(3);
       \u0275\u0275textInterpolate((ctx.packing == null ? null : ctx.packing.id) ? "Sauvegarder" : "Enregistrer");
-      \u0275\u0275advance();
-      \u0275\u0275property("outlined", true)("disabled", ctx.saving);
     }
   }, dependencies: [CommonModule, NgIf, FormsModule, NgControlStatus, NgModel, ButtonModule, ButtonDirective, ButtonLabel, ButtonIcon, PrimeTemplate, InputNumberModule, InputNumber, SelectModule, Select, DatePickerModule, DatePicker, SkeletonModule, Skeleton], styles: ["\n\n[_nghost-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n}\n.packing-mobile-panel[_ngcontent-%COMP%] {\n  min-height: 0;\n  overflow: hidden;\n}\n@media (max-width: 768px) {\n  [_nghost-%COMP%] {\n    width: 100%;\n    max-width: 100%;\n    overflow: hidden;\n  }\n  .packing-mobile-panel[_ngcontent-%COMP%] {\n    width: 100%;\n    max-width: 100%;\n  }\n  .packing-mobile-footer[_ngcontent-%COMP%] {\n    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));\n  }\n}\n/*# sourceMappingURL=packing-mobile-form.css.map */"] });
 };
@@ -614,13 +604,9 @@ var PackingMobileForm = class _PackingMobileForm {
 
     <!-- Footer (toujours visible) -->
     <div class="packing-mobile-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-3 flex-shrink-0">
-        <button pButton class="w-full py-3" severity="contrast" (click)="onSave()" [disabled]="saving || dialogLoading || !selectedPrestataire" [loading]="saving">
+        <button pButton class="w-full py-3" (click)="onSave()" [disabled]="saving || dialogLoading || !selectedPrestataire" [loading]="saving">
             <i pButtonIcon class="pi pi-check mr-2"></i>
             <span pButtonLabel>{{ packing?.id ? 'Sauvegarder' : 'Enregistrer' }}</span>
-        </button>
-        <button pButton class="w-full py-3" severity="secondary" [outlined]="true" (click)="onClose.emit()" [disabled]="saving">
-            <i pButtonIcon class="pi pi-times mr-2"></i>
-            <span pButtonLabel>Annuler</span>
         </button>
     </div>
 </div>
@@ -3484,4 +3470,4 @@ var packings_routes_default = [
 export {
   packings_routes_default as default
 };
-//# sourceMappingURL=chunk-3TELEI7K.js.map
+//# sourceMappingURL=chunk-5Y3YO25E.js.map

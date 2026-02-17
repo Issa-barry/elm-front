@@ -14,11 +14,11 @@ var contacts_routes_default = [
   },
   {
     path: "utilisateurs",
-    loadChildren: () => import("./chunk-BM75XJ5X.js")
+    loadChildren: () => import("./chunk-7B4HSW2J.js")
   },
   { path: "**", redirectTo: "/notfound" }
 ];
 export {
   contacts_routes_default as default
 };
-//# sourceMappingURL=chunk-ZSWHYLDZ.js.map
+//# sourceMappingURL=chunk-2NZ4BIBT.js.map
