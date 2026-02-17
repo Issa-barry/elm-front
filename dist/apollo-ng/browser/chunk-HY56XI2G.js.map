@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/models/role.model.ts"],
+  "sourcesContent": ["import { User } from './user.model';\n\nexport interface Role {\n  id: number;\n  name: string;\n  created_at: string;\n}\n\nexport interface ModulePermission {\n  module: string;\n  permissions: {\n    create: boolean;\n    read: boolean;\n    update: boolean;\n    delete: boolean;\n  };\n}\n\nexport interface RoleWithModules {\n  role: Role;\n  modules: ModulePermission[];\n}\n\nexport interface CreateRoleDto {\n  name: string;\n}\n\nexport interface UpdateRoleDto {\n  name: string;\n}\n\nexport interface UpdatePermissionsDto {\n  permissions: Record<string, string[]>;\n}\n\nexport interface AssignedUserRoleData {\n  user: User;\n  roles: string[];\n  permissions: string[];\n}\n\nexport interface UserRoles {\n  user_id: number;\n  nom_complet: string;\n  roles: string[];\n  permissions: string[];\n}\n\nexport interface PermissionCatalogModule extends ModulePermission {\n  actions: string[];\n}\n\nexport type PermissionAction = 'create' | 'read' | 'update' | 'delete';\n\nexport const PERMISSION_ACTIONS: PermissionAction[] = ['create', 'read', 'update', 'delete'];\n"],
+  "mappings": ";AAsDO,IAAM,qBAAyC,CAAC,UAAU,QAAQ,UAAU,QAAQ;",
+  "names": []
+}

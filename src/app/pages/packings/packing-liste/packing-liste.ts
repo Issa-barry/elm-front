@@ -32,9 +32,10 @@ import { Prestataire } from '@/models/prestataire.model';
 import { ParametresService } from '@/services/parametres/parametres.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { PackingMobileForm } from '../packing-mobile-form/packing-mobile-form';
  
 interface Column {
-  field: string;
+  field: string; 
   header: string;
   customExportHeader?: string;
 }
@@ -78,6 +79,7 @@ interface StatutOption {
     SkeletonModule,
     MenuModule,
     PhoneFormatPipe,
+    PackingMobileForm,
   ],
   providers: [MessageService, ConfirmationService]
 })
@@ -97,6 +99,7 @@ export class PackingListe implements OnInit, OnDestroy {
   mobileSearchTerm = '';
   readonly mobilePageSize = 10;
   mobileVisibleCount = this.mobilePageSize;
+  mobileFormVisible = false;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'packings-mobile-pwa';
 
@@ -217,6 +220,10 @@ export class PackingListe implements OnInit, OnDestroy {
   applyMobileStatusFilter(statut: PackingStatut | string | null) {
     this.filterStatut = statut;
     this.loadPackings();
+  }
+
+  get isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
   }
 
   private syncMobilePwaMode() {
@@ -341,8 +348,13 @@ export class PackingListe implements OnInit, OnDestroy {
   openNew() {
     this.selectedPrestataire = null;
     this.submitted = false;
-    this.packingDialog = true;
     this.dialogLoading = true;
+
+    if (this.isMobile) {
+      this.mobileFormVisible = true;
+    } else {
+      this.packingDialog = true;
+    }
 
     forkJoin({
       prixRouleauDefaut: this.parametresService.getPrixRouleauDefaut(),
@@ -379,7 +391,12 @@ export class PackingListe implements OnInit, OnDestroy {
       date: packing.date ? new Date(packing.date) : undefined
     };
     this.selectedPrestataire = packing.prestataire || null;
-    this.packingDialog = true;
+
+    if (this.isMobile) {
+      this.mobileFormVisible = true;
+    } else {
+      this.packingDialog = true;
+    }
   }
 
   deletePacking(packing: Packing) {
@@ -438,6 +455,17 @@ export class PackingListe implements OnInit, OnDestroy {
     this.submitted = false;
   }
 
+  closeMobileForm() {
+    this.mobileFormVisible = false;
+    this.submitted = false;
+  }
+
+  onMobileFormSave(event: { packing: Partial<Packing>; prestataire: Prestataire }) {
+    this.packing = event.packing;
+    this.selectedPrestataire = event.prestataire;
+    this.savePacking();
+  }
+
   savePacking() {
     this.submitted = true;
 
@@ -467,6 +495,7 @@ export class PackingListe implements OnInit, OnDestroy {
             life: 3000
           });
           this.packingDialog = false;
+          this.mobileFormVisible = false;
           this.packing = {};
           this.saving = false;
           this.loadPackings();
@@ -487,6 +516,7 @@ export class PackingListe implements OnInit, OnDestroy {
             life: 3000
           });
           this.packingDialog = false;
+          this.mobileFormVisible = false;
           this.packing = {};
           this.saving = false;
           this.loadPackings();

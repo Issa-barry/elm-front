@@ -18,13 +18,13 @@ class PackingFormModel {
   prestataire_id?: number;
   prestataire?: Prestataire;
   reference?: string;
-  date?: Date | string | null; 
+  date?: Date | string | null;  
   nb_rouleaux: number = 0;
   prix_par_rouleau: number = 0;
   montant: number = 0; 
   statut: PackingStatut = 'valide';
   notes?: string | null;
- 
+  
   constructor(data?: Partial<Packing>) {
     if (data) {
       this.id = data.id;

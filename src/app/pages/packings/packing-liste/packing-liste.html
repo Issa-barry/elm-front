@@ -24,7 +24,7 @@
     />
     <button
       pButton
-      pRipple
+      pRipple 
       icon="pi pi-filter"
       class="p-button-rounded p-button-text mobile-add"
       aria-label="Filtrer par statut"
@@ -252,7 +252,8 @@
     [header]="packing?.id ? 'Détails du packing' : 'Nouveau packing'"
     [modal]="true"
     styleClass="packing-dialog"
-    [breakpoints]="{ '960px': '95vw' }"
+    [breakpoints]="{ '960px': '95vw', '768px': '100vw', '480px': '100vw' }"
+    [maximizable]="false"
 >
     <div class="packing-dialog-content">
         <section class="packing-dialog-section">
@@ -355,3 +356,19 @@
 
 <p-confirmdialog [style]="{ width: '450px' }" />
 
+<!-- Mobile slideover form (full screen, comme comptabilite-packing-paiement) -->
+<div class="fixed inset-0 z-50" *ngIf="mobileFormVisible">
+    <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeMobileForm()"></div>
+    <div class="packing-mobile-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full h-full animate-fadeinright">
+        <app-packing-mobile-form
+            [packing]="packing"
+            [prestataires]="prestataires"
+            [selectedPrestataire]="selectedPrestataire"
+            [saving]="saving"
+            [dialogLoading]="dialogLoading"
+            [submitted]="submitted"
+            (onSaveEvent)="onMobileFormSave($event)"
+            (onClose)="closeMobileForm()"
+        ></app-packing-mobile-form>
+    </div>
+</div>

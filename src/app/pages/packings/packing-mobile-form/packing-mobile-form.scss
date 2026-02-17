@@ -1,0 +1,31 @@
+// ─── Full height dans le slideover (full screen mobile) ──
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+// ─── Racine : permet au body de scroller, footer reste en bas ──
+.packing-mobile-panel {
+    min-height: 0;
+    overflow: hidden;
+}
+
+// ─── Mobile only : fenêtre plein écran alignée, bouton toujours visible ──
+@media (max-width: 768px) {
+    :host {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .packing-mobile-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .packing-mobile-footer {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+}

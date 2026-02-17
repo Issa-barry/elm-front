@@ -24,7 +24,7 @@
     flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh;
-    height: 100dvh;
+    height: 100dvh; 
     height: 100vh;
     overflow: hidden;
     margin-top: calc(-0.25rem - env(safe-area-inset-top));
@@ -525,6 +525,11 @@
             }
         }
     }
+}
+
+// ─── Mobile slideover (comme comptabilite-packing-paiement) ─────────
+.packing-mobile-slideover {
+    z-index: 51;
 }
 
 // ─── Dark mode ───────────────────────────────────────────
