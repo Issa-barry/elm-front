@@ -38,6 +38,7 @@ import { ComptabilitePackingPaiement, PaiementPayload } from '../components/comp
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
 import { ComptabilitePackingPaiementDialog } from '../components/comptabilite-packing-paiement-dialog/comptabilite-packing-paiement-dialog';
+import { ComptabiliteHistoriqueVersements } from '../components/comptabilite-historique-versements/comptabilite-historique-versements';
 import { MoneyPipe } from '@/pipes/money.pipe';
 
 interface ModePaiementOption {
@@ -73,6 +74,7 @@ interface ModePaiementOption {
     StyleClassModule,
     ComptabilitePackingPaiement,
     ComptabilitePackingPaiementDialog,
+    ComptabiliteHistoriqueVersements,
         RatingModule,
         RadioButtonModule,
         MoneyPipe
@@ -271,7 +273,11 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
   // ========================= Historique versements =========================
 
   openHistorique(facture: FacturePacking) {
-    this.historiqueDialog = true;
+    if (this.isMobile) {
+      this.historiqueSlideoverVisible = true;
+    } else {
+      this.historiqueDialog = true;
+    }
     this.historiqueLoading = true;
     this.historiqueData = null;
 
@@ -289,8 +295,19 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
         });
         this.historiqueLoading = false;
         this.historiqueDialog = false;
+        this.historiqueSlideoverVisible = false;
       },
     });
+  }
+
+  closeHistoriqueSlideover() {
+    this.historiqueSlideoverVisible = false;
+    this.historiqueData = null;
+  }
+
+  onHistoriqueDeleteVersement(versement: Versement) {
+    if (!this.historiqueData) return;
+    this.confirmDeleteVersement(this.historiqueData.facture_id, versement);
   }
 
   confirmDeleteVersement(factureId: number, versement: Versement) {
@@ -391,6 +408,13 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
 
   goBack() {
     this.router.navigate(['/comptabilite/comptabilite-packing-liste']);
+  }
+
+  // Slide-over historique (mobile)
+  historiqueSlideoverVisible: boolean = false;
+
+  get isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
   }
 
   // Slide-over paiement

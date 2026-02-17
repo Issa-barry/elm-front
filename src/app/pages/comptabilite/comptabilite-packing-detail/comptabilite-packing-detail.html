@@ -44,6 +44,20 @@
     </div>
 </div>
 
+<!-- Slide-over historique versements (full screen sur mobile) -->
+<div class="fixed inset-0 z-50" *ngIf="historiqueSlideoverVisible">
+    <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeHistoriqueSlideover()"></div>
+    <div class="detail-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
+         <app-comptabilite-historique-versements
+            [data]="historiqueData"
+            [loading]="historiqueLoading"
+            [canDelete]="canDeleteVersement"
+            (onClose)="closeHistoriqueSlideover()"
+            (onDeleteVersement)="onHistoriqueDeleteVersement($event)"
+         ></app-comptabilite-historique-versements>
+    </div>
+</div>
+
 <!-- Contenu scrollable (full screen sur mobile) -->
 <div class="detail-mobile-scroll">
 <!-- Stats bar -->

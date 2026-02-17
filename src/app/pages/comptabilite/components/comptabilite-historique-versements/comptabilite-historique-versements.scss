@@ -1,0 +1,77 @@
+// ─── Full height dans le slideover (full screen mobile) ──
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.historique-panel {
+    min-height: 0;
+    overflow: hidden;
+}
+
+// ─── Mobile: plein écran ──
+@media (max-width: 768px) {
+    :host {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .historique-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .historique-footer {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+}
+
+// ─── Versement card ──
+.versement-card {
+    background: var(--p-surface-0);
+    transition: background 0.15s ease;
+}
+
+// ─── Mode badge ──
+.versement-mode-badge {
+    background: var(--p-surface-100);
+    color: var(--p-surface-600);
+}
+
+// ─── Statut badge ──
+.historique-statut-badge {
+    &--success {
+        background: #ecfdf5;
+        color: #059669;
+    }
+    &--warn {
+        background: #fffbeb;
+        color: #d97706;
+    }
+}
+
+// ─── Dark mode ──
+:host-context(.app-dark) {
+    .versement-card {
+        background: var(--p-surface-800);
+    }
+
+    .versement-mode-badge {
+        background: var(--p-surface-700);
+        color: var(--p-surface-300);
+    }
+
+    .historique-statut-badge {
+        &--success {
+            background: rgba(5, 150, 105, 0.12);
+            color: #34d399;
+        }
+        &--warn {
+            background: rgba(217, 119, 6, 0.12);
+            color: #fbbf24;
+        }
+    }
+}

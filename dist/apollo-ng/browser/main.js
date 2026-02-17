@@ -3157,11 +3157,11 @@ var appRoutes = [
       },
       {
         path: "comptabilite",
-        loadChildren: () => import("./chunk-V7ZXI3CN.js")
+        loadChildren: () => import("./chunk-HZUA2NIF.js")
       },
       {
         path: "contacts",
-        loadChildren: () => import("./chunk-2NZ4BIBT.js")
+        loadChildren: () => import("./chunk-4U4I5GP4.js")
       },
       {
         path: "packings",

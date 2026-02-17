@@ -2150,6 +2150,343 @@ var ComptabilitePackingPaiementDialog = class _ComptabilitePackingPaiementDialog
   (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ComptabilitePackingPaiementDialog, { className: "ComptabilitePackingPaiementDialog", filePath: "src/app/pages/comptabilite/components/comptabilite-packing-paiement-dialog/comptabilite-packing-paiement-dialog.ts", lineNumber: 9 });
 })();
 
+// src/app/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements.ts
+function ComptabiliteHistoriqueVersements_div_0_div_28_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 25);
+    \u0275\u0275element(1, "i", 26);
+    \u0275\u0275elementEnd();
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_div_29_div_3_span_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 35);
+    \u0275\u0275element(1, "i", 40);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const versement_r3 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", versement_r3.creator.name, " ");
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_div_29_div_3_div_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 41);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const versement_r3 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", versement_r3.notes, " ");
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_div_29_div_3_div_12_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r4 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 42)(1, "button", 43);
+    \u0275\u0275listener("click", function ComptabiliteHistoriqueVersements_div_0_div_29_div_3_div_12_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r4);
+      const versement_r3 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r1.onDeleteVersement.emit(versement_r3));
+    });
+    \u0275\u0275element(2, "i", 44);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    \u0275\u0275advance();
+    \u0275\u0275property("text", true)("rounded", true);
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_div_29_div_3_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 30)(1, "div", 31)(2, "span", 32);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "span", 33);
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "div", 34)(7, "span", 35);
+    \u0275\u0275element(8, "i", 36);
+    \u0275\u0275text(9);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(10, ComptabiliteHistoriqueVersements_div_0_div_29_div_3_span_10_Template, 3, 1, "span", 37);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(11, ComptabiliteHistoriqueVersements_div_0_div_29_div_3_div_11_Template, 2, 1, "div", 38)(12, ComptabiliteHistoriqueVersements_div_0_div_29_div_3_div_12_Template, 3, 2, "div", 39);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const versement_r3 = ctx.$implicit;
+    const ctx_r1 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1(" ", ctx_r1.formatCurrency(versement_r3.montant), " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", versement_r3.mode_paiement_label, " ");
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1(" ", ctx_r1.formatDate(versement_r3.date_versement), " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", versement_r3.creator);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", versement_r3.notes);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.canDelete);
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_div_29_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 27)(1, "div", 28);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(3, ComptabiliteHistoriqueVersements_div_0_div_29_div_3_Template, 13, 6, "div", 29);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2(" ", ctx_r1.data.versements.length, " versement", ctx_r1.data.versements.length > 1 ? "s" : "", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.data.versements);
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_div_30_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 45);
+    \u0275\u0275element(1, "i", 46);
+    \u0275\u0275elementStart(2, "span", 47);
+    \u0275\u0275text(3, "Aucun versement enregistr\xE9");
+    \u0275\u0275elementEnd()();
+  }
+}
+function ComptabiliteHistoriqueVersements_div_0_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r1 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 1)(1, "div", 2)(2, "div", 3)(3, "div", 4);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 5);
+    \u0275\u0275text(6, "Historique des versements");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(7, "button", 6);
+    \u0275\u0275listener("click", function ComptabiliteHistoriqueVersements_div_0_Template_button_click_7_listener() {
+      \u0275\u0275restoreView(_r1);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.onClose.emit());
+    });
+    \u0275\u0275element(8, "i", 7);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(9, "div", 8)(10, "div", 9)(11, "div", 10)(12, "div", 11)(13, "span", 12);
+    \u0275\u0275text(14, "Total facture");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(15, "span", 13);
+    \u0275\u0275text(16);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(17, "div", 11)(18, "span", 12);
+    \u0275\u0275text(19, "D\xE9j\xE0 vers\xE9");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(20, "span", 14);
+    \u0275\u0275text(21);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275element(22, "div", 15);
+    \u0275\u0275elementStart(23, "div", 11)(24, "span", 16);
+    \u0275\u0275text(25, "Reste \xE0 payer");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(26, "span", 17);
+    \u0275\u0275text(27);
+    \u0275\u0275elementEnd()()()();
+    \u0275\u0275template(28, ComptabiliteHistoriqueVersements_div_0_div_28_Template, 2, 0, "div", 18)(29, ComptabiliteHistoriqueVersements_div_0_div_29_Template, 4, 3, "div", 19)(30, ComptabiliteHistoriqueVersements_div_0_div_30_Template, 4, 0, "div", 20);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(31, "div", 21)(32, "div", 22)(33, "span", 23);
+    \u0275\u0275text(34, "Statut");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(35, "span", 24);
+    \u0275\u0275text(36);
+    \u0275\u0275elementEnd()()()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate(ctx_r1.data.reference.replace("FACT-PACK-", ""));
+    \u0275\u0275advance(3);
+    \u0275\u0275property("text", true)("rounded", true);
+    \u0275\u0275advance(9);
+    \u0275\u0275textInterpolate(ctx_r1.formatCurrency(ctx_r1.data.montant_total));
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate(ctx_r1.formatCurrency(ctx_r1.data.montant_verse));
+    \u0275\u0275advance(6);
+    \u0275\u0275textInterpolate(ctx_r1.formatCurrency(ctx_r1.data.montant_restant));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.loading);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r1.loading && ctx_r1.data.versements.length > 0);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r1.loading && ctx_r1.data.versements.length === 0);
+    \u0275\u0275advance(5);
+    \u0275\u0275classProp("historique-statut-badge--success", ctx_r1.data.is_soldee)("historique-statut-badge--warn", !ctx_r1.data.is_soldee);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r1.data.is_soldee ? "Sold\xE9" : "En cours", " ");
+  }
+}
+var ComptabiliteHistoriqueVersements = class _ComptabiliteHistoriqueVersements {
+  data = null;
+  loading = false;
+  canDelete = false;
+  onClose = new EventEmitter();
+  onDeleteVersement = new EventEmitter();
+  formatCurrency(value) {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "decimal",
+      minimumFractionDigits: 0
+    }).format(value) + " GNF";
+  }
+  formatDate(dateStr) {
+    if (!dateStr)
+      return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("fr-FR");
+  }
+  static \u0275fac = function ComptabiliteHistoriqueVersements_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _ComptabiliteHistoriqueVersements)();
+  };
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _ComptabiliteHistoriqueVersements, selectors: [["app-comptabilite-historique-versements"]], inputs: { data: "data", loading: "loading", canDelete: "canDelete" }, outputs: { onClose: "onClose", onDeleteVersement: "onDeleteVersement" }, decls: 1, vars: 1, consts: [["class", "historique-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900", 4, "ngIf"], [1, "historique-panel", "flex", "flex-col", "h-full", "bg-surface-0", "dark:bg-surface-900"], [1, "historique-header", "w-full", "flex-shrink-0", "p-6", "border-b", "border-surface-200", "dark:border-surface-700", "flex", "items-center"], [1, "flex-1", "min-w-0"], [1, "text-surface-900", "dark:text-surface-0", "text-xl", "font-medium", "leading-tight"], [1, "text-surface-500", "dark:text-surface-400", "text-sm", "font-normal", "mt-1"], ["pButton", "", 1, "w-10", "h-10", 3, "click", "text", "rounded"], ["pButtonIcon", "", 1, "pi", "pi-times"], [1, "historique-body", "flex-1", "min-h-0", "w-full", "overflow-y-auto"], [1, "p-6", "border-b", "border-surface-200", "dark:border-surface-700"], [1, "w-full", "p-5", "bg-surface-50", "dark:bg-surface-800", "rounded-xl", "flex", "flex-col", "gap-4"], [1, "w-full", "flex", "justify-between", "items-center"], [1, "text-surface-500", "dark:text-surface-400", "text-base"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-medium"], [1, "text-base", "font-semibold", 2, "color", "#059669"], [1, "w-full", "h-px", "bg-surface-200", "dark:bg-surface-700"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-semibold"], [1, "text-lg", "font-bold", 2, "color", "#d97706"], ["class", "flex items-center justify-center p-12", 4, "ngIf"], ["class", "p-6 flex flex-col gap-3", 4, "ngIf"], ["class", "flex flex-col items-center justify-center gap-3 py-16 text-surface-300 dark:text-surface-500", 4, "ngIf"], [1, "historique-footer", "w-full", "border-t", "border-surface-200", "dark:border-surface-700", "p-6", "flex-shrink-0"], [1, "flex", "items-center", "justify-between"], [1, "text-surface-500", "dark:text-surface-400", "text-sm", "font-medium"], [1, "historique-statut-badge", "text-sm", "font-semibold", "px-3", "py-1", "rounded-full"], [1, "flex", "items-center", "justify-center", "p-12"], [1, "pi", "pi-spin", "pi-spinner", "text-3xl", "text-surface-300"], [1, "p-6", "flex", "flex-col", "gap-3"], [1, "text-surface-500", "dark:text-surface-400", "text-xs", "font-semibold", "uppercase", "tracking-wider", "mb-1"], ["class", "versement-card p-4 rounded-xl border border-surface-200 dark:border-surface-700 flex flex-col gap-2", 4, "ngFor", "ngForOf"], [1, "versement-card", "p-4", "rounded-xl", "border", "border-surface-200", "dark:border-surface-700", "flex", "flex-col", "gap-2"], [1, "flex", "justify-between", "items-center"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-bold", 2, "color", "#059669"], [1, "versement-mode-badge", "text-xs", "font-semibold", "px-2", "py-1", "rounded-full"], [1, "flex", "items-center", "gap-4", "text-sm", "text-surface-500", "dark:text-surface-400"], [1, "flex", "items-center", "gap-1"], [1, "pi", "pi-calendar", "text-xs"], ["class", "flex items-center gap-1", 4, "ngIf"], ["class", "text-sm text-surface-400 dark:text-surface-500 italic", 4, "ngIf"], ["class", "flex justify-end pt-1", 4, "ngIf"], [1, "pi", "pi-user", "text-xs"], [1, "text-sm", "text-surface-400", "dark:text-surface-500", "italic"], [1, "flex", "justify-end", "pt-1"], ["pButton", "", "severity", "danger", 1, "w-8", "h-8", 3, "click", "text", "rounded"], ["pButtonIcon", "", 1, "pi", "pi-trash", "text-sm"], [1, "flex", "flex-col", "items-center", "justify-center", "gap-3", "py-16", "text-surface-300", "dark:text-surface-500"], [1, "pi", "pi-inbox", "text-4xl"], [1, "text-sm"]], template: function ComptabiliteHistoriqueVersements_Template(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275template(0, ComptabiliteHistoriqueVersements_div_0_Template, 37, 14, "div", 0);
+    }
+    if (rf & 2) {
+      \u0275\u0275property("ngIf", ctx.data);
+    }
+  }, dependencies: [CommonModule, NgForOf, NgIf, ButtonModule, ButtonDirective, ButtonIcon], styles: ["\n\n[_nghost-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n}\n.historique-panel[_ngcontent-%COMP%] {\n  min-height: 0;\n  overflow: hidden;\n}\n@media (max-width: 768px) {\n  [_nghost-%COMP%] {\n    width: 100%;\n    max-width: 100%;\n    overflow: hidden;\n  }\n  .historique-panel[_ngcontent-%COMP%] {\n    width: 100%;\n    max-width: 100%;\n  }\n  .historique-footer[_ngcontent-%COMP%] {\n    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));\n  }\n}\n.versement-card[_ngcontent-%COMP%] {\n  background: var(--p-surface-0);\n  transition: background 0.15s ease;\n}\n.versement-mode-badge[_ngcontent-%COMP%] {\n  background: var(--p-surface-100);\n  color: var(--p-surface-600);\n}\n.historique-statut-badge--success[_ngcontent-%COMP%] {\n  background: #ecfdf5;\n  color: #059669;\n}\n.historique-statut-badge--warn[_ngcontent-%COMP%] {\n  background: #fffbeb;\n  color: #d97706;\n}\n.app-dark[_nghost-%COMP%]   .versement-card[_ngcontent-%COMP%], .app-dark   [_nghost-%COMP%]   .versement-card[_ngcontent-%COMP%] {\n  background: var(--p-surface-800);\n}\n.app-dark[_nghost-%COMP%]   .versement-mode-badge[_ngcontent-%COMP%], .app-dark   [_nghost-%COMP%]   .versement-mode-badge[_ngcontent-%COMP%] {\n  background: var(--p-surface-700);\n  color: var(--p-surface-300);\n}\n.app-dark[_nghost-%COMP%]   .historique-statut-badge--success[_ngcontent-%COMP%], .app-dark   [_nghost-%COMP%]   .historique-statut-badge--success[_ngcontent-%COMP%] {\n  background: rgba(5, 150, 105, 0.12);\n  color: #34d399;\n}\n.app-dark[_nghost-%COMP%]   .historique-statut-badge--warn[_ngcontent-%COMP%], .app-dark   [_nghost-%COMP%]   .historique-statut-badge--warn[_ngcontent-%COMP%] {\n  background: rgba(217, 119, 6, 0.12);\n  color: #fbbf24;\n}\n/*# sourceMappingURL=comptabilite-historique-versements.css.map */"] });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ComptabiliteHistoriqueVersements, [{
+    type: Component,
+    args: [{ selector: "app-comptabilite-historique-versements", standalone: true, imports: [CommonModule, ButtonModule], template: `<div class="historique-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="data">
+    <!-- Header -->
+    <div class="historique-header w-full flex-shrink-0 p-6 border-b border-surface-200 dark:border-surface-700 flex items-center">
+        <div class="flex-1 min-w-0">
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ data.reference.replace('FACT-PACK-', '') }}</div>
+            <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Historique des versements</div>
+        </div>
+        <button pButton [text]="true" [rounded]="true" class="w-10 h-10" (click)="onClose.emit()">
+            <i pButtonIcon class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <!-- Body (scrollable) -->
+    <div class="historique-body flex-1 min-h-0 w-full overflow-y-auto">
+        <!-- R\xE9sum\xE9 facture -->
+        <div class="p-6 border-b border-surface-200 dark:border-surface-700">
+            <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col gap-4">
+                <div class="w-full flex justify-between items-center">
+                    <span class="text-surface-500 dark:text-surface-400 text-base">Total facture</span>
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium">{{ formatCurrency(data.montant_total) }}</span>
+                </div>
+                <div class="w-full flex justify-between items-center">
+                    <span class="text-surface-500 dark:text-surface-400 text-base">D\xE9j\xE0 vers\xE9</span>
+                    <span class="text-base font-semibold" style="color: #059669">{{ formatCurrency(data.montant_verse) }}</span>
+                </div>
+                <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
+                <div class="w-full flex justify-between items-center">
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Reste \xE0 payer</span>
+                    <span class="text-lg font-bold" style="color: #d97706">{{ formatCurrency(data.montant_restant) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="flex items-center justify-center p-12">
+            <i class="pi pi-spin pi-spinner text-3xl text-surface-300"></i>
+        </div>
+
+        <!-- Liste des versements -->
+        <div *ngIf="!loading && data.versements.length > 0" class="p-6 flex flex-col gap-3">
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                {{ data.versements.length }} versement{{ data.versements.length > 1 ? 's' : '' }}
+            </div>
+
+            <div
+                *ngFor="let versement of data.versements"
+                class="versement-card p-4 rounded-xl border border-surface-200 dark:border-surface-700 flex flex-col gap-2"
+            >
+                <div class="flex justify-between items-center">
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-bold" style="color: #059669">
+                        {{ formatCurrency(versement.montant) }}
+                    </span>
+                    <span class="versement-mode-badge text-xs font-semibold px-2 py-1 rounded-full">
+                        {{ versement.mode_paiement_label }}
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-surface-500 dark:text-surface-400">
+                    <span class="flex items-center gap-1">
+                        <i class="pi pi-calendar text-xs"></i>
+                        {{ formatDate(versement.date_versement) }}
+                    </span>
+                    <span *ngIf="versement.creator" class="flex items-center gap-1">
+                        <i class="pi pi-user text-xs"></i>
+                        {{ versement.creator.name }}
+                    </span>
+                </div>
+
+                <div *ngIf="versement.notes" class="text-sm text-surface-400 dark:text-surface-500 italic">
+                    {{ versement.notes }}
+                </div>
+
+                <div *ngIf="canDelete" class="flex justify-end pt-1">
+                    <button
+                        pButton
+                        [text]="true"
+                        [rounded]="true"
+                        severity="danger"
+                        class="w-8 h-8"
+                        (click)="onDeleteVersement.emit(versement)"
+                    >
+                        <i pButtonIcon class="pi pi-trash text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loading && data.versements.length === 0" class="flex flex-col items-center justify-center gap-3 py-16 text-surface-300 dark:text-surface-500">
+            <i class="pi pi-inbox text-4xl"></i>
+            <span class="text-sm">Aucun versement enregistr\xE9</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="historique-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex-shrink-0">
+        <div class="flex items-center justify-between">
+            <span class="text-surface-500 dark:text-surface-400 text-sm font-medium">Statut</span>
+            <span
+                class="historique-statut-badge text-sm font-semibold px-3 py-1 rounded-full"
+                [class.historique-statut-badge--success]="data.is_soldee"
+                [class.historique-statut-badge--warn]="!data.is_soldee"
+            >
+                {{ data.is_soldee ? 'Sold\xE9' : 'En cours' }}
+            </span>
+        </div>
+    </div>
+</div>
+`, styles: ["/* src/app/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements.scss */\n:host {\n  display: flex;\n  flex-direction: column;\n  height: 100%;\n  min-height: 0;\n}\n.historique-panel {\n  min-height: 0;\n  overflow: hidden;\n}\n@media (max-width: 768px) {\n  :host {\n    width: 100%;\n    max-width: 100%;\n    overflow: hidden;\n  }\n  .historique-panel {\n    width: 100%;\n    max-width: 100%;\n  }\n  .historique-footer {\n    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));\n  }\n}\n.versement-card {\n  background: var(--p-surface-0);\n  transition: background 0.15s ease;\n}\n.versement-mode-badge {\n  background: var(--p-surface-100);\n  color: var(--p-surface-600);\n}\n.historique-statut-badge--success {\n  background: #ecfdf5;\n  color: #059669;\n}\n.historique-statut-badge--warn {\n  background: #fffbeb;\n  color: #d97706;\n}\n:host-context(.app-dark) .versement-card {\n  background: var(--p-surface-800);\n}\n:host-context(.app-dark) .versement-mode-badge {\n  background: var(--p-surface-700);\n  color: var(--p-surface-300);\n}\n:host-context(.app-dark) .historique-statut-badge--success {\n  background: rgba(5, 150, 105, 0.12);\n  color: #34d399;\n}\n:host-context(.app-dark) .historique-statut-badge--warn {\n  background: rgba(217, 119, 6, 0.12);\n  color: #fbbf24;\n}\n/*# sourceMappingURL=comptabilite-historique-versements.css.map */\n"] }]
+  }], null, { data: [{
+    type: Input
+  }], loading: [{
+    type: Input
+  }], canDelete: [{
+    type: Input
+  }], onClose: [{
+    type: Output
+  }], onDeleteVersement: [{
+    type: Output
+  }] });
+})();
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ComptabiliteHistoriqueVersements, { className: "ComptabiliteHistoriqueVersements", filePath: "src/app/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements.ts", lineNumber: 13 });
+})();
+
 // src/app/pages/comptabilite/comptabilite-packing-detail/comptabilite-packing-detail.ts
 var _c02 = () => [10, 20, 30];
 var _c12 = () => ({ "min-width": "55rem" });
@@ -2213,129 +2550,157 @@ function ComptabilitePackingDetail_div_16_Template(rf, ctx) {
     \u0275\u0275property("facture", ctx_r1.slideoverFacture)("saving", ctx_r1.slideoverSaving);
   }
 }
-function ComptabilitePackingDetail_div_48_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_17_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 46);
-    \u0275\u0275text(1, "Chargement...");
+    const _r4 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 42)(1, "div", 43);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_17_Template_div_click_1_listener() {
+      \u0275\u0275restoreView(_r4);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.closeHistoriqueSlideover());
+    });
     \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(2, "div", 44)(3, "app-comptabilite-historique-versements", 46);
+    \u0275\u0275listener("onClose", function ComptabilitePackingDetail_div_17_Template_app_comptabilite_historique_versements_onClose_3_listener() {
+      \u0275\u0275restoreView(_r4);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.closeHistoriqueSlideover());
+    })("onDeleteVersement", function ComptabilitePackingDetail_div_17_Template_app_comptabilite_historique_versements_onDeleteVersement_3_listener($event) {
+      \u0275\u0275restoreView(_r4);
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.onHistoriqueDeleteVersement($event));
+    });
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275property("data", ctx_r1.historiqueData)("loading", ctx_r1.historiqueLoading)("canDelete", ctx_r1.canDeleteVersement);
   }
 }
 function ComptabilitePackingDetail_div_49_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 46);
-    \u0275\u0275text(1, "Aucune facture pour ce prestataire.");
+    \u0275\u0275elementStart(0, "div", 47);
+    \u0275\u0275text(1, "Chargement...");
     \u0275\u0275elementEnd();
-  }
-}
-function ComptabilitePackingDetail_div_50_article_1_p_button_22_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r4 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-button", 64);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_50_article_1_p_button_22_Template_p_button_click_0_listener() {
-      \u0275\u0275restoreView(_r4);
-      const facture_r5 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r1.openSlideoverPaiement(facture_r5));
-    });
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    \u0275\u0275property("text", true)("rounded", true);
-  }
-}
-function ComptabilitePackingDetail_div_50_article_1_p_button_23_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r6 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-button", 65);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_50_article_1_p_button_23_Template_p_button_click_0_listener() {
-      \u0275\u0275restoreView(_r6);
-      const facture_r5 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r1.openHistorique(facture_r5));
-    });
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    \u0275\u0275property("text", true)("rounded", true);
-  }
-}
-function ComptabilitePackingDetail_div_50_article_1_p_button_24_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r7 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-button", 66);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_50_article_1_p_button_24_Template_p_button_click_0_listener() {
-      \u0275\u0275restoreView(_r7);
-      const facture_r5 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r1.confirmDeleteFacture(facture_r5));
-    });
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    \u0275\u0275property("text", true)("rounded", true);
-  }
-}
-function ComptabilitePackingDetail_div_50_article_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "article", 49)(1, "div", 50)(2, "span", 51);
-    \u0275\u0275text(3);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "span", 52);
-    \u0275\u0275text(5);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "span", 53);
-    \u0275\u0275text(7);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(8, "div", 54)(9, "span", 55);
-    \u0275\u0275text(10);
-    \u0275\u0275pipe(11, "money");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(12, "span", 56);
-    \u0275\u0275text(13);
-    \u0275\u0275pipe(14, "money");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "span", 57);
-    \u0275\u0275text(16);
-    \u0275\u0275pipe(17, "money");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(18, "div", 58)(19, "span", 59);
-    \u0275\u0275text(20);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(21, "div", 60);
-    \u0275\u0275template(22, ComptabilitePackingDetail_div_50_article_1_p_button_22_Template, 1, 2, "p-button", 61)(23, ComptabilitePackingDetail_div_50_article_1_p_button_23_Template, 1, 2, "p-button", 62)(24, ComptabilitePackingDetail_div_50_article_1_p_button_24_Template, 1, 2, "p-button", 63);
-    \u0275\u0275elementEnd()()();
-  }
-  if (rf & 2) {
-    const facture_r5 = ctx.$implicit;
-    const ctx_r1 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(ctx_r1.getReferenceShort(facture_r5.reference));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r1.formatDateDisplay(facture_r5.date));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("", facture_r5.total_rouleaux, " rouleaux");
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(11, 11, facture_r5.montant_total, "GNF"));
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate1("Vers\xE9 : ", \u0275\u0275pipeBind2(14, 14, facture_r5.montant_verse, "GNF"));
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate1("Restant : ", \u0275\u0275pipeBind2(17, 17, facture_r5.montant_restant, "GNF"));
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngClass", \u0275\u0275pureFunction4(20, _c52, facture_r5.statut === "impayee", facture_r5.statut === "partielle", facture_r5.statut === "payee", facture_r5.statut === "annulee"));
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(facture_r5.statut_label);
-    \u0275\u0275advance(2);
-    \u0275\u0275property("ngIf", ctx_r1.canCreateVersement && facture_r5.statut !== "payee");
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", ctx_r1.canReadVersement);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", ctx_r1.canDeleteFacture && facture_r5.montant_verse === 0);
   }
 }
 function ComptabilitePackingDetail_div_50_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementStart(0, "div", 47);
-    \u0275\u0275template(1, ComptabilitePackingDetail_div_50_article_1_Template, 25, 25, "article", 48);
+    \u0275\u0275text(1, "Aucune facture pour ce prestataire.");
+    \u0275\u0275elementEnd();
+  }
+}
+function ComptabilitePackingDetail_div_51_article_1_p_button_22_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r5 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "p-button", 65);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_51_article_1_p_button_22_Template_p_button_click_0_listener() {
+      \u0275\u0275restoreView(_r5);
+      const facture_r6 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.openSlideoverPaiement(facture_r6));
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    \u0275\u0275property("text", true)("rounded", true);
+  }
+}
+function ComptabilitePackingDetail_div_51_article_1_p_button_23_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r7 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "p-button", 66);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_51_article_1_p_button_23_Template_p_button_click_0_listener() {
+      \u0275\u0275restoreView(_r7);
+      const facture_r6 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.openHistorique(facture_r6));
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    \u0275\u0275property("text", true)("rounded", true);
+  }
+}
+function ComptabilitePackingDetail_div_51_article_1_p_button_24_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r8 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "p-button", 67);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_51_article_1_p_button_24_Template_p_button_click_0_listener() {
+      \u0275\u0275restoreView(_r8);
+      const facture_r6 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r1.confirmDeleteFacture(facture_r6));
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    \u0275\u0275property("text", true)("rounded", true);
+  }
+}
+function ComptabilitePackingDetail_div_51_article_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "article", 50)(1, "div", 51)(2, "span", 52);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "span", 53);
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "span", 54);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(8, "div", 55)(9, "span", 56);
+    \u0275\u0275text(10);
+    \u0275\u0275pipe(11, "money");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "span", 57);
+    \u0275\u0275text(13);
+    \u0275\u0275pipe(14, "money");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(15, "span", 58);
+    \u0275\u0275text(16);
+    \u0275\u0275pipe(17, "money");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(18, "div", 59)(19, "span", 60);
+    \u0275\u0275text(20);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(21, "div", 61);
+    \u0275\u0275template(22, ComptabilitePackingDetail_div_51_article_1_p_button_22_Template, 1, 2, "p-button", 62)(23, ComptabilitePackingDetail_div_51_article_1_p_button_23_Template, 1, 2, "p-button", 63)(24, ComptabilitePackingDetail_div_51_article_1_p_button_24_Template, 1, 2, "p-button", 64);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const facture_r6 = ctx.$implicit;
+    const ctx_r1 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(ctx_r1.getReferenceShort(facture_r6.reference));
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(ctx_r1.formatDateDisplay(facture_r6.date));
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("", facture_r6.total_rouleaux, " rouleaux");
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(11, 11, facture_r6.montant_total, "GNF"));
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1("Vers\xE9 : ", \u0275\u0275pipeBind2(14, 14, facture_r6.montant_verse, "GNF"));
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1("Restant : ", \u0275\u0275pipeBind2(17, 17, facture_r6.montant_restant, "GNF"));
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngClass", \u0275\u0275pureFunction4(20, _c52, facture_r6.statut === "impayee", facture_r6.statut === "partielle", facture_r6.statut === "payee", facture_r6.statut === "annulee"));
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(facture_r6.statut_label);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", ctx_r1.canCreateVersement && facture_r6.statut !== "payee");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.canReadVersement);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r1.canDeleteFacture && facture_r6.montant_verse === 0);
+  }
+}
+function ComptabilitePackingDetail_div_51_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 48);
+    \u0275\u0275template(1, ComptabilitePackingDetail_div_51_article_1_Template, 25, 25, "article", 49);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -2344,58 +2709,58 @@ function ComptabilitePackingDetail_div_50_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r1.factures());
   }
 }
-function ComptabilitePackingDetail_ng_template_53_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_54_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 67)(1, "h5", 68);
+    \u0275\u0275elementStart(0, "div", 68)(1, "h5", 69);
     \u0275\u0275text(2, "Factures");
     \u0275\u0275elementEnd()();
   }
 }
-function ComptabilitePackingDetail_ng_template_55_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_56_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "th", 69)(2, "span", 70);
+    \u0275\u0275elementStart(0, "tr")(1, "th", 70)(2, "span", 71);
     \u0275\u0275text(3, "R\xE9f\xE9rence ");
-    \u0275\u0275element(4, "p-sortIcon", 71);
+    \u0275\u0275element(4, "p-sortIcon", 72);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "th", 72)(6, "span", 70);
+    \u0275\u0275elementStart(5, "th", 73)(6, "span", 71);
     \u0275\u0275text(7, "Date ");
-    \u0275\u0275element(8, "p-sortIcon", 73);
+    \u0275\u0275element(8, "p-sortIcon", 74);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(9, "th", 74)(10, "span", 75);
+    \u0275\u0275elementStart(9, "th", 75)(10, "span", 76);
     \u0275\u0275text(11, "Rouleaux ");
-    \u0275\u0275element(12, "p-sortIcon", 76);
+    \u0275\u0275element(12, "p-sortIcon", 77);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(13, "th", 77)(14, "span", 75);
+    \u0275\u0275elementStart(13, "th", 78)(14, "span", 76);
     \u0275\u0275text(15, "Prix/rouleau");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(16, "th", 78)(17, "span", 75);
+    \u0275\u0275elementStart(16, "th", 79)(17, "span", 76);
     \u0275\u0275text(18, "A payer ");
-    \u0275\u0275element(19, "p-sortIcon", 79);
+    \u0275\u0275element(19, "p-sortIcon", 80);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(20, "th", 80)(21, "span", 75);
+    \u0275\u0275elementStart(20, "th", 81)(21, "span", 76);
     \u0275\u0275text(22, "Vers\xE9 ");
-    \u0275\u0275element(23, "p-sortIcon", 81);
+    \u0275\u0275element(23, "p-sortIcon", 82);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(24, "th", 77)(25, "span", 75);
+    \u0275\u0275elementStart(24, "th", 78)(25, "span", 76);
     \u0275\u0275text(26, "Restant");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(27, "th", 82)(28, "span", 83);
+    \u0275\u0275elementStart(27, "th", 83)(28, "span", 84);
     \u0275\u0275text(29, "Statut ");
-    \u0275\u0275element(30, "p-sortIcon", 84);
+    \u0275\u0275element(30, "p-sortIcon", 85);
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(31, "th", 85);
+    \u0275\u0275element(31, "th", 86);
     \u0275\u0275elementEnd();
   }
 }
-function ComptabilitePackingDetail_ng_template_57_p_button_24_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_58_p_button_24_Template(rf, ctx) {
   if (rf & 1) {
-    const _r8 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-button", 64);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_57_p_button_24_Template_p_button_click_0_listener() {
-      \u0275\u0275restoreView(_r8);
-      const facture_r9 = \u0275\u0275nextContext().$implicit;
+    const _r9 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "p-button", 65);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_58_p_button_24_Template_p_button_click_0_listener() {
+      \u0275\u0275restoreView(_r9);
+      const facture_r10 = \u0275\u0275nextContext().$implicit;
       const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.openSlideoverPaiement(facture_r9));
+      return \u0275\u0275resetView(ctx_r1.openSlideoverPaiement(facture_r10));
     });
     \u0275\u0275elementEnd();
   }
@@ -2403,31 +2768,15 @@ function ComptabilitePackingDetail_ng_template_57_p_button_24_Template(rf, ctx) 
     \u0275\u0275property("text", true)("rounded", true);
   }
 }
-function ComptabilitePackingDetail_ng_template_57_p_button_25_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r10 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-button", 96);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_57_p_button_25_Template_p_button_click_0_listener() {
-      \u0275\u0275restoreView(_r10);
-      const facture_r9 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.openHistorique(facture_r9));
-    });
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    \u0275\u0275property("text", true)("rounded", true);
-  }
-}
-function ComptabilitePackingDetail_ng_template_57_p_button_26_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_58_p_button_25_Template(rf, ctx) {
   if (rf & 1) {
     const _r11 = \u0275\u0275getCurrentView();
     \u0275\u0275elementStart(0, "p-button", 97);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_57_p_button_26_Template_p_button_click_0_listener() {
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_58_p_button_25_Template_p_button_click_0_listener() {
       \u0275\u0275restoreView(_r11);
-      const facture_r9 = \u0275\u0275nextContext().$implicit;
+      const facture_r10 = \u0275\u0275nextContext().$implicit;
       const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.confirmDeleteFacture(facture_r9));
+      return \u0275\u0275resetView(ctx_r1.openHistorique(facture_r10));
     });
     \u0275\u0275elementEnd();
   }
@@ -2435,133 +2784,149 @@ function ComptabilitePackingDetail_ng_template_57_p_button_26_Template(rf, ctx) 
     \u0275\u0275property("text", true)("rounded", true);
   }
 }
-function ComptabilitePackingDetail_ng_template_57_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_58_p_button_26_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 86);
+    const _r12 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "p-button", 98);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_58_p_button_26_Template_p_button_click_0_listener() {
+      \u0275\u0275restoreView(_r12);
+      const facture_r10 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.confirmDeleteFacture(facture_r10));
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    \u0275\u0275property("text", true)("rounded", true);
+  }
+}
+function ComptabilitePackingDetail_ng_template_58_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 87);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 87);
+    \u0275\u0275elementStart(3, "td", 88);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 88);
+    \u0275\u0275elementStart(5, "td", 89);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 88);
+    \u0275\u0275elementStart(7, "td", 89);
     \u0275\u0275text(8);
     \u0275\u0275pipe(9, "money");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "td", 88);
+    \u0275\u0275elementStart(10, "td", 89);
     \u0275\u0275text(11);
     \u0275\u0275pipe(12, "money");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "td", 89);
+    \u0275\u0275elementStart(13, "td", 90);
     \u0275\u0275text(14);
     \u0275\u0275pipe(15, "money");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td", 90);
+    \u0275\u0275elementStart(16, "td", 91);
     \u0275\u0275text(17);
     \u0275\u0275pipe(18, "money");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(19, "td", 91)(20, "span", 92);
+    \u0275\u0275elementStart(19, "td", 92)(20, "span", 93);
     \u0275\u0275text(21);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(22, "td")(23, "div", 93);
-    \u0275\u0275template(24, ComptabilitePackingDetail_ng_template_57_p_button_24_Template, 1, 2, "p-button", 61)(25, ComptabilitePackingDetail_ng_template_57_p_button_25_Template, 1, 2, "p-button", 94)(26, ComptabilitePackingDetail_ng_template_57_p_button_26_Template, 1, 2, "p-button", 95);
+    \u0275\u0275elementStart(22, "td")(23, "div", 94);
+    \u0275\u0275template(24, ComptabilitePackingDetail_ng_template_58_p_button_24_Template, 1, 2, "p-button", 62)(25, ComptabilitePackingDetail_ng_template_58_p_button_25_Template, 1, 2, "p-button", 95)(26, ComptabilitePackingDetail_ng_template_58_p_button_26_Template, 1, 2, "p-button", 96);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
-    const facture_r9 = ctx.$implicit;
+    const facture_r10 = ctx.$implicit;
     const ctx_r1 = \u0275\u0275nextContext();
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r1.getReferenceShort(facture_r9.reference));
+    \u0275\u0275textInterpolate(ctx_r1.getReferenceShort(facture_r10.reference));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r1.formatDateDisplay(facture_r9.date));
+    \u0275\u0275textInterpolate(ctx_r1.formatDateDisplay(facture_r10.date));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(facture_r9.total_rouleaux);
+    \u0275\u0275textInterpolate(facture_r10.total_rouleaux);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(9, 12, facture_r9.prix_par_rouleau, "GNF"));
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(9, 12, facture_r10.prix_par_rouleau, "GNF"));
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(12, 15, facture_r9.montant_total, "GNF"));
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(12, 15, facture_r10.montant_total, "GNF"));
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(15, 18, facture_r9.montant_verse, "GNF"));
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(15, 18, facture_r10.montant_verse, "GNF"));
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(18, 21, facture_r9.montant_restant, "GNF"));
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(18, 21, facture_r10.montant_restant, "GNF"));
     \u0275\u0275advance(3);
-    \u0275\u0275property("ngClass", \u0275\u0275pureFunction4(24, _c6, facture_r9.statut === "impayee", facture_r9.statut === "partielle", facture_r9.statut === "payee", facture_r9.statut === "annulee"));
+    \u0275\u0275property("ngClass", \u0275\u0275pureFunction4(24, _c6, facture_r10.statut === "impayee", facture_r10.statut === "partielle", facture_r10.statut === "payee", facture_r10.statut === "annulee"));
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", facture_r9.statut_label, " ");
+    \u0275\u0275textInterpolate1(" ", facture_r10.statut_label, " ");
     \u0275\u0275advance(3);
-    \u0275\u0275property("ngIf", ctx_r1.canCreateVersement && facture_r9.statut !== "payee");
+    \u0275\u0275property("ngIf", ctx_r1.canCreateVersement && facture_r10.statut !== "payee");
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", ctx_r1.canReadVersement);
     \u0275\u0275advance();
-    \u0275\u0275property("ngIf", ctx_r1.canDeleteFacture && facture_r9.montant_verse === 0);
+    \u0275\u0275property("ngIf", ctx_r1.canDeleteFacture && facture_r10.montant_verse === 0);
   }
 }
-function ComptabilitePackingDetail_ng_template_59_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_60_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 98)(2, "div", 99);
-    \u0275\u0275element(3, "i", 100);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 99)(2, "div", 100);
+    \u0275\u0275element(3, "i", 101);
     \u0275\u0275elementStart(4, "span");
     \u0275\u0275text(5, "Aucune facture pour ce prestataire");
     \u0275\u0275elementEnd()()()();
   }
 }
-function ComptabilitePackingDetail_div_62_small_29_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_63_small_29_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 111);
+    \u0275\u0275elementStart(0, "small", 112);
     \u0275\u0275text(1, "Montant requis.");
     \u0275\u0275elementEnd();
   }
 }
-function ComptabilitePackingDetail_div_62_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_63_Template(rf, ctx) {
   if (rf & 1) {
-    const _r12 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 101)(1, "div", 102)(2, "span", 103);
+    const _r13 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 102)(1, "div", 103)(2, "span", 104);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
-    \u0275\u0275element(4, "span", 104);
+    \u0275\u0275element(4, "span", 105);
     \u0275\u0275elementStart(5, "span");
     \u0275\u0275text(6, "Total : ");
     \u0275\u0275elementStart(7, "strong");
     \u0275\u0275text(8);
     \u0275\u0275pipe(9, "money");
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(10, "span", 104);
-    \u0275\u0275elementStart(11, "span", 105);
+    \u0275\u0275element(10, "span", 105);
+    \u0275\u0275elementStart(11, "span", 106);
     \u0275\u0275text(12, "Vers\xE9 : ");
     \u0275\u0275elementStart(13, "strong");
     \u0275\u0275text(14);
     \u0275\u0275pipe(15, "money");
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(16, "span", 104);
-    \u0275\u0275elementStart(17, "span", 106);
+    \u0275\u0275element(16, "span", 105);
+    \u0275\u0275elementStart(17, "span", 107);
     \u0275\u0275text(18);
     \u0275\u0275pipe(19, "money");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(20, "div", 101)(21, "div", 36)(22, "label", 107);
+    \u0275\u0275elementStart(20, "div", 102)(21, "div", 36)(22, "label", 108);
     \u0275\u0275text(23, "Mode de paiement");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "p-select", 108);
-    \u0275\u0275twoWayListener("ngModelChange", function ComptabilitePackingDetail_div_62_Template_p_select_ngModelChange_24_listener($event) {
-      \u0275\u0275restoreView(_r12);
+    \u0275\u0275elementStart(24, "p-select", 109);
+    \u0275\u0275twoWayListener("ngModelChange", function ComptabilitePackingDetail_div_63_Template_p_select_ngModelChange_24_listener($event) {
+      \u0275\u0275restoreView(_r13);
       const ctx_r1 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r1.versementData.mode_paiement, $event) || (ctx_r1.versementData.mode_paiement = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(25, "div", 36)(26, "label", 107);
+    \u0275\u0275elementStart(25, "div", 36)(26, "label", 108);
     \u0275\u0275text(27, "Montant \xE0 verser");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(28, "p-inputnumber", 109);
-    \u0275\u0275twoWayListener("ngModelChange", function ComptabilitePackingDetail_div_62_Template_p_inputnumber_ngModelChange_28_listener($event) {
-      \u0275\u0275restoreView(_r12);
+    \u0275\u0275elementStart(28, "p-inputnumber", 110);
+    \u0275\u0275twoWayListener("ngModelChange", function ComptabilitePackingDetail_div_63_Template_p_inputnumber_ngModelChange_28_listener($event) {
+      \u0275\u0275restoreView(_r13);
       const ctx_r1 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r1.versementData.montant, $event) || (ctx_r1.versementData.montant = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275template(29, ComptabilitePackingDetail_div_62_small_29_Template, 2, 0, "small", 110);
+    \u0275\u0275template(29, ComptabilitePackingDetail_div_63_small_29_Template, 2, 0, "small", 111);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
@@ -2584,25 +2949,25 @@ function ComptabilitePackingDetail_div_62_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r1.versementSubmitted && !ctx_r1.versementData.montant);
   }
 }
-function ComptabilitePackingDetail_ng_template_63_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_64_Template(rf, ctx) {
   if (rf & 1) {
-    const _r13 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 112);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_63_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r13);
+    const _r14 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 113);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_64_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r14);
       const ctx_r1 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r1.hideVersementDialog());
     });
-    \u0275\u0275elementStart(1, "span", 113);
+    \u0275\u0275elementStart(1, "span", 114);
     \u0275\u0275text(2, "Annuler");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(3, "button", 114);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_63_Template_button_click_3_listener() {
-      \u0275\u0275restoreView(_r13);
+    \u0275\u0275elementStart(3, "button", 115);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_64_Template_button_click_3_listener() {
+      \u0275\u0275restoreView(_r14);
       const ctx_r1 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r1.saveVersement());
     });
-    \u0275\u0275elementStart(4, "span", 113);
+    \u0275\u0275elementStart(4, "span", 114);
     \u0275\u0275text(5, "Enregistrer");
     \u0275\u0275elementEnd()();
   }
@@ -2613,33 +2978,33 @@ function ComptabilitePackingDetail_ng_template_63_Template(rf, ctx) {
     \u0275\u0275property("disabled", ctx_r1.versementSaving)("loading", ctx_r1.versementSaving);
   }
 }
-function ComptabilitePackingDetail_div_66_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_67_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 115);
-    \u0275\u0275element(1, "i", 116);
+    \u0275\u0275elementStart(0, "div", 116);
+    \u0275\u0275element(1, "i", 117);
     \u0275\u0275elementEnd();
   }
 }
-function ComptabilitePackingDetail_div_67_p_table_20_ng_template_1_th_13_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_p_table_20_ng_template_1_th_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "th", 124);
+    \u0275\u0275element(0, "th", 125);
   }
 }
-function ComptabilitePackingDetail_div_67_p_table_20_ng_template_1_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_p_table_20_ng_template_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "th")(2, "span", 70);
+    \u0275\u0275elementStart(0, "tr")(1, "th")(2, "span", 71);
     \u0275\u0275text(3, "Date");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(4, "th", 77)(5, "span", 75);
+    \u0275\u0275elementStart(4, "th", 78)(5, "span", 76);
     \u0275\u0275text(6, "Montant");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "th")(8, "span", 70);
+    \u0275\u0275elementStart(7, "th")(8, "span", 71);
     \u0275\u0275text(9, "Mode");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(10, "th")(11, "span", 70);
+    \u0275\u0275elementStart(10, "th")(11, "span", 71);
     \u0275\u0275text(12, "Notes");
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(13, ComptabilitePackingDetail_div_67_p_table_20_ng_template_1_th_13_Template, 1, 0, "th", 123);
+    \u0275\u0275template(13, ComptabilitePackingDetail_div_68_p_table_20_ng_template_1_th_13_Template, 1, 0, "th", 124);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -2648,15 +3013,15 @@ function ComptabilitePackingDetail_div_67_p_table_20_ng_template_1_Template(rf, 
     \u0275\u0275property("ngIf", ctx_r1.canDeleteVersement);
   }
 }
-function ComptabilitePackingDetail_div_67_p_table_20_ng_template_3_td_9_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_p_table_20_ng_template_3_td_9_Template(rf, ctx) {
   if (rf & 1) {
-    const _r14 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td", 91)(1, "p-button", 66);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_67_p_table_20_ng_template_3_td_9_Template_p_button_click_1_listener() {
-      \u0275\u0275restoreView(_r14);
-      const versement_r15 = \u0275\u0275nextContext().$implicit;
+    const _r15 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "td", 92)(1, "p-button", 67);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_div_68_p_table_20_ng_template_3_td_9_Template_p_button_click_1_listener() {
+      \u0275\u0275restoreView(_r15);
+      const versement_r16 = \u0275\u0275nextContext().$implicit;
       const ctx_r1 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r1.confirmDeleteVersement(ctx_r1.historiqueData.facture_id, versement_r15));
+      return \u0275\u0275resetView(ctx_r1.confirmDeleteVersement(ctx_r1.historiqueData.facture_id, versement_r16));
     });
     \u0275\u0275elementEnd()();
   }
@@ -2665,42 +3030,42 @@ function ComptabilitePackingDetail_div_67_p_table_20_ng_template_3_td_9_Template
     \u0275\u0275property("text", true)("rounded", true);
   }
 }
-function ComptabilitePackingDetail_div_67_p_table_20_ng_template_3_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_p_table_20_ng_template_3_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 125);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 126);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 126);
+    \u0275\u0275elementStart(3, "td", 127);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(5, "td");
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 125);
+    \u0275\u0275elementStart(7, "td", 126);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, ComptabilitePackingDetail_div_67_p_table_20_ng_template_3_td_9_Template, 2, 2, "td", 127);
+    \u0275\u0275template(9, ComptabilitePackingDetail_div_68_p_table_20_ng_template_3_td_9_Template, 2, 2, "td", 128);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const versement_r15 = ctx.$implicit;
+    const versement_r16 = ctx.$implicit;
     const ctx_r1 = \u0275\u0275nextContext(3);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r1.formatDateDisplay(versement_r15.date_versement));
+    \u0275\u0275textInterpolate(ctx_r1.formatDateDisplay(versement_r16.date_versement));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r1.formatCurrency(versement_r15.montant));
+    \u0275\u0275textInterpolate(ctx_r1.formatCurrency(versement_r16.montant));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(versement_r15.mode_paiement_label);
+    \u0275\u0275textInterpolate(versement_r16.mode_paiement_label);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(versement_r15.notes || "-");
+    \u0275\u0275textInterpolate(versement_r16.notes || "-");
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", ctx_r1.canDeleteVersement);
   }
 }
-function ComptabilitePackingDetail_div_67_p_table_20_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_p_table_20_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "p-table", 122);
-    \u0275\u0275template(1, ComptabilitePackingDetail_div_67_p_table_20_ng_template_1_Template, 14, 1, "ng-template", null, 1, \u0275\u0275templateRefExtractor)(3, ComptabilitePackingDetail_div_67_p_table_20_ng_template_3_Template, 10, 5, "ng-template", null, 2, \u0275\u0275templateRefExtractor);
+    \u0275\u0275elementStart(0, "p-table", 123);
+    \u0275\u0275template(1, ComptabilitePackingDetail_div_68_p_table_20_ng_template_1_Template, 14, 1, "ng-template", null, 1, \u0275\u0275templateRefExtractor)(3, ComptabilitePackingDetail_div_68_p_table_20_ng_template_3_Template, 10, 5, "ng-template", null, 2, \u0275\u0275templateRefExtractor);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -2708,40 +3073,40 @@ function ComptabilitePackingDetail_div_67_p_table_20_Template(rf, ctx) {
     \u0275\u0275property("value", ctx_r1.historiqueData.versements)("rowHover", true);
   }
 }
-function ComptabilitePackingDetail_div_67_div_21_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_div_21_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 99);
-    \u0275\u0275element(1, "i", 100);
+    \u0275\u0275elementStart(0, "div", 100);
+    \u0275\u0275element(1, "i", 101);
     \u0275\u0275elementStart(2, "span");
     \u0275\u0275text(3, "Aucun versement enregistr\xE9");
     \u0275\u0275elementEnd()();
   }
 }
-function ComptabilitePackingDetail_div_67_Template(rf, ctx) {
+function ComptabilitePackingDetail_div_68_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 101)(1, "div", 102)(2, "span", 117);
+    \u0275\u0275elementStart(0, "div", 102)(1, "div", 103)(2, "span", 118);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
-    \u0275\u0275element(4, "span", 104);
+    \u0275\u0275element(4, "span", 105);
     \u0275\u0275elementStart(5, "span");
     \u0275\u0275text(6, "Total: ");
     \u0275\u0275elementStart(7, "strong");
     \u0275\u0275text(8);
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(9, "span", 104);
-    \u0275\u0275elementStart(10, "span", 105);
+    \u0275\u0275element(9, "span", 105);
+    \u0275\u0275elementStart(10, "span", 106);
     \u0275\u0275text(11, "Vers\xE9: ");
     \u0275\u0275elementStart(12, "strong");
     \u0275\u0275text(13);
     \u0275\u0275elementEnd()();
-    \u0275\u0275element(14, "span", 104);
-    \u0275\u0275elementStart(15, "span", 118);
+    \u0275\u0275element(14, "span", 105);
+    \u0275\u0275elementStart(15, "span", 119);
     \u0275\u0275text(16);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(17, "span", 119)(18, "span", 92);
+    \u0275\u0275elementStart(17, "span", 120)(18, "span", 93);
     \u0275\u0275text(19);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275template(20, ComptabilitePackingDetail_div_67_p_table_20_Template, 5, 2, "p-table", 120)(21, ComptabilitePackingDetail_div_67_div_21_Template, 4, 0, "div", 121);
+    \u0275\u0275template(20, ComptabilitePackingDetail_div_68_p_table_20_Template, 5, 2, "p-table", 121)(21, ComptabilitePackingDetail_div_68_div_21_Template, 4, 0, "div", 122);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -2764,12 +3129,12 @@ function ComptabilitePackingDetail_div_67_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r1.historiqueData.versements.length === 0);
   }
 }
-function ComptabilitePackingDetail_ng_template_68_Template(rf, ctx) {
+function ComptabilitePackingDetail_ng_template_69_Template(rf, ctx) {
   if (rf & 1) {
-    const _r16 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "p-button", 128);
-    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_68_Template_p_button_click_0_listener() {
-      \u0275\u0275restoreView(_r16);
+    const _r17 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "p-button", 129);
+    \u0275\u0275listener("click", function ComptabilitePackingDetail_ng_template_69_Template_p_button_click_0_listener() {
+      \u0275\u0275restoreView(_r17);
       const ctx_r1 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r1.historiqueDialog = false);
     });
@@ -2945,7 +3310,11 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
   }
   // ========================= Historique versements =========================
   openHistorique(facture) {
-    this.historiqueDialog = true;
+    if (this.isMobile) {
+      this.historiqueSlideoverVisible = true;
+    } else {
+      this.historiqueDialog = true;
+    }
     this.historiqueLoading = true;
     this.historiqueData = null;
     this.factureService.getVersements(facture.id).subscribe({
@@ -2962,8 +3331,18 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
         });
         this.historiqueLoading = false;
         this.historiqueDialog = false;
+        this.historiqueSlideoverVisible = false;
       }
     });
+  }
+  closeHistoriqueSlideover() {
+    this.historiqueSlideoverVisible = false;
+    this.historiqueData = null;
+  }
+  onHistoriqueDeleteVersement(versement) {
+    if (!this.historiqueData)
+      return;
+    this.confirmDeleteVersement(this.historiqueData.facture_id, versement);
   }
   confirmDeleteVersement(factureId, versement) {
     this.confirmationService.confirm({
@@ -3059,6 +3438,11 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
   goBack() {
     this.router.navigate(["/comptabilite/comptabilite-packing-liste"]);
   }
+  // Slide-over historique (mobile)
+  historiqueSlideoverVisible = false;
+  get isMobile() {
+    return typeof window !== "undefined" && window.innerWidth <= this.mobileBreakpoint;
+  }
   // Slide-over paiement
   slideoverVisible = false;
   slideoverFacture = null;
@@ -3113,7 +3497,7 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
         return ctx.onWindowResize();
       }, \u0275\u0275resolveWindow);
     }
-  }, features: [\u0275\u0275ProvidersFeature([MessageService, ConfirmationService])], decls: 71, vars: 51, consts: [["caption", ""], ["header", ""], ["body", ""], ["emptymessage", ""], ["footer", ""], ["position", "top-right", "appendTo", "body", 3, "baseZIndex", "preventOpenDuplicates"], [1, "detail-page-wrap"], [1, "detail-mobile-header"], ["pButton", "", "pRipple", "", "icon", "pi pi-arrow-left", "aria-label", "Retour \xE0 la liste", 1, "p-button-rounded", "p-button-text", "detail-mobile-back", 3, "click"], [1, "detail-mobile-title-wrap"], [1, "detail-mobile-title"], ["class", "detail-mobile-subtitle", 4, "ngIf"], [1, "detail-header", "detail-header--desktop"], [1, "detail-header__left"], ["icon", "pi pi-arrow-left", "severity", "secondary", "pTooltip", "Retour", 3, "click", "rounded", "text"], [1, "detail-header__name"], ["class", "detail-header__phone", 4, "ngIf"], ["class", "fixed inset-0 z-50", 4, "ngIf"], [1, "detail-mobile-scroll"], [1, "stats-bar", "mb-6"], [1, "stats-bar__item"], [1, "stats-bar__icon"], [1, "pi", "pi-wallet"], [1, "stats-bar__value"], [1, "stats-bar__label"], [1, "stats-bar__divider"], [1, "pi", "pi-check-circle"], [1, "pi", "pi-arrow-right"], [1, "detail-factures-mobile"], [1, "detail-factures-mobile__title"], ["class", "detail-factures-mobile__state", 4, "ngIf"], ["class", "detail-factures-mobile__list", 4, "ngIf"], [1, "card", "tableau-card", "detail-tableau-desktop"], ["dataKey", "id", "currentPageReportTemplate", "{first} \xE0 {last} sur {totalRecords} factures", 3, "value", "rows", "paginator", "rowHover", "showCurrentPageReport", "rowsPerPageOptions", "loading", "tableStyle"], ["header", "Enregistrer un versement", 3, "visibleChange", "visible", "contentStyle", "modal", "blockScroll", "dismissableMask", "closeOnEscape"], ["class", "flex flex-col gap-4", 4, "ngIf"], [1, "mt-4"], ["header", "Historique des versements", 3, "visibleChange", "visible", "contentStyle", "modal", "blockScroll", "dismissableMask", "closeOnEscape"], ["class", "flex items-center justify-center p-12", 4, "ngIf"], [1, "detail-mobile-subtitle"], [1, "detail-header__phone"], [1, "pi", "pi-phone"], [1, "fixed", "inset-0", "z-50"], [1, "absolute", "inset-0", "bg-black/50", "animate-fadein", 3, "click"], [1, "detail-paiement-slideover", "bg-surface-0", "dark:bg-surface-900", "absolute", "top-0", "right-0", "shadow-xl", "w-full", "md:w-108", "h-full", "animate-fadeinright"], [3, "onPay", "onClose", "facture", "saving"], [1, "detail-factures-mobile__state"], [1, "detail-factures-mobile__list"], ["class", "detail-facture-card", 4, "ngFor", "ngForOf"], [1, "detail-facture-card"], [1, "detail-facture-card__main"], [1, "detail-facture-card__ref"], [1, "detail-facture-card__date"], [1, "detail-facture-card__rouleaux"], [1, "detail-facture-card__amounts"], [1, "detail-facture-card__total"], [1, "detail-facture-card__verse"], [1, "detail-facture-card__restant"], [1, "detail-facture-card__footer"], [1, "detail-facture-card__badge", 3, "ngClass"], [1, "detail-facture-card__actions"], ["icon", "pi pi-money-bill", "severity", "secondary", "pTooltip", "Payer", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-list", "severity", "info", "pTooltip", "Historique", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-trash", "severity", "danger", "pTooltip", "Supprimer", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-money-bill", "severity", "secondary", "pTooltip", "Payer", 3, "click", "text", "rounded"], ["icon", "pi pi-list", "severity", "info", "pTooltip", "Historique", 3, "click", "text", "rounded"], ["icon", "pi pi-trash", "severity", "danger", "pTooltip", "Supprimer", 3, "click", "text", "rounded"], [1, "table-caption"], [1, "table-caption__title"], ["pSortableColumn", "reference"], [1, "col-header"], ["field", "reference"], ["pSortableColumn", "date"], ["field", "date"], ["pSortableColumn", "total_rouleaux", 1, "text-right"], [1, "col-header", "justify-end"], ["field", "total_rouleaux"], [1, "text-right"], ["pSortableColumn", "montant_total", 1, "text-right"], ["field", "montant_total"], ["pSortableColumn", "montant_verse", 1, "text-right"], ["field", "montant_verse"], ["pSortableColumn", "statut", 1, "text-center"], [1, "col-header", "justify-center"], ["field", "statut"], [2, "width", "10rem"], [1, "font-semibold"], [1, "cell-secondary", "font-semibold"], [1, "text-right", "cell-mono", "font-semibold"], [1, "text-right", "cell-mono", "cell-success", "font-semibold"], [1, "text-right", "cell-mono", "cell-bold"], [1, "text-center"], [1, "status-badge", 3, "ngClass"], [1, "flex", "items-center", "justify-end", "gap-1"], ["icon", "pi pi-list", "severity", "secondary", "pTooltip", "Historique versements", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-trash", "severity", "secondary", "pTooltip", "Supprimer", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-list", "severity", "secondary", "pTooltip", "Historique versements", 3, "click", "text", "rounded"], ["icon", "pi pi-trash", "severity", "secondary", "pTooltip", "Supprimer", 3, "click", "text", "rounded"], ["colspan", "9"], [1, "empty-state"], [1, "pi", "pi-inbox"], [1, "flex", "flex-col", "gap-4"], [1, "preview-summary"], [1, "font-bold"], [1, "preview-summary__sep"], [1, "cell-success"], [1, "font-bold", 2, "color", "#d97706"], [1, "block", "font-bold", "mb-2"], ["optionLabel", "label", "optionValue", "value", "styleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "options"], ["suffix", " GNF", "locale", "fr-FR", "inputStyleClass", "w-full", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "min", "max", "useGrouping"], ["class", "text-red-500", 4, "ngIf"], [1, "text-red-500"], ["pButton", "", 3, "click", "outlined"], ["pButtonLabel", ""], ["pButton", "", 3, "click", "disabled", "loading"], [1, "flex", "items-center", "justify-center", "p-12"], [1, "pi", "pi-spin", "pi-spinner", "text-3xl", "text-surface-300"], [1, "font-bold", "text-lg"], [1, "cell-bold"], [1, "ml-auto"], [3, "value", "rowHover", 4, "ngIf"], ["class", "empty-state", 4, "ngIf"], [3, "value", "rowHover"], ["style", "width: 4rem", 4, "ngIf"], [2, "width", "4rem"], [1, "cell-secondary"], [1, "text-right", "cell-mono", "cell-success", "font-bold"], ["class", "text-center", 4, "ngIf"], ["label", "Fermer", 3, "click", "text"]], template: function ComptabilitePackingDetail_Template(rf, ctx) {
+  }, features: [\u0275\u0275ProvidersFeature([MessageService, ConfirmationService])], decls: 72, vars: 52, consts: [["caption", ""], ["header", ""], ["body", ""], ["emptymessage", ""], ["footer", ""], ["position", "top-right", "appendTo", "body", 3, "baseZIndex", "preventOpenDuplicates"], [1, "detail-page-wrap"], [1, "detail-mobile-header"], ["pButton", "", "pRipple", "", "icon", "pi pi-arrow-left", "aria-label", "Retour \xE0 la liste", 1, "p-button-rounded", "p-button-text", "detail-mobile-back", 3, "click"], [1, "detail-mobile-title-wrap"], [1, "detail-mobile-title"], ["class", "detail-mobile-subtitle", 4, "ngIf"], [1, "detail-header", "detail-header--desktop"], [1, "detail-header__left"], ["icon", "pi pi-arrow-left", "severity", "secondary", "pTooltip", "Retour", 3, "click", "rounded", "text"], [1, "detail-header__name"], ["class", "detail-header__phone", 4, "ngIf"], ["class", "fixed inset-0 z-50", 4, "ngIf"], [1, "detail-mobile-scroll"], [1, "stats-bar", "mb-6"], [1, "stats-bar__item"], [1, "stats-bar__icon"], [1, "pi", "pi-wallet"], [1, "stats-bar__value"], [1, "stats-bar__label"], [1, "stats-bar__divider"], [1, "pi", "pi-check-circle"], [1, "pi", "pi-arrow-right"], [1, "detail-factures-mobile"], [1, "detail-factures-mobile__title"], ["class", "detail-factures-mobile__state", 4, "ngIf"], ["class", "detail-factures-mobile__list", 4, "ngIf"], [1, "card", "tableau-card", "detail-tableau-desktop"], ["dataKey", "id", "currentPageReportTemplate", "{first} \xE0 {last} sur {totalRecords} factures", 3, "value", "rows", "paginator", "rowHover", "showCurrentPageReport", "rowsPerPageOptions", "loading", "tableStyle"], ["header", "Enregistrer un versement", 3, "visibleChange", "visible", "contentStyle", "modal", "blockScroll", "dismissableMask", "closeOnEscape"], ["class", "flex flex-col gap-4", 4, "ngIf"], [1, "mt-4"], ["header", "Historique des versements", 3, "visibleChange", "visible", "contentStyle", "modal", "blockScroll", "dismissableMask", "closeOnEscape"], ["class", "flex items-center justify-center p-12", 4, "ngIf"], [1, "detail-mobile-subtitle"], [1, "detail-header__phone"], [1, "pi", "pi-phone"], [1, "fixed", "inset-0", "z-50"], [1, "absolute", "inset-0", "bg-black/50", "animate-fadein", 3, "click"], [1, "detail-paiement-slideover", "bg-surface-0", "dark:bg-surface-900", "absolute", "top-0", "right-0", "shadow-xl", "w-full", "md:w-108", "h-full", "animate-fadeinright"], [3, "onPay", "onClose", "facture", "saving"], [3, "onClose", "onDeleteVersement", "data", "loading", "canDelete"], [1, "detail-factures-mobile__state"], [1, "detail-factures-mobile__list"], ["class", "detail-facture-card", 4, "ngFor", "ngForOf"], [1, "detail-facture-card"], [1, "detail-facture-card__main"], [1, "detail-facture-card__ref"], [1, "detail-facture-card__date"], [1, "detail-facture-card__rouleaux"], [1, "detail-facture-card__amounts"], [1, "detail-facture-card__total"], [1, "detail-facture-card__verse"], [1, "detail-facture-card__restant"], [1, "detail-facture-card__footer"], [1, "detail-facture-card__badge", 3, "ngClass"], [1, "detail-facture-card__actions"], ["icon", "pi pi-money-bill", "severity", "secondary", "pTooltip", "Payer", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-list", "severity", "info", "pTooltip", "Historique", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-trash", "severity", "danger", "pTooltip", "Supprimer", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-money-bill", "severity", "secondary", "pTooltip", "Payer", 3, "click", "text", "rounded"], ["icon", "pi pi-list", "severity", "info", "pTooltip", "Historique", 3, "click", "text", "rounded"], ["icon", "pi pi-trash", "severity", "danger", "pTooltip", "Supprimer", 3, "click", "text", "rounded"], [1, "table-caption"], [1, "table-caption__title"], ["pSortableColumn", "reference"], [1, "col-header"], ["field", "reference"], ["pSortableColumn", "date"], ["field", "date"], ["pSortableColumn", "total_rouleaux", 1, "text-right"], [1, "col-header", "justify-end"], ["field", "total_rouleaux"], [1, "text-right"], ["pSortableColumn", "montant_total", 1, "text-right"], ["field", "montant_total"], ["pSortableColumn", "montant_verse", 1, "text-right"], ["field", "montant_verse"], ["pSortableColumn", "statut", 1, "text-center"], [1, "col-header", "justify-center"], ["field", "statut"], [2, "width", "10rem"], [1, "font-semibold"], [1, "cell-secondary", "font-semibold"], [1, "text-right", "cell-mono", "font-semibold"], [1, "text-right", "cell-mono", "cell-success", "font-semibold"], [1, "text-right", "cell-mono", "cell-bold"], [1, "text-center"], [1, "status-badge", 3, "ngClass"], [1, "flex", "items-center", "justify-end", "gap-1"], ["icon", "pi pi-list", "severity", "secondary", "pTooltip", "Historique versements", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-trash", "severity", "secondary", "pTooltip", "Supprimer", 3, "text", "rounded", "click", 4, "ngIf"], ["icon", "pi pi-list", "severity", "secondary", "pTooltip", "Historique versements", 3, "click", "text", "rounded"], ["icon", "pi pi-trash", "severity", "secondary", "pTooltip", "Supprimer", 3, "click", "text", "rounded"], ["colspan", "9"], [1, "empty-state"], [1, "pi", "pi-inbox"], [1, "flex", "flex-col", "gap-4"], [1, "preview-summary"], [1, "font-bold"], [1, "preview-summary__sep"], [1, "cell-success"], [1, "font-bold", 2, "color", "#d97706"], [1, "block", "font-bold", "mb-2"], ["optionLabel", "label", "optionValue", "value", "styleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "options"], ["suffix", " GNF", "locale", "fr-FR", "inputStyleClass", "w-full", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "min", "max", "useGrouping"], ["class", "text-red-500", 4, "ngIf"], [1, "text-red-500"], ["pButton", "", 3, "click", "outlined"], ["pButtonLabel", ""], ["pButton", "", 3, "click", "disabled", "loading"], [1, "flex", "items-center", "justify-center", "p-12"], [1, "pi", "pi-spin", "pi-spinner", "text-3xl", "text-surface-300"], [1, "font-bold", "text-lg"], [1, "cell-bold"], [1, "ml-auto"], [3, "value", "rowHover", 4, "ngIf"], ["class", "empty-state", 4, "ngIf"], [3, "value", "rowHover"], ["style", "width: 4rem", 4, "ngIf"], [2, "width", "4rem"], [1, "cell-secondary"], [1, "text-right", "cell-mono", "cell-success", "font-bold"], ["class", "text-center", 4, "ngIf"], ["label", "Fermer", 3, "click", "text"]], template: function ComptabilitePackingDetail_Template(rf, ctx) {
     if (rf & 1) {
       const _r1 = \u0275\u0275getCurrentView();
       \u0275\u0275element(0, "p-toast", 5);
@@ -3141,61 +3525,61 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
       \u0275\u0275elementEnd()();
       \u0275\u0275element(15, "div");
       \u0275\u0275elementEnd();
-      \u0275\u0275template(16, ComptabilitePackingDetail_div_16_Template, 4, 2, "div", 17);
-      \u0275\u0275elementStart(17, "div", 18)(18, "div", 19)(19, "div", 20)(20, "div", 21);
-      \u0275\u0275element(21, "i", 22);
+      \u0275\u0275template(16, ComptabilitePackingDetail_div_16_Template, 4, 2, "div", 17)(17, ComptabilitePackingDetail_div_17_Template, 4, 3, "div", 17);
+      \u0275\u0275elementStart(18, "div", 18)(19, "div", 19)(20, "div", 20)(21, "div", 21);
+      \u0275\u0275element(22, "i", 22);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(22, "div")(23, "div", 23);
-      \u0275\u0275text(24);
+      \u0275\u0275elementStart(23, "div")(24, "div", 23);
+      \u0275\u0275text(25);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(25, "div", 24);
-      \u0275\u0275text(26, "Total \xE0 payer");
+      \u0275\u0275elementStart(26, "div", 24);
+      \u0275\u0275text(27, "Total \xE0 payer");
       \u0275\u0275elementEnd()()();
-      \u0275\u0275element(27, "div", 25);
-      \u0275\u0275elementStart(28, "div", 20)(29, "div", 21);
-      \u0275\u0275element(30, "i", 26);
+      \u0275\u0275element(28, "div", 25);
+      \u0275\u0275elementStart(29, "div", 20)(30, "div", 21);
+      \u0275\u0275element(31, "i", 26);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(31, "div")(32, "div", 23);
-      \u0275\u0275text(33);
+      \u0275\u0275elementStart(32, "div")(33, "div", 23);
+      \u0275\u0275text(34);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(34, "div", 24);
-      \u0275\u0275text(35, "Total vers\xE9");
+      \u0275\u0275elementStart(35, "div", 24);
+      \u0275\u0275text(36, "Total vers\xE9");
       \u0275\u0275elementEnd()()();
-      \u0275\u0275element(36, "div", 25);
-      \u0275\u0275elementStart(37, "div", 20)(38, "div", 21);
-      \u0275\u0275element(39, "i", 27);
+      \u0275\u0275element(37, "div", 25);
+      \u0275\u0275elementStart(38, "div", 20)(39, "div", 21);
+      \u0275\u0275element(40, "i", 27);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(40, "div")(41, "div", 23);
-      \u0275\u0275text(42);
+      \u0275\u0275elementStart(41, "div")(42, "div", 23);
+      \u0275\u0275text(43);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(43, "div", 24);
-      \u0275\u0275text(44, "Reste \xE0 payer");
+      \u0275\u0275elementStart(44, "div", 24);
+      \u0275\u0275text(45, "Reste \xE0 payer");
       \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(45, "div", 28)(46, "h3", 29);
-      \u0275\u0275text(47, "Factures");
+      \u0275\u0275elementStart(46, "div", 28)(47, "h3", 29);
+      \u0275\u0275text(48, "Factures");
       \u0275\u0275elementEnd();
-      \u0275\u0275template(48, ComptabilitePackingDetail_div_48_Template, 2, 0, "div", 30)(49, ComptabilitePackingDetail_div_49_Template, 2, 0, "div", 30)(50, ComptabilitePackingDetail_div_50_Template, 2, 1, "div", 31);
+      \u0275\u0275template(49, ComptabilitePackingDetail_div_49_Template, 2, 0, "div", 30)(50, ComptabilitePackingDetail_div_50_Template, 2, 0, "div", 30)(51, ComptabilitePackingDetail_div_51_Template, 2, 1, "div", 31);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(51, "div", 32)(52, "p-table", 33);
-      \u0275\u0275template(53, ComptabilitePackingDetail_ng_template_53_Template, 3, 0, "ng-template", null, 0, \u0275\u0275templateRefExtractor)(55, ComptabilitePackingDetail_ng_template_55_Template, 32, 0, "ng-template", null, 1, \u0275\u0275templateRefExtractor)(57, ComptabilitePackingDetail_ng_template_57_Template, 27, 29, "ng-template", null, 2, \u0275\u0275templateRefExtractor)(59, ComptabilitePackingDetail_ng_template_59_Template, 6, 0, "ng-template", null, 3, \u0275\u0275templateRefExtractor);
+      \u0275\u0275elementStart(52, "div", 32)(53, "p-table", 33);
+      \u0275\u0275template(54, ComptabilitePackingDetail_ng_template_54_Template, 3, 0, "ng-template", null, 0, \u0275\u0275templateRefExtractor)(56, ComptabilitePackingDetail_ng_template_56_Template, 32, 0, "ng-template", null, 1, \u0275\u0275templateRefExtractor)(58, ComptabilitePackingDetail_ng_template_58_Template, 27, 29, "ng-template", null, 2, \u0275\u0275templateRefExtractor)(60, ComptabilitePackingDetail_ng_template_60_Template, 6, 0, "ng-template", null, 3, \u0275\u0275templateRefExtractor);
       \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(61, "p-dialog", 34);
-      \u0275\u0275twoWayListener("visibleChange", function ComptabilitePackingDetail_Template_p_dialog_visibleChange_61_listener($event) {
+      \u0275\u0275elementStart(62, "p-dialog", 34);
+      \u0275\u0275twoWayListener("visibleChange", function ComptabilitePackingDetail_Template_p_dialog_visibleChange_62_listener($event) {
         \u0275\u0275restoreView(_r1);
         \u0275\u0275twoWayBindingSet(ctx.versementDialog, $event) || (ctx.versementDialog = $event);
         return \u0275\u0275resetView($event);
       });
-      \u0275\u0275template(62, ComptabilitePackingDetail_div_62_Template, 30, 20, "div", 35)(63, ComptabilitePackingDetail_ng_template_63_Template, 6, 3, "ng-template", 36, 4, \u0275\u0275templateRefExtractor);
+      \u0275\u0275template(63, ComptabilitePackingDetail_div_63_Template, 30, 20, "div", 35)(64, ComptabilitePackingDetail_ng_template_64_Template, 6, 3, "ng-template", 36, 4, \u0275\u0275templateRefExtractor);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(65, "p-dialog", 37);
-      \u0275\u0275twoWayListener("visibleChange", function ComptabilitePackingDetail_Template_p_dialog_visibleChange_65_listener($event) {
+      \u0275\u0275elementStart(66, "p-dialog", 37);
+      \u0275\u0275twoWayListener("visibleChange", function ComptabilitePackingDetail_Template_p_dialog_visibleChange_66_listener($event) {
         \u0275\u0275restoreView(_r1);
         \u0275\u0275twoWayBindingSet(ctx.historiqueDialog, $event) || (ctx.historiqueDialog = $event);
         return \u0275\u0275resetView($event);
       });
-      \u0275\u0275template(66, ComptabilitePackingDetail_div_66_Template, 2, 0, "div", 38)(67, ComptabilitePackingDetail_div_67_Template, 22, 8, "div", 35)(68, ComptabilitePackingDetail_ng_template_68_Template, 1, 1, "ng-template", null, 4, \u0275\u0275templateRefExtractor);
+      \u0275\u0275template(67, ComptabilitePackingDetail_div_67_Template, 2, 0, "div", 38)(68, ComptabilitePackingDetail_div_68_Template, 22, 8, "div", 35)(69, ComptabilitePackingDetail_ng_template_69_Template, 1, 1, "ng-template", null, 4, \u0275\u0275templateRefExtractor);
       \u0275\u0275elementEnd();
-      \u0275\u0275element(70, "p-confirmdialog");
+      \u0275\u0275element(71, "p-confirmdialog");
     }
     if (rf & 2) {
       \u0275\u0275property("baseZIndex", 1100)("preventOpenDuplicates", true);
@@ -3211,6 +3595,8 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
       \u0275\u0275property("ngIf", ctx.prestatairePhone);
       \u0275\u0275advance(2);
       \u0275\u0275property("ngIf", ctx.slideoverVisible);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.historiqueSlideoverVisible);
       \u0275\u0275advance(8);
       \u0275\u0275textInterpolate(ctx.formatCurrency(ctx.totalFacture));
       \u0275\u0275advance(9);
@@ -3224,23 +3610,23 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", !ctx.loading && ctx.factures().length);
       \u0275\u0275advance(2);
-      \u0275\u0275property("value", ctx.factures())("rows", 10)("paginator", true)("rowHover", true)("showCurrentPageReport", true)("rowsPerPageOptions", \u0275\u0275pureFunction0(44, _c02))("loading", ctx.loading)("tableStyle", \u0275\u0275pureFunction0(45, _c12));
+      \u0275\u0275property("value", ctx.factures())("rows", 10)("paginator", true)("rowHover", true)("showCurrentPageReport", true)("rowsPerPageOptions", \u0275\u0275pureFunction0(45, _c02))("loading", ctx.loading)("tableStyle", \u0275\u0275pureFunction0(46, _c12));
       \u0275\u0275advance(9);
-      \u0275\u0275styleMap(\u0275\u0275pureFunction0(46, _c22));
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(47, _c22));
       \u0275\u0275twoWayProperty("visible", ctx.versementDialog);
-      \u0275\u0275property("contentStyle", \u0275\u0275pureFunction0(47, _c32))("modal", true)("blockScroll", true)("dismissableMask", false)("closeOnEscape", false);
+      \u0275\u0275property("contentStyle", \u0275\u0275pureFunction0(48, _c32))("modal", true)("blockScroll", true)("dismissableMask", false)("closeOnEscape", false);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.selectedFacture);
       \u0275\u0275advance(3);
-      \u0275\u0275styleMap(\u0275\u0275pureFunction0(48, _c22));
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(49, _c22));
       \u0275\u0275twoWayProperty("visible", ctx.historiqueDialog);
-      \u0275\u0275property("contentStyle", \u0275\u0275pureFunction0(49, _c32))("modal", true)("blockScroll", true)("dismissableMask", false)("closeOnEscape", false);
+      \u0275\u0275property("contentStyle", \u0275\u0275pureFunction0(50, _c32))("modal", true)("blockScroll", true)("dismissableMask", false)("closeOnEscape", false);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.historiqueLoading);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.historiqueData);
       \u0275\u0275advance(3);
-      \u0275\u0275styleMap(\u0275\u0275pureFunction0(50, _c42));
+      \u0275\u0275styleMap(\u0275\u0275pureFunction0(51, _c42));
     }
   }, dependencies: [
     CommonModule,
@@ -3281,6 +3667,7 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
     Tooltip,
     StyleClassModule,
     ComptabilitePackingPaiement,
+    ComptabiliteHistoriqueVersements,
     RatingModule,
     RadioButtonModule,
     PhoneFormatPipe,
@@ -3313,6 +3700,7 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
       StyleClassModule,
       ComptabilitePackingPaiement,
       ComptabilitePackingPaiementDialog,
+      ComptabiliteHistoriqueVersements,
       RatingModule,
       RadioButtonModule,
       MoneyPipe
@@ -3359,6 +3747,20 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
             (onPay)="onSlideoverPay($event)"\r
             (onClose)="closeSlideoverPaiement()"\r
          ></app-comptabilite-packing-paiement>\r
+    </div>\r
+</div>\r
+\r
+<!-- Slide-over historique versements (full screen sur mobile) -->\r
+<div class="fixed inset-0 z-50" *ngIf="historiqueSlideoverVisible">\r
+    <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeHistoriqueSlideover()"></div>\r
+    <div class="detail-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">\r
+         <app-comptabilite-historique-versements\r
+            [data]="historiqueData"\r
+            [loading]="historiqueLoading"\r
+            [canDelete]="canDeleteVersement"\r
+            (onClose)="closeHistoriqueSlideover()"\r
+            (onDeleteVersement)="onHistoriqueDeleteVersement($event)"\r
+         ></app-comptabilite-historique-versements>\r
     </div>\r
 </div>\r
 \r
@@ -3704,7 +4106,7 @@ var ComptabilitePackingDetail = class _ComptabilitePackingDetail {
   }] });
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ComptabilitePackingDetail, { className: "ComptabilitePackingDetail", filePath: "src/app/pages/comptabilite/comptabilite-packing-detail/comptabilite-packing-detail.ts", lineNumber: 83 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ComptabilitePackingDetail, { className: "ComptabilitePackingDetail", filePath: "src/app/pages/comptabilite/comptabilite-packing-detail/comptabilite-packing-detail.ts", lineNumber: 85 });
 })();
 
 // src/app/pages/comptabilite/comptabilite.routes.ts
@@ -3732,4 +4134,4 @@ var comptabilite_routes_default = [
 export {
   comptabilite_routes_default as default
 };
-//# sourceMappingURL=chunk-V7ZXI3CN.js.map
+//# sourceMappingURL=chunk-HZUA2NIF.js.map

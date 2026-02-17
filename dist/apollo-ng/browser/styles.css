@@ -611,6 +611,9 @@
   .visible {
     visibility: visible;
   }
+  .visible\! {
+    visibility: visible !important;
+  }
   .sr-only {
     position: absolute;
     width: 1px;
@@ -729,6 +732,34 @@
   @media (width >= 1920px) {
     .container {
       max-width: 1920px;
+    }
+  }
+  .container\! {
+    width: 100% !important;
+  }
+  @media (width >= 576px) {
+    .container\! {
+      max-width: 576px !important;
+    }
+  }
+  @media (width >= 768px) {
+    .container\! {
+      max-width: 768px !important;
+    }
+  }
+  @media (width >= 992px) {
+    .container\! {
+      max-width: 992px !important;
+    }
+  }
+  @media (width >= 1200px) {
+    .container\! {
+      max-width: 1200px !important;
+    }
+  }
+  @media (width >= 1920px) {
+    .container\! {
+      max-width: 1920px !important;
     }
   }
   .m-0 {
@@ -965,6 +996,9 @@
   .table {
     display: table;
   }
+  .table\! {
+    display: table !important;
+  }
   .table-caption {
     display: table-caption;
   }
@@ -1199,71 +1233,11 @@
   .animate-fadein {
     animation: fadein 0.15s linear;
   }
-  .animate-fadeindown {
-    animation: fadeindown 0.15s linear;
-  }
-  .animate-fadeinleft {
-    animation: fadeinleft 0.15s linear;
-  }
   .animate-fadeinright {
     animation: fadeinright 0.15s linear;
   }
-  .animate-fadeinup {
-    animation: fadeinup 0.15s linear;
-  }
-  .animate-fadeout {
-    animation: fadeout 0.15s linear;
-  }
-  .animate-fadeoutdown {
-    animation: fadeoutdown 0.15s linear;
-  }
-  .animate-fadeoutleft {
-    animation: fadeoutleft 0.15s linear;
-  }
-  .animate-fadeoutright {
-    animation: fadeoutright 0.15s linear;
-  }
-  .animate-fadeoutup {
-    animation: fadeoutup 0.15s linear;
-  }
-  .animate-flip {
-    animation: flip 0.15s linear;
-  }
-  .animate-flipleft {
-    animation: flipleft 0.15s linear;
-  }
-  .animate-flipright {
-    animation: flipright 0.15s linear;
-  }
-  .animate-flipup {
-    animation: flipup 0.15s linear;
-  }
   .animate-scalein {
     animation: scalein 0.15s linear;
-  }
-  .animate-slidedown {
-    animation: slidedown 0.45s ease-in-out;
-  }
-  .animate-slideup {
-    animation: slideup 0.45s cubic-bezier(0, 1, 0, 1);
-  }
-  .animate-width {
-    animation: width 0.45s linear;
-  }
-  .animate-zoomin {
-    animation: zoomin 0.15s linear;
-  }
-  .animate-zoomindown {
-    animation: zoomindown 0.15s linear;
-  }
-  .animate-zoominleft {
-    animation: zoominleft 0.15s linear;
-  }
-  .animate-zoominright {
-    animation: zoominright 0.15s linear;
-  }
-  .animate-zoominup {
-    animation: zoominup 0.15s linear;
   }
   .cursor-auto {
     cursor: auto;
@@ -1734,6 +1708,9 @@
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
+  .px-3 {
+    padding-inline: calc(var(--spacing) * 3);
+  }
   .px-4 {
     padding-inline: calc(var(--spacing) * 4);
   }
@@ -1775,6 +1752,9 @@
   }
   .py-20 {
     padding-block: calc(var(--spacing) * 20);
+  }
+  .pt-1 {
+    padding-top: calc(var(--spacing) * 1);
   }
   .pt-2 {
     padding-top: calc(var(--spacing) * 2);
@@ -1960,17 +1940,9 @@
   .whitespace-nowrap {
     white-space: nowrap;
   }
-  .bg-emphasis {
-    background: var(--p-content-hover-background);
-    color: var(--p-content-hover-color);
-  }
   .bg-highlight {
     background: var(--p-highlight-background);
     color: var(--p-highlight-color);
-  }
-  .bg-highlight-emphasis {
-    background: var(--p-highlight-focus-background);
-    color: var(--p-highlight-focus-color);
   }
   .text-black\/60 {
     color: color-mix(in srgb, #000 60%, transparent);
@@ -1996,12 +1968,6 @@
   }
   .text-blue-900 {
     color: var(--color-blue-900);
-  }
-  .text-color {
-    color: var(--p-text-color);
-  }
-  .text-color-emphasis {
-    color: var(--p-text-hover-color);
   }
   .text-cyan-500 {
     color: var(--color-cyan-500);
@@ -2041,9 +2007,6 @@
   }
   .text-muted-color\! {
     color: var(--p-text-muted-color) !important;
-  }
-  .text-muted-color-emphasis {
-    color: var(--p-text-hover-muted-color);
   }
   .text-orange-500 {
     color: var(--color-orange-500);
@@ -3369,6 +3332,9 @@
   }
   .dark\:text-surface-400:where(.app-dark, .app-dark *) {
     color: var(--p-surface-400);
+  }
+  .dark\:text-surface-500:where(.app-dark, .app-dark *) {
+    color: var(--p-surface-500);
   }
   .dark\:text-surface-900:where(.app-dark, .app-dark *) {
     color: var(--p-surface-900);
@@ -4822,6 +4788,13 @@ img {
 .layout-profile-sidebar.p-sidebar .p-sidebar-content {
   padding-left: 2rem;
   padding-right: 2rem;
+}
+@media (max-width: 768px) {
+  .layout-profile-sidebar.p-drawer,
+  .layout-profile-sidebar.p-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 }
 .layout-config-sidebar.p-sidebar .p-sidebar-content {
   padding-left: 2rem;
