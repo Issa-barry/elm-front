@@ -26,7 +26,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 import {
   Produit,
-  CreateProduitDto, 
+  CreateProduitDto,  
   PRODUIT_TYPE_LABELS,
   PRODUIT_STATUT_LABELS,
   ProduitType,
