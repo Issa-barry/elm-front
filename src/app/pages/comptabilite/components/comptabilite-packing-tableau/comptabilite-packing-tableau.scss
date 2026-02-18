@@ -4,7 +4,8 @@
 }
 
 .compta-mobile-search {
-    margin-bottom: 0.75rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
 }
 
 :host ::ng-deep .compta-mobile-search .p-iconfield,
@@ -410,4 +411,56 @@
 
 :host-context(.app-dark) ::ng-deep .p-datatable .p-datatable-caption {
     border-bottom-color: var(--p-surface-700);
+}
+
+// ─── Dark mode: liste mobile (cartes prestataires) ─────────────────────
+:host-context(.app-dark) {
+    .compta-mobile-card {
+        background: var(--p-surface-800);
+        border-color: var(--p-surface-600);
+    }
+
+    .compta-mobile-card:active {
+        background: var(--p-surface-700);
+    }
+
+    .compta-mobile-card-avatar {
+        background: var(--p-surface-700);
+        color: var(--p-primary-400);
+    }
+
+    .compta-mobile-card-name {
+        color: var(--p-surface-0);
+    }
+
+    .compta-mobile-card-meta {
+        color: var(--p-surface-400);
+    }
+
+    .compta-mobile-card-summary {
+        color: var(--p-surface-200);
+    }
+
+    .compta-mobile-status-badge--danger {
+        background: rgba(220, 38, 38, 0.2);
+        color: #f87171;
+    }
+
+    .compta-mobile-status-badge--warn {
+        background: rgba(217, 119, 6, 0.2);
+        color: #fbbf24;
+    }
+
+    .compta-mobile-status-badge--success {
+        background: rgba(5, 150, 105, 0.2);
+        color: #34d399;
+    }
+
+    .compta-mobile-action-btn {
+        color: var(--p-primary-400) !important;
+    }
+
+    .compta-mobile-state {
+        color: var(--p-surface-400);
+    }
 }

@@ -24,8 +24,8 @@
         flex-direction: column;
         min-height: 100vh;
         min-height: 100dvh;
-        height: 100dvh;
         height: 100vh;
+        height: 100dvh;
         overflow: hidden;
         margin-top: calc(-0.25rem - env(safe-area-inset-top));
         margin-left: -0.875rem;
@@ -369,6 +369,85 @@
         border: 1px solid #cfd7ff;
         background: #eef2ff;
         color: #4f5df4;
+    }
+
+    // Dark mode: variables et surcharges pour la vue mobile
+    :host-context(.app-dark) {
+        :host {
+            --mobile-primary: var(--p-primary-400);
+            --mobile-text: var(--p-surface-100);
+            --mobile-muted: var(--p-surface-400);
+            --mobile-card: var(--p-surface-800);
+            --mobile-border: var(--p-surface-600);
+        }
+        .produits-mobile-app {
+            background: var(--p-surface-950);
+        }
+        .mobile-header {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .mobile-search {
+            background: var(--p-surface-800);
+            border-color: var(--p-surface-600);
+            box-shadow: none;
+        }
+        .mobile-search .p-inputtext::placeholder {
+            color: var(--p-surface-500);
+        }
+        .mobile-produit-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .mobile-produit-card:active {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        .mobile-card-image-placeholder {
+            background: var(--p-surface-700);
+            border-color: var(--p-surface-600);
+        }
+        .mobile-card-image-placeholder .pi {
+            color: var(--p-surface-400);
+        }
+        .mobile-code {
+            color: var(--p-surface-400);
+        }
+        .mobile-state {
+            background: var(--p-surface-800);
+            border-color: var(--p-surface-600);
+            color: var(--p-surface-400);
+        }
+        :host ::ng-deep .mobile-action-btn {
+            color: var(--p-surface-300) !important;
+        }
+        :host ::ng-deep .mobile-action-btn .p-button-icon {
+            color: var(--p-primary-400);
+        }
+        :host ::ng-deep .mobile-status-tag.p-tag-success {
+            background: rgba(5, 150, 105, 0.2);
+            color: #34d399;
+        }
+        :host ::ng-deep .mobile-status-tag.p-tag-warn,
+        :host ::ng-deep .mobile-status-tag.p-tag-warning {
+            background: rgba(217, 119, 6, 0.2);
+            color: #fbbf24;
+        }
+        :host ::ng-deep .mobile-status-tag.p-tag-danger {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+        }
+        :host ::ng-deep .mobile-status-tag.p-tag-secondary {
+            background: var(--p-surface-700);
+            color: var(--p-surface-300);
+        }
+        :host ::ng-deep .mobile-delete-action {
+            border-color: var(--p-surface-600) !important;
+            background: var(--p-surface-700) !important;
+            color: #f87171 !important;
+        }
+        :host ::ng-deep .mobile-load-more-btn {
+            border-color: var(--p-surface-600);
+            background: var(--p-surface-800);
+            color: var(--p-primary-400);
+        }
     }
 }
 

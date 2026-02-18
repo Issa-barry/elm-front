@@ -4,7 +4,8 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
-        "build": "ng build",
+        "build": "ng build && node scripts/write-version.js",
+        "build:deploy": "ng build && node scripts/write-version.js && node scripts/copy-deploy.js",
         "watch": "ng build --watch --configuration development",
         "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
         "test": "ng test"

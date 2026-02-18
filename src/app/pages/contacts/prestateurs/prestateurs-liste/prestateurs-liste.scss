@@ -24,8 +24,8 @@
     flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh;
-    height: 100dvh;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     margin-top: calc(-0.25rem - env(safe-area-inset-top));
     margin-left: -0.875rem;
@@ -243,6 +243,31 @@
 
   .mobile-fab:active {
     transform: scale(0.96);
+  }
+
+  // Dark mode: variables et surcharges pour la vue mobile
+  :host-context(.app-dark) {
+    :host {
+      --mobile-primary: var(--p-primary-400);
+      --mobile-text: var(--p-surface-100);
+      --mobile-muted: var(--p-surface-400);
+      --mobile-card: var(--p-surface-800);
+      --mobile-border: var(--p-surface-600);
+    }
+    .prestateurs-mobile-app {
+      background: var(--p-surface-950);
+    }
+    .mobile-header {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .mobile-user-card:active {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+    .mobile-state {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-600);
+      color: var(--p-surface-400);
+    }
   }
 }
 

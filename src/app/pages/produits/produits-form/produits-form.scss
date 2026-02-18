@@ -26,7 +26,7 @@
     font-weight: 700;
     color: var(--text-color);
   }
-
+ 
   .side-title {
     font-weight: 700;
     color: var(--text-color);
@@ -80,6 +80,25 @@
 
   .upload-dropzone:hover {
     background: color-mix(in srgb, var(--primary-50) 35%, transparent);
+  }
+}
+
+// Dark mode desktop (surcharges pour couleurs en dur)
+:host-context(.app-dark) .product-form {
+  .status-pill-active {
+    background: rgba(5, 150, 105, 0.2);
+    color: #34d399;
+  }
+
+  .status-pill-inactive {
+    background: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
+  }
+
+  .service-alert {
+    background: rgba(220, 38, 38, 0.15);
+    border-color: var(--p-surface-600);
+    color: #f87171;
   }
 }
 
@@ -347,6 +366,73 @@
       border-radius: 0.75rem !important;
       font-weight: 600 !important;
       min-height: 2.75rem;
+    }
+  }
+
+  // Dark mode: formulaire produit mobile
+  :host-context(.app-dark) .product-form {
+    background: var(--p-surface-950) !important;
+
+    .mobile-form-back,
+    .mobile-form-edit {
+      color: var(--p-surface-100) !important;
+    }
+
+    .mobile-form-title {
+      color: var(--p-surface-0);
+    }
+
+    .mobile-image-card {
+      background: var(--p-surface-800);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-upload-placeholder {
+      color: var(--p-surface-400);
+
+      i {
+        color: var(--p-surface-500);
+      }
+    }
+
+    .mobile-section-card {
+      background: var(--p-surface-800);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .mobile-field-label {
+      color: var(--p-surface-400);
+    }
+
+    .mobile-price-label {
+      color: var(--p-surface-400);
+    }
+
+    .mobile-service-alert {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: var(--p-surface-600);
+      color: #f87171;
+    }
+
+    .mobile-info-hint {
+      color: var(--p-surface-400);
+    }
+
+    .mobile-status-label {
+      color: var(--p-surface-200);
+    }
+
+    .mobile-status-value {
+      color: var(--p-surface-400);
+
+      &.active {
+        color: #34d399;
+      }
+    }
+
+    .mobile-bottom-actions {
+      background: rgba(15, 23, 42, 0.92);
+      border-top-color: var(--p-surface-700);
     }
   }
 }

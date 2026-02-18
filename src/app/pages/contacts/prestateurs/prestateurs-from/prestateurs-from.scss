@@ -1,0 +1,29 @@
+// Alignement des boutons Enregistrer / Annuler
+.prestateurs-form-actions {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+
+  .flex {
+    align-items: center;
+  }
+
+  ::ng-deep .p-button {
+    min-height: 2.5rem;
+    min-width: 7rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .prestateurs-form-actions {
+    .flex {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    ::ng-deep .p-button {
+      width: 100%;
+      justify-content: center;
+      min-width: unset;
+    }
+  }
+}

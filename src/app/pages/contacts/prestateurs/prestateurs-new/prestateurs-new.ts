@@ -60,8 +60,13 @@ export class PrestateursNew {
             summary: 'Succès',
             detail: 'Prestataire créé avec succès'
           });
+          const id = response.data?.id;
           setTimeout(() => {
-            this.router.navigate(['contacts/prestateurs']);
+            if (id != null) {
+              this.router.navigate(['contacts/prestateurs/edit', id]);
+            } else {
+              this.router.navigate(['contacts/prestateurs']);
+            }
           }, 1500);
         }
         this.loading = false;

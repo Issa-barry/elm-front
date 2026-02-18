@@ -22,8 +22,9 @@
     .compta-packing-mobile-app {
         display: flex;
         flex-direction: column;
-        min-height: 100dvh;
         min-height: 100vh;
+        min-height: 100dvh;
+        height: 100vh;
         height: 100dvh;
         overflow: hidden;
         margin: calc(-0.25rem - env(safe-area-inset-top)) -0.875rem 0;
@@ -43,7 +44,7 @@
         min-height: 0;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        padding-top: 0.75rem;
+        padding: 1rem 0.5rem 0 0.5rem;
     }
 
     .compta-packing-mobile-header {
@@ -101,6 +102,7 @@
     }
 
     .compta-mobile-shell__stats {
+        margin-top: 1.25rem;
         margin-bottom: 0 !important;
     }
 }

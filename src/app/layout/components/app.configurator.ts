@@ -80,7 +80,7 @@ declare type SurfacesType = {
                                 (click)="updateColors($event, 'surface', surface)"
                                 class="cursor-pointer w-6 h-6 rounded-full flex shrink-0 items-center justify-center p-0 outline-offset-1"
                                 [ngClass]="{
-                                    'outline outline-primary': selectedSurface() ? selectedSurface() === surface.name : darkTheme() ? surface.name === 'zinc' : surface.name === 'slate'
+                                    'outline outline-primary': selectedSurface() ? selectedSurface() === surface.name : surface.name === 'slate'
                                 }"
                                 [style]="{
                                     'background-color': surface?.palette?.['500']
@@ -518,10 +518,18 @@ export class AppConfigurator implements OnInit {
     }
 
     executeDarkModeToggle() {
+        const willBeDark = !this.layoutService.layoutConfig().darkTheme;
         this.layoutService.layoutConfig.update((state) => ({
             ...state,
-            darkTheme: !state.darkTheme
+            darkTheme: willBeDark,
+            ...(willBeDark ? { surface: 'slate' } : {})
         }));
+        if (willBeDark) {
+            const slateSurface = this.surfaces.find((s) => s.name === 'slate');
+            if (slateSurface?.palette) {
+                updateSurfacePalette(slateSurface.palette);
+            }
+        }
     }
 
     toggleConfigSidebar() {

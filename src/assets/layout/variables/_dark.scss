@@ -4,3 +4,27 @@
     --sidebar-border: 1px solid var(--surface-border);
     --card-shadow: none;
 }
+
+// Dialogs / overlays rendus en appendTo body : appliquer le dark partout
+.app-dark {
+    .packing-dialog {
+        .packing-dialog-section-title {
+            color: var(--p-surface-400);
+        }
+        .packing-dialog-field label {
+            color: var(--p-surface-300);
+        }
+        .packing-dialog-total {
+            background: var(--p-surface-800);
+        }
+        .packing-dialog-total-label {
+            color: var(--p-surface-200);
+        }
+        .packing-dialog-total-value {
+            color: var(--p-primary-400);
+        }
+        .p-dialog-footer {
+            border-top-color: var(--p-surface-600);
+        }
+    }
+}

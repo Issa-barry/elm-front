@@ -1,38 +1,87 @@
 # Déploiement sur Hostinger
 
-## Page blanche sur smartphone
+## 1. Build de l’application
 
-Si l’application s’affiche sur desktop mais reste blanche sur mobile, voici ce qui a été mis en place et ce à vérifier.
+**Option A – Dossier prêt à déployer (recommandé)**  
+Génère le build puis copie tout dans **`dist/apollo-ng-deploy/`** (à envoyer tel quel sur Hostinger) :
 
-### 1. Modifications dans le projet
+```bash
+npm run build:deploy
+```
 
-- **Navigation non bloquante** : la première navigation ne bloque plus l’affichage. L’app peut se charger même si le réseau est lent ou si une garde échoue.
-- **Gestion d’erreur au démarrage** : en cas d’échec au chargement de l’app, un message et un bouton « Réessayer » s’affichent au lieu d’une page blanche.
+**Option B – Build classique**  
+Génère **`dist/apollo-ng/`**. Les fichiers à déployer sont dans **`dist/apollo-ng/browser/`** :
 
-### 2. Déploiement
+```bash
+npm run build
+```
 
-1. **Build** :  
-   `npm run build`  
-   Les fichiers à déployer se trouvent dans **`dist/apollo-ng/browser/`** (ou `dist/apollo-ng/` selon la version d’Angular).
+---
 
-2. **Contenu à envoyer sur Hostinger**  
-   Envoyer **tout le contenu** du dossier `dist/apollo-ng/browser/` dans le répertoire prévu (souvent `public_html`), en conservant la structure (dossiers `assets`, etc.).  
-   Le fichier **`.htaccess`** doit être à la **racine** de ce que sert le site (à côté de `index.html`).
+## 2. Déploiement à la racine du site (ex. https://mondomaine.com/)
 
-3. **Base href**  
-   - Site à la **racine** du domaine (ex. `https://mondomaine.com/`) : ne rien changer, `<base href="/">` dans `index.html` est correct.  
-   - Site dans un **sous-dossier** (ex. `https://mondomaine.com/app/`) :  
-     `ng build --base-href /app/`  
-     puis déployer le contenu de `dist/apollo-ng/browser/` (par exemple dans `public_html/app/`).
+1. Ouvre **Gestionnaire de fichiers** (ou FTP) dans Hostinger.
+2. Va dans **`public_html`**.
+3. **Supprime** tout le contenu actuel de `public_html` (ou sauvegarde-le ailleurs si besoin).
+4. **Envoie tout le contenu** soit de **`dist/apollo-ng-deploy/`** (si tu as utilisé `npm run build:deploy`), soit de **`dist/apollo-ng/browser/`** (si tu as utilisé `npm run build`), **dans** `public_html` :
+   - `index.html` à la racine de `public_html`
+   - `.htaccess` à la racine de `public_html`
+   - dossiers `demo/`, `layout/`, `media/`, etc.
+   - fichiers `main-*.js`, `polyfills-*.js`, `styles-*.css`, `chunk-*.js`
 
-### 3. Vérifications sur Hostinger
+Tu dois avoir par exemple :
 
-- **Réécriture d’URL (mod_rewrite)** : activée pour le site (souvent dans « Paramètres avancés » ou « Apache »).
-- **.htaccess** : présent à la racine du site (à côté de `index.html`) et non ignoré par l’hébergeur.
-- **HTTPS** : si le site est en HTTPS, les requêtes API doivent aussi être en HTTPS (pas de mixed content).
+```
+public_html/
+  index.html
+  .htaccess
+  main-XXXXX.js
+  polyfills-XXXXX.js
+  styles-XXXXX.css
+  chunk-*.js
+  demo/
+  layout/
+  media/
+  ...
+```
 
-### 4. En cas de page blanche
+5. L’app est disponible sur **https://mondomaine.com/** (ou **https://mondomaine.com/#/** avec le mode hash).
 
-- Sur mobile, ouvrir les **outils de développement** (Chrome remote debugging, Safari Web Inspector, etc.) et regarder l’onglet **Console** pour les erreurs JavaScript.
-- Si le message « L’application n’a pas pu démarrer » s’affiche, recharger la page ou tester avec un navigateur à jour.
-- Vérifier que l’URL d’accès est bien celle du site (avec ou sans sous-dossier) et que le **base href** correspond (voir point 3 ci-dessus).
+---
+
+## 3. Déploiement dans un sous-dossier (ex. https://mondomaine.com/app/)
+
+Si le site doit être dans **https://mondomaine.com/app/** :
+
+1. Build avec le bon `base-href` :
+
+```bash
+ng build --configuration=production --base-href /app/
+```
+
+2. Dans Hostinger, va dans **`public_html`**.
+3. Crée un dossier **`app`** (s’il n’existe pas).
+4. Envoie **tout le contenu** de **`dist/apollo-ng-deploy/`** (ou de **`dist/apollo-ng/browser/`**) **dans** `public_html/app/`.
+
+L’app sera accessible sur **https://mondomaine.com/app/#/**.
+
+---
+
+## 4. Vérifications
+
+- **Page blanche au refresh** (ex. sur `https://ton-domaine.com/#/auth/login`) : le **`.htaccess`** doit être bien pris en compte par Hostinger (Apache). Il contient `DirectoryIndex index.html` et des règles pour renvoyer `index.html` sur toute requête, afin qu’un rechargement sur une URL avec hash affiche bien l’app. Si ça ne marche pas, dans le **panneau Hostinger** vérifie que les Fichiers `.htaccess` sont autorisés (souvent dans « Paramètres avancés » ou « Configuration Apache »).
+- **Page blanche** : ouvre la console du navigateur (F12 → Console) et regarde les erreurs (fichiers 404, erreurs JavaScript). Les URLs sont en **mode hash** (`#/auth/login`, etc.) pour éviter les 404 au refresh.
+- Le fichier **`.htaccess`** est copié automatiquement depuis `public/` lors du build.
+- **API** : en production l’app utilise l’URL définie dans `src/environments/environment.production.ts`. Vérifie que ce domaine est accessible (CORS si besoin).
+
+---
+
+## 5. Résumé des commandes utiles
+
+| Situation                    | Commande |
+|-----------------------------|----------|
+| Build + dossier prêt déploy | `npm run build:deploy` |
+| Build pour la racine        | `npm run build` |
+| Build pour /app/            | `ng build --configuration=production --base-href /app/` puis copier `dist/apollo-ng/browser/` vers ton dossier de déploiement |
+
+Après chaque nouveau déploiement, pense à vider le cache du navigateur (Ctrl+F5) ou à tester en navigation privée.

@@ -72,7 +72,7 @@
 }
 
 // ─── Dark mode ───────────────────────────────────────────
-:host-context(.dark) {
+:host-context(.app-dark) {
     .cell-role__name {
         color: var(--p-surface-100);
     }

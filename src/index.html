@@ -5,12 +5,12 @@
         <title>Apollo - PrimeNG</title>
         <!-- Base relative : fonctionne à la racine et dans un sous-dossier (ex. Hostinger) -->
         <base href="./" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual" />
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta http-equiv="Pragma" content="no-cache" />
         <meta http-equiv="Expires" content="0" />
         <link rel="preconnect" href="https://primefaces.org" />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
         <link href="https://fonts.cdnfonts.com/css/lato" rel="stylesheet" />
     </head>
 
@@ -22,5 +22,24 @@
                 </div>
             </div>
         </app-root>
+        <noscript>
+            <p style="padding:2rem;font-family:system-ui;text-align:center;">JavaScript est requis pour cette application. Activez-le puis rechargez la page.</p>
+        </noscript>
+        <script>
+            window.addEventListener('error', function(e) {
+                if (e.message && (e.message.indexOf('Loading chunk') !== -1 || e.message.indexOf('ChunkLoadError') !== -1)) {
+                    document.body.innerHTML = '<div style="padding:2rem;font-family:system-ui;text-align:center;max-width:28rem;margin:2rem auto;"><p style="font-size:1.1rem;color:#374151;">Échec du chargement. Rechargez la page (Ctrl+F5 pour vider le cache).</p><button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;font-size:1rem;cursor:pointer;">Réessayer</button></div>';
+                }
+            });
+            // Si on a une URL avec hash (#/auth/login etc.) et que l'app n'a pas rendu après 8s → proposer de recharger (évite page blanche au refresh)
+            if (window.location.hash) {
+                setTimeout(function() {
+                    var root = document.querySelector('app-root');
+                    if (root && !root.querySelector('router-outlet') && root.querySelector('.layout-preloader-container')) {
+                        root.innerHTML = '<div style="padding:2rem;font-family:system-ui;text-align:center;max-width:28rem;margin:2rem auto;"><p style="font-size:1.1rem;color:#374151;">La page n\'a pas pu s\'afficher. Rechargez pour réessayer.</p><button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;font-size:1rem;cursor:pointer;">Recharger la page</button></div>';
+                    }
+                }, 8000);
+            }
+        </script>
     </body>
 </html>
