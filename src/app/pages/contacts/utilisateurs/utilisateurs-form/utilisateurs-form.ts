@@ -30,7 +30,7 @@ export interface UserFormData {
   reference?: string;
   civilite?: Civilite | null;
   date_naissance?: string | null;   // format YYYY-MM-DD envoyé au backend
-  // Pièce d'identité (optionnel)
+  // Pièce d'identité (optionnel, mais tous requis si piece_type est renseigné)
   piece_type?: PieceType;
   piece_numero?: string;
   piece_delivree_le?: string;
@@ -104,6 +104,9 @@ export class UtilisateursForm implements OnInit, OnChanges {
   // Validation du mot de passe
   passwordError: string | null = null;
 
+  // Validation KYC — erreurs par champ
+  kycErrors: Record<string, string> = {};
+
   // Liste des pays pour le sélecteur
   countries = COUNTRIES;
 
@@ -145,7 +148,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
   // ── Type → rôles filtrés ──────────────────────────────
 
-  /** Rôles affichés dans le select selon le type choisi */
   get filteredRoles(): { label: string; value: string }[] {
     if (this.model.type === 'staff') {
       return this.availableRoles.filter(r => this.STAFF_ROLES.includes(r.value));
@@ -153,18 +155,101 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return [];
   }
 
-  /** Vrai uniquement pour le staff : le rôle est choisi manuellement */
   get isRoleSelectable(): boolean {
     return this.model.type === 'staff';
   }
 
-  /** Appelé au changement du type : auto-assigne le rôle pour les non-staff */
   onTypeChange(): void {
     if (!this.model.type) return;
     if (this.model.type === 'staff') {
       this.model.role = undefined;
     } else {
       this.model.role = this.model.type;
+    }
+  }
+
+  // ── KYC ──────────────────────────────────────────────
+
+  /** Vrai dès que piece_type est sélectionné → tous les autres champs KYC deviennent requis */
+  get isKycActive(): boolean {
+    return !!this.model.piece_type;
+  }
+
+  /** Appelé lorsque piece_type change */
+  onPieceTypeChange(): void {
+    if (!this.model.piece_type) {
+      // On vide le bloc KYC quand le type est retiré
+      this.model.piece_numero    = undefined;
+      this.model.piece_pays      = undefined;
+      this.model.piece_delivree_le = undefined;
+      this.model.piece_expire_le   = undefined;
+      this.kycErrors = {};
+    } else if (this.submitted) {
+      this.setKycErrors();
+    }
+  }
+
+  /** Appelé sur chaque champ KYC après soumission (re-validation en temps réel) */
+  onKycFieldChange(): void {
+    if (this.submitted && this.isKycActive) {
+      this.setKycErrors();
+    }
+  }
+
+  /** Vérification pure (sans side-effect) — utilisée par isValid() */
+  private checkKyc(): boolean {
+    if (!this.model.piece_type) return true;
+
+    if (!this.model.piece_numero?.trim()) return false;
+    if (!this.model.piece_pays) return false;
+    if (!this.model.piece_delivree_le) return false;
+    if (!this.model.piece_expire_le) return false;
+
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    const delivree = new Date(this.model.piece_delivree_le);
+    if (delivree > today) return false;
+
+    const expire = new Date(this.model.piece_expire_le);
+    if (expire <= delivree) return false;
+
+    return true;
+  }
+
+  /** Renseigne kycErrors avec les messages à afficher */
+  private setKycErrors(): void {
+    this.kycErrors = {};
+    if (!this.model.piece_type) return;
+
+    if (!this.model.piece_numero?.trim()) {
+      this.kycErrors['piece_numero'] = 'Numéro de pièce obligatoire.';
+    }
+    if (!this.model.piece_pays) {
+      this.kycErrors['piece_pays'] = 'Pays de délivrance obligatoire.';
+    }
+
+    if (!this.model.piece_delivree_le) {
+      this.kycErrors['piece_delivree_le'] = 'Date de délivrance obligatoire.';
+    } else {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      const delivree = new Date(this.model.piece_delivree_le);
+      if (delivree > today) {
+        this.kycErrors['piece_delivree_le'] = 'La date de délivrance ne peut pas être dans le futur.';
+      }
+    }
+
+    if (!this.model.piece_expire_le) {
+      this.kycErrors['piece_expire_le'] = "Date d'expiration obligatoire.";
+    }
+
+    // Cohérence croisée expire > delivree
+    if (this.model.piece_delivree_le && this.model.piece_expire_le) {
+      const delivree = new Date(this.model.piece_delivree_le);
+      const expire   = new Date(this.model.piece_expire_le);
+      if (expire <= delivree) {
+        this.kycErrors['dates'] = "La date d'expiration doit être postérieure à la date de délivrance.";
+      }
     }
   }
 
@@ -192,7 +277,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
         piece_expire_le: this.initialData.piece_expire_le ?? undefined,
         piece_pays: this.initialData.piece_pays ?? undefined,
       };
-      // Convertit la chaîne YYYY-MM-DD en Date pour le datepicker
       this.dateNaissanceObj = this.initialData.date_naissance
         ? new Date(this.initialData.date_naissance)
         : null;
@@ -217,9 +301,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.detectPhoneCountry(this.model.phone);
     }
 
-    this.submitted = false;
-    this.phoneError = null;
+    this.submitted     = false;
+    this.phoneError    = null;
     this.passwordError = null;
+    this.kycErrors     = {};
   }
 
   detectPhoneCountry(phone: string) {
@@ -241,7 +326,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
     try {
       const isValid = isValidPhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
-
       if (!isValid) {
         this.phoneError = `Numéro invalide pour ${this.getCountryName(this.phoneCountry)}.`;
         return false;
@@ -249,10 +333,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
       const phoneNumber = parsePhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
       if (phoneNumber) {
-        this.model.phone = phoneNumber.formatInternational();
+        this.model.phone     = phoneNumber.formatInternational();
         this.model.code_pays = this.phoneCountry;
-        this.model.pays = this.getCountryName(this.phoneCountry);
-        this.phoneError = null;
+        this.model.pays      = this.getCountryName(this.phoneCountry);
+        this.phoneError      = null;
         return true;
       }
 
@@ -337,12 +421,8 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   isValid(): boolean {
-    if (!this.model.type) {
-      return false;
-    }
-    if (!this.model.role) {
-      return false;
-    }
+    if (!this.model.type)  return false;
+    if (!this.model.role)  return false;
 
     const basicValidation = !!(
       this.model.nom?.trim() &&
@@ -351,18 +431,13 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.model.ville?.trim() &&
       this.model.quartier?.trim()
     );
+    if (!basicValidation) return false;
 
-    if (!basicValidation) {
-      return false;
-    }
+    if (!this.validatePhone()) return false;
 
-    if (!this.validatePhone()) {
-      return false;
-    }
+    if (this.mode === 'create' && !this.validatePassword()) return false;
 
-    if (this.mode === 'create' && !this.validatePassword()) {
-      return false;
-    }
+    if (!this.checkKyc()) return false;
 
     return true;
   }
@@ -372,15 +447,17 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   cancelEditing() {
-    this.isEditing = false;
-    this.submitted = false;
-    this.phoneError = null;
+    this.isEditing   = false;
+    this.submitted   = false;
+    this.phoneError  = null;
     this.passwordError = null;
+    this.kycErrors   = {};
     this.initializeModel();
   }
 
   onSubmit() {
     this.submitted = true;
+    this.setKycErrors();      // déclenche l'affichage des erreurs KYC
 
     if (!this.isValid()) {
       return;
@@ -404,7 +481,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
     if (this.mode === 'create') {
       return 'Créer un compte utilisateur';
     }
-
     const reference = this.model.reference?.trim();
     return reference
       ? `Modification compte utilisateur : ${reference}`

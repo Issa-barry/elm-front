@@ -292,7 +292,7 @@
           </small>
         </div>
 
-        <!-- Pièce d'identité (section optionnelle, accordion) -->
+        <!-- Pièce d'identité (optionnel → obligatoire si type sélectionné) -->
         <div class="col-span-12 mb-2">
           <p-accordion>
             <p-accordion-panel value="piece">
@@ -300,7 +300,13 @@
                 <span class="flex items-center gap-2 font-medium text-surface-700 dark:text-surface-200">
                   <i class="pi pi-id-card text-sm"></i>
                   Pièce d'identité
-                  <span class="text-xs font-normal text-surface-400">(optionnel)</span>
+                  <span
+                    *ngIf="isKycActive"
+                    class="text-xs font-semibold px-1.5 py-0.5 rounded"
+                    style="background: #fff7ed; color: #c2410c;">
+                    Obligatoire
+                  </span>
+                  <span *ngIf="!isKycActive" class="text-xs font-normal text-surface-400">(optionnel)</span>
                 </span>
               </p-accordion-header>
               <p-accordion-content>
@@ -320,14 +326,18 @@
                       placeholder="Sélectionner un type"
                       [disabled]="fieldsDisabled"
                       [showClear]="true"
+                      (onChange)="onPieceTypeChange()"
                       fluid
                     ></p-select>
+                    <small class="text-surface-500 dark:text-surface-400 block mt-1" *ngIf="isKycActive">
+                      Tous les champs ci-dessous sont requis.
+                    </small>
                   </div>
 
                   <!-- Numéro de pièce -->
                   <div class="mb-4 col-span-12 md:col-span-6">
                     <label for="piece_numero" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Numéro de pièce
+                      Numéro de pièce <span class="text-red-500" *ngIf="isKycActive">*</span>
                     </label>
                     <input
                       id="piece_numero"
@@ -337,13 +347,18 @@
                       [(ngModel)]="model.piece_numero"
                       [disabled]="fieldsDisabled"
                       placeholder="Ex: GN-123456789"
+                      [invalid]="!!kycErrors['piece_numero']"
+                      (ngModelChange)="onKycFieldChange()"
                     />
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_numero']">
+                      {{ kycErrors['piece_numero'] }}
+                    </small>
                   </div>
 
                   <!-- Pays de délivrance -->
                   <div class="mb-4 col-span-12 md:col-span-4">
                     <label for="piece_pays" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Pays de délivrance
+                      Pays de délivrance <span class="text-red-500" *ngIf="isKycActive">*</span>
                     </label>
                     <p-select
                       id="piece_pays"
@@ -354,14 +369,19 @@
                       placeholder="Sélectionner un pays"
                       [disabled]="fieldsDisabled"
                       [showClear]="true"
+                      [invalid]="!!kycErrors['piece_pays']"
+                      (onChange)="onKycFieldChange()"
                       fluid
                     ></p-select>
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_pays']">
+                      {{ kycErrors['piece_pays'] }}
+                    </small>
                   </div>
 
                   <!-- Date de délivrance -->
                   <div class="mb-4 col-span-12 md:col-span-4">
                     <label for="piece_delivree_le" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Délivrée le
+                      Délivrée le <span class="text-red-500" *ngIf="isKycActive">*</span>
                     </label>
                     <input
                       id="piece_delivree_le"
@@ -370,13 +390,18 @@
                       fluid
                       [(ngModel)]="model.piece_delivree_le"
                       [disabled]="fieldsDisabled"
+                      [invalid]="!!kycErrors['piece_delivree_le']"
+                      (change)="onKycFieldChange()"
                     />
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_delivree_le']">
+                      {{ kycErrors['piece_delivree_le'] }}
+                    </small>
                   </div>
 
                   <!-- Date d'expiration -->
                   <div class="mb-4 col-span-12 md:col-span-4">
                     <label for="piece_expire_le" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Expire le
+                      Expire le <span class="text-red-500" *ngIf="isKycActive">*</span>
                     </label>
                     <input
                       id="piece_expire_le"
@@ -385,7 +410,20 @@
                       fluid
                       [(ngModel)]="model.piece_expire_le"
                       [disabled]="fieldsDisabled"
+                      [invalid]="!!kycErrors['piece_expire_le'] || !!kycErrors['dates']"
+                      (change)="onKycFieldChange()"
                     />
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_expire_le']">
+                      {{ kycErrors['piece_expire_le'] }}
+                    </small>
+                  </div>
+
+                  <!-- Erreur croisée dates -->
+                  <div class="col-span-12 -mt-2" *ngIf="kycErrors['dates']">
+                    <small class="text-red-500 flex items-center gap-1">
+                      <i class="pi pi-exclamation-triangle text-xs"></i>
+                      {{ kycErrors['dates'] }}
+                    </small>
                   </div>
 
                 </div>

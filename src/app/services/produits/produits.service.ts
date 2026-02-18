@@ -82,17 +82,9 @@ export class ProduitService {
   }
 
   /**
-   * POST /produits - Crée un nouveau produit
+   * POST /produits - Crée un nouveau produit (JSON uniquement, sans image)
    */
   create(dto: CreateProduitDto): Observable<Produit> {
-    // Si image présente, utiliser FormData, sinon JSON
-    if (dto.image) {
-      const formData = this.toFormData(dto);
-      return this.http.post<ApiResponse<any>>(this.apiUrl, formData).pipe(
-        map(response => Produit.fromApi(response.data))
-      );
-    }
-
     const { image, ...jsonDto } = dto;
     return this.http.post<ApiResponse<any>>(this.apiUrl, jsonDto).pipe(
       map(response => Produit.fromApi(response.data))
@@ -100,22 +92,31 @@ export class ProduitService {
   }
 
   /**
-   * PUT /produits/{id} - Met à jour un produit
+   * PUT /produits/{id} - Met à jour un produit (JSON uniquement, sans image)
    */
   update(id: number, dto: CreateProduitDto): Observable<Produit> {
-    // Si image présente, utiliser FormData avec _method spoofing
-    if (dto.image) {
-      const formData = this.toFormData(dto);
-      formData.append('_method', 'PUT');
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${id}`, formData).pipe(
-        map(response => Produit.fromApi(response.data))
-      );
-    }
-
     const { image, ...jsonDto } = dto;
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${id}`, jsonDto).pipe(
       map(response => Produit.fromApi(response.data))
     );
+  }
+
+  /**
+   * POST /produits/{id}/image - Upload ou remplace l'image d'un produit
+   */
+  uploadProduitImage(produitId: number, file: File): Observable<Produit> {
+    const formData = new FormData();
+    formData.append('image', file, file.name);
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${produitId}/image`, formData).pipe(
+      map(response => Produit.fromApi(response.data))
+    );
+  }
+
+  /**
+   * DELETE /produits/{id}/image - Supprime l'image d'un produit
+   */
+  deleteProduitImage(produitId: number): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${produitId}/image`);
   }
 
   /**
@@ -161,50 +162,5 @@ export class ProduitService {
     );
   }
 
-  /**
-   * Conversion en FormData pour l'upload de fichiers
-   */
-  private toFormData(dto: CreateProduitDto): FormData {
-    const formData = new FormData();
-
-    // Ajouter les champs dans l'ordre correct pour Laravel
-    if (dto.nom) formData.append('nom', dto.nom);
-    if (dto.type) formData.append('type', dto.type);
-
-    // qte_stock peut être 0, donc on vérifie !== undefined
-    if (dto.qte_stock !== undefined && dto.qte_stock !== null) {
-      formData.append('qte_stock', dto.qte_stock.toString());
-    }
-
-    // Prix (peuvent être undefined)
-    if (dto.prix_usine !== undefined && dto.prix_usine !== null) {
-      formData.append('prix_usine', dto.prix_usine.toString());
-    }
-    if (dto.prix_vente !== undefined && dto.prix_vente !== null) {
-      formData.append('prix_vente', dto.prix_vente.toString());
-    }
-    if (dto.prix_achat !== undefined && dto.prix_achat !== null) {
-      formData.append('prix_achat', dto.prix_achat.toString());
-    }
-
-    // Champs optionnels
-    if (dto.statut) formData.append('statut', dto.statut);
-    if (dto.description) formData.append('description', dto.description);
-    if (dto.cout !== undefined && dto.cout !== null) {
-      formData.append('cout', dto.cout.toString());
-    }
-
-    // Image en dernier
-    if (dto.image instanceof File) {
-      formData.append('image', dto.image, dto.image.name);
-    }
-
-    // Debug: afficher le contenu du FormData
-    console.log('FormData content:');
-    formData.forEach((value, key) => {
-      console.log(`  ${key}:`, value);
-    });
-
-    return formData;
-  }
 }
+

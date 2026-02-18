@@ -5,6 +5,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   QueryList,
@@ -65,7 +66,10 @@ import {
     }
   `
 })
-export class ProduitsForm implements OnInit, OnChanges {
+export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
+
+  private static readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  private static readonly MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
   @ViewChildren('buttonEl') buttonEl!: QueryList<ElementRef>;
 
   @Input() mode: 'create' | 'edit' = 'create';
@@ -113,6 +117,7 @@ export class ProduitsForm implements OnInit, OnChanges {
 
   selectedImageFile: File | null = null;
   imagePreview: string | null = null;
+  imageError: string | null = null;
 
   ngOnInit(): void {
     // âœ… Charger les donnÃ©es initiales si Ã©dition
@@ -158,6 +163,7 @@ export class ProduitsForm implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData']?.currentValue) {
+      this.revokePreviewUrl();
       this.product = new Produit(changes['initialData'].currentValue);
       this.imagePreview = changes['initialData'].currentValue.image_url ?? null;
 
@@ -165,6 +171,7 @@ export class ProduitsForm implements OnInit, OnChanges {
         this.isEditing = false;
         this.submitted = false;
         this.selectedImageFile = null;
+        this.imageError = null;
       }
     }
 
@@ -268,21 +275,42 @@ export class ProduitsForm implements OnInit, OnChanges {
   // IMAGE UPLOAD
   // =========================
   onUpload(event: any): void {
-    if (event?.files?.length) {
-      const file: File = event.files[0];
-      this.selectedImageFile = file;
+    if (!event?.files?.length) return;
+    const file: File = event.files[0];
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => (this.imagePreview = e.target.result);
-      reader.readAsDataURL(file);
+    this.imageError = null;
+
+    if (!ProduitsForm.ALLOWED_TYPES.includes(file.type)) {
+      this.imageError = 'Format non supporté. Utilisez JPG, PNG ou WebP.';
+      return;
     }
+    if (file.size > ProduitsForm.MAX_SIZE) {
+      this.imageError = 'Fichier trop volumineux. Taille max : 5 Mo.';
+      return;
+    }
+
+    this.revokePreviewUrl();
+    this.selectedImageFile = file;
+    this.imagePreview = URL.createObjectURL(file);
   }
 
   removeImage(event: any): void {
     event.stopPropagation();
+    this.revokePreviewUrl();
     this.selectedImageFile = null;
     this.imagePreview = null;
+    this.imageError = null;
     this.product.image_url = null;
+  }
+
+  private revokePreviewUrl(): void {
+    if (this.imagePreview?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.imagePreview);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.revokePreviewUrl();
   }
 
   // =========================
@@ -309,9 +337,6 @@ export class ProduitsForm implements OnInit, OnChanges {
     if (this.product.prix_achat !== null) dto.prix_achat = this.product.prix_achat;
 
     if (this.selectedImageFile) dto.image = this.selectedImageFile;
-
-    console.log('DTO:', dto);
-    
 
     this.submitForm.emit(dto);
   }
@@ -349,9 +374,11 @@ export class ProduitsForm implements OnInit, OnChanges {
   // RESET
   // =========================
   public resetForm(): void {
+    this.revokePreviewUrl();
     this.submitted = false;
     this.selectedImageFile = null;
     this.imagePreview = null;
+    this.imageError = null;
 
     this.product = new Produit({
       nom: '',
