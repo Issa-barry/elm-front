@@ -44,7 +44,15 @@ export class UtilisateursNew {
       quartier: data.quartier || '',
       password: data.password || '',
       password_confirmation: data.password_confirmation || '',
+      type: data.type ?? 'staff',
       role: data.role || '',
+      civilite: data.civilite || undefined,
+      date_naissance: data.date_naissance || undefined,
+      piece_type: data.piece_type || undefined,
+      piece_numero: data.piece_numero || undefined,
+      piece_delivree_le: data.piece_delivree_le || undefined,
+      piece_expire_le: data.piece_expire_le || undefined,
+      piece_pays: data.piece_pays || undefined,
     };
 
     this.userService.createUser(payload).subscribe({

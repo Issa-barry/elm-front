@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
- import { User, CreateUserDto } from '@/models/user.model';
+import { User, CreateUserDto, Civilite, PieceType, UserType } from '@/models/user.model';
 import { environment } from 'src/environments/environment';
 
 // Interfaces pour les réponses API
@@ -48,12 +48,21 @@ export interface UpdateUserDto {
   nom?: string;
   prenom?: string;
   phone?: string;
-  email?: string;
+  email?: string | null;
   pays?: string;
   code_pays?: string;
   code_phone_pays?: string;
   ville?: string;
   quartier?: string;
+  type?: UserType;
+  role?: string;
+  civilite?: Civilite | null;
+  date_naissance?: string | null;
+  piece_type?: PieceType | null;
+  piece_numero?: string | null;
+  piece_delivree_le?: string | null;
+  piece_expire_le?: string | null;
+  piece_pays?: string | null;
 }
 
 @Injectable({

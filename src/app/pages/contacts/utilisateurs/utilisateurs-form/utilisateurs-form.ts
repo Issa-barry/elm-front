@@ -6,8 +6,10 @@ import { RippleModule } from 'primeng/ripple';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
+import { AccordionModule } from 'primeng/accordion';
+import { DatePicker } from 'primeng/datepicker';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
-import { User } from '@/models/user.model';
+import { User, UserType, PieceType, PIECE_TYPE_LABELS, Civilite, CIVILITE_LABELS } from '@/models/user.model';
 import { COUNTRIES } from '@/models/country.model';
 import { RoleService } from '@/services/role/role.service';
 
@@ -23,8 +25,17 @@ export interface UserFormData {
   quartier?: string;
   password?: string;
   password_confirmation?: string;
+  type?: UserType;
   role?: string;
   reference?: string;
+  civilite?: Civilite | null;
+  date_naissance?: string | null;   // format YYYY-MM-DD envoyé au backend
+  // Pièce d'identité (optionnel)
+  piece_type?: PieceType;
+  piece_numero?: string;
+  piece_delivree_le?: string;
+  piece_expire_le?: string;
+  piece_pays?: string;
 }
 
 @Component({
@@ -39,7 +50,9 @@ export interface UserFormData {
     ButtonModule,
     RippleModule,
     FormsModule,
-    PasswordModule
+    PasswordModule,
+    AccordionModule,
+    DatePicker,
   ],
 })
 export class UtilisateursForm implements OnInit, OnChanges {
@@ -54,8 +67,35 @@ export class UtilisateursForm implements OnInit, OnChanges {
   isEditing = false;
   model: UserFormData = {};
 
-  // Rôles disponibles
+  /** Date de naissance sous forme de Date pour le p-datepicker */
+  dateNaissanceObj: Date | null = null;
+
+  /** Date max pour le datepicker (aujourd'hui) */
+  readonly today = new Date();
+
+  // Types de compte
+  readonly userTypeOptions: { label: string; value: UserType }[] = [
+    { label: 'Staff',        value: 'staff' },
+    { label: 'Client',       value: 'client' },
+    { label: 'Prestataire',  value: 'prestataire' },
+    { label: 'Investisseur', value: 'investisseur' },
+  ];
+
+  // Civilité
+  readonly civiliteOptions: { label: string; value: Civilite }[] = (
+    Object.entries(CIVILITE_LABELS) as [Civilite, string][]
+  ).map(([value, label]) => ({ label, value }));
+
+  // Rôles réservés au staff (sélection manuelle)
+  private readonly STAFF_ROLES = ['admin', 'manager', 'comptable', 'agent_vente', 'employe'];
+
+  // Rôles disponibles (chargés depuis l'API)
   availableRoles: { label: string; value: string }[] = [];
+
+  // Options pièces d'identité
+  readonly pieceTypeOptions: { label: string; value: PieceType }[] = (
+    Object.entries(PIECE_TYPE_LABELS) as [PieceType, string][]
+  ).map(([value, label]) => ({ label, value }));
 
   // Validation du téléphone
   phoneError: string | null = null;
@@ -103,6 +143,33 @@ export class UtilisateursForm implements OnInit, OnChanges {
     });
   }
 
+  // ── Type → rôles filtrés ──────────────────────────────
+
+  /** Rôles affichés dans le select selon le type choisi */
+  get filteredRoles(): { label: string; value: string }[] {
+    if (this.model.type === 'staff') {
+      return this.availableRoles.filter(r => this.STAFF_ROLES.includes(r.value));
+    }
+    return [];
+  }
+
+  /** Vrai uniquement pour le staff : le rôle est choisi manuellement */
+  get isRoleSelectable(): boolean {
+    return this.model.type === 'staff';
+  }
+
+  /** Appelé au changement du type : auto-assigne le rôle pour les non-staff */
+  onTypeChange(): void {
+    if (!this.model.type) return;
+    if (this.model.type === 'staff') {
+      this.model.role = undefined;
+    } else {
+      this.model.role = this.model.type;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────
+
   private initializeModel() {
     if (this.initialData) {
       this.model = {
@@ -113,13 +180,25 @@ export class UtilisateursForm implements OnInit, OnChanges {
         pays: this.initialData.pays,
         code_pays: this.initialData.code_pays,
         code_phone_pays: this.initialData.code_phone_pays,
-        ville: this.initialData.ville,
-        quartier: this.initialData.quartier,
-        role: this.initialData.roles?.[0],
+        ville: this.initialData.ville ?? undefined,
+        quartier: this.initialData.quartier ?? undefined,
+        type: this.initialData.type,
+        role: this.initialData.role_names?.[0] ?? this.initialData.roles?.[0],
         reference: this.initialData.reference,
+        civilite: this.initialData.civilite ?? undefined,
+        piece_type: this.initialData.piece_type ?? undefined,
+        piece_numero: this.initialData.piece_numero ?? undefined,
+        piece_delivree_le: this.initialData.piece_delivree_le ?? undefined,
+        piece_expire_le: this.initialData.piece_expire_le ?? undefined,
+        piece_pays: this.initialData.piece_pays ?? undefined,
       };
+      // Convertit la chaîne YYYY-MM-DD en Date pour le datepicker
+      this.dateNaissanceObj = this.initialData.date_naissance
+        ? new Date(this.initialData.date_naissance)
+        : null;
     } else {
       this.model = {};
+      this.dateNaissanceObj = null;
     }
 
     if (this.mode === 'create' && !this.model.ville?.trim()) {
@@ -224,6 +303,11 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return true;
   }
 
+  private formatDate(date: Date | null): string | null {
+    if (!date) return null;
+    return date.toISOString().split('T')[0];
+  }
+
   getCountryName(code: string): string {
     const country = this.countries.find(c => c.code === code);
     return country ? country.name : code;
@@ -253,6 +337,9 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   isValid(): boolean {
+    if (!this.model.type) {
+      return false;
+    }
     if (!this.model.role) {
       return false;
     }
@@ -299,7 +386,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
       return;
     }
 
-    this.submitForm.emit({ ...this.model });
+    this.submitForm.emit({
+      ...this.model,
+      date_naissance: this.formatDate(this.dateNaissanceObj) ?? undefined,
+    });
   }
 
   onCancel() {
