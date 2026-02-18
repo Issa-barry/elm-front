@@ -143,6 +143,14 @@ export class ProduitsForm implements OnInit, OnChanges {
     return this.product.type === 'fabricable';
   }
 
+  isPrixAchatVisible(): boolean {
+    return ['materiel', 'service', 'achat_vente'].includes(this.product.type);
+  }
+
+  isPrixVenteVisible(): boolean {
+    return ['service', 'fabricable', 'achat_vente'].includes(this.product.type);
+  }
+
   isPrixVenteRequired(): boolean {
     // Obligatoire pour: fabricable, achat_vente
     return ['fabricable', 'achat_vente'].includes(this.product.type);
@@ -207,10 +215,12 @@ export class ProduitsForm implements OnInit, OnChanges {
   // TYPE CHANGE
   // =========================
   onTypeChange(): void {
-    // RÃ©initialiser les prix non applicables
+    // Réinitialiser les prix non applicables au type sélectionné
     if (!this.isPrixUsineVisible()) this.product.prix_usine = null;
+    if (!this.isPrixAchatVisible()) this.product.prix_achat = null;
+    if (!this.isPrixVenteVisible()) this.product.prix_vente = null;
 
-    // Pour le type "service", forcer qte_stock Ã  0
+    // Pour le type "service", forcer qte_stock à 0
     if (this.product.type === 'service') {
       this.product.qte_stock = 0;
     }
