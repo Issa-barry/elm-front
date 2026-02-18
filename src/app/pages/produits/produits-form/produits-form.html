@@ -102,7 +102,7 @@
         <div class="mobile-section-card">
             <label class="mobile-field-label">Prix</label>
             <div class="mobile-price-grid">
-                <div class="mobile-price-item">
+                <div class="mobile-price-item" *ngIf="isPrixAchatVisible()">
                     <span class="mobile-price-label">Achat</span>
                     <p-inputnumber
                         [(ngModel)]="product.prix_achat"
@@ -119,7 +119,7 @@
                         Obligatoire
                     </small>
                 </div>
-                <div class="mobile-price-item">
+                <div class="mobile-price-item" *ngIf="isPrixVenteVisible()">
                     <span class="mobile-price-label">Vente</span>
                     <p-inputnumber
                         [(ngModel)]="product.prix_vente"
@@ -287,7 +287,7 @@
 
                         <div class="col-span-12 mt-4">
                             <div class="grid grid-cols-12 gap-4">
-                                <div class="col-span-12 lg:col-span-4">
+                                <div class="col-span-12 lg:col-span-4" *ngIf="isPrixAchatVisible()">
                                     <p-inputnumber
                                         inputId="prix_achat"
                                         [(ngModel)]="product.prix_achat"
@@ -297,7 +297,7 @@
                                         [min]="0"
                                         [disabled]="fieldsDisabled"
                                         [invalid]="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat)"
-                                        placeholder="prix d'achat"
+                                        placeholder="Prix d'achat"
                                         fluid
                                     ></p-inputnumber>
                                     <small class="text-red-500" *ngIf="submitted && isPrixAchatRequired() && isPriceMissing(product.prix_achat) && isEditing">
@@ -305,7 +305,7 @@
                                     </small>
                                 </div>
 
-                                <div class="col-span-12 lg:col-span-4">
+                                <div class="col-span-12 lg:col-span-4" *ngIf="isPrixVenteVisible()">
                                     <p-inputnumber
                                         inputId="prix_vente"
                                         [(ngModel)]="product.prix_vente"

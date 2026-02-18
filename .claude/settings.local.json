@@ -4,7 +4,9 @@
       "Bash(npx ng build:*)",
       "Bash(find:*)",
       "Read(//c/laragon/www/elm-api/app/**)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(node -e:*)"
     ]
   }
 }
