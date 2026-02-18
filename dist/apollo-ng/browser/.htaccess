@@ -1,21 +1,36 @@
-# Angular SPA - Redirect all requests to index.html
+# Angular SPA - Toujours servir index.html pour les routes (évite page blanche au refresh sur #/auth/login etc.)
 RewriteEngine On
+RewriteBase /
 
-# Si le fichier ou répertoire existe, le servir directement
-RewriteCond %{REQUEST_FILENAME} -f [OR]
+# Priorité à index.html pour la racine et les dossiers (Hostinger)
+DirectoryIndex index.html
+
+# Si le fichier existe (JS, CSS, images...), le servir directement
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Si c'est un dossier réel (ex. /demo/), le servir
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Sinon, rediriger vers index.html (Angular SPA routing)
+# Tout le reste (/, /auth/login, etc.) → index.html pour que le hash soit géré par Angular
 RewriteRule ^ index.html [L]
 
 # ===========================================
 # CACHE CONTROL
 # ===========================================
 
-# index.html : JAMAIS caché (force le navigateur à toujours vérifier)
+# index.html : JAMAIS caché (réactualisation après chaque déploiement)
 <Files "index.html">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+    Header set Surrogate-Control "no-store"
+</Files>
+
+# version.json : idem (vérification de nouvelle version)
+<Files "version.json">
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "0"
 </Files>

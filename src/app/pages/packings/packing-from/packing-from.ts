@@ -187,6 +187,14 @@ export class PackingFrom implements OnInit {
     return d.toISOString().split('T')[0];
   }
 
+  // Soumettre au clavier Entrée (uniquement en mode édition)
+  onEnterKey(event: Event): void {
+    if (this.isEditing) {
+      event.preventDefault();
+      this.onSubmit();
+    }
+  }
+
   // Soumettre le formulaire
   onSubmit(): void {
     this.submitted = true;

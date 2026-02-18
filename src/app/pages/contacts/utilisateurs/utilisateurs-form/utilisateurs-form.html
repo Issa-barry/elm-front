@@ -11,14 +11,14 @@
         <!-- Utilisateur -->
       </div>
       <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
-       <!-- Renseignez les informations du compte utilisateur. -->
+        Renseignez les informations du compte utilisateur.
       </p>
     </div>
 
     <div class="col-span-12 lg:col-span-10">
       <div class="grid grid-cols-12 gap-4">
-        <!-- Rôle de l'utilisateur -->
-        <div class="mb-6 col-span-12 md:col-span-6">
+        <!-- Rôle -->
+        <div class="mb-6 col-span-12 md:col-span-12">
           <label for="role" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
            Rôle <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
@@ -93,24 +93,23 @@
           </small>
         </div>
 
-        
-        <!-- Téléphone avec sélecteur de pays -->
+        <!-- Téléphone avec sélecteur de pays (même grille que prestataire) -->
         <div class="mb-6 col-span-12">
-          <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <div class="flex gap-2 items-start">
-            <!-- Sélecteur de pays (compact : drapeau + code) -->
-            <div class="phone-country-select">
+          <div class="grid grid-cols-12 gap-3">
+            <div class="col-span-12 md:col-span-4">
+              <label for="codePays" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+                Pays <span class="text-red-500" *ngIf="isEditing">*</span>
+              </label>
               <p-select
                 id="codePays"
                 [(ngModel)]="phoneCountry"
                 [options]="countries"
                 optionLabel="name"
                 optionValue="code"
-                placeholder="Pays"
+                placeholder="Sélectionner un pays"
                 [disabled]="fieldsDisabled"
-                (onChange)="onCountryChange()"
+                (onCountryChange)="onCountryChange()"
+                fluid
               >
                 <ng-template let-country pTemplate="item">
                   <div class="flex items-center gap-2">
@@ -123,13 +122,15 @@
                   <div class="flex items-center gap-2" *ngIf="country">
                     <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
                     <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                    <span>{{ country.name }}</span>
                   </div>
                 </ng-template>
               </p-select>
             </div>
-
-            <!-- Champ téléphone -->
-            <div class="flex-1">
+            <div class="col-span-12 md:col-span-8">
+              <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
+                Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
+              </label>
               <input
                 id="phone"
                 type="tel"
@@ -140,12 +141,10 @@
                 [disabled]="fieldsDisabled"
                 (input)="onPhoneInput()"
                 (blur)="onPhoneBlur()"
-                placeholder="622 00 00 00"
+                placeholder="Exemple: 622 00 00 00"
               />
             </div>
           </div>
-
-          <!-- Messages d'erreur pour le téléphone -->
           <small class="text-red-500 block mt-2" *ngIf="submitted && !model.phone?.trim() && isEditing">
             Téléphone obligatoire.
           </small>
@@ -236,29 +235,30 @@
           </small>
         </div>
 
-        <!-- Boutons -->
-        <div class="col-span-12 form-actions" *ngIf="isEditing">
-          <button
-            pButton
-            pRipple
-            [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
-            icon="pi pi-check"
-            (click)="onSubmit()"
-            [loading]="loading"
-            [disabled]="!isValid() || loading"
-            class="form-action-submit"
-          ></button>
-
-          <button
-            pButton
-            pRipple
-            label="Annuler"
-            icon="pi pi-times"
-            severity="secondary"
-            (click)="onCancel()"
-            [disabled]="loading"
-            class="form-action-cancel"
-          ></button>
+        <!-- Boutons (même structure que formulaire prestataire) -->
+        <div class="col-span-12 utilisateurs-form-actions" *ngIf="isEditing">
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              pButton
+              pRipple
+              [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
+              icon="pi pi-check"
+              (click)="onSubmit()"
+              [loading]="loading"
+              [disabled]="!isValid() || loading"
+              class="utilisateurs-form-submit"
+            ></button>
+            <button
+              pButton
+              pRipple
+              label="Annuler"
+              icon="pi pi-times"
+              severity="secondary"
+              (click)="onCancel()"
+              [disabled]="loading"
+              class="utilisateurs-form-cancel"
+            ></button>
+          </div>
         </div>
       </div>
     </div>

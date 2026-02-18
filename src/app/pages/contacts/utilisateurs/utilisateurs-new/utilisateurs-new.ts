@@ -55,10 +55,14 @@ export class UtilisateursNew {
             summary: 'Succès',
             detail: 'Utilisateur créé avec succès'
           });
-          const createdUser = response.data?.user;
+          const createdId = response.data?.user?.id ?? (response.data as any)?.id;
           setTimeout(() => {
-            this.router.navigate(['contacts/utilisateurs/edit', createdUser?.id || '']);
-          }, 1500);
+            if (createdId != null) {
+              this.router.navigate(['contacts/utilisateurs/edit', createdId]);
+            } else {
+              this.router.navigate(['contacts/utilisateurs']);
+            }
+          }, 600);
         }
         this.loading = false;
       },

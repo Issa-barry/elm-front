@@ -208,28 +208,29 @@
         </div>
 
         <!-- Boutons -->
-        <div class="col-span-12 flex gap-2 prestateurs-form-actions" *ngIf="isEditing">
-          <button
-            pButton
-            pRipple
-            [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
-            icon="pi pi-check"
-            (click)="onSubmit()"
-            [loading]="loading"
-            [disabled]="!isValid() || loading"
-            class="w-auto prestateurs-form-submit"
-          ></button>
-
-          <button
-            pButton
-            pRipple
-            label="Annuler"
-            icon="pi pi-times"
-            severity="secondary"
-            (click)="onCancel()"
-            [disabled]="loading"
-            class="w-auto prestateurs-form-cancel"
-          ></button>
+        <div class="col-span-12 prestateurs-form-actions" *ngIf="isEditing">
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              pButton
+              pRipple
+              [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
+              icon="pi pi-check"
+              (click)="onSubmit()"
+              [loading]="loading"
+              [disabled]="!isValid() || loading"
+              class="prestateurs-form-submit"
+            ></button>
+            <button
+              pButton
+              pRipple
+              label="Annuler"
+              icon="pi pi-times"
+              severity="secondary"
+              (click)="onCancel()"
+              [disabled]="loading"
+              class="prestateurs-form-cancel"
+            ></button>
+          </div>
         </div>
       </div>
     </div>
