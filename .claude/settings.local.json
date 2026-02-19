@@ -9,7 +9,8 @@
       "Bash(node -e:*)",
       "Bash(cmd //c \"dir c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng /b | findstr /i date\")",
       "Bash(cmd //c \"dir c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng\\\\datepicker /b\")",
-      "Bash(cmd //c \"type c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng\\\\datepicker\\\\index.d.ts\")"
+      "Bash(cmd //c \"type c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng\\\\datepicker\\\\index.d.ts\")",
+      "Read(//c/laragon/www/elm-api/**)"
     ]
   }
 }

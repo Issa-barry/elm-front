@@ -237,10 +237,11 @@
         gap: 0.35rem;
     }
 
-    .mobile-eye-action {
+    .mobile-chevron-action {
         width: 2.05rem;
         height: 2.05rem;
-        color: var(--mobile-primary) !important;
+        color: var(--mobile-muted) !important;
+        flex-shrink: 0;
     }
 
     .mobile-state {
@@ -470,5 +471,201 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+// ================================
+// MOBILE — Search row + Filter btn
+// ================================
+@media screen and (max-width: 768px) {
+    .mobile-search-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .mobile-search {
+            flex: 1;
+        }
+    }
+
+    .mobile-filter-btn {
+        position: relative;
+        width: 2.5rem;
+        height: 2.5rem;
+        flex-shrink: 0;
+        border-radius: 0.65rem;
+        border: 1.5px solid var(--mobile-border);
+        background: #f7f9fd;
+        color: var(--mobile-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background 0.15s ease, border-color 0.15s ease;
+
+        .pi { font-size: 1rem; }
+    }
+
+    .mobile-filter-btn--active {
+        background: rgba(95, 107, 255, 0.1);
+        border-color: var(--mobile-primary);
+        color: var(--mobile-primary);
+    }
+
+    .mobile-filter-badge {
+        position: absolute;
+        top: -0.3rem;
+        right: -0.3rem;
+        width: 1.15rem;
+        height: 1.15rem;
+        border-radius: 50%;
+        background: var(--mobile-primary);
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+    // ── Drawer filtres mobile ──
+    :host ::ng-deep .mobile-filter-drawer {
+        width: min(320px, 88vw) !important;
+
+        .p-drawer-content {
+            padding: 1rem 1.25rem;
+            overflow-y: auto;
+        }
+
+        .p-drawer-footer {
+            padding: 0.75rem 1.25rem 1rem;
+            border-top: 1px solid var(--mobile-border);
+        }
+    }
+
+    .filter-drawer-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #94a3b8;
+        margin-bottom: 0.1rem;
+    }
+
+    .filter-label--inline {
+        margin-bottom: 0;
+        font-size: 0.85rem;
+        text-transform: none;
+        letter-spacing: 0;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .filter-toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.65rem 0;
+        border-top: 1px solid var(--mobile-border);
+        border-bottom: 1px solid var(--mobile-border);
+    }
+
+    .filter-drawer-footer {
+        display: flex;
+        gap: 0.75rem;
+
+        .p-button { flex: 1; }
+    }
+
+    // Dark mode — filter drawer
+    :host-context(.app-dark) {
+        .mobile-filter-btn {
+            background: var(--p-surface-800);
+            border-color: var(--p-surface-600);
+            color: var(--p-surface-400);
+        }
+
+        .mobile-filter-btn--active {
+            background: rgba(var(--p-primary-400-rgb, 95, 107, 255), 0.15);
+            border-color: var(--p-primary-400);
+            color: var(--p-primary-400);
+        }
+
+        .filter-label--inline {
+            color: var(--p-surface-200);
+        }
+
+        .filter-toggle-row {
+            border-color: var(--p-surface-600);
+        }
+
+        :host ::ng-deep .mobile-filter-drawer {
+            .p-drawer-footer {
+                border-top-color: var(--p-surface-700);
+            }
+        }
+    }
+}
+
+// ================================
+// DESKTOP — Filter bar
+// ================================
+.desktop-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--p-surface-100);
+    margin-bottom: 0.5rem;
+
+    :host-context(.app-dark) & {
+        border-bottom-color: var(--p-surface-700);
+    }
+}
+
+:host ::ng-deep .desktop-filter-select {
+    min-width: 11rem;
+}
+
+.desktop-filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.desktop-filter-toggle-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--p-surface-600);
+}
+
+.desktop-filter-count {
+    margin-left: auto;
+    font-size: 0.82rem;
+    color: var(--p-surface-400);
+    font-weight: 500;
+}
+
+:host-context(.app-dark) {
+    .desktop-filter-toggle-label {
+        color: var(--p-surface-400);
+    }
+    .desktop-filter-count {
+        color: var(--p-surface-500);
     }
 }

@@ -11,6 +11,8 @@ import {
   Produit,
   ProduitSearchParams,
   ProduitStatistics,
+  ProduitStatut,
+  ProduitType,
   UpdateStockDto
 } from '@/models/produit.model';
 
@@ -32,6 +34,29 @@ export class ProduitService {
   }
 
   /**
+   * GET /produits - Liste avec filtres (sans recherche textuelle)
+   */
+  getAllFiltered(params: {
+    statut?: ProduitStatut | null;
+    type?: ProduitType | null;
+    in_stock?: boolean | null;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+  } = {}): Observable<Produit[]> {
+    let httpParams = new HttpParams();
+    if (params.statut) httpParams = httpParams.set('statut', params.statut);
+    if (params.type) httpParams = httpParams.set('type', params.type);
+    if (params.in_stock !== null && params.in_stock !== undefined) {
+      httpParams = httpParams.set('in_stock', String(params.in_stock));
+    }
+    if (params.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
+    if (params.sort_order) httpParams = httpParams.set('sort_order', params.sort_order);
+    return this.http.get<ApiResponse<any[]>>(this.apiUrl, { params: httpParams }).pipe(
+      map(response => Produit.fromApiArray(response.data))
+    );
+  }
+
+  /**
    * GET /produits/archived - Liste les produits archivés
    */
   getArchived(): Observable<Produit[]> {
@@ -43,7 +68,7 @@ export class ProduitService {
   /**
    * GET /produits/search - Recherche avec filtres et pagination
    */
-  search(params: ProduitSearchParams): Observable<PaginatedResponse<Produit>> {
+  search(params: ProduitSearchParams): Observable<Produit[]> {
     let httpParams = new HttpParams();
 
     if (params.search) httpParams = httpParams.set('search', params.search);
@@ -55,11 +80,8 @@ export class ProduitService {
     if (params.sort_by) httpParams = httpParams.set('sort_by', params.sort_by);
     if (params.sort_order) httpParams = httpParams.set('sort_order', params.sort_order);
 
-    return this.http.get<PaginatedResponse<any>>(`${this.apiUrl}/search`, { params: httpParams }).pipe(
-      map(response => ({
-        ...response,
-        data: Produit.fromApiArray(response.data)
-      }))
+    return this.http.get<ApiResponse<{ produits: any[]; count: number }>>(`${this.apiUrl}/search`, { params: httpParams }).pipe(
+      map(response => Produit.fromApiArray(response.data.produits))
     );
   }
 
