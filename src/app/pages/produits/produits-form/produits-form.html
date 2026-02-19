@@ -105,6 +105,37 @@
             </div>
         </div>
 
+        <!-- Type + Stock en rangée compacte (en premier, champ structurant) -->
+        <div class="mobile-section-card">
+            <div class="mobile-meta-row">
+                <div class="mobile-meta-field">
+                    <label class="mobile-field-label">Type</label>
+                    <p-select
+                        [options]="typeOptions"
+                        [(ngModel)]="product.type"
+                        (onChange)="onTypeChange()"
+                        [disabled]="fieldsDisabled"
+                        placeholder="Type"
+                        fluid
+                    ></p-select>
+                </div>
+                <div class="mobile-meta-field">
+                    <label class="mobile-field-label">Stock</label>
+                    <p-inputnumber
+                        [(ngModel)]="product.qte_stock"
+                        [showButtons]="true"
+                        [min]="0"
+                        [disabled]="isQteStockDisabled()"
+                        placeholder="0"
+                        fluid
+                    ></p-inputnumber>
+                </div>
+            </div>
+            <small class="mobile-info-hint" *ngIf="product.type === 'service'">
+                <i class="pi pi-info-circle"></i> Stock non géré pour les services
+            </small>
+        </div>
+
         <!-- Nom du produit -->
         <div class="mobile-section-card">
             <!-- <label class="mobile-field-label">Nom du produit</label> -->
@@ -195,37 +226,6 @@
                 <i class="pi pi-exclamation-circle"></i>
                 Au moins un prix requis pour un service.
             </div>
-        </div>
-
-        <!-- Type + Statut + Stock en rangée compacte -->
-        <div class="mobile-section-card">
-            <div class="mobile-meta-row">
-                <div class="mobile-meta-field">
-                    <label class="mobile-field-label">Type</label>
-                    <p-select
-                        [options]="typeOptions"
-                        [(ngModel)]="product.type"
-                        (onChange)="onTypeChange()"
-                        [disabled]="fieldsDisabled"
-                        placeholder="Type"
-                        fluid
-                    ></p-select>
-                </div>
-                <div class="mobile-meta-field">
-                    <label class="mobile-field-label">Stock</label>
-                    <p-inputnumber
-                        [(ngModel)]="product.qte_stock"
-                        [showButtons]="true"
-                        [min]="0"
-                        [disabled]="isQteStockDisabled()"
-                        placeholder="0"
-                        fluid
-                    ></p-inputnumber>
-                </div>
-            </div>
-            <small class="mobile-info-hint" *ngIf="product.type === 'service'">
-                <i class="pi pi-info-circle"></i> Stock non géré pour les services
-            </small>
         </div>
 
         <!-- Status toggle -->
