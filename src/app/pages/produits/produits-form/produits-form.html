@@ -55,8 +55,9 @@
                                     [src]="imagePreview || product.getImageUrl()"
                                     alt="Image du produit"
                                 />
+                                <!-- Bouton X (caché pendant confirmation ou chargement) -->
                                 <button
-                                    *ngIf="!fieldsDisabled"
+                                    *ngIf="!fieldsDisabled && !confirmingDelete && !loading"
                                     pButton
                                     pRipple
                                     rounded
@@ -67,10 +68,33 @@
                                 >
                                     <i class="pi pi-times"></i>
                                 </button>
+                                <!-- Overlay spinner pendant l'upload -->
+                                <div
+                                    *ngIf="loading && selectedImageFile"
+                                    class="mobile-upload-loading"
+                                >
+                                    <i class="pi pi-spin pi-spinner text-white text-3xl"></i>
+                                </div>
+                                <!-- Overlay confirmation suppression -->
+                                <div *ngIf="confirmingDelete" class="mobile-delete-confirm">
+                                    <p class="text-white text-sm font-semibold mb-3 text-center">Supprimer cette image ?</p>
+                                    <div class="flex gap-2 justify-center">
+                                        <button pButton type="button" severity="danger" size="small" label="Supprimer" (click)="confirmDeleteImage($event)"></button>
+                                        <button pButton type="button" severity="secondary" size="small" label="Annuler" (click)="cancelDeleteImage($event)"></button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </ng-template>
                 </p-fileUpload>
+            </div>
+            <div *ngIf="isEditing" class="px-3 pb-2">
+                <small class="block text-center text-surface-400">
+                    <i class="pi pi-info-circle mr-1"></i>JPG, PNG, WebP — 5 Mo max
+                </small>
+                <small class="block text-center text-red-500 mt-1" *ngIf="imageError">
+                    <i class="pi pi-exclamation-circle mr-1"></i>{{ imageError }}
+                </small>
             </div>
             <div *ngIf="!isEditing && product.image_url" class="mobile-upload-preview">
                 <img [src]="product.getImageUrl()" alt="Image du produit" />
@@ -414,14 +438,15 @@
                                     </div>
 
                                     <div *ngIf="imagePreview || product.image_url" class="relative w-full flex justify-center py-3">
-                                        <div class="relative">
+                                        <div class="relative inline-block">
                                             <img
                                                 [src]="imagePreview || product.getImageUrl()"
                                                 alt="Image du produit"
                                                 class="max-h-72 rounded shadow object-contain"
                                             />
+                                            <!-- Bouton X (caché pendant confirmation ou chargement) -->
                                             <button
-                                                *ngIf="!fieldsDisabled"
+                                                *ngIf="!fieldsDisabled && !confirmingDelete && !loading"
                                                 pButton
                                                 pRipple
                                                 rounded
@@ -432,11 +457,36 @@
                                             >
                                                 <i class="pi pi-times"></i>
                                             </button>
+                                            <!-- Overlay spinner pendant l'upload -->
+                                            <div
+                                                *ngIf="loading && selectedImageFile"
+                                                class="absolute inset-0 flex items-center justify-center bg-surface-0/80 dark:bg-surface-900/80 rounded"
+                                            >
+                                                <i class="pi pi-spin pi-spinner text-primary text-3xl"></i>
+                                            </div>
+                                            <!-- Overlay confirmation suppression -->
+                                            <div
+                                                *ngIf="confirmingDelete"
+                                                class="absolute inset-0 flex flex-col items-center justify-center rounded"
+                                                style="background: rgba(0,0,0,0.65);"
+                                            >
+                                                <p class="text-white text-sm font-semibold mb-3 px-3 text-center">Supprimer cette image ?</p>
+                                                <div class="flex gap-2">
+                                                    <button pButton type="button" severity="danger" size="small" label="Supprimer" (click)="confirmDeleteImage($event)"></button>
+                                                    <button pButton type="button" severity="secondary" size="small" label="Annuler" (click)="cancelDeleteImage($event)"></button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </ng-template>
                         </p-fileUpload>
+                        <small class="block mt-2 text-surface-400">
+                            <i class="pi pi-info-circle mr-1"></i>JPG, PNG, WebP — 5 Mo max
+                        </small>
+                        <small class="block mt-1 text-red-500" *ngIf="imageError">
+                            <i class="pi pi-exclamation-circle mr-1"></i>{{ imageError }}
+                        </small>
                     </div>
 
                     <div class="flex justify-center mt-2" *ngIf="!isEditing && product.image_url">

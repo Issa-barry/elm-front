@@ -78,6 +78,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
 
   @Output() submitForm = new EventEmitter<CreateProduitDto>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() deleteImage = new EventEmitter<void>();
 
   submitted = false;
   isEditing = false;
@@ -118,6 +119,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
   selectedImageFile: File | null = null;
   imagePreview: string | null = null;
   imageError: string | null = null;
+  confirmingDelete = false;
 
   ngOnInit(): void {
     // âœ… Charger les donnÃ©es initiales si Ã©dition
@@ -172,6 +174,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
         this.submitted = false;
         this.selectedImageFile = null;
         this.imageError = null;
+        this.confirmingDelete = false;
       }
     }
 
@@ -296,11 +299,29 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
 
   removeImage(event: any): void {
     event.stopPropagation();
-    this.revokePreviewUrl();
-    this.selectedImageFile = null;
-    this.imagePreview = null;
-    this.imageError = null;
+    if (this.selectedImageFile) {
+      // Annuler la sélection d'un nouveau fichier (pas d'appel API)
+      this.revokePreviewUrl();
+      this.selectedImageFile = null;
+      this.imagePreview = null;
+      this.imageError = null;
+    } else if (this.product.image_url) {
+      // Image existante sur le serveur → confirmation requise
+      this.confirmingDelete = true;
+    }
+  }
+
+  confirmDeleteImage(event: any): void {
+    event.stopPropagation();
+    this.confirmingDelete = false;
     this.product.image_url = null;
+    this.imagePreview = null;
+    this.deleteImage.emit();
+  }
+
+  cancelDeleteImage(event: any): void {
+    event.stopPropagation();
+    this.confirmingDelete = false;
   }
 
   private revokePreviewUrl(): void {

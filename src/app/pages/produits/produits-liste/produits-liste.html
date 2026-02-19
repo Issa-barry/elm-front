@@ -47,7 +47,13 @@
             (click)="goToEditProduit($event, produit.id)"
         >
             <div class="mobile-card-media">
-                <div class="mobile-card-image-placeholder" aria-hidden="true">
+                <img
+                    *ngIf="produit.image_url"
+                    [src]="produit.getImageUrl()"
+                    [alt]="produit.nom"
+                    class="mobile-card-thumb"
+                />
+                <div *ngIf="!produit.image_url" class="mobile-card-image-placeholder" aria-hidden="true">
                     <i class="pi pi-box"></i>
                 </div>
             </div>
@@ -162,6 +168,7 @@
                         <th style="width: 3rem">
                             <p-tableHeaderCheckbox />
                         </th>
+                        <th style="width: 5rem">Image</th>
                         <th style="min-width: 16rem" pSortableColumn="code">
                             <span class="flex items-center gap-2">Code
                             <p-sortIcon field="code" /></span>
@@ -170,7 +177,6 @@
                             <span class="flex items-center gap-2">Nom
                             <p-sortIcon field="nom" /></span>
                         </th>
-                        <!-- <th>Image</th> -->
                         <!-- <th pSortableColumn="price" style="min-width: 8rem">
                             <span class="flex items-center gap-2">Prix
                             <p-sortIcon field="price" /></span>
@@ -195,11 +201,18 @@
                         <td style="width: 3rem">
                             <p-tableCheckbox [value]="produit" />
                         </td>
+                        <td style="width: 5rem">
+                            <img
+                                *ngIf="produit.image_url"
+                                [src]="produit.getImageUrl()"
+                                [alt]="produit.nom"
+                                style="width: 48px; height: 48px; object-fit: contain;"
+                                class="rounded border border-surface-200"
+                            />
+                            <i *ngIf="!produit.image_url" class="pi pi-image text-surface-300 text-2xl"></i>
+                        </td>
                         <td style="min-width: 12rem">{{ produit.code }}</td>
-                       <td style="min-width: 16rem">{{ produit.nom }}</td>
-                        <!-- <td>
-                            <img [src]="'/demo/images/produit/' + produit.image" [alt]="produit.name" style="width: 64px" class="rounded" /> 
-                        </td> -->
+                        <td style="min-width: 16rem">{{ produit.nom }}</td>
                          <td>{{ produit.type }}</td>
                         <td>{{ produit.qte_stock }}</td>
                         <td>

@@ -49,10 +49,58 @@ export class ProduitsEdit implements OnInit, OnDestroy {
     if (!this.produitId) return;
 
     this.loading = true;
+    const imageFile = dto.image ?? null;
 
     this.produitService.update(this.produitId, dto).subscribe({
       next: (updatedProduit) => {
+        if (imageFile) {
+          this.uploadImageAfterUpdate(updatedProduit, imageFile);
+        } else {
+          this.initialData = updatedProduit;
+          this.loading = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Produit modifié avec succès',
+            life: 3000,
+          });
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        this.showApiError(error, 'Erreur lors de la modification du produit');
+      },
+    });
+  }
+
+  onDeleteImage(): void {
+    if (!this.produitId) return;
+    this.loading = true;
+
+    this.produitService.deleteProduitImage(this.produitId).subscribe({
+      next: (updatedProduit) => {
         this.initialData = updatedProduit;
+        this.loading = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Image supprimée avec succès',
+          life: 3000,
+        });
+      },
+      error: (error) => {
+        // Restaure l'état précédent côté form via ngOnChanges
+        this.initialData = { ...this.initialData } as Produit;
+        this.loading = false;
+        this.showApiError(error, "Impossible de supprimer l'image");
+      },
+    });
+  }
+
+  private uploadImageAfterUpdate(produit: Produit, file: File): void {
+    this.produitService.uploadProduitImage(produit.id, file).subscribe({
+      next: (produitWithImage) => {
+        this.initialData = produitWithImage;
         this.loading = false;
         this.messageService.add({
           severity: 'success',
@@ -61,9 +109,15 @@ export class ProduitsEdit implements OnInit, OnDestroy {
           life: 3000,
         });
       },
-      error: (error) => {
+      error: () => {
+        this.initialData = produit;
         this.loading = false;
-        this.showApiError(error, 'Erreur lors de la modification du produit');
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Attention',
+          detail: "Produit modifié, mais l'image n'a pas pu être envoyée.",
+          life: 5000,
+        });
       },
     });
   }

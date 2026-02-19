@@ -306,6 +306,28 @@
       i { font-size: 0.7rem; }
     }
 
+    .mobile-upload-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 0.75rem;
+    }
+
+    .mobile-delete-confirm {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 1rem;
+    }
+
     // ---- Section cards ----
     .mobile-section-card {
       background: #fff;

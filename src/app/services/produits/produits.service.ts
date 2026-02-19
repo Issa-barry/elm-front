@@ -115,8 +115,10 @@ export class ProduitService {
   /**
    * DELETE /produits/{id}/image - Supprime l'image d'un produit
    */
-  deleteProduitImage(produitId: number): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${produitId}/image`);
+  deleteProduitImage(produitId: number): Observable<Produit> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${produitId}/image`).pipe(
+      map(response => Produit.fromApi(response.data))
+    );
   }
 
   /**

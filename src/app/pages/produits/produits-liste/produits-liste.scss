@@ -156,6 +156,15 @@
         flex-shrink: 0;
     }
 
+    .mobile-card-thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 0.65rem;
+        object-fit: contain;
+        border: 1px solid var(--mobile-border);
+        background: #fff;
+    }
+
     .mobile-card-image-placeholder {
         width: 64px;
         height: 64px;
