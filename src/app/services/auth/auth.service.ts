@@ -6,13 +6,16 @@ import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { User } from '@/models/user.model';
 import { ApiResponse, AuthResponse, ChangePasswordRequest, LoginRequest, RegisterRequest, UpdateProfileRequest } from '@/models/auth.model';
+import { MeResponse } from '@/models/usine.model';
+import { UsineContextService } from '@/services/usine/usine-context.service';
  
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private http = inject(HttpClient);
-  private router = inject(Router);
+  private http         = inject(HttpClient);
+  private router       = inject(Router);
+  private usineContext = inject(UsineContextService);
 
   private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'access_token';
@@ -108,16 +111,21 @@ export class AuthService {
   }
 
   /**
-   * Obtenir le profil de l'utilisateur connecté
+   * Obtenir le profil de l'utilisateur connecté.
+   * La réponse /auth/me retourne un MeResponse enrichi (usines, rôles, permissions).
+   * On hydrate le store usine après chaque appel réussi.
    */
-  me(): Observable<ApiResponse<User>> {
-    return this.http.get<ApiResponse<any>>(`${this.API_URL}/me`).pipe(
+  me(): Observable<ApiResponse<MeResponse>> {
+    return this.http.get<ApiResponse<MeResponse>>(`${this.API_URL}/me`).pipe(
       tap(response => {
         if (response.success && response.data) {
+          // Extraire et persister le User (conserve la logique existante)
           const user = this.extractUserFromPayload(response.data);
           if (user) {
             this.setUser(user);
           }
+          // Hydrater le contexte usine avec les données multi-usine
+          this.usineContext.hydrateFromMe(response.data);
         }
       }),
       catchError(error => this.handleError(error))
@@ -348,7 +356,7 @@ export class AuthService {
   }
 
   /**
-   * Nettoyer toutes les données d'authentification
+   * Nettoyer toutes les données d'authentification (y compris contexte usine)
    */
   private clearAuth(): void {
     sessionStorage.removeItem(this.TOKEN_KEY);
@@ -356,6 +364,7 @@ export class AuthService {
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
     this.currentUserSubject.next(null);
+    this.usineContext.clear();
   }
 
   /**

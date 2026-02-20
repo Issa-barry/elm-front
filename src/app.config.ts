@@ -3,9 +3,11 @@ import { ApplicationConfig } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withHashLocation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeuix/themes/aura';
+import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@/interceptors/auth.interceptor';
+import { usineInterceptor } from '@/interceptors/usine.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -17,8 +19,9 @@ export const appConfig: ApplicationConfig = {
         ),
         provideHttpClient(
             withFetch(),
-            withInterceptors([authInterceptor]) // ← Ajout de l'intercepteur
+            withInterceptors([authInterceptor, usineInterceptor])
         ),
+        MessageService,
         provideAnimationsAsync(),
         providePrimeNG({
             theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } },
