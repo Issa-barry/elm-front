@@ -351,6 +351,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     };
     // Statut piloté par le switch (actif/inactif)
     dto.statut = this.product.statut;
+    dto.is_critique = this.product.is_critique;
 
     // Prix seulement si dÃ©finis
     if (this.product.prix_usine !== null) dto.prix_usine = this.product.prix_usine;
@@ -413,6 +414,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
       type: 'materiel',
       in_stock: true,
       is_archived: false,
+      is_critique: false,
       description: null,
       image_url: null
     });

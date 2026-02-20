@@ -78,11 +78,20 @@
                             <div class="mobile-code">{{ produit.code || 'Sans code' }}</div>
                             <div class="mobile-name">{{ produit.nom }}</div>
                         </div>
-                        <p-tag
-                            styleClass="mobile-status-tag"
-                            [value]="getStatutLabel(produit.statut)"
-                            [severity]="getStatutSeverity(produit.statut)"
-                        />
+                        <div class="flex flex-col items-end gap-1">
+                            <p-tag
+                                styleClass="mobile-status-tag"
+                                [value]="getStatutLabel(produit.statut)"
+                                [severity]="getStatutSeverity(produit.statut)"
+                            />
+                            <p-tag
+                                *ngIf="produit.is_critique"
+                                value="Critique"
+                                severity="warn"
+                                icon="pi pi-exclamation-triangle"
+                                [rounded]="true"
+                            />
+                        </div>
                     </div>
 
                     <div class="mobile-card-footer">
@@ -321,7 +330,17 @@
                     <i *ngIf="!produit.image_url" class="pi pi-image text-surface-300 text-2xl"></i>
                 </td>
                 <td style="min-width: 12rem">{{ produit.code }}</td>
-                <td style="min-width: 16rem">{{ produit.nom }}</td>
+                <td style="min-width: 16rem">
+                    <span>{{ produit.nom }}</span>
+                    <p-tag
+                        *ngIf="produit.is_critique"
+                        value="Critique"
+                        severity="warn"
+                        icon="pi pi-exclamation-triangle"
+                        [rounded]="true"
+                        styleClass="ml-2"
+                    />
+                </td>
                 <td>{{ getTypeLabel(produit.type) }}</td>
                 <td>{{ produit.qte_stock }}</td>
                 <td>

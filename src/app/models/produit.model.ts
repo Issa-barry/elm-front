@@ -68,6 +68,8 @@ export class Produit {
 
   in_stock: boolean = true;
   is_archived: boolean = false;
+  is_critique: boolean = false;
+  last_stockout_notified_at: string | null = null;
 
   archived_at: string | null = null;
   description: string | null = null;
@@ -126,6 +128,8 @@ export class Produit {
       prix_vente: data?.prix_vente !== null && data?.prix_vente !== undefined ? Number(data.prix_vente) : null,
       prix_achat: data?.prix_achat !== null && data?.prix_achat !== undefined ? Number(data.prix_achat) : null,
       cout: data?.cout !== null && data?.cout !== undefined ? Number(data.cout) : null,
+      is_critique: data?.is_critique ?? false,
+      last_stockout_notified_at: data?.last_stockout_notified_at ?? null,
     });
   }
 
@@ -149,6 +153,7 @@ export interface CreateProduitDto {
   prix_vente?: number;
   prix_achat?: number;
 
+  is_critique?: boolean;
   image?: File;
 }
 

@@ -240,6 +240,16 @@
             ></p-toggleswitch>
         </div>
 
+        <!-- Produit critique -->
+        <div class="mobile-section-card mobile-status-row">
+            <span class="mobile-status-label">Produit critique</span>
+            <p-toggleswitch
+                [(ngModel)]="product.is_critique"
+                [disabled]="fieldsDisabled"
+                class="ml-auto"
+            ></p-toggleswitch>
+        </div>
+
         <!-- Boutons sticky en bas -->
         <div class="mobile-bottom-actions" *ngIf="isEditing">
             <button
@@ -505,6 +515,17 @@
                             <p-toggleswitch
                                 [ngModel]="isActifSwitch"
                                 (ngModelChange)="onStatutToggleChange($event)"
+                                [disabled]="fieldsDisabled"
+                                class="ml-auto"
+                            ></p-toggleswitch>
+                        </div>
+                        <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded mt-2">
+                            <div class="flex flex-col flex-1">
+                                <span class="text-black/90 dark:text-surface-0! font-bold">Produit critique</span>
+                                <small class="text-surface-500">Déclenche une alerte en cas de rupture de stock</small>
+                            </div>
+                            <p-toggleswitch
+                                [(ngModel)]="product.is_critique"
                                 [disabled]="fieldsDisabled"
                                 class="ml-auto"
                             ></p-toggleswitch>
