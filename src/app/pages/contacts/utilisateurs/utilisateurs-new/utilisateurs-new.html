@@ -14,6 +14,20 @@
     <span class="edit-header-spacer"></span>
   </header>
 
+  <!-- Rappel UX : usine d'assignation ou message vue consolidée -->
+  @if (usineContext.isConsolidated()) {
+    <p-message
+      severity="warn"
+      styleClass="usine-context-message mb-3"
+      [text]="'Veuillez sélectionner une usine dans la barre du haut pour pouvoir créer un utilisateur.'"
+    />
+  } @else if (usineContext.currentUsine(); as usine) {
+    <div class="usine-assignation-reminder mb-3">
+      <i class="pi pi-building"></i>
+      <span>L'utilisateur sera assigné à : <strong>{{ usine.nom }}</strong></span>
+    </div>
+  }
+
   <div class="edit-content">
     <app-utilisateurs-form
       [mode]="'create'"
