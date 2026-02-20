@@ -17,7 +17,7 @@ interface UsineOption {
  * Sélecteur d'usine affiché dans la topbar.
  *
  * Comportement :
- * - Siège            → p-select avec toutes les usines + option "Vue consolidée"
+ * - Siège            → p-select avec toutes les usines + option "Toutes les usines"
  * - Non-siège, N > 1 → p-select limité à accessible_usines
  * - Non-siège, N = 1 → badge non-interactif (contexte forcé)
  * - Non-siège, N = 0 → rien (backend gère le contexte)
@@ -110,9 +110,9 @@ export class AppUsineSelector {
       icon:  'pi-building',
     }));
 
-    // Siège : option "Vue consolidée" en tête de liste
+    // Siège : option "Toutes les usines" en tête de liste
     if (this.usineCtx.isSiegeUser()) {
-      opts.unshift({ label: 'Vue consolidée', value: null, icon: 'pi-globe' });
+      opts.unshift({ label: 'Toutes les usines', value: null, icon: 'pi-globe' });
     }
 
     return opts;
@@ -136,7 +136,7 @@ export class AppUsineSelector {
   });
 
   readonly currentLabel = computed(() => {
-    if (this.usineCtx.isConsolidated()) return 'Vue consolidée';
+    if (this.usineCtx.isConsolidated()) return 'Toutes les usines';
     return this.usineCtx.currentUsine()?.nom ?? '—';
   });
 

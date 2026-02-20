@@ -77,26 +77,8 @@
           />
         </div>
 
-        <!-- Civilité -->
-        <div class="mb-6 col-span-12 md:col-span-3">
-          <label for="civilite" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Civilité
-          </label>
-          <p-select
-            id="civilite"
-            [(ngModel)]="model.civilite"
-            [options]="civiliteOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="—"
-            [disabled]="fieldsDisabled"
-            [showClear]="true"
-            fluid
-          ></p-select>
-        </div>
-
-        <!-- Date de naissance -->
-        <div class="mb-6 col-span-12 md:col-span-3">
+        <!-- Date de naissance (prend l'espace restant sur la ligne) -->
+        <div class="mb-6 col-span-12 md:col-span-6">
           <label for="date_naissance" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Date de naissance
           </label>
@@ -272,26 +254,6 @@
           </small>
         </div>
 
-        <!-- Confirmation mot de passe (uniquement en création) -->
-        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="mode === 'create'">
-          <label for="password_confirmation" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Confirmer le mot de passe <span class="text-red-500">*</span>
-          </label>
-          <p-password
-            id="password_confirmation"
-            [(ngModel)]="model.password_confirmation"
-            [toggleMask]="true"
-            [feedback]="false"
-            [invalid]="submitted && model.password !== model.password_confirmation"
-            [disabled]="fieldsDisabled"
-            fluid
-            placeholder="Confirmez le mot de passe"
-          ></p-password>
-          <small class="text-red-500" *ngIf="submitted && model.password !== model.password_confirmation && isEditing">
-            Les mots de passe ne correspondent pas.
-          </small>
-        </div>
-
         <!-- Pièce d'identité (optionnel → obligatoire si type sélectionné) -->
         <div class="col-span-12 mb-2">
           <p-accordion>
@@ -442,7 +404,7 @@
               icon="pi pi-check"
               (click)="onSubmit()"
               [loading]="loading"
-              [disabled]="!isValid() || loading"
+              [disabled]="!isValid() || loading || formDisabled"
               class="utilisateurs-form-submit"
             ></button>
             <button

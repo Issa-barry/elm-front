@@ -59,6 +59,8 @@ export class UtilisateursForm implements OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialData: Partial<User> | null = null;
   @Input() loading = false;
+  /** Quand true, désactive tous les champs et le bouton Enregistrer (ex. contexte « Toutes les usines »). */
+  @Input() formDisabled = false;
 
   @Output() submitForm = new EventEmitter<UserFormData>();
   @Output() cancel = new EventEmitter<void>();
@@ -378,11 +380,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
       return false;
     }
 
-    if (this.model.password !== this.model.password_confirmation) {
-      this.passwordError = 'Les mots de passe ne correspondent pas.';
-      return false;
-    }
-
     this.passwordError = null;
     return true;
   }
@@ -465,6 +462,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
     this.submitForm.emit({
       ...this.model,
+      password_confirmation: this.model.password,
       date_naissance: this.formatDate(this.dateNaissanceObj) ?? undefined,
     });
   }
@@ -474,7 +472,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   get fieldsDisabled(): boolean {
-    return (this.mode === 'edit' && !this.isEditing) || this.loading;
+    return (this.mode === 'edit' && !this.isEditing) || this.loading || this.formDisabled;
   }
 
   get formTitle(): string {
