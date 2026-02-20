@@ -7,11 +7,9 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
@@ -58,11 +56,9 @@ interface ExportColumn {
       RippleModule,
       ToastModule,
       ToolbarModule,
-      RatingModule,
       InputTextModule,
       TextareaModule,
       SelectModule,
-      RadioButtonModule,
       InputNumberModule,
       DialogModule,
       TagModule,
@@ -178,44 +174,35 @@ export class ProduitsListe implements OnInit, OnDestroy {
     // ── Chargement avec filtres ───────────────────────────
     loadWithFilters(): void {
         this.loading = true;
-        const hasSearch  = !!this.mobileSearchTerm.trim();
+        const search     = this.mobileSearchTerm.trim();
+        const hasSearch  = !!search;
         const hasFilters = !!(this.filterStatut || this.filterType || this.filterInStock !== null);
 
-        if (hasSearch || hasFilters) {
-            this.produitService.search({
-                ...(this.mobileSearchTerm.trim() && { search: this.mobileSearchTerm.trim() }),
-                ...(this.filterStatut  && { statut: this.filterStatut }),
-                ...(this.filterType    && { type: this.filterType }),
-                ...(this.filterInStock !== null && { in_stock: this.filterInStock }),
+        const request$ = (hasSearch || hasFilters)
+            ? this.produitService.search({
+                ...(search                         && { search }),
+                ...(this.filterStatut              && { statut: this.filterStatut }),
+                ...(this.filterType                && { type: this.filterType }),
+                ...(this.filterInStock !== null    && { in_stock: this.filterInStock }),
                 sort_by:    this.sortBy,
                 sort_order: this.sortOrder,
-            }).subscribe({
-                next: (produits) => {
-                    this.produits = produits;
-                    this.resetMobilePagination();
-                    this.loading = false;
-                },
-                error: (err) => {
-                    this.loading = false;
-                    this.showApiError(err, 'Chargement des produits impossible');
-                },
-            });
-        } else {
-            this.produitService.getAllFiltered({
+            })
+            : this.produitService.getAllFiltered({
                 sort_by:    this.sortBy,
                 sort_order: this.sortOrder,
-            }).subscribe({
-                next: (produits) => {
-                    this.produits = produits;
-                    this.resetMobilePagination();
-                    this.loading = false;
-                },
-                error: (err) => {
-                    this.loading = false;
-                    this.showApiError(err, 'Chargement des produits impossible');
-                },
             });
-        }
+
+        request$.subscribe({
+            next: (produits) => {
+                this.produits = produits;
+                this.resetMobilePagination();
+                this.loading = false;
+            },
+            error: (err) => {
+                this.loading = false;
+                this.showApiError(err, 'Chargement des produits impossible');
+            },
+        });
     }
 
     // ── Sync URL ──────────────────────────────────────────
@@ -248,11 +235,8 @@ export class ProduitsListe implements OnInit, OnDestroy {
     }
 
     get activeFiltersCount(): number {
-        let count = 0;
-        if (this.filterStatut)           count++;
-        if (this.filterType)             count++;
-        if (this.filterInStock !== null) count++;
-        return count;
+        return [this.filterStatut, this.filterType, this.filterInStock]
+            .filter(v => v !== null).length;
     }
 
     // ── Mobile filter drawer ──────────────────────────────
@@ -285,17 +269,12 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.searchSubject.next(value);
     }
 
-    // Filtrage côté serveur — on retourne simplement les produits chargés
-    get mobileFilteredProduits(): Produit[] {
-        return this.produits;
-    }
-
     get mobileVisibleProduits(): Produit[] {
-        return this.mobileFilteredProduits.slice(0, this.mobileVisibleCount);
+        return this.produits.slice(0, this.mobileVisibleCount);
     }
 
     get canLoadMoreMobile(): boolean {
-        return this.mobileVisibleCount < this.mobileFilteredProduits.length;
+        return this.mobileVisibleCount < this.produits.length;
     }
 
     loadMoreMobile(): void {
@@ -489,6 +468,13 @@ export class ProduitsListe implements OnInit, OnDestroy {
     goToEditProduit(event: Event, produitId: number) {
         event.stopPropagation();
         this.router.navigate(['/produits/produits-edit', produitId]);
+    }
+
+    onRowDblClick(event: MouseEvent, produit: Produit): void {
+        if (window.innerWidth <= this.mobileBreakpoint) return;
+        const target = event.target as Element;
+        if (target.closest('button, a, input, textarea, select, [role="button"], .p-checkbox, .p-button, .p-link')) return;
+        this.router.navigate(['/produits/produits-edit', produit.id]);
     }
 
     private resetMobilePagination(): void {

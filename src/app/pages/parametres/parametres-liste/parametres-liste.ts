@@ -8,13 +8,14 @@ import { ParametresPacking } from '../components/parametres-packing/parametres-p
 import { ParametresProfile } from '../components/parametres-profile/parametres-profile';
 import { ParametresAuth } from '../components/parametres-auth/parametres-auth';
 import { ParametresRolesPermissions } from '../components/parametres-roles-permissions/parametres-roles-permissions';
+import { ParametresNotifications } from '../components/parametres-notifications/parametres-notifications';
 
-type Section = 'profile' | 'auth' | 'packing' | 'roles';
+type Section = 'profile' | 'auth' | 'packing' | 'roles' | 'notifications';
 
 @Component({
   selector: 'app-parametres-liste',
   standalone: true,
-  imports: [CommonModule, ParametresAuth, DividerModule, ToastModule, RouterModule, ParametresPacking, ParametresProfile, ParametresRolesPermissions],
+  imports: [CommonModule, ParametresAuth, DividerModule, ToastModule, RouterModule, ParametresPacking, ParametresProfile, ParametresRolesPermissions, ParametresNotifications],
   providers: [MessageService],
   templateUrl: './parametres-liste.html',
   styleUrl: './parametres-liste.scss',

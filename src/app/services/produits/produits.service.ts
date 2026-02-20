@@ -7,7 +7,6 @@ import {
   ApiResponse,
   ChangeStatusDto,
   CreateProduitDto,
-  PaginatedResponse,
   Produit,
   ProduitSearchParams,
   ProduitStatistics,
@@ -17,7 +16,7 @@ import {
 } from '@/models/produit.model';
 
 @Injectable({
-  providedIn: 'root' 
+  providedIn: 'root'
 })
 export class ProduitService {
   private apiUrl = `${environment.apiUrl}/produits`;

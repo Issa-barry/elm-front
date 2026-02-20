@@ -14,7 +14,7 @@
 
         <div class="mobile-title-wrap">
             <h1 class="mobile-title">Produits</h1>
-            <p class="mobile-subtitle">{{ mobileFilteredProduits.length }} produit{{ mobileFilteredProduits.length > 1 ? 's' : '' }}</p>
+            <p class="mobile-subtitle">{{ produits.length }} produit{{ produits.length > 1 ? 's' : '' }}</p>
         </div>
 
         <button
@@ -104,7 +104,7 @@
 
         <ng-template #mobileListState>
             <div class="mobile-state" *ngIf="loading">Chargement des produits...</div>
-            <div class="mobile-state" *ngIf="!loading && !mobileFilteredProduits.length">
+            <div class="mobile-state" *ngIf="!loading && !produits.length">
                 <i class="pi pi-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
                 Aucun produit{{ activeFiltersCount > 0 ? ' pour ces filtres' : ' trouvé' }}.
             </div>
@@ -306,7 +306,7 @@
             </tr>
         </ng-template>
         <ng-template #body let-produit>
-            <tr>
+            <tr class="produit-row" (dblclick)="onRowDblClick($event, produit)" pTooltip="Double-cliquez pour modifier" tooltipPosition="left" [tooltipOptions]="{ showDelay: 800 }" [tooltipDisabled]="!canUpdate">
                 <td style="width: 3rem">
                     <p-tableCheckbox [value]="produit" />
                 </td>

@@ -6,6 +6,11 @@
     display: none;
 }
 
+/* Double-clic desktop — curseur pointer sur les lignes */
+.produits-desktop ::ng-deep .produit-row {
+    cursor: pointer;
+}
+
 @media screen and (max-width: 768px) {
     :host {
         --mobile-primary: #5f6bff;
