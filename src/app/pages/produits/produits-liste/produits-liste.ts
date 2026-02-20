@@ -7,11 +7,9 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
@@ -19,19 +17,21 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
-import { Router } from '@angular/router';
+import { DrawerModule } from 'primeng/drawer';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil } from 'rxjs';
 import { ProduitService } from '@/services/produits/produits.service';
 import { AuthService } from '@/services/auth/auth.service';
-import { forkJoin } from 'rxjs';
 import {
     CreateProduitDto,
     Produit,
-    PRODUIT_STATUT_LABELS,  
+    PRODUIT_STATUT_LABELS,
     PRODUIT_STATUT_SEVERITY,
     PRODUIT_TYPE_LABELS,
     ProduitStatut,
     ProduitStatutSeverity,
-    ProduitType 
+    ProduitType
 } from '@/models/produit.model';
 
 interface Column {
@@ -45,71 +45,82 @@ interface ExportColumn {
     dataKey: string;
 }
 
-
 @Component({
   selector: 'app-produits-liste',
-   standalone: true,
-    imports: [
-        CommonModule,
-        TableModule,
-        FormsModule,
-        ButtonModule,
-        RippleModule,
-        ToastModule,
-        ToolbarModule,
-        RatingModule,
-        InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
-        InputNumberModule,
-        DialogModule,
-        TagModule,
-        InputIconModule,
-        IconFieldModule,
-        ConfirmDialogModule,
-        TooltipModule
-    ],
-        providers: [MessageService, ProduitService, ConfirmationService],
-
+  standalone: true,
+  imports: [
+      CommonModule,
+      TableModule,
+      FormsModule,
+      ButtonModule,
+      RippleModule,
+      ToastModule,
+      ToolbarModule,
+      InputTextModule,
+      TextareaModule,
+      SelectModule,
+      InputNumberModule,
+      DialogModule,
+      TagModule,
+      InputIconModule,
+      IconFieldModule,
+      ConfirmDialogModule,
+      TooltipModule,
+      DrawerModule,
+      ToggleSwitchModule,
+  ],
+  providers: [MessageService, ProduitService, ConfirmationService],
   templateUrl: './produits-liste.html',
   styleUrl: './produits-liste.scss',
 })
 export class ProduitsListe implements OnInit, OnDestroy {
-     produits: Produit[] = [];
-     produit: Produit = new Produit();
-    loading: boolean = true;
-    saving: boolean = false;
+    produits: Produit[] = [];
+    produit: Produit = new Produit();
+    loading = true;
+    saving = false;
 
-    ///
     filterFields: string[] = ['code', 'nom', 'description', 'type', 'statut', 'qte_stock'];
-
-    produitDialog: boolean = false;
-
+    produitDialog = false;
     selectedProduits!: Produit[] | null;
-
-    submitted: boolean = false;
+    submitted = false;
 
     typeOptions: { label: string; value: ProduitType }[] = [];
     statutOptions: { label: string; value: ProduitStatut }[] = [];
 
     @ViewChild('dt') dt!: Table;
-
     exportColumns!: ExportColumn[];
-
     cols!: Column[];
 
     canCreate = false;
     canUpdate = false;
     canDelete = false;
+
+    // Mobile pagination
     mobileSearchTerm = '';
     readonly mobilePageSize = 8;
     mobileVisibleCount = this.mobilePageSize;
     private readonly mobileBreakpoint = 768;
     private readonly mobilePwaClass = 'produits-mobile-pwa';
 
+    // ── Filtres actifs ────────────────────────────────────
+    filterStatut: ProduitStatut | null = null;
+    filterType: ProduitType | null = null;
+    filterInStock: boolean | null = null;
+    sortBy = 'created_at';
+    sortOrder: 'asc' | 'desc' = 'desc';
+
+    // ── Mobile filter drawer ──────────────────────────────
+    mobileFilterVisible = false;
+    tempFilterStatut: ProduitStatut | null = null;
+    tempFilterType: ProduitType | null = null;
+    tempFilterInStock: boolean | null = null;
+
+    private destroy$ = new Subject<void>();
+    private searchSubject = new Subject<string>();
+
     constructor(
         private router: Router,
+        private route: ActivatedRoute,
         private produitService: ProduitService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
@@ -121,19 +132,38 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.canDelete = this.authService.hasPermission('produits.delete');
     }
 
-    exportCSV() {
-        this.dt.exportCSV();
-    }
-
     ngOnInit() {
         this.initOptions();
         this.initColumns();
-        this.loadProduits();
         this.syncMobilePwaMode();
+
+        // Debounce pour la recherche mobile
+        this.searchSubject.pipe(
+            debounceTime(450),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.resetMobilePagination();
+            this.syncUrl();
+            this.loadWithFilters();
+        });
+
+        // Lecture des paramètres d'URL au démarrage
+        const params = this.route.snapshot.queryParams;
+        this.filterStatut  = (params['statut'] as ProduitStatut) || null;
+        this.filterType    = (params['type'] as ProduitType) || null;
+        this.filterInStock = params['in_stock'] !== undefined ? params['in_stock'] === 'true' : null;
+        this.sortBy        = params['sort_by'] || 'created_at';
+        this.sortOrder     = params['sort_order'] === 'asc' ? 'asc' : 'desc';
+        if (params['search']) this.mobileSearchTerm = params['search'];
+
+        this.loadWithFilters();
     }
 
     ngOnDestroy(): void {
         this.clearMobilePwaMode();
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     @HostListener('window:resize')
@@ -141,22 +171,123 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.syncMobilePwaMode();
     }
 
-      loadProduits() {
+    // ── Chargement avec filtres ───────────────────────────
+    loadWithFilters(): void {
         this.loading = true;
-        this.produitService.getAll().subscribe({
-                next: (produits) => {
-                    this.produits = produits;
-                    this.resetMobilePagination();
-                    this.loading=false;
-                },
-                error: (err) =>{
-                    console.error('Erreur lors du chargement des produits :', err);
-                    this.loading = false;
-                    this.showApiError(err, 'Chargement des produits impossible');
-                }
-                });
+        const search     = this.mobileSearchTerm.trim();
+        const hasSearch  = !!search;
+        const hasFilters = !!(this.filterStatut || this.filterType || this.filterInStock !== null);
+
+        const request$ = (hasSearch || hasFilters)
+            ? this.produitService.search({
+                ...(search                         && { search }),
+                ...(this.filterStatut              && { statut: this.filterStatut }),
+                ...(this.filterType                && { type: this.filterType }),
+                ...(this.filterInStock !== null    && { in_stock: this.filterInStock }),
+                sort_by:    this.sortBy,
+                sort_order: this.sortOrder,
+            })
+            : this.produitService.getAllFiltered({
+                sort_by:    this.sortBy,
+                sort_order: this.sortOrder,
+            });
+
+        request$.subscribe({
+            next: (produits) => {
+                this.produits = produits;
+                this.resetMobilePagination();
+                this.loading = false;
+            },
+            error: (err) => {
+                this.loading = false;
+                this.showApiError(err, 'Chargement des produits impossible');
+            },
+        });
     }
 
+    // ── Sync URL ──────────────────────────────────────────
+    private syncUrl(): void {
+        const queryParams: Record<string, string> = {};
+        if (this.mobileSearchTerm.trim()) queryParams['search']     = this.mobileSearchTerm.trim();
+        if (this.filterStatut)            queryParams['statut']     = this.filterStatut;
+        if (this.filterType)              queryParams['type']       = this.filterType;
+        if (this.filterInStock !== null)  queryParams['in_stock']   = String(this.filterInStock);
+        if (this.sortBy !== 'created_at') queryParams['sort_by']    = this.sortBy;
+        if (this.sortOrder !== 'desc')    queryParams['sort_order'] = this.sortOrder;
+        this.router.navigate([], { relativeTo: this.route, queryParams, replaceUrl: true });
+    }
+
+    // ── Desktop filters ───────────────────────────────────
+    onDesktopFilterChange(): void {
+        this.resetMobilePagination();
+        this.syncUrl();
+        this.loadWithFilters();
+    }
+
+    resetAllFilters(): void {
+        this.filterStatut     = null;
+        this.filterType       = null;
+        this.filterInStock    = null;
+        this.mobileSearchTerm = '';
+        this.resetMobilePagination();
+        this.syncUrl();
+        this.loadWithFilters();
+    }
+
+    get activeFiltersCount(): number {
+        return [this.filterStatut, this.filterType, this.filterInStock]
+            .filter(v => v !== null).length;
+    }
+
+    // ── Mobile filter drawer ──────────────────────────────
+    openMobileFilters(): void {
+        this.tempFilterStatut  = this.filterStatut;
+        this.tempFilterType    = this.filterType;
+        this.tempFilterInStock = this.filterInStock;
+        this.mobileFilterVisible = true;
+    }
+
+    applyMobileFilters(): void {
+        this.filterStatut  = this.tempFilterStatut;
+        this.filterType    = this.tempFilterType;
+        this.filterInStock = this.tempFilterInStock;
+        this.mobileFilterVisible = false;
+        this.resetMobilePagination();
+        this.syncUrl();
+        this.loadWithFilters();
+    }
+
+    resetMobileFiltersTemp(): void {
+        this.tempFilterStatut  = null;
+        this.tempFilterType    = null;
+        this.tempFilterInStock = null;
+    }
+
+    // ── Mobile search (debounced) ─────────────────────────
+    onMobileSearchChange(value: string): void {
+        this.mobileVisibleCount = this.mobilePageSize;
+        this.searchSubject.next(value);
+    }
+
+    get mobileVisibleProduits(): Produit[] {
+        return this.produits.slice(0, this.mobileVisibleCount);
+    }
+
+    get canLoadMoreMobile(): boolean {
+        return this.mobileVisibleCount < this.produits.length;
+    }
+
+    loadMoreMobile(): void {
+        this.mobileVisibleCount += this.mobilePageSize;
+    }
+
+    trackByProduitId(index: number, produit: Produit): number | string {
+        return produit.id || produit.code || index;
+    }
+
+    exportCSV() {
+        this.dt.exportCSV();
+    }
 
     initOptions() {
         this.typeOptions = Object.entries(PRODUIT_TYPE_LABELS).map(([value, label]) => ({
@@ -171,69 +302,20 @@ export class ProduitsListe implements OnInit, OnDestroy {
 
     initColumns() {
         this.cols = [
-            {
-                field: 'code',
-                header: 'Code',
-                customExportHeader: 'Product Code'
-            },
+            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
             { field: 'nom', header: 'Nom' },
             { field: 'image', header: 'Image' },
             { field: 'prix_vente', header: 'Prix' },
             { field: 'type', header: 'Type' }
         ];
-
         this.exportColumns = this.cols.map((col) => ({
             title: col.header,
             dataKey: col.field
         }));
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
-
-    onMobileSearchChange(_value?: string): void {
-        this.mobileVisibleCount = this.mobilePageSize;
-    }
-
-    get mobileFilteredProduits(): Produit[] {
-        const term = this.mobileSearchTerm.trim().toLowerCase();
-        if (!term) {
-            return this.produits;
-        }
-
-        return this.produits.filter((produit) => {
-            const values = [
-                produit.code,
-                produit.nom,
-                produit.description,
-                this.getTypeLabel(produit.type),
-                this.getStatutLabel(produit.statut),
-                produit.qte_stock
-            ];
-
-            return values.some((value) => this.searchableValue(value).includes(term));
-        });
-    }
-
-    get mobileVisibleProduits(): Produit[] {
-        return this.mobileFilteredProduits.slice(0, this.mobileVisibleCount);
-    }
-
-    get canLoadMoreMobile(): boolean {
-        return this.mobileVisibleCount < this.mobileFilteredProduits.length;
-    }
-
-    loadMoreMobile(): void {
-        this.mobileVisibleCount += this.mobilePageSize;
-    }
-
-    trackByProduitId(index: number, produit: Produit): number | string {
-        return produit.id || produit.code || index;
-    }
-
     openNew() {
-        this.produit = new Produit();
+        this.produit   = new Produit();
         this.submitted = false;
         this.produitDialog = true;
     }
@@ -251,24 +333,15 @@ export class ProduitsListe implements OnInit, OnDestroy {
             accept: () => {
                 const ids = (this.selectedProduits ?? []).map((item) => item.id).filter((id) => !!id);
                 if (ids.length === 0) return;
-
                 forkJoin(ids.map((id) => this.produitService.delete(id))).subscribe({
                     next: () => {
                         this.produits = this.produits.filter((item) => !ids.includes(item.id));
                         this.selectedProduits = null;
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Successful',
-                            detail: 'Products Deleted',
-                            life: 3000
-                        });
+                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
                     },
-                    error: (err) => {
-                        console.error('Erreur lors de la suppression des produits :', err);
-                        this.showApiError(err, 'Suppression impossible');
-                    }
+                    error: (err) => this.showApiError(err, 'Suppression impossible'),
                 });
-            }
+            },
         });
     }
 
@@ -287,33 +360,12 @@ export class ProduitsListe implements OnInit, OnDestroy {
                 this.produitService.delete(produit.id).subscribe({
                     next: () => {
                         this.produits = this.produits.filter((item) => item.id !== produit.id);
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Successful',
-                            detail: 'Product Deleted',
-                            life: 3000
-                        });
+                        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
                     },
-                    error: (err) => {
-                        console.error('Erreur lors de la suppression du produit :', err);
-                        this.showApiError(err, 'Suppression impossible');
-                    }
+                    error: (err) => this.showApiError(err, 'Suppression impossible'),
                 });
-            }
+            },
         });
-    }
-
-    getSeverity(status: string) {
-        switch (status) {
-            case 'INSTOCK':
-                return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
-                return 'danger';
-            default:
-                return 'info';
-        }
     }
 
     getStatutSeverity(statut?: ProduitStatut): ProduitStatutSeverity {
@@ -332,32 +384,29 @@ export class ProduitsListe implements OnInit, OnDestroy {
     }
 
     formatCurrency(value?: number | null): string {
-        if (typeof value !== 'number') {
-            return '-';
-        }
+        if (typeof value !== 'number') return '-';
+        return `${new Intl.NumberFormat('fr-GN', { maximumFractionDigits: 0 }).format(value)} GNF`;
+    }
 
-        const formatted = new Intl.NumberFormat('fr-GN', { maximumFractionDigits: 0 }).format(value);
-        return `${formatted} GNF`;
+    onGlobalFilter(table: Table, event: Event) {
+        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
     saveProduit() {
         this.submitted = true;
-        if (!this.produit.nom?.trim() || !this.produit.type || this.saving) {
-            return;
-        }
-
+        if (!this.produit.nom?.trim() || !this.produit.type || this.saving) return;
         this.saving = true;
 
         const dto: CreateProduitDto = {
-            nom: this.produit.nom.trim(),
-            type: this.produit.type,
-            qte_stock: this.produit.qte_stock ?? 0,
-            statut: this.produit.statut,
-            cout: this.produit.cout ?? undefined,
+            nom:         this.produit.nom.trim(),
+            type:        this.produit.type,
+            qte_stock:   this.produit.qte_stock ?? 0,
+            statut:      this.produit.statut,
+            cout:        this.produit.cout        ?? undefined,
             description: this.produit.description ?? undefined,
-            prix_usine: this.produit.prix_usine ?? undefined,
-            prix_vente: this.produit.prix_vente ?? undefined,
-            prix_achat: this.produit.prix_achat ?? undefined
+            prix_usine:  this.produit.prix_usine  ?? undefined,
+            prix_vente:  this.produit.prix_vente  ?? undefined,
+            prix_achat:  this.produit.prix_achat  ?? undefined,
         };
 
         const isUpdate = !!this.produit.id;
@@ -368,61 +417,47 @@ export class ProduitsListe implements OnInit, OnDestroy {
         request$.subscribe({
             next: () => {
                 this.produitDialog = false;
-                this.produit = new Produit();
-                this.submitted = false;
-                this.saving = false;
-                this.loadProduits();
+                this.produit       = new Produit();
+                this.submitted     = false;
+                this.saving        = false;
+                this.loadWithFilters();
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Succès',
                     detail: isUpdate ? 'Produit mis à jour' : 'Produit créé',
-                    life: 3000
+                    life: 3000,
                 });
             },
             error: (err) => {
                 this.saving = false;
                 this.showApiError(err, 'Sauvegarde impossible');
-            }
+            },
         });
     }
 
     private showApiError(err: any, fallback: string): void {
-        const summary = 'Erreur';
-        const detail = this.extractErrorMessage(err, fallback);
-
         if (err.status === 422 && err.error?.errors) {
             const messages = Object.values(err.error.errors).flat() as string[];
-            messages.forEach(msg => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Validation',
-                    detail: msg,
-                    life: 5000
-                });
-            });
+            messages.forEach(msg =>
+                this.messageService.add({ severity: 'error', summary: 'Validation', detail: msg as string, life: 5000 })
+            );
         } else {
             this.messageService.add({
                 severity: 'error',
-                summary,
-                detail,
-                life: 5000
+                summary: 'Erreur',
+                detail: this.extractErrorMessage(err, fallback),
+                life: 5000,
             });
         }
     }
 
     private extractErrorMessage(err: any, fallback: string): string {
-        if (typeof err?.error?.message === 'string' && err.error.message.trim().length > 0) {
-            return err.error.message;
-        }
-
-        if (typeof err?.message === 'string' && err.message.trim().length > 0) {
-            return err.message;
-        }
-
+        if (typeof err?.error?.message === 'string' && err.error.message.trim()) return err.error.message;
+        if (typeof err?.message === 'string' && err.message.trim()) return err.message;
         return fallback;
     }
 
-     goToNewProduits() {
+    goToNewProduits() {
         this.router.navigate(['/produits/produits-new']);
     }
 
@@ -435,23 +470,19 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.router.navigate(['/produits/produits-edit', produitId]);
     }
 
+    onRowDblClick(event: MouseEvent, produit: Produit): void {
+        if (window.innerWidth <= this.mobileBreakpoint) return;
+        const target = event.target as Element;
+        if (target.closest('button, a, input, textarea, select, [role="button"], .p-checkbox, .p-button, .p-link')) return;
+        this.router.navigate(['/produits/produits-edit', produit.id]);
+    }
+
     private resetMobilePagination(): void {
         this.mobileVisibleCount = this.mobilePageSize;
     }
 
-    private searchableValue(value: unknown): string {
-        if (value === null || value === undefined) {
-            return '';
-        }
-
-        return String(value).toLowerCase();
-    }
-
     private syncMobilePwaMode(): void {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
+        if (typeof window === 'undefined') return;
         if (window.innerWidth <= this.mobileBreakpoint) {
             this.document.body.classList.add(this.mobilePwaClass);
         } else {
@@ -462,5 +493,4 @@ export class ProduitsListe implements OnInit, OnDestroy {
     private clearMobilePwaMode(): void {
         this.document.body.classList.remove(this.mobilePwaClass);
     }
-
 }

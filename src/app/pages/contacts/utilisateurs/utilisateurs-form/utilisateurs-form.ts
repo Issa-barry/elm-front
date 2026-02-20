@@ -6,8 +6,10 @@ import { RippleModule } from 'primeng/ripple';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
+import { AccordionModule } from 'primeng/accordion';
+import { DatePicker } from 'primeng/datepicker';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
-import { User } from '@/models/user.model';
+import { User, UserType, PieceType, PIECE_TYPE_LABELS, Civilite, CIVILITE_LABELS } from '@/models/user.model';
 import { COUNTRIES } from '@/models/country.model';
 import { RoleService } from '@/services/role/role.service';
 
@@ -23,8 +25,17 @@ export interface UserFormData {
   quartier?: string;
   password?: string;
   password_confirmation?: string;
+  type?: UserType;
   role?: string;
   reference?: string;
+  civilite?: Civilite | null;
+  date_naissance?: string | null;   // format YYYY-MM-DD envoyé au backend
+  // Pièce d'identité (optionnel, mais tous requis si piece_type est renseigné)
+  piece_type?: PieceType;
+  piece_numero?: string;
+  piece_delivree_le?: string;
+  piece_expire_le?: string;
+  piece_pays?: string;
 }
 
 @Component({
@@ -39,7 +50,9 @@ export interface UserFormData {
     ButtonModule,
     RippleModule,
     FormsModule,
-    PasswordModule
+    PasswordModule,
+    AccordionModule,
+    DatePicker,
   ],
 })
 export class UtilisateursForm implements OnInit, OnChanges {
@@ -54,8 +67,35 @@ export class UtilisateursForm implements OnInit, OnChanges {
   isEditing = false;
   model: UserFormData = {};
 
-  // Rôles disponibles
+  /** Date de naissance sous forme de Date pour le p-datepicker */
+  dateNaissanceObj: Date | null = null;
+
+  /** Date max pour le datepicker (aujourd'hui) */
+  readonly today = new Date();
+
+  // Types de compte
+  readonly userTypeOptions: { label: string; value: UserType }[] = [
+    { label: 'Staff',        value: 'staff' },
+    { label: 'Client',       value: 'client' },
+    { label: 'Prestataire',  value: 'prestataire' },
+    { label: 'Investisseur', value: 'investisseur' },
+  ];
+
+  // Civilité
+  readonly civiliteOptions: { label: string; value: Civilite }[] = (
+    Object.entries(CIVILITE_LABELS) as [Civilite, string][]
+  ).map(([value, label]) => ({ label, value }));
+
+  // Rôles réservés au staff (sélection manuelle)
+  private readonly STAFF_ROLES = ['admin', 'manager', 'comptable', 'agent_vente', 'employe'];
+
+  // Rôles disponibles (chargés depuis l'API)
   availableRoles: { label: string; value: string }[] = [];
+
+  // Options pièces d'identité
+  readonly pieceTypeOptions: { label: string; value: PieceType }[] = (
+    Object.entries(PIECE_TYPE_LABELS) as [PieceType, string][]
+  ).map(([value, label]) => ({ label, value }));
 
   // Validation du téléphone
   phoneError: string | null = null;
@@ -63,6 +103,9 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
   // Validation du mot de passe
   passwordError: string | null = null;
+
+  // Validation KYC — erreurs par champ
+  kycErrors: Record<string, string> = {};
 
   // Liste des pays pour le sélecteur
   countries = COUNTRIES;
@@ -103,6 +146,115 @@ export class UtilisateursForm implements OnInit, OnChanges {
     });
   }
 
+  // ── Type → rôles filtrés ──────────────────────────────
+
+  get filteredRoles(): { label: string; value: string }[] {
+    if (this.model.type === 'staff') {
+      return this.availableRoles.filter(r => this.STAFF_ROLES.includes(r.value));
+    }
+    return [];
+  }
+
+  get isRoleSelectable(): boolean {
+    return this.model.type === 'staff';
+  }
+
+  onTypeChange(): void {
+    if (!this.model.type) return;
+    if (this.model.type === 'staff') {
+      this.model.role = undefined;
+    } else {
+      this.model.role = this.model.type;
+    }
+  }
+
+  // ── KYC ──────────────────────────────────────────────
+
+  /** Vrai dès que piece_type est sélectionné → tous les autres champs KYC deviennent requis */
+  get isKycActive(): boolean {
+    return !!this.model.piece_type;
+  }
+
+  /** Appelé lorsque piece_type change */
+  onPieceTypeChange(): void {
+    if (!this.model.piece_type) {
+      // On vide le bloc KYC quand le type est retiré
+      this.model.piece_numero    = undefined;
+      this.model.piece_pays      = undefined;
+      this.model.piece_delivree_le = undefined;
+      this.model.piece_expire_le   = undefined;
+      this.kycErrors = {};
+    } else if (this.submitted) {
+      this.setKycErrors();
+    }
+  }
+
+  /** Appelé sur chaque champ KYC après soumission (re-validation en temps réel) */
+  onKycFieldChange(): void {
+    if (this.submitted && this.isKycActive) {
+      this.setKycErrors();
+    }
+  }
+
+  /** Vérification pure (sans side-effect) — utilisée par isValid() */
+  private checkKyc(): boolean {
+    if (!this.model.piece_type) return true;
+
+    if (!this.model.piece_numero?.trim()) return false;
+    if (!this.model.piece_pays) return false;
+    if (!this.model.piece_delivree_le) return false;
+    if (!this.model.piece_expire_le) return false;
+
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    const delivree = new Date(this.model.piece_delivree_le);
+    if (delivree > today) return false;
+
+    const expire = new Date(this.model.piece_expire_le);
+    if (expire <= delivree) return false;
+
+    return true;
+  }
+
+  /** Renseigne kycErrors avec les messages à afficher */
+  private setKycErrors(): void {
+    this.kycErrors = {};
+    if (!this.model.piece_type) return;
+
+    if (!this.model.piece_numero?.trim()) {
+      this.kycErrors['piece_numero'] = 'Numéro de pièce obligatoire.';
+    }
+    if (!this.model.piece_pays) {
+      this.kycErrors['piece_pays'] = 'Pays de délivrance obligatoire.';
+    }
+
+    if (!this.model.piece_delivree_le) {
+      this.kycErrors['piece_delivree_le'] = 'Date de délivrance obligatoire.';
+    } else {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      const delivree = new Date(this.model.piece_delivree_le);
+      if (delivree > today) {
+        this.kycErrors['piece_delivree_le'] = 'La date de délivrance ne peut pas être dans le futur.';
+      }
+    }
+
+    if (!this.model.piece_expire_le) {
+      this.kycErrors['piece_expire_le'] = "Date d'expiration obligatoire.";
+    }
+
+    // Cohérence croisée expire > delivree
+    if (this.model.piece_delivree_le && this.model.piece_expire_le) {
+      const delivree = new Date(this.model.piece_delivree_le);
+      const expire   = new Date(this.model.piece_expire_le);
+      if (expire <= delivree) {
+        this.kycErrors['dates'] = "La date d'expiration doit être postérieure à la date de délivrance.";
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────
+
   private initializeModel() {
     if (this.initialData) {
       this.model = {
@@ -113,13 +265,24 @@ export class UtilisateursForm implements OnInit, OnChanges {
         pays: this.initialData.pays,
         code_pays: this.initialData.code_pays,
         code_phone_pays: this.initialData.code_phone_pays,
-        ville: this.initialData.ville,
-        quartier: this.initialData.quartier,
-        role: this.initialData.roles?.[0],
+        ville: this.initialData.ville ?? undefined,
+        quartier: this.initialData.quartier ?? undefined,
+        type: this.initialData.type,
+        role: this.initialData.role_names?.[0] ?? this.initialData.roles?.[0],
         reference: this.initialData.reference,
+        civilite: this.initialData.civilite ?? undefined,
+        piece_type: this.initialData.piece_type ?? undefined,
+        piece_numero: this.initialData.piece_numero ?? undefined,
+        piece_delivree_le: this.initialData.piece_delivree_le ?? undefined,
+        piece_expire_le: this.initialData.piece_expire_le ?? undefined,
+        piece_pays: this.initialData.piece_pays ?? undefined,
       };
+      this.dateNaissanceObj = this.initialData.date_naissance
+        ? new Date(this.initialData.date_naissance)
+        : null;
     } else {
       this.model = {};
+      this.dateNaissanceObj = null;
     }
 
     if (this.mode === 'create' && !this.model.ville?.trim()) {
@@ -138,9 +301,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.detectPhoneCountry(this.model.phone);
     }
 
-    this.submitted = false;
-    this.phoneError = null;
+    this.submitted     = false;
+    this.phoneError    = null;
     this.passwordError = null;
+    this.kycErrors     = {};
   }
 
   detectPhoneCountry(phone: string) {
@@ -162,7 +326,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
     try {
       const isValid = isValidPhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
-
       if (!isValid) {
         this.phoneError = `Numéro invalide pour ${this.getCountryName(this.phoneCountry)}.`;
         return false;
@@ -170,10 +333,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
       const phoneNumber = parsePhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
       if (phoneNumber) {
-        this.model.phone = phoneNumber.formatInternational();
+        this.model.phone     = phoneNumber.formatInternational();
         this.model.code_pays = this.phoneCountry;
-        this.model.pays = this.getCountryName(this.phoneCountry);
-        this.phoneError = null;
+        this.model.pays      = this.getCountryName(this.phoneCountry);
+        this.phoneError      = null;
         return true;
       }
 
@@ -224,6 +387,11 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return true;
   }
 
+  private formatDate(date: Date | null): string | null {
+    if (!date) return null;
+    return date.toISOString().split('T')[0];
+  }
+
   getCountryName(code: string): string {
     const country = this.countries.find(c => c.code === code);
     return country ? country.name : code;
@@ -253,9 +421,8 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   isValid(): boolean {
-    if (!this.model.role) {
-      return false;
-    }
+    if (!this.model.type)  return false;
+    if (!this.model.role)  return false;
 
     const basicValidation = !!(
       this.model.nom?.trim() &&
@@ -264,18 +431,13 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.model.ville?.trim() &&
       this.model.quartier?.trim()
     );
+    if (!basicValidation) return false;
 
-    if (!basicValidation) {
-      return false;
-    }
+    if (!this.validatePhone()) return false;
 
-    if (!this.validatePhone()) {
-      return false;
-    }
+    if (this.mode === 'create' && !this.validatePassword()) return false;
 
-    if (this.mode === 'create' && !this.validatePassword()) {
-      return false;
-    }
+    if (!this.checkKyc()) return false;
 
     return true;
   }
@@ -285,21 +447,26 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   cancelEditing() {
-    this.isEditing = false;
-    this.submitted = false;
-    this.phoneError = null;
+    this.isEditing   = false;
+    this.submitted   = false;
+    this.phoneError  = null;
     this.passwordError = null;
+    this.kycErrors   = {};
     this.initializeModel();
   }
 
   onSubmit() {
     this.submitted = true;
+    this.setKycErrors();      // déclenche l'affichage des erreurs KYC
 
     if (!this.isValid()) {
       return;
     }
 
-    this.submitForm.emit({ ...this.model });
+    this.submitForm.emit({
+      ...this.model,
+      date_naissance: this.formatDate(this.dateNaissanceObj) ?? undefined,
+    });
   }
 
   onCancel() {
@@ -314,7 +481,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
     if (this.mode === 'create') {
       return 'Créer un compte utilisateur';
     }
-
     const reference = this.model.reference?.trim();
     return reference
       ? `Modification compte utilisateur : ${reference}`

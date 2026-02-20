@@ -102,17 +102,15 @@ export class PrestateursEdit implements OnInit {
     this.prestataireService.updatePrestataire(this.prestateurId, payload).subscribe({
       next: (response) => {
         if (response.success) {
-          this.prestateursData = {
-            ...data,
-            reference: data.reference || this.prestateursData?.reference,
-          };
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
             detail: 'Prestataire modifié avec succès'
           });
+          this.loadPrestataire(this.prestateurId!);
+        } else {
+          this.loading = false;
         }
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur lors de la modification:', error);

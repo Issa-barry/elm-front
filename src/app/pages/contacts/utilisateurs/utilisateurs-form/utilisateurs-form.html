@@ -13,19 +13,42 @@
       <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
         Renseignez les informations du compte utilisateur.
       </p>
-    </div>
+    </div> 
 
     <div class="col-span-12 lg:col-span-10">
       <div class="grid grid-cols-12 gap-4">
-        <!-- Rôle -->
+
+        <!-- Type de compte — sélectionné en premier, pilote le rôle -->
         <div class="mb-6 col-span-12 md:col-span-12">
+          <label for="type" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Type de compte <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <p-select
+            id="type"
+            [(ngModel)]="model.type"
+            [options]="userTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner un type"
+            [disabled]="fieldsDisabled"
+            [invalid]="submitted && !model.type"
+            (onChange)="onTypeChange()"
+            fluid
+          ></p-select>
+          <small class="text-red-500" *ngIf="submitted && !model.type && isEditing">
+            Type de compte obligatoire.
+          </small>
+        </div>
+
+        <!-- Rôle — affiché uniquement pour le type "staff" -->
+        <div class="mb-6 col-span-12 md:col-span-12" *ngIf="isRoleSelectable">
           <label for="role" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-           Rôle <span class="text-red-500" *ngIf="isEditing">*</span>
+            Rôle <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <p-select
             id="role"
             [(ngModel)]="model.role"
-            [options]="availableRoles"
+            [options]="filteredRoles"
             optionLabel="label"
             optionValue="value"
             placeholder="Sélectionner un rôle"
@@ -54,6 +77,40 @@
           />
         </div>
 
+        <!-- Civilité -->
+        <div class="mb-6 col-span-12 md:col-span-3">
+          <label for="civilite" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Civilité
+          </label>
+          <p-select
+            id="civilite"
+            [(ngModel)]="model.civilite"
+            [options]="civiliteOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="—"
+            [disabled]="fieldsDisabled"
+            [showClear]="true"
+            fluid
+          ></p-select>
+        </div>
+
+        <!-- Date de naissance -->
+        <div class="mb-6 col-span-12 md:col-span-3">
+          <label for="date_naissance" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Date de naissance
+          </label>
+          <p-datepicker
+            id="date_naissance"
+            [(ngModel)]="dateNaissanceObj"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            [disabled]="fieldsDisabled"
+            [maxDate]="today"
+            fluid
+          />
+        </div>
 
         <!-- Nom -->
         <div class="mb-6 col-span-12 md:col-span-6">
@@ -233,6 +290,146 @@
           <small class="text-red-500" *ngIf="submitted && model.password !== model.password_confirmation && isEditing">
             Les mots de passe ne correspondent pas.
           </small>
+        </div>
+
+        <!-- Pièce d'identité (optionnel → obligatoire si type sélectionné) -->
+        <div class="col-span-12 mb-2">
+          <p-accordion>
+            <p-accordion-panel value="piece">
+              <p-accordion-header>
+                <span class="flex items-center gap-2 font-medium text-surface-700 dark:text-surface-200">
+                  <i class="pi pi-id-card text-sm"></i>
+                  Pièce d'identité
+                  <span
+                    *ngIf="isKycActive"
+                    class="text-xs font-semibold px-1.5 py-0.5 rounded"
+                    style="background: #fff7ed; color: #c2410c;">
+                    Obligatoire
+                  </span>
+                  <span *ngIf="!isKycActive" class="text-xs font-normal text-surface-400">(optionnel)</span>
+                </span>
+              </p-accordion-header>
+              <p-accordion-content>
+                <div class="grid grid-cols-12 gap-4 pt-2">
+
+                  <!-- Type de pièce -->
+                  <div class="mb-4 col-span-12 md:col-span-6">
+                    <label for="piece_type" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+                      Type de pièce
+                    </label>
+                    <p-select
+                      id="piece_type"
+                      [(ngModel)]="model.piece_type"
+                      [options]="pieceTypeOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Sélectionner un type"
+                      [disabled]="fieldsDisabled"
+                      [showClear]="true"
+                      (onChange)="onPieceTypeChange()"
+                      fluid
+                    ></p-select>
+                    <small class="text-surface-500 dark:text-surface-400 block mt-1" *ngIf="isKycActive">
+                      Tous les champs ci-dessous sont requis.
+                    </small>
+                  </div>
+
+                  <!-- Numéro de pièce -->
+                  <div class="mb-4 col-span-12 md:col-span-6">
+                    <label for="piece_numero" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+                      Numéro de pièce <span class="text-red-500" *ngIf="isKycActive">*</span>
+                    </label>
+                    <input
+                      id="piece_numero"
+                      type="text"
+                      pInputText
+                      fluid
+                      [(ngModel)]="model.piece_numero"
+                      [disabled]="fieldsDisabled"
+                      placeholder="Ex: GN-123456789"
+                      [invalid]="!!kycErrors['piece_numero']"
+                      (ngModelChange)="onKycFieldChange()"
+                    />
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_numero']">
+                      {{ kycErrors['piece_numero'] }}
+                    </small>
+                  </div>
+
+                  <!-- Pays de délivrance -->
+                  <div class="mb-4 col-span-12 md:col-span-4">
+                    <label for="piece_pays" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+                      Pays de délivrance <span class="text-red-500" *ngIf="isKycActive">*</span>
+                    </label>
+                    <p-select
+                      id="piece_pays"
+                      [(ngModel)]="model.piece_pays"
+                      [options]="countries"
+                      optionLabel="name"
+                      optionValue="code"
+                      placeholder="Sélectionner un pays"
+                      [disabled]="fieldsDisabled"
+                      [showClear]="true"
+                      [invalid]="!!kycErrors['piece_pays']"
+                      (onChange)="onKycFieldChange()"
+                      fluid
+                    ></p-select>
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_pays']">
+                      {{ kycErrors['piece_pays'] }}
+                    </small>
+                  </div>
+
+                  <!-- Date de délivrance -->
+                  <div class="mb-4 col-span-12 md:col-span-4">
+                    <label for="piece_delivree_le" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+                      Délivrée le <span class="text-red-500" *ngIf="isKycActive">*</span>
+                    </label>
+                    <input
+                      id="piece_delivree_le"
+                      type="date"
+                      pInputText
+                      fluid
+                      [(ngModel)]="model.piece_delivree_le"
+                      [disabled]="fieldsDisabled"
+                      [invalid]="!!kycErrors['piece_delivree_le']"
+                      (change)="onKycFieldChange()"
+                    />
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_delivree_le']">
+                      {{ kycErrors['piece_delivree_le'] }}
+                    </small>
+                  </div>
+
+                  <!-- Date d'expiration -->
+                  <div class="mb-4 col-span-12 md:col-span-4">
+                    <label for="piece_expire_le" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+                      Expire le <span class="text-red-500" *ngIf="isKycActive">*</span>
+                    </label>
+                    <input
+                      id="piece_expire_le"
+                      type="date"
+                      pInputText
+                      fluid
+                      [(ngModel)]="model.piece_expire_le"
+                      [disabled]="fieldsDisabled"
+                      [invalid]="!!kycErrors['piece_expire_le'] || !!kycErrors['dates']"
+                      (change)="onKycFieldChange()"
+                    />
+                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_expire_le']">
+                      {{ kycErrors['piece_expire_le'] }}
+                    </small>
+                  </div>
+
+                  <!-- Erreur croisée dates -->
+                  <div class="col-span-12 -mt-2" *ngIf="kycErrors['dates']">
+                    <small class="text-red-500 flex items-center gap-1">
+                      <i class="pi pi-exclamation-triangle text-xs"></i>
+                      {{ kycErrors['dates'] }}
+                    </small>
+                  </div>
+
+                </div>
+              </p-accordion-content>
+            </p-accordion-panel>
+          </p-accordion>
         </div>
 
         <!-- Boutons (même structure que formulaire prestataire) -->
