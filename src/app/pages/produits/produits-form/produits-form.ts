@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -112,6 +112,8 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     type: 'materiel',
     in_stock: true,
     is_archived: false,
+    is_critique: false,
+    seuil_alerte_stock: null,
     description: null,
     image_url: null
   });
@@ -193,6 +195,33 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     return this.product.type === 'service' || this.fieldsDisabled;
   }
 
+  // Seuil d'alerte stock : caché/désactivé pour les services (pas de stock)
+  isSeuilAlerteStockDisabled(): boolean {
+    return this.product.type === 'service' || this.fieldsDisabled;
+  }
+
+  /** true si le produit est critique et a un type avec stock (afficher le champ seuil) */
+  isSeuilAlerteStockVisible(): boolean {
+    return this.product.is_critique === true && this.product.type !== 'service';
+  }
+
+  /** Validation : entier >= 0 si renseigné */
+  isSeuilAlerteStockInvalid(): boolean {
+    const v = this.product.seuil_alerte_stock;
+    if (v === null || v === undefined) return false;
+    const n = Number(v);
+    return !Number.isInteger(n) || n < 0;
+  }
+
+  getSeuilAlerteStockErrorMessage(): string {
+    const v = this.product.seuil_alerte_stock;
+    if (v === null || v === undefined) return '';
+    const n = Number(v);
+    if (!Number.isInteger(n)) return 'Doit être un nombre entier.';
+    if (n < 0) return 'Doit être supérieur ou égal à 0.';
+    return '';
+  }
+
   // =========================
   // HELPERS NUMÃ‰RIQUES
   // =========================
@@ -250,6 +279,9 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
 
     // Service: au moins un prix (achat ou vente)
     if (this.product.type === 'service' && !this.hasServicePrice()) return false;
+
+    // Seuil alerte stock : si renseigné, doit être entier >= 0
+    if (this.isSeuilAlerteStockInvalid()) return false;
 
     return true;
   }
@@ -353,6 +385,16 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     dto.statut = this.product.statut;
     dto.is_critique = this.product.is_critique;
 
+    // Seuil alerte stock : vide => null, sinon entier
+    const rawSeuil = this.product.seuil_alerte_stock;
+    const hasValue = rawSeuil !== null && rawSeuil !== undefined && !Number.isNaN(Number(rawSeuil));
+    if (hasValue) {
+      const n = Math.floor(Number(rawSeuil));
+      dto.seuil_alerte_stock = n >= 0 ? n : null;
+    } else {
+      dto.seuil_alerte_stock = null;
+    }
+
     // Prix seulement si dÃ©finis
     if (this.product.prix_usine !== null) dto.prix_usine = this.product.prix_usine;
     if (this.product.prix_vente !== null) dto.prix_vente = this.product.prix_vente;
@@ -415,6 +457,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
       in_stock: true,
       is_archived: false,
       is_critique: false,
+      seuil_alerte_stock: null,
       description: null,
       image_url: null
     });

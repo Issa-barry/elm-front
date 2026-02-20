@@ -43,7 +43,7 @@ export class LayoutService {
         primary: 'indigo',
         inputStyle: 'outlined',
         surface: null,
-        darkTheme: false,
+        darkTheme: true,
         menuMode: 'static',
         menuTheme: 'colorScheme',
     };
@@ -116,6 +116,7 @@ export class LayoutService {
 
             if (!this.initialized || !config) {
                 this.initialized = true;
+                this.toggleDarkMode(config);
                 return;
             }
 

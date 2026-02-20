@@ -250,6 +250,28 @@
             ></p-toggleswitch>
         </div>
 
+        <!-- Seuil d'alerte stock (masqué pour type service) -->
+        <div class="mobile-section-card" *ngIf="isSeuilAlerteStockVisible()">
+            <label class="mobile-field-label">Seuil d'alerte stock</label>
+            <p-inputnumber
+                [(ngModel)]="product.seuil_alerte_stock"
+                [showButtons]="true"
+                [min]="0"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="0"
+                [disabled]="isSeuilAlerteStockDisabled()"
+                placeholder="Ex: 5 (vide = seuil global)"
+                [invalid]="submitted && isSeuilAlerteStockInvalid()"
+                fluid
+            ></p-inputnumber>
+            <small class="mobile-info-hint">
+                <i class="pi pi-info-circle"></i> Déclenche l'alerte quand le stock atteint ce seuil.
+            </small>
+            <small class="text-red-500" *ngIf="submitted && isSeuilAlerteStockInvalid() && isEditing">
+                {{ getSeuilAlerteStockErrorMessage() }}
+            </small>
+        </div>
+
         <!-- Boutons sticky en bas -->
         <div class="mobile-bottom-actions" *ngIf="isEditing">
             <button
@@ -530,6 +552,30 @@
                                 class="ml-auto"
                             ></p-toggleswitch>
                         </div>
+                    </div>
+                </div>
+
+                <div class="border border-surface-200 dark:border-surface-700 rounded" *ngIf="isSeuilAlerteStockVisible()">
+                    <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Seuil d'alerte stock</span>
+                    <div class="p-4">
+                        <p-inputnumber
+                            [(ngModel)]="product.seuil_alerte_stock"
+                            inputId="seuil_alerte_stock_desktop"
+                            [showButtons]="true"
+                            [min]="0"
+                            [minFractionDigits]="0"
+                            [maxFractionDigits]="0"
+                            [disabled]="isSeuilAlerteStockDisabled()"
+                            placeholder="Ex: 5 (vide = seuil global)"
+                            [invalid]="submitted && isSeuilAlerteStockInvalid()"
+                            fluid
+                        ></p-inputnumber>
+                        <small class="text-surface-500 block mt-2">
+                            <i class="pi pi-info-circle mr-1"></i>Déclenche l'alerte quand le stock atteint ce seuil.
+                        </small>
+                        <small class="text-red-500 block mt-1" *ngIf="submitted && isSeuilAlerteStockInvalid() && isEditing">
+                            {{ getSeuilAlerteStockErrorMessage() }}
+                        </small>
                     </div>
                 </div>
 
