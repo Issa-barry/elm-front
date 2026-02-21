@@ -17,7 +17,11 @@
       "Bash(git push:*)",
       "Bash(npx tsc:*)",
       "Bash(npx ng lint:*)",
-      "Bash(npx ng test:*)"
+      "Bash(npx ng test:*)",
+      "Bash(node_modules/.bin/tsc:*)",
+      "Bash(node node_modules/typescript/bin/tsc:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"
