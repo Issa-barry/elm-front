@@ -17,6 +17,13 @@ permissions:
   contents: read
 
 jobs:
+  # ──────────────────────────────────────────────────────────
+  # BUILD — s'exécute sur toutes les branches déclenchantes.
+  # La configuration Angular varie selon la branche :
+  #   pre-prod → preprod
+  #   main     → production
+  #   autres   → production (CI strict, comme la prod)
+  # ──────────────────────────────────────────────────────────
   build:
     name: Build Angular
     runs-on: ubuntu-latest
@@ -34,9 +41,20 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build production bundle
+      - name: Determine build configuration
+        id: build-config
         run: |
-          node ./node_modules/@angular/cli/bin/ng build
+          if [ "${{ github.ref }}" = "refs/heads/pre-prod" ]; then
+            echo "config=preprod" >> "$GITHUB_OUTPUT"
+          else
+            # main + dev + toute autre branche → production
+            echo "config=production" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Angular build configuration: $(grep config "$GITHUB_OUTPUT" | cut -d= -f2)"
+
+      - name: Build Angular bundle (${{ steps.build-config.outputs.config }})
+        run: |
+          node ./node_modules/@angular/cli/bin/ng build --configuration ${{ steps.build-config.outputs.config }}
           node scripts/write-version.js
           node scripts/copy-deploy.js
 
@@ -52,16 +70,15 @@ jobs:
           path: dist/apollo-ng-deploy/
           if-no-files-found: error
 
+  # ──────────────────────────────────────────────────────────
+  # DEPLOY PRE-PROD — uniquement sur push/dispatch vers pre-prod
+  # Secrets requis : HOSTINGER_PREPROD_FTP_*
+  # ──────────────────────────────────────────────────────────
   deploy-preprod:
-    name: Deploy Pre-Prod to usine-eau.eu
+    name: Deploy Pre-Prod (Hostinger preprod)
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/pre-prod' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-
-    env:
-      HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
-      HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-      HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
 
     steps:
       - name: Download deploy artifact
@@ -70,18 +87,59 @@ jobs:
           name: apollo-ng-deploy
           path: dist/apollo-ng-deploy/
 
-      - name: Validate required secrets
+      - name: Validate required secrets (preprod)
+        env:
+          HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_PREPROD_FTP_SERVER }}
+          HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_PREPROD_FTP_USERNAME }}
+          HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_PREPROD_FTP_PASSWORD }}
         run: |
           if [ -z "$HOSTINGER_FTP_SERVER" ] || [ -z "$HOSTINGER_FTP_USERNAME" ] || [ -z "$HOSTINGER_FTP_PASSWORD" ]; then
-            echo "::error::Missing one or more required secrets: HOSTINGER_FTP_SERVER, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD"
+            echo "::error::Missing one or more required secrets: HOSTINGER_PREPROD_FTP_SERVER, HOSTINGER_PREPROD_FTP_USERNAME, HOSTINGER_PREPROD_FTP_PASSWORD"
             exit 1
           fi
 
-      - name: Deploy dist to /public_html/
+      - name: Deploy to preprod /public_html/
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.HOSTINGER_FTP_SERVER }}
-          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          server: ${{ secrets.HOSTINGER_PREPROD_FTP_SERVER }}
+          username: ${{ secrets.HOSTINGER_PREPROD_FTP_USERNAME }}
+          password: ${{ secrets.HOSTINGER_PREPROD_FTP_PASSWORD }}
+          local-dir: dist/apollo-ng-deploy/
+          server-dir: /public_html/
+
+  # ──────────────────────────────────────────────────────────
+  # DEPLOY PROD — uniquement sur push/dispatch vers main
+  # Secrets requis : HOSTINGER_PROD_FTP_*
+  # ──────────────────────────────────────────────────────────
+  deploy-prod:
+    name: Deploy Prod (Hostinger production)
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    steps:
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: apollo-ng-deploy
+          path: dist/apollo-ng-deploy/
+
+      - name: Validate required secrets (prod)
+        env:
+          HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_PROD_FTP_SERVER }}
+          HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_PROD_FTP_USERNAME }}
+          HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_PROD_FTP_PASSWORD }}
+        run: |
+          if [ -z "$HOSTINGER_FTP_SERVER" ] || [ -z "$HOSTINGER_FTP_USERNAME" ] || [ -z "$HOSTINGER_FTP_PASSWORD" ]; then
+            echo "::error::Missing one or more required secrets: HOSTINGER_PROD_FTP_SERVER, HOSTINGER_PROD_FTP_USERNAME, HOSTINGER_PROD_FTP_PASSWORD"
+            exit 1
+          fi
+
+      - name: Deploy to prod /public_html/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_PROD_FTP_SERVER }}
+          username: ${{ secrets.HOSTINGER_PROD_FTP_USERNAME }}
+          password: ${{ secrets.HOSTINGER_PROD_FTP_PASSWORD }}
           local-dir: dist/apollo-ng-deploy/
           server-dir: /public_html/
