@@ -1,0 +1,84 @@
+name: Frontend CI/CD
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - pre-prod
+      - main
+  push:
+    branches:
+      - dev
+      - pre-prod
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Angular
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build:deploy
+
+      - name: Validate deploy output
+        run: |
+          test -f dist/apollo-ng-deploy/index.html
+          echo "dist/apollo-ng-deploy is ready"
+
+      - name: Upload deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apollo-ng-deploy
+          path: dist/apollo-ng-deploy/
+          if-no-files-found: error
+
+  deploy-production:
+    name: Deploy to Hostinger
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    env:
+      HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
+      HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+      HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+
+    steps:
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: apollo-ng-deploy
+          path: dist/apollo-ng-deploy/
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "$HOSTINGER_FTP_SERVER" ] || [ -z "$HOSTINGER_FTP_USERNAME" ] || [ -z "$HOSTINGER_FTP_PASSWORD" ]; then
+            echo "::error::Missing one or more required secrets: HOSTINGER_FTP_SERVER, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD"
+            exit 1
+          fi
+
+      - name: Deploy dist to public_html via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_FTP_SERVER }}
+          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          local-dir: dist/apollo-ng-deploy/
+          server-dir: /public_html/

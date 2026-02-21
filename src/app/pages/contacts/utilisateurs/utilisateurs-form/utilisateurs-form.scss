@@ -32,6 +32,42 @@
   }
 }
 
+.utilisateurs-form-summary-card {
+  border: 1px solid var(--p-surface-300, #d1d5db);
+  border-radius: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+  background: var(--p-surface-0, #fff);
+}
+
+.utilisateurs-form-summary-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--p-text-color, var(--text-color));
+}
+
+.utilisateurs-form-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem 0;
+
+  span {
+    color: var(--p-text-muted-color, #6b7280);
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+
+  strong {
+    color: var(--p-text-color, var(--text-color));
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+}
+
 .utilisateurs-form-stepper {
   ::ng-deep .p-stepper {
     .p-step-list {
@@ -130,7 +166,11 @@
   .p-inputtext:focus-visible,
   .p-select .p-select-label:focus-visible,
   .p-datepicker .p-inputtext:focus-visible,
-  .p-password input:focus-visible,
+  .p-password input:focus-visible {
+    outline: 1px solid var(--p-primary-color, var(--primary-color));
+    outline-offset: 0;
+  }
+
   .p-button:focus-visible {
     outline: 2px solid var(--p-primary-color, var(--primary-color));
     outline-offset: 2px;
@@ -165,6 +205,16 @@
       width: 100%;
       justify-content: center;
       min-width: unset;
+    }
+  }
+
+  .utilisateurs-form-summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+
+    strong {
+      text-align: left;
     }
   }
 }
