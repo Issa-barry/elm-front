@@ -1,6 +1,6 @@
 <div class="min-h-full">
-  <div class="utilisateurs-form-card max-w-6xl mx-auto px-4 sm:px-8 lg:px-10 py-8 sm:py-12">
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-10 lg:p-12">
+  <div class="utilisateurs-form-card max-w-7xl mx-auto px-4 sm:px-8 lg:px-10 py-8 sm:py-12">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 sm:p-12 lg:p-14">
       <header class="mb-10 sm:mb-12">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{{ formTitle }}</h1>
         <p class="mt-2 text-sm sm:text-base text-gray-600">Renseignez les informations du compte utilisateur.</p>
@@ -80,7 +80,7 @@
                   </div>
                 </section>
 
-                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-end gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-end gap-3 pt-8 mt-8" *ngIf="isEditing">
                   <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
                   <button type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [disabled]="!isStep1Valid() || formDisabled" class="utilisateurs-form-next"></button>
                 </div>
@@ -132,7 +132,7 @@
                   </div>
                 </section>
 
-                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8" *ngIf="isEditing">
                   <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
                   <div class="flex flex-wrap items-center gap-3">
                     <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
@@ -169,7 +169,7 @@
                   </div>
                 </section>
 
-                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8" *ngIf="isEditing">
                   <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
                   <div class="flex flex-wrap items-center gap-3">
                     <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
@@ -183,7 +183,7 @@
               <ng-template pTemplate="content">
                 <section class="space-y-8">
                   <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-7 py-1">
-                    <div class="utilisateurs-form-field">
+                    <div class="utilisateurs-form-field xl:col-span-2">
                       <label for="email" class="utilisateurs-form-label">Email</label>
                       <input id="email" name="email" type="email" pInputText fluid [(ngModel)]="model.email" [disabled]="fieldsDisabled" placeholder="exemple@email.com" class="w-full" />
                     </div>
@@ -213,7 +213,7 @@
                   </div>
                 </section>
 
-                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8" *ngIf="isEditing">
                   <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
                   <div class="flex flex-wrap items-center gap-3">
                     <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
@@ -273,7 +273,7 @@
                   </small>
                 </div>
 
-                <div class="utilisateurs-form-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                <div class="utilisateurs-form-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8" *ngIf="isEditing">
                   <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
                   <div class="flex flex-wrap items-center gap-3">
                     <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
