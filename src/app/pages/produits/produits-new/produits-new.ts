@@ -59,10 +59,35 @@ export class ProduitsNew implements OnInit, OnDestroy {
   // =============================
   onSubmitForm(dto: CreateProduitDto): void {
     this.loading = true;
+    const imageFile = dto.image ?? null;
 
     this.produitService.create(dto).subscribe({
-      next: (createdProduit) => this.handleSuccess('Produit créé avec succès', createdProduit),
+      next: (createdProduit) => {
+        if (imageFile && createdProduit.id) {
+          this.uploadImageAfterCreate(createdProduit, imageFile);
+        } else {
+          this.handleSuccess('Produit créé avec succès', createdProduit);
+        }
+      },
       error: (err) => this.handleError('Erreur lors de la création du produit', err)
+    });
+  }
+
+  private uploadImageAfterCreate(produit: Produit, file: File): void {
+    this.produitService.uploadProduitImage(produit.id, file).subscribe({
+      next: (produitWithImage) => {
+        this.handleSuccess('Produit créé avec succès', produitWithImage);
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Attention',
+          detail: "Produit créé, mais l'image n'a pas pu être envoyée.",
+          life: 5000
+        });
+        this.loading = false;
+        this.router.navigate(['/produits/produits-edit', produit.id]);
+      }
     });
   }
 

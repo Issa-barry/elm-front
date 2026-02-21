@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
- import { User, CreateUserDto } from '@/models/user.model';
+import { User, CreateUserDto, Civilite, PieceType, UserType } from '@/models/user.model';
 import { environment } from 'src/environments/environment';
 
 // Interfaces pour les réponses API
@@ -48,12 +48,21 @@ export interface UpdateUserDto {
   nom?: string;
   prenom?: string;
   phone?: string;
-  email?: string;
+  email?: string | null;
   pays?: string;
   code_pays?: string;
   code_phone_pays?: string;
   ville?: string;
   quartier?: string;
+  type?: UserType;
+  role?: string;
+  civilite?: Civilite | null;
+  date_naissance?: string | null;
+  piece_type?: PieceType | null;
+  piece_numero?: string | null;
+  piece_delivree_le?: string | null;
+  piece_expire_le?: string | null;
+  piece_pays?: string | null;
 }
 
 @Injectable({
@@ -67,10 +76,19 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Créer un nouvel utilisateur (via le endpoint register)
+   * Créer un nouvel utilisateur (via le endpoint register).
+   * Utilisé par la page d'inscription publique (/auth/register).
    */
   createUser(data: CreateUserDto): Observable<ApiResponse<{ user: User; access_token: string }>> {
     return this.http.post<ApiResponse<{ user: User; access_token: string }>>(`${this.authUrl}/register`, data);
+  }
+
+  /**
+   * Créer un utilisateur via l'API métier (POST /users).
+   * À combiner avec UsineService.assignUser pour l'assignation à l'usine courante.
+   */
+  createUserViaApi(data: CreateUserDto): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(this.apiUrl, data);
   }
 
   /**

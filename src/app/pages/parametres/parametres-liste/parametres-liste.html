@@ -55,6 +55,17 @@
             <span>Rôles & Permissions</span>
           </a>
         </li>
+        <li class="-ml-[2px]" [ngClass]="isActive('notifications') ? 'border-l-2 border-primary' : 'border-l-2 border-surface-200 dark:border-surface-700'">
+          <a
+            href="#"
+            class="w-full text-left flex items-center py-3 px-4 font-medium transition-colors hover:text-primary"
+            [ngClass]="isActive('notifications') ? 'text-primary' : 'text-surface-700 dark:text-surface-200'"
+            (click)="onSectionClick($event, 'notifications')"
+          >
+            <i class="pi pi-bell mr-2 text-base! leading-normal!"></i>
+            <span>Notifications</span>
+          </a>
+        </li>
       </ul>
     </div>
     <div class="col-span-12 lg:col-span-10 xl:col-span-10 bg-surface-0 dark:bg-surface-900 p-8 rounded-2xl flex-auto">
@@ -62,6 +73,7 @@
       <app-parametres-auth *ngIf="isActive('auth')"></app-parametres-auth>
       <app-parametres-packing *ngIf="isActive('packing')"></app-parametres-packing>
       <app-parametres-roles-permissions *ngIf="isActive('roles')"></app-parametres-roles-permissions>
-     </div>
+      <app-parametres-notifications *ngIf="isActive('notifications')"></app-parametres-notifications>
+    </div>
   </div>
 </div>

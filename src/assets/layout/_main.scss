@@ -22,12 +22,26 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+// ─── Mobile: empêcher le décalage au focus des inputs (clavier virtuel) ──
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+        overscroll-behavior: none;
+    }
+
+    // Empêcher le zoom automatique sur les inputs iOS (< 16px = zoom)
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
 a {
     text-decoration: none;
 }
 
 .layout-container {
     min-height: 100vh;
+    min-height: 100dvh;
 }
 
 img {

@@ -1,19 +1,27 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withHashLocation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeuix/themes/aura';
+import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@/interceptors/auth.interceptor';
+import { usineInterceptor } from '@/interceptors/usine.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
+        // Sans withEnabledBlockingInitialNavigation : l'app s'affiche tout de suite (évite page blanche sur mobile / réseau lent)
+        provideRouter(
+            appRoutes,
+            withHashLocation(), // Évite la page blanche au déploiement : le serveur sert toujours index.html
+            withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' })
+        ),
         provideHttpClient(
             withFetch(),
-            withInterceptors([authInterceptor]) // ← Ajout de l'intercepteur
+            withInterceptors([authInterceptor, usineInterceptor])
         ),
+        MessageService,
         provideAnimationsAsync(),
         providePrimeNG({
             theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } },

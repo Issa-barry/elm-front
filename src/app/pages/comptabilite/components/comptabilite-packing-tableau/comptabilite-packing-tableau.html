@@ -1,6 +1,69 @@
 <p-toast />
 
-<div class="card tableau-card compta-table-card">
+<!-- Mobile: list as cards (≤768px) -->
+<div class="compta-tableau-mobile">
+    <section class="compta-mobile-search">
+        <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+                pInputText
+                type="text"
+                [(ngModel)]="mobileSearchTerm"
+                (ngModelChange)="onMobileSearchChange()"
+                placeholder="Prestataire, téléphone..."
+                class="w-full"
+            />
+        </p-iconfield>
+    </section>
+
+    <section class="compta-mobile-list" *ngIf="!loading && mobileVisiblePrestataires.length; else mobileListState">
+        <article
+            class="compta-mobile-card"
+            *ngFor="let item of mobileVisiblePrestataires; trackBy: trackByPrestataireId"
+            (click)="goToDetail(item)"
+        >
+            <div class="compta-mobile-card-avatar" aria-hidden="true">
+                {{ getInitials(item.prestataire_nom) }}
+            </div>
+            <div class="compta-mobile-card-body">
+                <div class="compta-mobile-card-name">{{ item.prestataire_nom }}</div>
+                <div class="compta-mobile-card-meta">{{ item.prestataire_phone | phoneFormat:'INT' }} · {{ formatDateDisplay(item.derniere_date) }}</div>
+                <div class="compta-mobile-card-footer">
+                    <span class="compta-mobile-card-summary">{{ formatCurrency(item.montant_facture) }}</span>
+                    <span
+                        class="compta-mobile-status-badge"
+                        [ngClass]="{
+                            'compta-mobile-status-badge--danger': item.statut === 'impaye',
+                            'compta-mobile-status-badge--warn': item.statut === 'partiel',
+                            'compta-mobile-status-badge--success': item.statut === 'solde'
+                        }"
+                    >{{ getStatutLabel(item.statut) }}</span>
+                    <button
+                        pButton
+                        pRipple
+                        icon="pi pi-arrow-right"
+                        class="p-button-rounded p-button-text p-button-sm compta-mobile-action-btn"
+                        pTooltip="Détail"
+                        tooltipPosition="top"
+                        (click)="$event.stopPropagation(); goToDetail(item)"
+                    ></button>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <ng-template #mobileListState>
+        <div class="compta-mobile-state" *ngIf="loading">Chargement...</div>
+        <div class="compta-mobile-state" *ngIf="!loading && !mobileFilteredPrestataires.length">Aucun prestataire.</div>
+    </ng-template>
+
+    <div class="compta-mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+        <button pButton label="Charger plus" icon="pi pi-angle-down" class="compta-mobile-load-more-btn" (click)="loadMoreMobile()"></button>
+    </div>
+</div>
+
+<!-- Desktop: toolbar + table -->
+<div class="card tableau-card compta-table-card compta-tableau-desktop">
     <p-toolbar styleClass="mb-6 compta-toolbar">
         <ng-template #start>
             <div class="compta-toolbar__start">

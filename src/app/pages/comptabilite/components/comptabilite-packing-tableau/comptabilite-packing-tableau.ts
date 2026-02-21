@@ -109,6 +109,11 @@ export class ComptabilitePackingTableau implements OnInit {
   exportColumns!: ExportColumn[];
   cols!: Column[];
 
+  // Mobile list
+  mobileSearchTerm = '';
+  readonly mobilePageSize = 10;
+  mobileVisibleCount = this.mobilePageSize;
+
   constructor(
     private router: Router,
     private factureService: FacturePaiementService,
@@ -170,6 +175,7 @@ export class ComptabilitePackingTableau implements OnInit {
 
   applyStatutFilter() {
     if (!this.comptaSummary) return;
+    this.mobileVisibleCount = this.mobilePageSize;
     if (this.filtreStatut) {
       this.prestataires.set(
         this.comptaSummary.prestataires.filter(p => p.statut === this.filtreStatut)
@@ -177,6 +183,12 @@ export class ComptabilitePackingTableau implements OnInit {
     } else {
       this.prestataires.set(this.comptaSummary.prestataires);
     }
+  }
+
+  /** Appelé depuis le parent (liste mobile) pour le filtre statut */
+  applyMobileStatut(value: string | null) {
+    this.filtreStatut = value;
+    this.applyStatutFilter();
   }
 
   exportCSV() {
@@ -272,8 +284,8 @@ export class ComptabilitePackingTableau implements OnInit {
     }).format(value) + ' GNF';
   }
 
-  formatDateDisplay(dateStr: string): string {
-    if (!dateStr) return '';
+  formatDateDisplay(dateStr: string | null | undefined): string {
+    if (dateStr == null || dateStr === '') return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString('fr-FR');
   }
@@ -298,5 +310,40 @@ export class ComptabilitePackingTableau implements OnInit {
     }
 
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  }
+
+  get mobileFilteredPrestataires(): ComptabilitePrestataire[] {
+    const list = this.prestataires();
+    const term = this.mobileSearchTerm.trim().toLowerCase();
+    if (!term) return list;
+    return list.filter(
+      (p) =>
+        (p.prestataire_nom || '').toLowerCase().includes(term) ||
+        (p.prestataire_phone || '').replace(/\s/g, '').includes(term.replace(/\s/g, ''))
+    );
+  }
+
+  get mobileVisiblePrestataires(): ComptabilitePrestataire[] {
+    return this.mobileFilteredPrestataires.slice(0, this.mobileVisibleCount);
+  }
+
+  get canLoadMoreMobile(): boolean {
+    return this.mobileVisibleCount < this.mobileFilteredPrestataires.length;
+  }
+
+  onMobileSearchChange() {
+    this.mobileVisibleCount = this.mobilePageSize;
+  }
+
+  loadMoreMobile() {
+    this.mobileVisibleCount += this.mobilePageSize;
+  }
+
+  trackByPrestataireId(_index: number, p: ComptabilitePrestataire): number {
+    return p.prestataire_id;
+  }
+
+  getStatutLabel(statut: string): string {
+    return statut === 'impaye' ? 'Impayé' : statut === 'partiel' ? 'Partiel' : 'Soldé';
   }
 }

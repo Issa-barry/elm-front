@@ -1,10 +1,41 @@
-<section class="compta-mobile-shell">
-  <div class="compta-mobile-shell__stats grid grid-cols-12 gap-6 mb-6">
-    <app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
-  </div>
+<section class="compta-mobile-shell compta-packing-mobile-app">
+  <header class="compta-packing-mobile-header">
+    <button
+      pButton
+      pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text compta-mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goHome()"
+    ></button>
+    <div class="compta-mobile-title-wrap">
+      <h1 class="compta-mobile-title">Comptabilité Packing</h1>
+      <p class="compta-mobile-subtitle">Facturation prestataires</p>
+    </div>
+    <p-menu
+      #statusMenu
+      [model]="mobileStatusMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="compta-mobile-status-menu"
+    />
+    <button
+      pButton
+      pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text compta-mobile-filter-btn"
+      aria-label="Filtrer par statut"
+      (click)="statusMenu.toggle($event)"
+    ></button>
+  </header>
 
-  <app-comptabilite-packing-tableau
-    class="compta-mobile-shell__table"
-    (dataChanged)="statsWidget.loadStats($event)"
-  ></app-comptabilite-packing-tableau>
+  <div class="compta-mobile-scroll">
+    <div class="compta-mobile-shell__stats grid grid-cols-12 gap-6 mb-6">
+      <app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
+    </div>
+    <app-comptabilite-packing-tableau
+      class="compta-mobile-shell__table"
+      (dataChanged)="statsWidget.loadStats($event)"
+    ></app-comptabilite-packing-tableau>
+  </div>
 </section>

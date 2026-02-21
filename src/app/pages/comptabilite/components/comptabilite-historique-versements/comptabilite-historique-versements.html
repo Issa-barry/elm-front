@@ -1,0 +1,108 @@
+<div class="historique-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="data">
+    <!-- Header -->
+    <div class="historique-header w-full flex-shrink-0 p-6 border-b border-surface-200 dark:border-surface-700 flex items-center">
+        <div class="flex-1 min-w-0">
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ data.reference.replace('FACT-PACK-', '') }}</div>
+            <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Historique des versements</div>
+        </div>
+        <button pButton [text]="true" [rounded]="true" class="w-10 h-10" (click)="onClose.emit()">
+            <i pButtonIcon class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <!-- Body (scrollable) -->
+    <div class="historique-body flex-1 min-h-0 w-full overflow-y-auto">
+        <!-- Résumé facture -->
+        <div class="p-6 border-b border-surface-200 dark:border-surface-700">
+            <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col gap-4">
+                <div class="w-full flex justify-between items-center">
+                    <span class="text-surface-500 dark:text-surface-400 text-base">Total facture</span>
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium">{{ formatCurrency(data.montant_total) }}</span>
+                </div>
+                <div class="w-full flex justify-between items-center">
+                    <span class="text-surface-500 dark:text-surface-400 text-base">Déjà versé</span>
+                    <span class="text-base font-semibold" style="color: #059669">{{ formatCurrency(data.montant_verse) }}</span>
+                </div>
+                <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
+                <div class="w-full flex justify-between items-center">
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Reste à payer</span>
+                    <span class="text-lg font-bold" style="color: #d97706">{{ formatCurrency(data.montant_restant) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="flex items-center justify-center p-12">
+            <i class="pi pi-spin pi-spinner text-3xl text-surface-300"></i>
+        </div>
+
+        <!-- Liste des versements -->
+        <div *ngIf="!loading && data.versements.length > 0" class="p-6 flex flex-col gap-3">
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                {{ data.versements.length }} versement{{ data.versements.length > 1 ? 's' : '' }}
+            </div>
+
+            <div
+                *ngFor="let versement of data.versements"
+                class="versement-card p-4 rounded-xl border border-surface-200 dark:border-surface-700 flex flex-col gap-2"
+            >
+                <div class="flex justify-between items-center">
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-bold" style="color: #059669">
+                        {{ formatCurrency(versement.montant) }}
+                    </span>
+                    <span class="versement-mode-badge text-xs font-semibold px-2 py-1 rounded-full">
+                        {{ versement.mode_paiement_label }}
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm text-surface-500 dark:text-surface-400">
+                    <span class="flex items-center gap-1">
+                        <i class="pi pi-calendar text-xs"></i>
+                        {{ formatDate(versement.date_versement) }}
+                    </span>
+                    <span *ngIf="versement.creator" class="flex items-center gap-1">
+                        <i class="pi pi-user text-xs"></i>
+                        {{ versement.creator.name }}
+                    </span>
+                </div>
+
+                <div *ngIf="versement.notes" class="text-sm text-surface-400 dark:text-surface-500 italic">
+                    {{ versement.notes }}
+                </div>
+
+                <div *ngIf="canDelete" class="flex justify-end pt-1">
+                    <button
+                        pButton
+                        [text]="true"
+                        [rounded]="true"
+                        severity="danger"
+                        class="w-8 h-8"
+                        (click)="onDeleteVersement.emit(versement)"
+                    >
+                        <i pButtonIcon class="pi pi-trash text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loading && data.versements.length === 0" class="flex flex-col items-center justify-center gap-3 py-16 text-surface-300 dark:text-surface-500">
+            <i class="pi pi-inbox text-4xl"></i>
+            <span class="text-sm">Aucun versement enregistré</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="historique-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex-shrink-0">
+        <div class="flex items-center justify-between">
+            <span class="text-surface-500 dark:text-surface-400 text-sm font-medium">Statut</span>
+            <span
+                class="historique-statut-badge text-sm font-semibold px-3 py-1 rounded-full"
+                [class.historique-statut-badge--success]="data.is_soldee"
+                [class.historique-statut-badge--warn]="!data.is_soldee"
+            >
+                {{ data.is_soldee ? 'Soldé' : 'En cours' }}
+            </span>
+        </div>
+    </div>
+</div>

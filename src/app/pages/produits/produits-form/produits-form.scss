@@ -26,7 +26,7 @@
     font-weight: 700;
     color: var(--text-color);
   }
-
+ 
   .side-title {
     font-weight: 700;
     color: var(--text-color);
@@ -80,6 +80,96 @@
 
   .upload-dropzone:hover {
     background: color-mix(in srgb, var(--primary-50) 35%, transparent);
+  }
+
+  // ── Phase 1 : Type structurant + hiérarchie visuelle ──
+
+  .type-selector-block {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--surface-200);
+  }
+
+  .form-field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--surface-900);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-field-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: #94a3b8;
+
+    i { font-size: 0.7rem; }
+  }
+
+  .prix-section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .prix-helper-text {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    color: #94a3b8;
+
+    i { font-size: 0.7rem; }
+  }
+
+  .price-field-anim {
+    animation: priceFieldFade 0.18s ease-out;
+  }
+}
+
+@keyframes priceFieldFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Dark mode desktop
+:host-context(.app-dark) .product-form {
+  .type-selector-block {
+    border-bottom-color: var(--p-surface-700);
+  }
+
+  .form-field-label {
+    color: var(--p-surface-0);
+  }
+
+  .form-field-hint,
+  .prix-helper-text {
+    color: var(--p-surface-500);
+  }
+
+  .status-pill-active {
+    background: rgba(5, 150, 105, 0.2);
+    color: #34d399;
+  }
+
+  .status-pill-inactive {
+    background: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
+  }
+
+  .service-alert {
+    background: rgba(220, 38, 38, 0.15);
+    border-color: var(--p-surface-600);
+    color: #f87171;
   }
 }
 
@@ -141,6 +231,7 @@
       font-weight: 700;
       color: #1e293b;
       letter-spacing: -0.01em;
+      text-align: center;
     }
 
     // ---- Image card ----
@@ -214,6 +305,28 @@
       border-radius: 999px !important;
 
       i { font-size: 0.7rem; }
+    }
+
+    .mobile-upload-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 0.75rem;
+    }
+
+    .mobile-delete-confirm {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 1rem;
     }
 
     // ---- Section cards ----
@@ -347,6 +460,73 @@
       border-radius: 0.75rem !important;
       font-weight: 600 !important;
       min-height: 2.75rem;
+    }
+  }
+
+  // Dark mode: formulaire produit mobile
+  :host-context(.app-dark) .product-form {
+    background: var(--p-surface-950) !important;
+
+    .mobile-form-back,
+    .mobile-form-edit {
+      color: var(--p-surface-100) !important;
+    }
+
+    .mobile-form-title {
+      color: var(--p-surface-0);
+    }
+
+    .mobile-image-card {
+      background: var(--p-surface-800);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-upload-placeholder {
+      color: var(--p-surface-400);
+
+      i {
+        color: var(--p-surface-500);
+      }
+    }
+
+    .mobile-section-card {
+      background: var(--p-surface-800);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .mobile-field-label {
+      color: var(--p-surface-400);
+    }
+
+    .mobile-price-label {
+      color: var(--p-surface-400);
+    }
+
+    .mobile-service-alert {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: var(--p-surface-600);
+      color: #f87171;
+    }
+
+    .mobile-info-hint {
+      color: var(--p-surface-400);
+    }
+
+    .mobile-status-label {
+      color: var(--p-surface-200);
+    }
+
+    .mobile-status-value {
+      color: var(--p-surface-400);
+
+      &.active {
+        color: #34d399;
+      }
+    }
+
+    .mobile-bottom-actions {
+      background: rgba(15, 23, 42, 0.92);
+      border-top-color: var(--p-surface-700);
     }
   }
 }

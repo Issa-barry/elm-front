@@ -1,3 +1,142 @@
+// ─── Mobile list (visible ≤768px) ─────────────────────────
+.compta-tableau-mobile {
+    display: none;
+}
+
+.compta-mobile-search {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+:host ::ng-deep .compta-mobile-search .p-iconfield,
+:host ::ng-deep .compta-mobile-search .p-inputtext {
+    width: 100%;
+}
+
+.compta-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.compta-mobile-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--p-surface-0);
+    border: 1px solid var(--p-surface-200);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.compta-mobile-card:active {
+    background: var(--p-surface-100);
+}
+
+.compta-mobile-card-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background: var(--p-primary-50);
+    color: var(--p-primary-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.compta-mobile-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.compta-mobile-card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--p-surface-900);
+    line-height: 1.3;
+}
+
+.compta-mobile-card-meta {
+    font-size: 0.85rem;
+    color: var(--p-surface-500);
+    margin-top: 0.2rem;
+}
+
+.compta-mobile-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.compta-mobile-card-summary {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--p-surface-800);
+}
+
+.compta-mobile-status-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+}
+
+.compta-mobile-status-badge--danger {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.compta-mobile-status-badge--warn {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.compta-mobile-status-badge--success {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.compta-mobile-action-btn {
+    color: var(--p-primary-600) !important;
+}
+
+.compta-mobile-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--p-surface-500);
+    font-size: 0.9rem;
+}
+
+.compta-mobile-load-more {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: center;
+}
+
+.compta-mobile-load-more-btn {
+    width: 100%;
+    max-width: 18rem;
+}
+
+@media (max-width: 768px) {
+    .compta-tableau-mobile {
+        display: block;
+    }
+
+    .compta-tableau-desktop {
+        display: none !important;
+    }
+}
+
+// ─── Desktop table ────────────────────────────────────────
 .tableau-card {
     border-radius: 14px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
@@ -240,36 +379,88 @@
     }
 }
 
-:host-context(.dark) .cell-prestataire__name,
-:host-context(.dark) .cell-bold {
+:host-context(.app-dark) .cell-prestataire__name,
+:host-context(.app-dark) .cell-bold {
     color: var(--p-surface-100);
 }
 
-:host-context(.dark) .col-header {
+:host-context(.app-dark) .col-header {
     color: var(--p-surface-400);
 }
 
-:host-context(.dark) .status-badge--danger {
+:host-context(.app-dark) .status-badge--danger {
     background: rgba(220, 38, 38, 0.12);
 }
 
-:host-context(.dark) .status-badge--warn {
+:host-context(.app-dark) .status-badge--warn {
     background: rgba(217, 119, 6, 0.12);
 }
 
-:host-context(.dark) .status-badge--success {
+:host-context(.app-dark) .status-badge--success {
     background: rgba(5, 150, 105, 0.12);
 }
 
-:host-context(.dark) .preview-summary {
+:host-context(.app-dark) .preview-summary {
     background: var(--p-surface-700);
 }
 
-:host-context(.dark) ::ng-deep .compta-toolbar.p-toolbar {
+:host-context(.app-dark) ::ng-deep .compta-toolbar.p-toolbar {
     background: var(--p-surface-700);
     border-color: var(--p-surface-600);
 }
 
-:host-context(.dark) ::ng-deep .p-datatable .p-datatable-caption {
+:host-context(.app-dark) ::ng-deep .p-datatable .p-datatable-caption {
     border-bottom-color: var(--p-surface-700);
+}
+
+// ─── Dark mode: liste mobile (cartes prestataires) ─────────────────────
+:host-context(.app-dark) {
+    .compta-mobile-card {
+        background: var(--p-surface-800);
+        border-color: var(--p-surface-600);
+    }
+
+    .compta-mobile-card:active {
+        background: var(--p-surface-700);
+    }
+
+    .compta-mobile-card-avatar {
+        background: var(--p-surface-700);
+        color: var(--p-primary-400);
+    }
+
+    .compta-mobile-card-name {
+        color: var(--p-surface-0);
+    }
+
+    .compta-mobile-card-meta {
+        color: var(--p-surface-400);
+    }
+
+    .compta-mobile-card-summary {
+        color: var(--p-surface-200);
+    }
+
+    .compta-mobile-status-badge--danger {
+        background: rgba(220, 38, 38, 0.2);
+        color: #f87171;
+    }
+
+    .compta-mobile-status-badge--warn {
+        background: rgba(217, 119, 6, 0.2);
+        color: #fbbf24;
+    }
+
+    .compta-mobile-status-badge--success {
+        background: rgba(5, 150, 105, 0.2);
+        color: #34d399;
+    }
+
+    .compta-mobile-action-btn {
+        color: var(--p-primary-400) !important;
+    }
+
+    .compta-mobile-state {
+        color: var(--p-surface-400);
+    }
 }

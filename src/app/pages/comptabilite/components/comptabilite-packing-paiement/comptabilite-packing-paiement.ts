@@ -29,7 +29,7 @@ export class ComptabilitePackingPaiement implements OnChanges {
   montant: number | null = null;
   selectedMode: ModePaiement = 'especes';
 
-  ngOnChanges() {
+  ngOnChanges() { 
     if (this.facture) {
       this.montant = this.facture.montant_restant;
       this.selectedMode = 'especes';

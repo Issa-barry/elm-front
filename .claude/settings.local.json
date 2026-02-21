@@ -4,7 +4,23 @@
       "Bash(npx ng build:*)",
       "Bash(find:*)",
       "Read(//c/laragon/www/elm-api/app/**)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(node -e:*)",
+      "Bash(cmd //c \"dir c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng /b | findstr /i date\")",
+      "Bash(cmd //c \"dir c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng\\\\datepicker /b\")",
+      "Bash(cmd //c \"type c:\\\\laragon\\\\www\\\\FRONT\\\\elm-front\\\\node_modules\\\\primeng\\\\datepicker\\\\index.d.ts\")",
+      "Read(//c/laragon/www/elm-api/**)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx ng lint:*)",
+      "Bash(npx ng test:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"
     ]
   }
 }

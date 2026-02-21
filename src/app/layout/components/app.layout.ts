@@ -1,13 +1,16 @@
-import { Component, Renderer2, ViewChild } from '@angular/core';
+import { Component, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
+import { ToastModule } from 'primeng/toast';
 import { AppTopbar } from './app.topbar';
 import { AppSidebar } from './app.sidebar';
 import { LayoutService } from '@/layout/service/layout.service';
 import { AppConfigurator } from './app.configurator';
 import { AppProfileSidebar } from './app.profilesidebar';
- 
+
+const BODY_CLASS_ACCUEIL = 'layout-on-accueil';
+
 @Component({
     selector: 'app-layout',
     standalone: true,
@@ -18,6 +21,7 @@ import { AppProfileSidebar } from './app.profilesidebar';
         RouterModule,
         AppConfigurator,
         AppProfileSidebar,
+        ToastModule,
     ],
     template: `<div class="layout-container" [ngClass]="containerClass">
         <div app-sidebar></div>
@@ -30,14 +34,17 @@ import { AppProfileSidebar } from './app.profilesidebar';
         <div app-profilesidebar></div>
         <app-configurator></app-configurator>
         <div class="layout-mask animate-fadein"></div>
+        <p-toast position="top-right" [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
     </div> `,
 })
-export class AppLayout {
+export class AppLayout implements OnDestroy {
     overlayMenuOpenSubscription: Subscription;
 
     menuOutsideClickListener: any;
 
     menuScrollListener: any;
+
+    private routerSubscription: Subscription | null = null;
 
     @ViewChild(AppSidebar) appSidebar!: AppSidebar;
 
@@ -48,6 +55,11 @@ export class AppLayout {
         public renderer: Renderer2,
         public router: Router
     ) {
+        this.updateAccueilBodyClass(this.router.url);
+        this.routerSubscription = this.router.events
+            .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+            .subscribe((event) => this.updateAccueilBodyClass(event.urlAfterRedirects || event.url));
+
         this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
             if (!this.menuOutsideClickListener) {
                 this.menuOutsideClickListener = this.renderer.listen('document', 'click', (event) => {
@@ -153,7 +165,19 @@ export class AppLayout {
         };
     }
 
+    private updateAccueilBodyClass(url: string): void {
+        const path = url.split('?')[0].replace(/\/$/, '') || '/';
+        const isAccueil = path === '/' || path === '';
+        if (isAccueil) {
+            document.body.classList.add(BODY_CLASS_ACCUEIL);
+        } else {
+            document.body.classList.remove(BODY_CLASS_ACCUEIL);
+        }
+    }
+
     ngOnDestroy() {
+        this.routerSubscription?.unsubscribe();
+        document.body.classList.remove(BODY_CLASS_ACCUEIL);
         if (this.overlayMenuOpenSubscription) {
             this.overlayMenuOpenSubscription.unsubscribe();
         }

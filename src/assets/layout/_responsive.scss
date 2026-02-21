@@ -52,6 +52,11 @@
         overflow: hidden;
     }
 
+    /* Topbar visible uniquement sur l'accueil (dashboard) */
+    body:not(.layout-on-accueil) .layout-topbar {
+        display: none !important;
+    }
+
     .layout-container {
         .layout-content-wrapper {
             margin-left: 0;
@@ -141,10 +146,20 @@
         }
     }
 
-    body.produits-mobile-pwa {
+    body.produits-mobile-pwa,
+    body.utilisateurs-mobile-pwa,
+    body.prestateurs-mobile-pwa,
+    body.packings-mobile-pwa,
+    body.comptabilite-packing-mobile-pwa,
+    body.comptabilite-packing-detail-mobile-pwa {
+        /* Comme pour produit : menu du haut (recherche, profil) masqué sur liste mobile */
+        .layout-topbar {
+            display: none !important;
+        }
+
         .layout-container {
             .layout-topbar {
-                display: none;
+                display: none !important;
             }
 
             .layout-content-wrapper {

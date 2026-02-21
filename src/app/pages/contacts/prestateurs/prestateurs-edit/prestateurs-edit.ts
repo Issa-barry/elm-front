@@ -29,8 +29,6 @@ export class PrestateursEdit implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    console.log("id=",id);
-    
     if (id) {
       this.prestateurId = parseInt(id, 10);
       this.loadPrestataire(this.prestateurId);
@@ -42,7 +40,6 @@ export class PrestateursEdit implements OnInit {
 
     this.prestataireService.getPrestataire(id).subscribe({
       next: (response) => {
-        console.log("bonjour", response);
         if (response.success && response.data) {
           const prestataire = response.data;
           this.prestateursData = {
@@ -105,17 +102,15 @@ export class PrestateursEdit implements OnInit {
     this.prestataireService.updatePrestataire(this.prestateurId, payload).subscribe({
       next: (response) => {
         if (response.success) {
-          this.prestateursData = {
-            ...data,
-            reference: data.reference || this.prestateursData?.reference,
-          };
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
             detail: 'Prestataire modifié avec succès'
           });
+          this.loadPrestataire(this.prestateurId!);
+        } else {
+          this.loading = false;
         }
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur lors de la modification:', error);

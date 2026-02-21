@@ -1,3 +1,35 @@
+// ─── Full height dans le slideover (full screen mobile) ──
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+// ─── Racine : permet au body de scroller, footer reste en bas ──
+.paiement-panel {
+    min-height: 0;
+    overflow: hidden;
+}
+
+// ─── Mobile only : fenêtre plein écran alignée, bouton toujours visible ──
+@media (max-width: 768px) {
+    :host {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .paiement-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .paiement-footer {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+} 
+
 // ─── Payment mode cards ──────────────────────────────────
 .slideover-mode {
     flex: 1;
@@ -32,7 +64,7 @@
     }
 }
 
-:host-context(.dark) {
+:host-context(.app-dark) {
     .slideover-mode {
         border-color: var(--p-surface-600);
         color: var(--p-surface-300);

@@ -1,10 +1,11 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   ElementRef,
   EventEmitter,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   QueryList,
@@ -26,7 +27,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 import {
   Produit,
-  CreateProduitDto, 
+  CreateProduitDto,  
   PRODUIT_TYPE_LABELS,
   PRODUIT_STATUT_LABELS,
   ProduitType,
@@ -65,7 +66,10 @@ import {
     }
   `
 })
-export class ProduitsForm implements OnInit, OnChanges {
+export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
+
+  private static readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  private static readonly MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
   @ViewChildren('buttonEl') buttonEl!: QueryList<ElementRef>;
 
   @Input() mode: 'create' | 'edit' = 'create';
@@ -74,6 +78,7 @@ export class ProduitsForm implements OnInit, OnChanges {
 
   @Output() submitForm = new EventEmitter<CreateProduitDto>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() deleteImage = new EventEmitter<void>();
 
   submitted = false;
   isEditing = false;
@@ -107,12 +112,16 @@ export class ProduitsForm implements OnInit, OnChanges {
     type: 'materiel',
     in_stock: true,
     is_archived: false,
+    is_critique: false,
+    seuil_alerte_stock: null,
     description: null,
     image_url: null
   });
 
   selectedImageFile: File | null = null;
   imagePreview: string | null = null;
+  imageError: string | null = null;
+  confirmingDelete = false;
 
   ngOnInit(): void {
     // âœ… Charger les donnÃ©es initiales si Ã©dition
@@ -143,6 +152,14 @@ export class ProduitsForm implements OnInit, OnChanges {
     return this.product.type === 'fabricable';
   }
 
+  isPrixAchatVisible(): boolean {
+    return ['materiel', 'service', 'achat_vente'].includes(this.product.type);
+  }
+
+  isPrixVenteVisible(): boolean {
+    return ['service', 'fabricable', 'achat_vente'].includes(this.product.type);
+  }
+
   isPrixVenteRequired(): boolean {
     // Obligatoire pour: fabricable, achat_vente
     return ['fabricable', 'achat_vente'].includes(this.product.type);
@@ -150,6 +167,7 @@ export class ProduitsForm implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initialData']?.currentValue) {
+      this.revokePreviewUrl();
       this.product = new Produit(changes['initialData'].currentValue);
       this.imagePreview = changes['initialData'].currentValue.image_url ?? null;
 
@@ -157,6 +175,8 @@ export class ProduitsForm implements OnInit, OnChanges {
         this.isEditing = false;
         this.submitted = false;
         this.selectedImageFile = null;
+        this.imageError = null;
+        this.confirmingDelete = false;
       }
     }
 
@@ -173,6 +193,33 @@ export class ProduitsForm implements OnInit, OnChanges {
   // Pour le type "service", qte_stock doit Ãªtre 0 et dÃ©sactivÃ©
   isQteStockDisabled(): boolean {
     return this.product.type === 'service' || this.fieldsDisabled;
+  }
+
+  // Seuil d'alerte stock : caché/désactivé pour les services (pas de stock)
+  isSeuilAlerteStockDisabled(): boolean {
+    return this.product.type === 'service' || this.fieldsDisabled;
+  }
+
+  /** true si le produit est critique et a un type avec stock (afficher le champ seuil) */
+  isSeuilAlerteStockVisible(): boolean {
+    return this.product.is_critique === true && this.product.type !== 'service';
+  }
+
+  /** Validation : entier >= 0 si renseigné */
+  isSeuilAlerteStockInvalid(): boolean {
+    const v = this.product.seuil_alerte_stock;
+    if (v === null || v === undefined) return false;
+    const n = Number(v);
+    return !Number.isInteger(n) || n < 0;
+  }
+
+  getSeuilAlerteStockErrorMessage(): string {
+    const v = this.product.seuil_alerte_stock;
+    if (v === null || v === undefined) return '';
+    const n = Number(v);
+    if (!Number.isInteger(n)) return 'Doit être un nombre entier.';
+    if (n < 0) return 'Doit être supérieur ou égal à 0.';
+    return '';
   }
 
   // =========================
@@ -207,10 +254,12 @@ export class ProduitsForm implements OnInit, OnChanges {
   // TYPE CHANGE
   // =========================
   onTypeChange(): void {
-    // RÃ©initialiser les prix non applicables
+    // Réinitialiser les prix non applicables au type sélectionné
     if (!this.isPrixUsineVisible()) this.product.prix_usine = null;
+    if (!this.isPrixAchatVisible()) this.product.prix_achat = null;
+    if (!this.isPrixVenteVisible()) this.product.prix_vente = null;
 
-    // Pour le type "service", forcer qte_stock Ã  0
+    // Pour le type "service", forcer qte_stock à 0
     if (this.product.type === 'service') {
       this.product.qte_stock = 0;
     }
@@ -230,6 +279,9 @@ export class ProduitsForm implements OnInit, OnChanges {
 
     // Service: au moins un prix (achat ou vente)
     if (this.product.type === 'service' && !this.hasServicePrice()) return false;
+
+    // Seuil alerte stock : si renseigné, doit être entier >= 0
+    if (this.isSeuilAlerteStockInvalid()) return false;
 
     return true;
   }
@@ -258,21 +310,60 @@ export class ProduitsForm implements OnInit, OnChanges {
   // IMAGE UPLOAD
   // =========================
   onUpload(event: any): void {
-    if (event?.files?.length) {
-      const file: File = event.files[0];
-      this.selectedImageFile = file;
+    if (!event?.files?.length) return;
+    const file: File = event.files[0];
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => (this.imagePreview = e.target.result);
-      reader.readAsDataURL(file);
+    this.imageError = null;
+
+    if (!ProduitsForm.ALLOWED_TYPES.includes(file.type)) {
+      this.imageError = 'Format non supporté. Utilisez JPG, PNG ou WebP.';
+      return;
     }
+    if (file.size > ProduitsForm.MAX_SIZE) {
+      this.imageError = 'Fichier trop volumineux. Taille max : 5 Mo.';
+      return;
+    }
+
+    this.revokePreviewUrl();
+    this.selectedImageFile = file;
+    this.imagePreview = URL.createObjectURL(file);
   }
 
   removeImage(event: any): void {
     event.stopPropagation();
-    this.selectedImageFile = null;
-    this.imagePreview = null;
+    if (this.selectedImageFile) {
+      // Annuler la sélection d'un nouveau fichier (pas d'appel API)
+      this.revokePreviewUrl();
+      this.selectedImageFile = null;
+      this.imagePreview = null;
+      this.imageError = null;
+    } else if (this.product.image_url) {
+      // Image existante sur le serveur → confirmation requise
+      this.confirmingDelete = true;
+    }
+  }
+
+  confirmDeleteImage(event: any): void {
+    event.stopPropagation();
+    this.confirmingDelete = false;
     this.product.image_url = null;
+    this.imagePreview = null;
+    this.deleteImage.emit();
+  }
+
+  cancelDeleteImage(event: any): void {
+    event.stopPropagation();
+    this.confirmingDelete = false;
+  }
+
+  private revokePreviewUrl(): void {
+    if (this.imagePreview?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.imagePreview);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.revokePreviewUrl();
   }
 
   // =========================
@@ -292,6 +383,17 @@ export class ProduitsForm implements OnInit, OnChanges {
     };
     // Statut piloté par le switch (actif/inactif)
     dto.statut = this.product.statut;
+    dto.is_critique = this.product.is_critique;
+
+    // Seuil alerte stock : vide => null, sinon entier
+    const rawSeuil = this.product.seuil_alerte_stock;
+    const hasValue = rawSeuil !== null && rawSeuil !== undefined && !Number.isNaN(Number(rawSeuil));
+    if (hasValue) {
+      const n = Math.floor(Number(rawSeuil));
+      dto.seuil_alerte_stock = n >= 0 ? n : null;
+    } else {
+      dto.seuil_alerte_stock = null;
+    }
 
     // Prix seulement si dÃ©finis
     if (this.product.prix_usine !== null) dto.prix_usine = this.product.prix_usine;
@@ -299,9 +401,6 @@ export class ProduitsForm implements OnInit, OnChanges {
     if (this.product.prix_achat !== null) dto.prix_achat = this.product.prix_achat;
 
     if (this.selectedImageFile) dto.image = this.selectedImageFile;
-
-    console.log('DTO:', dto);
-    
 
     this.submitForm.emit(dto);
   }
@@ -339,9 +438,11 @@ export class ProduitsForm implements OnInit, OnChanges {
   // RESET
   // =========================
   public resetForm(): void {
+    this.revokePreviewUrl();
     this.submitted = false;
     this.selectedImageFile = null;
     this.imagePreview = null;
+    this.imageError = null;
 
     this.product = new Produit({
       nom: '',
@@ -355,6 +456,8 @@ export class ProduitsForm implements OnInit, OnChanges {
       type: 'materiel',
       in_stock: true,
       is_archived: false,
+      is_critique: false,
+      seuil_alerte_stock: null,
       description: null,
       image_url: null
     });

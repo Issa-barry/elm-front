@@ -1,16 +1,31 @@
 <p-toast></p-toast>
 
-<div class="p-4">
-  <div *ngIf="loading && !prestateursData" class="flex justify-center items-center h-96">
-    <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
-  </div>
+<div class="edit-page">
+  <header class="edit-mobile-header">
+    <button
+      type="button"
+      class="edit-back"
+      aria-label="Retour à la liste"
+      (click)="onCancel()"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <h1 class="edit-title">Modifier le prestataire</h1>
+    <span class="edit-header-spacer"></span>
+  </header>
 
-  <app-prestateurs-from
-    *ngIf="prestateursData"
-    [mode]="'edit'"
-    [initialData]="prestateursData"
-    [loading]="loading"
-    (submitForm)="onSubmit($event)"
-    (cancel)="onCancel()"
-  ></app-prestateurs-from>
+  <div class="edit-content">
+    <div *ngIf="loading && !prestateursData" class="flex justify-center items-center h-96">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+
+    <app-prestateurs-from
+      *ngIf="prestateursData"
+      [mode]="'edit'"
+      [initialData]="prestateursData"
+      [loading]="loading"
+      (submitForm)="onSubmit($event)"
+      (cancel)="onCancel()"
+    ></app-prestateurs-from>
+  </div>
 </div>

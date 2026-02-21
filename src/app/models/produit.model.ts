@@ -59,6 +59,9 @@ export class Produit {
 
   qte_stock: number = 0;
 
+  /** Seuil personnalisé pour alerte stock. null = seuil global backend. Entier >= 0. */
+  seuil_alerte_stock: number | null = null;
+
   // ✅ number, pas string
   cout: number | null = null;
 
@@ -68,6 +71,8 @@ export class Produit {
 
   in_stock: boolean = true;
   is_archived: boolean = false;
+  is_critique: boolean = false;
+  last_stockout_notified_at: string | null = null;
 
   archived_at: string | null = null;
   description: string | null = null;
@@ -126,6 +131,9 @@ export class Produit {
       prix_vente: data?.prix_vente !== null && data?.prix_vente !== undefined ? Number(data.prix_vente) : null,
       prix_achat: data?.prix_achat !== null && data?.prix_achat !== undefined ? Number(data.prix_achat) : null,
       cout: data?.cout !== null && data?.cout !== undefined ? Number(data.cout) : null,
+      is_critique: data?.is_critique ?? false,
+      last_stockout_notified_at: data?.last_stockout_notified_at ?? null,
+      seuil_alerte_stock: data?.seuil_alerte_stock !== null && data?.seuil_alerte_stock !== undefined ? Number(data.seuil_alerte_stock) : null,
     });
   }
 
@@ -149,6 +157,9 @@ export interface CreateProduitDto {
   prix_vente?: number;
   prix_achat?: number;
 
+  is_critique?: boolean;
+  /** Seuil d'alerte stock par produit. null = seuil global. Entier >= 0. */
+  seuil_alerte_stock?: number | null;
   image?: File;
 }
 

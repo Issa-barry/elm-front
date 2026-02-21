@@ -1,6 +1,120 @@
 <p-confirmDialog></p-confirmDialog>
 
-<div class="card">
+<!-- Mobile: app-like list (≤768px) -->
+<div class="prestateurs-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton
+      pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goHome()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Prestataires</h1>
+      <p class="mobile-subtitle">{{ mobileFilteredPrestataires.length }} prestataire{{ mobileFilteredPrestataires.length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #statusMenu
+      [model]="mobileStatusMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton
+      pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="statusMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-icon-field>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="mobileSearchTerm"
+          (ngModelChange)="onMobileSearchChange()"
+          placeholder="Nom, email, téléphone..."
+          class="w-full"
+        />
+      </p-icon-field>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && mobileVisiblePrestataires.length; else mobileListState">
+      <article
+        class="mobile-user-card"
+        *ngFor="let prestataire of mobileVisiblePrestataires; trackBy: trackByPrestataireId"
+        (click)="goToEdit($event, prestataire.id)"
+      >
+        <div class="mobile-card-avatar" aria-hidden="true">
+          {{ getInitials(prestataire.nom_complet) }}
+        </div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ prestataire.nom_complet }}</div>
+          <div class="mobile-card-meta">{{ prestataire.email || (prestataire.phone | phoneFormat:'INT') }}</div>
+          <div class="mobile-card-footer">
+            <p-tag
+              [value]="prestataire.is_active ? 'Actif' : 'Inactif'"
+              [severity]="prestataire.is_active ? 'success' : 'danger'"
+              styleClass="mobile-status-tag"
+            />
+            <div class="mobile-card-actions">
+              <button
+                pButton
+                pRipple
+                icon="pi pi-eye"
+                class="p-button-rounded p-button-text p-button-sm"
+                [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                tooltipPosition="top"
+                (click)="goToEdit($event, prestataire.id)"
+                [disabled]="!canUpdate"
+              ></button>
+              <button
+                *ngIf="canDelete"
+                pButton
+                pRipple
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                [pTooltip]="'Supprimer'"
+                tooltipPosition="top"
+                (click)="$event.stopPropagation(); deletePrestataire($event, prestataire.id)"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !mobileFilteredPrestataires.length">Aucun prestataire.</div>
+    </ng-template>
+
+    <div class="mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
+      <button pButton label="Charger plus" icon="pi pi-angle-down" class="mobile-load-more-btn" (click)="loadMoreMobile()"></button>
+    </div>
+  </div>
+
+  <button
+    *ngIf="canCreate"
+    type="button"
+    class="mobile-fab"
+    aria-label="Nouveau prestataire"
+    (click)="navigateToCreate()"
+  >
+    <i class="pi pi-user-plus"></i>
+  </button>
+</div>
+
+<!-- Desktop: table -->
+<div class="card prestateurs-desktop">
   <p-table
     #dt
     [value]="prestataires"

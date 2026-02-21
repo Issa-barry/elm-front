@@ -114,7 +114,7 @@
 }
 
 // ─── Dark mode ───────────────────────────────────────────
-:host-context(.dark) {
+:host-context(.app-dark) {
     .role-name-input {
         color: var(--p-surface-100);
 

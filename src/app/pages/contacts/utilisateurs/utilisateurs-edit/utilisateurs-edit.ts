@@ -24,7 +24,7 @@ export class UtilisateursEdit implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
+    private router: Router, 
     private userService: UserService,
     private roleService: RoleService,
     private messageService: MessageService
@@ -57,8 +57,17 @@ export class UtilisateursEdit implements OnInit {
             code_phone_pays: user.code_phone_pays,
             ville: user.ville,
             quartier: user.quartier,
+            type: user.type,
             roles: user.role_names || user.roles,
+            role_names: user.role_names,
             is_active: user.is_active,
+            civilite: user.civilite,
+            date_naissance: user.date_naissance,
+            piece_type: user.piece_type,
+            piece_numero: user.piece_numero,
+            piece_delivree_le: user.piece_delivree_le,
+            piece_expire_le: user.piece_expire_le,
+            piece_pays: user.piece_pays,
           };
 
           // Si les rôles ne sont pas dans la réponse, les charger séparément
@@ -112,22 +121,29 @@ export class UtilisateursEdit implements OnInit {
       code_phone_pays: this.getCodePhonePays(data.code_pays || 'GN'),
       ville: data.ville,
       quartier: data.quartier,
+      type: data.type,
+      role: data.role,
+      civilite: data.civilite || null,
+      date_naissance: data.date_naissance || null,
+      piece_type: data.piece_type || null,
+      piece_numero: data.piece_numero || null,
+      piece_delivree_le: data.piece_delivree_le || null,
+      piece_expire_le: data.piece_expire_le || null,
+      piece_pays: data.piece_pays || null,
     };
 
     this.userService.updateUser(this.userId, payload).subscribe({
       next: (response) => {
         if (response.success) {
-          this.userData = {
-            ...this.userData,
-            ...response.data,
-          };
           this.messageService.add({
             severity: 'success',
             summary: 'Succès',
             detail: 'Utilisateur modifié avec succès'
           });
+          this.loadUser(this.userId!);
+        } else {
+          this.loading = false;
         }
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur lors de la modification:', error);

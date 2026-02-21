@@ -8,3 +8,13 @@
         }
     }
 }
+
+@media (max-width: 768px) {
+    .layout-profile-sidebar {
+        &.p-drawer,
+        &.p-sidebar {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    }
+}

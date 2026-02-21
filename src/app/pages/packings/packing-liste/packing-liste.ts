@@ -1,8 +1,10 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, Inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
+import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
@@ -20,6 +22,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { SkeletonModule } from 'primeng/skeleton';
+import { MenuModule } from 'primeng/menu';
 import { forkJoin } from 'rxjs';
 
 import { PackingService } from '@/services/packing/packing.service';
@@ -29,9 +32,10 @@ import { Prestataire } from '@/models/prestataire.model';
 import { ParametresService } from '@/services/parametres/parametres.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
-
+import { PackingMobileForm } from '../packing-mobile-form/packing-mobile-form';
+ 
 interface Column {
-  field: string;
+  field: string; 
   header: string;
   customExportHeader?: string;
 }
@@ -73,11 +77,13 @@ interface StatutOption {
     TextareaModule,
     TooltipModule,
     SkeletonModule,
+    MenuModule,
     PhoneFormatPipe,
+    PackingMobileForm,
   ],
   providers: [MessageService, ConfirmationService]
 })
-export class PackingListe implements OnInit {
+export class PackingListe implements OnInit, OnDestroy {
   filterFields: string[] = ['reference', 'prestataire.nom', 'prestataire.prenom', 'prestataire.phone', 'statut', 'montant'];
 
   packingDialog: boolean = false;
@@ -89,9 +95,24 @@ export class PackingListe implements OnInit {
   saving: boolean = false;
   dialogLoading: boolean = false;
 
+  // Mobile
+  mobileSearchTerm = '';
+  readonly mobilePageSize = 10;
+  mobileVisibleCount = this.mobilePageSize;
+  mobileFormVisible = false;
+  private readonly mobileBreakpoint = 768;
+  private readonly mobilePwaClass = 'packings-mobile-pwa';
+
   // Filtres
   filterDateRange: Date[] | null = null;
   filterStatut: string | null = null;
+
+  mobileStatusMenuItems: MenuItem[] = [
+    { label: 'Tous les statuts', command: () => this.applyMobileStatusFilter(null) },
+    { label: 'À valider', command: () => this.applyMobileStatusFilter('a_valider') },
+    { label: 'Validé', command: () => this.applyMobileStatusFilter('valide') },
+    { label: 'Annulé', command: () => this.applyMobileStatusFilter('annule') },
+  ];
 
   // Prix rouleau par défaut (depuis les paramètres)
   prixRouleauDefaut: number = 0;
@@ -122,7 +143,9 @@ export class PackingListe implements OnInit {
     private parametresService: ParametresService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('packings.create');
     this.canUpdate = this.authService.hasPermission('packings.update');
@@ -134,6 +157,82 @@ export class PackingListe implements OnInit {
     this.loadPrestataires();
     this.loadPrixRouleauDefaut();
     this.initColumns();
+    this.syncMobilePwaMode();
+  }
+
+  ngOnDestroy() {
+    this.document.body.classList.remove(this.mobilePwaClass);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncMobilePwaMode();
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
+
+  onMobileSearchChange() {
+    this.mobileVisibleCount = this.mobilePageSize;
+  }
+
+  get mobileFilteredPackings(): Packing[] {
+    const list = this.packings();
+    const term = this.mobileSearchTerm.trim().toLowerCase();
+    if (!term) return list;
+    return list.filter((p) => {
+      const ref = (p.reference || '').toLowerCase();
+      const nom = (p.prestataire?.nom || '').toLowerCase();
+      const prenom = (p.prestataire?.prenom || '').toLowerCase();
+      const phone = (p.prestataire?.phone || '').replace(/\s/g, '');
+      return ref.includes(term) || nom.includes(term) || prenom.includes(term) || phone.includes(term);
+    });
+  }
+
+  get mobileVisiblePackings(): Packing[] {
+    return this.mobileFilteredPackings.slice(0, this.mobileVisibleCount);
+  }
+
+  get canLoadMoreMobile(): boolean {
+    return this.mobileVisibleCount < this.mobileFilteredPackings.length;
+  }
+
+  loadMoreMobile() {
+    this.mobileVisibleCount += this.mobilePageSize;
+  }
+
+  trackByPackingId(_index: number, p: Packing): number {
+    return p.id;
+  }
+
+  getPrestataireInitials(prestataire: Prestataire): string {
+    if (!prestataire) return '?';
+    const n = (prestataire.nom || '').charAt(0).toUpperCase();
+    const p = (prestataire.prenom || '').charAt(0).toUpperCase();
+    return (n + p) || '?';
+  }
+
+  goToEditPacking(packing: Packing) {
+    this.router.navigate(['packings', 'packings-edit', packing.id]);
+  }
+
+  applyMobileStatusFilter(statut: PackingStatut | string | null) {
+    this.filterStatut = statut;
+    this.loadPackings();
+  }
+
+  get isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
+  }
+
+  private syncMobilePwaMode() {
+    if (typeof window === 'undefined') return;
+    if (window.innerWidth <= this.mobileBreakpoint) {
+      this.document.body.classList.add(this.mobilePwaClass);
+    } else {
+      this.document.body.classList.remove(this.mobilePwaClass);
+    }
   }
 
   initColumns() {
@@ -186,9 +285,8 @@ export class PackingListe implements OnInit {
           ? response.data
           : (response as any).data?.data || [];
         this.packings.set(data);
+        this.mobileVisibleCount = this.mobilePageSize;
         this.loading = false;
-        console.log(response);
-        
       },
       error: (error) => {
         this.messageService.add({
@@ -250,8 +348,13 @@ export class PackingListe implements OnInit {
   openNew() {
     this.selectedPrestataire = null;
     this.submitted = false;
-    this.packingDialog = true;
     this.dialogLoading = true;
+
+    if (this.isMobile) {
+      this.mobileFormVisible = true;
+    } else {
+      this.packingDialog = true;
+    }
 
     forkJoin({
       prixRouleauDefaut: this.parametresService.getPrixRouleauDefaut(),
@@ -288,7 +391,12 @@ export class PackingListe implements OnInit {
       date: packing.date ? new Date(packing.date) : undefined
     };
     this.selectedPrestataire = packing.prestataire || null;
-    this.packingDialog = true;
+
+    if (this.isMobile) {
+      this.mobileFormVisible = true;
+    } else {
+      this.packingDialog = true;
+    }
   }
 
   deletePacking(packing: Packing) {
@@ -347,6 +455,17 @@ export class PackingListe implements OnInit {
     this.submitted = false;
   }
 
+  closeMobileForm() {
+    this.mobileFormVisible = false;
+    this.submitted = false;
+  }
+
+  onMobileFormSave(event: { packing: Partial<Packing>; prestataire: Prestataire }) {
+    this.packing = event.packing;
+    this.selectedPrestataire = event.prestataire;
+    this.savePacking();
+  }
+
   savePacking() {
     this.submitted = true;
 
@@ -376,6 +495,7 @@ export class PackingListe implements OnInit {
             life: 3000
           });
           this.packingDialog = false;
+          this.mobileFormVisible = false;
           this.packing = {};
           this.saving = false;
           this.loadPackings();
@@ -396,6 +516,7 @@ export class PackingListe implements OnInit {
             life: 3000
           });
           this.packingDialog = false;
+          this.mobileFormVisible = false;
           this.packing = {};
           this.saving = false;
           this.loadPackings();
@@ -436,9 +557,9 @@ export class PackingListe implements OnInit {
     }).format(value) + ' GNF';
   }
 
-  formatDateDisplay(dateStr: string): string {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
+  formatDateDisplay(dateStr: string | Date): string {
+    if (dateStr == null) return '';
+    const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
     return date.toLocaleDateString('fr-FR');
   }
 

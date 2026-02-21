@@ -1,0 +1,5 @@
+/* Transition douce sur le grisage du cooldown */
+.opacity-50 {
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
