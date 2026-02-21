@@ -32,7 +32,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Build production bundle
         run: npm run build:deploy
@@ -49,79 +49,11 @@ jobs:
           path: dist/apollo-ng-deploy/
           if-no-files-found: error
 
-  deploy-dev:
-    name: Deploy Dev (branch dev)
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-
-    env:
-      HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
-      HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-      HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-
-    steps:
-      - name: Download deploy artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: apollo-ng-deploy
-          path: dist/apollo-ng-deploy/
-
-      - name: Validate required secrets
-        run: |
-          if [ -z "$HOSTINGER_FTP_SERVER" ] || [ -z "$HOSTINGER_FTP_USERNAME" ] || [ -z "$HOSTINGER_FTP_PASSWORD" ]; then
-            echo "::error::Missing one or more required secrets: HOSTINGER_FTP_SERVER, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD"
-            exit 1
-          fi
-
-      - name: Deploy dist to /public_html/dev/
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.HOSTINGER_FTP_SERVER }}
-          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-          local-dir: dist/apollo-ng-deploy/
-          server-dir: /public_html/dev/
-
   deploy-preprod:
-    name: Deploy Pre-Prod (branch pre-prod)
+    name: Deploy Pre-Prod to usine-eau.eu
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/pre-prod' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-
-    env:
-      HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
-      HOSTINGER_FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-      HOSTINGER_FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-
-    steps:
-      - name: Download deploy artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: apollo-ng-deploy
-          path: dist/apollo-ng-deploy/
-
-      - name: Validate required secrets
-        run: |
-          if [ -z "$HOSTINGER_FTP_SERVER" ] || [ -z "$HOSTINGER_FTP_USERNAME" ] || [ -z "$HOSTINGER_FTP_PASSWORD" ]; then
-            echo "::error::Missing one or more required secrets: HOSTINGER_FTP_SERVER, HOSTINGER_FTP_USERNAME, HOSTINGER_FTP_PASSWORD"
-            exit 1
-          fi
-
-      - name: Deploy dist to /public_html/pre-prod/
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.HOSTINGER_FTP_SERVER }}
-          username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
-          password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-          local-dir: dist/apollo-ng-deploy/
-          server-dir: /public_html/pre-prod/
-
-  deploy-production:
-    name: Deploy Production (branch main)
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 
     env:
       HOSTINGER_FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
