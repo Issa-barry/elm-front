@@ -1,425 +1,290 @@
-<div class="card utilisateurs-form-card">
-  <div class="flex justify-between items-center mb-6 utilisateurs-form-title">
-    <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
-      {{ formTitle }}
-    </span>
-  </div>
+<div class="min-h-full">
+  <div class="utilisateurs-form-card max-w-6xl mx-auto px-4 sm:px-8 lg:px-10 py-8 sm:py-12">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-10 lg:p-12">
+      <header class="mb-10 sm:mb-12">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{{ formTitle }}</h1>
+        <p class="mt-2 text-sm sm:text-base text-gray-600">Renseignez les informations du compte utilisateur.</p>
+      </header>
 
-  <div class="grid grid-cols-12 gap-4">
-    <div class="col-span-12 lg:col-span-2 utilisateurs-form-sidebar">
-      <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">
-        <!-- Utilisateur -->
-      </div>
-      <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal mr-4">
-        Renseignez les informations du compte utilisateur.
-      </p>
-    </div> 
+      <form class="utilisateurs-form-fields" (ngSubmit)="activeStep === lastStep ? onSubmit() : goNext()">
+        <p-stepper [(value)]="activeStep" class="w-full utilisateurs-form-stepper mb-10">
+          <p-step-list>
+            <p-step [value]="1">T&eacute;l&eacute;phone</p-step>
+            <p-step [value]="2">Type + R&ocirc;le</p-step>
+            <p-step [value]="3">Informations personnelles</p-step>
+            <p-step [value]="4">Acc&egrave;s</p-step>
+            <p-step *ngIf="hasIdentityStep" [value]="5">Pi&egrave;ce d'identit&eacute;</p-step>
+          </p-step-list>
 
-    <div class="col-span-12 lg:col-span-10">
-      <div class="grid grid-cols-12 gap-4">
+          <p-step-panels>
+            <p-step-panel [value]="1">
+              <ng-template pTemplate="content">
+                <section class="space-y-8">
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-7 py-1">
+                    <div class="utilisateurs-form-field">
+                      <label for="codePays" class="utilisateurs-form-label">Pays <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <p-select
+                        id="codePays"
+                        #codePaysModel="ngModel"
+                        [(ngModel)]="phoneCountry"
+                        name="codePays"
+                        [options]="countries"
+                        optionLabel="name"
+                        optionValue="code"
+                        [disabled]="fieldsDisabled"
+                        (onCountryChange)="onCountryChange()"
+                        fluid
+                        [attr.aria-invalid]="(submitted || codePaysModel.touched || codePaysModel.dirty) && !phoneCountry"
+                        aria-describedby="codePays-error"
+                      >
+                        <ng-template let-country pTemplate="item">
+                          <div class="flex items-center gap-2">
+                            <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
+                            <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                            <span>{{ country.name }}</span>
+                          </div>
+                        </ng-template>
+                        <ng-template let-country pTemplate="selectedItem">
+                          <div class="flex items-center gap-2" *ngIf="country">
+                            <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
+                            <span class="font-semibold text-primary">{{ country.dialCode }}</span>
+                            <span>{{ country.name }}</span>
+                          </div>
+                        </ng-template>
+                      </p-select>
+                      <small id="codePays-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || codePaysModel.touched || codePaysModel.dirty) && !phoneCountry && isEditing">Pays obligatoire.</small>
+                    </div>
 
-        <!-- Type de compte — sélectionné en premier, pilote le rôle -->
-        <div class="mb-6 col-span-12 md:col-span-12">
-          <label for="type" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Type de compte <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <p-select
-            id="type"
-            [(ngModel)]="model.type"
-            [options]="userTypeOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner un type"
-            [disabled]="fieldsDisabled"
-            [invalid]="submitted && !model.type"
-            (onChange)="onTypeChange()"
-            fluid
-          ></p-select>
-          <small class="text-red-500" *ngIf="submitted && !model.type && isEditing">
-            Type de compte obligatoire.
-          </small>
-        </div>
-
-        <!-- Rôle — affiché uniquement pour le type "staff" -->
-        <div class="mb-6 col-span-12 md:col-span-12" *ngIf="isRoleSelectable">
-          <label for="role" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Rôle <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <p-select
-            id="role"
-            [(ngModel)]="model.role"
-            [options]="filteredRoles"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner un rôle"
-            [disabled]="fieldsDisabled"
-            [invalid]="submitted && !model.role"
-            fluid
-          ></p-select>
-          <small class="text-red-500" *ngIf="submitted && !model.role && isEditing">
-            Rôle obligatoire.
-          </small>
-        </div>
-
-        <!-- Email -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="email" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            pInputText
-            fluid
-            [(ngModel)]="model.email"
-            [disabled]="fieldsDisabled"
-            placeholder="exemple@email.com"
-          />
-        </div>
-
-        <!-- Date de naissance (prend l'espace restant sur la ligne) -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="date_naissance" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Date de naissance
-          </label>
-          <p-datepicker
-            id="date_naissance"
-            [(ngModel)]="dateNaissanceObj"
-            [showIcon]="true"
-            dateFormat="dd/mm/yy"
-            placeholder="jj/mm/aaaa"
-            [disabled]="fieldsDisabled"
-            [maxDate]="today"
-            fluid
-          />
-        </div>
-
-        <!-- Nom -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="nom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Nom <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <input
-            id="nom"
-            type="text"
-            pInputText
-            fluid
-            [(ngModel)]="model.nom"
-            [invalid]="submitted && !model.nom?.trim()"
-            [disabled]="fieldsDisabled"
-          />
-          <small class="text-red-500" *ngIf="submitted && !model.nom?.trim() && isEditing">
-            Nom obligatoire.
-          </small>
-        </div>
-
-        <!-- Prénom -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Prénom <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <input
-            id="prenom"
-            type="text"
-            pInputText
-            fluid
-            [(ngModel)]="model.prenom"
-            [invalid]="submitted && !model.prenom?.trim()"
-            [disabled]="fieldsDisabled"
-          />
-          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
-            Prénom obligatoire.
-          </small>
-        </div>
-
-        <!-- Téléphone avec sélecteur de pays (même grille que prestataire) -->
-        <div class="mb-6 col-span-12">
-          <div class="grid grid-cols-12 gap-3">
-            <div class="col-span-12 md:col-span-4">
-              <label for="codePays" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
-                Pays <span class="text-red-500" *ngIf="isEditing">*</span>
-              </label>
-              <p-select
-                id="codePays"
-                [(ngModel)]="phoneCountry"
-                [options]="countries"
-                optionLabel="name"
-                optionValue="code"
-                placeholder="Sélectionner un pays"
-                [disabled]="fieldsDisabled"
-                (onCountryChange)="onCountryChange()"
-                fluid
-              >
-                <ng-template let-country pTemplate="item">
-                  <div class="flex items-center gap-2">
-                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
-                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
-                    <span>{{ country.name }}</span>
+                    <div class="utilisateurs-form-field">
+                      <label for="phone" class="utilisateurs-form-label">T&eacute;l&eacute;phone <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <input
+                        id="phone"
+                        #phoneModel="ngModel"
+                        name="phone"
+                        type="tel"
+                        pInputText
+                        fluid
+                        [(ngModel)]="model.phone"
+                        [invalid]="(submitted || phoneModel.touched || phoneModel.dirty || phoneError) && (!model.phone?.trim() || !!phoneError)"
+                        [disabled]="fieldsDisabled"
+                        (input)="onPhoneInput()"
+                        (blur)="onPhoneBlur()"
+                        placeholder="Exemple: 622 00 00 00"
+                        [attr.aria-invalid]="(submitted || phoneModel.touched || phoneModel.dirty) && (!model.phone?.trim() || !!phoneError)"
+                        [attr.aria-describedby]="phoneError || !model.phone?.trim() ? 'phone-error' : null"
+                        class="w-full"
+                      />
+                      <small id="phone-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || phoneModel.touched || phoneModel.dirty) && !model.phone?.trim() && isEditing">T&eacute;l&eacute;phone obligatoire.</small>
+                      <small class="utilisateurs-form-error" role="alert" *ngIf="(submitted || phoneModel.touched || phoneModel.dirty) && phoneError && model.phone?.trim() && isEditing">{{ phoneError }}</small>
+                    </div>
                   </div>
-                </ng-template>
-                <ng-template let-country pTemplate="selectedItem">
-                  <div class="flex items-center gap-2" *ngIf="country">
-                    <img [src]="country.flag" [alt]="country.name" class="w-5 h-auto rounded-sm" />
-                    <span class="font-semibold text-primary">{{ country.dialCode }}</span>
-                    <span>{{ country.name }}</span>
-                  </div>
-                </ng-template>
-              </p-select>
-            </div>
-            <div class="col-span-12 md:col-span-8">
-              <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
-                Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
-              </label>
-              <input
-                id="phone"
-                type="tel"
-                pInputText
-                fluid
-                [(ngModel)]="model.phone"
-                [invalid]="(submitted || phoneError) && (!model.phone?.trim() || !!phoneError)"
-                [disabled]="fieldsDisabled"
-                (input)="onPhoneInput()"
-                (blur)="onPhoneBlur()"
-                placeholder="Exemple: 622 00 00 00"
-              />
-            </div>
-          </div>
-          <small class="text-red-500 block mt-2" *ngIf="submitted && !model.phone?.trim() && isEditing">
-            Téléphone obligatoire.
-          </small>
-          <small class="text-red-500 block mt-2" *ngIf="phoneError && model.phone?.trim() && isEditing">
-            {{ phoneError }}
-          </small>
-        </div>
+                </section>
 
-        <!-- Ville -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="ville" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Ville <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <input
-            id="ville"
-            type="text"
-            pInputText
-            fluid
-            [(ngModel)]="model.ville"
-            [invalid]="submitted && !model.ville?.trim()"
-            [disabled]="fieldsDisabled"
-          />
-          <small class="text-red-500" *ngIf="submitted && !model.ville?.trim() && isEditing">
-            Ville obligatoire.
-          </small>
-        </div>
-
-        <!-- Quartier -->
-        <div class="mb-6 col-span-12 md:col-span-6">
-          <label for="quartier" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Quartier <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <input
-            id="quartier"
-            type="text"
-            pInputText
-            fluid
-            [(ngModel)]="model.quartier"
-            [invalid]="submitted && !model.quartier?.trim()"
-            [disabled]="fieldsDisabled"
-          />
-          <small class="text-red-500" *ngIf="submitted && !model.quartier?.trim() && isEditing">
-            Quartier obligatoire.
-          </small>
-        </div>
-
-        <!-- Mot de passe (uniquement en création) -->
-        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="mode === 'create'">
-          <label for="password" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Mot de passe <span class="text-red-500">*</span>
-          </label>
-          <p-password
-            id="password"
-            [(ngModel)]="model.password"
-            [toggleMask]="true"
-            [feedback]="true"
-            [invalid]="submitted && !!passwordError"
-            [disabled]="fieldsDisabled"
-            fluid
-            placeholder="Min. 8 caractères, majuscules, minuscules et chiffres"
-            promptLabel="Entrez un mot de passe"
-            weakLabel="Faible"
-            mediumLabel="Moyen"
-            strongLabel="Fort"
-          ></p-password>
-          <small class="text-red-500" *ngIf="submitted && passwordError && isEditing">
-            {{ passwordError }}
-          </small>
-        </div>
-
-        <!-- Pièce d'identité (optionnel → obligatoire si type sélectionné) -->
-        <div class="col-span-12 mb-2">
-          <p-accordion>
-            <p-accordion-panel value="piece">
-              <p-accordion-header>
-                <span class="flex items-center gap-2 font-medium text-surface-700 dark:text-surface-200">
-                  <i class="pi pi-id-card text-sm"></i>
-                  Pièce d'identité
-                  <span
-                    *ngIf="isKycActive"
-                    class="text-xs font-semibold px-1.5 py-0.5 rounded"
-                    style="background: #fff7ed; color: #c2410c;">
-                    Obligatoire
-                  </span>
-                  <span *ngIf="!isKycActive" class="text-xs font-normal text-surface-400">(optionnel)</span>
-                </span>
-              </p-accordion-header>
-              <p-accordion-content>
-                <div class="grid grid-cols-12 gap-4 pt-2">
-
-                  <!-- Type de pièce -->
-                  <div class="mb-4 col-span-12 md:col-span-6">
-                    <label for="piece_type" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Type de pièce
-                    </label>
-                    <p-select
-                      id="piece_type"
-                      [(ngModel)]="model.piece_type"
-                      [options]="pieceTypeOptions"
-                      optionLabel="label"
-                      optionValue="value"
-                      placeholder="Sélectionner un type"
-                      [disabled]="fieldsDisabled"
-                      [showClear]="true"
-                      (onChange)="onPieceTypeChange()"
-                      fluid
-                    ></p-select>
-                    <small class="text-surface-500 dark:text-surface-400 block mt-1" *ngIf="isKycActive">
-                      Tous les champs ci-dessous sont requis.
-                    </small>
-                  </div>
-
-                  <!-- Numéro de pièce -->
-                  <div class="mb-4 col-span-12 md:col-span-6">
-                    <label for="piece_numero" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Numéro de pièce <span class="text-red-500" *ngIf="isKycActive">*</span>
-                    </label>
-                    <input
-                      id="piece_numero"
-                      type="text"
-                      pInputText
-                      fluid
-                      [(ngModel)]="model.piece_numero"
-                      [disabled]="fieldsDisabled"
-                      placeholder="Ex: GN-123456789"
-                      [invalid]="!!kycErrors['piece_numero']"
-                      (ngModelChange)="onKycFieldChange()"
-                    />
-                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_numero']">
-                      {{ kycErrors['piece_numero'] }}
-                    </small>
-                  </div>
-
-                  <!-- Pays de délivrance -->
-                  <div class="mb-4 col-span-12 md:col-span-4">
-                    <label for="piece_pays" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Pays de délivrance <span class="text-red-500" *ngIf="isKycActive">*</span>
-                    </label>
-                    <p-select
-                      id="piece_pays"
-                      [(ngModel)]="model.piece_pays"
-                      [options]="countries"
-                      optionLabel="name"
-                      optionValue="code"
-                      placeholder="Sélectionner un pays"
-                      [disabled]="fieldsDisabled"
-                      [showClear]="true"
-                      [invalid]="!!kycErrors['piece_pays']"
-                      (onChange)="onKycFieldChange()"
-                      fluid
-                    ></p-select>
-                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_pays']">
-                      {{ kycErrors['piece_pays'] }}
-                    </small>
-                  </div>
-
-                  <!-- Date de délivrance -->
-                  <div class="mb-4 col-span-12 md:col-span-4">
-                    <label for="piece_delivree_le" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Délivrée le <span class="text-red-500" *ngIf="isKycActive">*</span>
-                    </label>
-                    <input
-                      id="piece_delivree_le"
-                      type="date"
-                      pInputText
-                      fluid
-                      [(ngModel)]="model.piece_delivree_le"
-                      [disabled]="fieldsDisabled"
-                      [invalid]="!!kycErrors['piece_delivree_le']"
-                      (change)="onKycFieldChange()"
-                    />
-                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_delivree_le']">
-                      {{ kycErrors['piece_delivree_le'] }}
-                    </small>
-                  </div>
-
-                  <!-- Date d'expiration -->
-                  <div class="mb-4 col-span-12 md:col-span-4">
-                    <label for="piece_expire_le" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-                      Expire le <span class="text-red-500" *ngIf="isKycActive">*</span>
-                    </label>
-                    <input
-                      id="piece_expire_le"
-                      type="date"
-                      pInputText
-                      fluid
-                      [(ngModel)]="model.piece_expire_le"
-                      [disabled]="fieldsDisabled"
-                      [invalid]="!!kycErrors['piece_expire_le'] || !!kycErrors['dates']"
-                      (change)="onKycFieldChange()"
-                    />
-                    <small class="text-red-500 block mt-1" *ngIf="kycErrors['piece_expire_le']">
-                      {{ kycErrors['piece_expire_le'] }}
-                    </small>
-                  </div>
-
-                  <!-- Erreur croisée dates -->
-                  <div class="col-span-12 -mt-2" *ngIf="kycErrors['dates']">
-                    <small class="text-red-500 flex items-center gap-1">
-                      <i class="pi pi-exclamation-triangle text-xs"></i>
-                      {{ kycErrors['dates'] }}
-                    </small>
-                  </div>
-
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-end gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                  <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
+                  <button type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [disabled]="!isStep1Valid() || formDisabled" class="utilisateurs-form-next"></button>
                 </div>
-              </p-accordion-content>
-            </p-accordion-panel>
-          </p-accordion>
-        </div>
+              </ng-template>
+            </p-step-panel>
 
-        <!-- Boutons (même structure que formulaire prestataire) -->
-        <div class="col-span-12 utilisateurs-form-actions" *ngIf="isEditing">
-          <div class="flex flex-wrap items-center gap-3">
-            <button
-              pButton
-              pRipple
-              [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'"
-              icon="pi pi-check"
-              (click)="onSubmit()"
-              [loading]="loading"
-              [disabled]="!isValid() || loading || formDisabled"
-              class="utilisateurs-form-submit"
-            ></button>
-            <button
-              pButton
-              pRipple
-              label="Annuler"
-              icon="pi pi-times"
-              severity="secondary"
-              (click)="onCancel()"
-              [disabled]="loading"
-              class="utilisateurs-form-cancel"
-            ></button>
-          </div>
-        </div>
-      </div>
+            <p-step-panel [value]="2">
+              <ng-template pTemplate="content">
+                <section class="space-y-8">
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-7 py-1">
+                    <div class="utilisateurs-form-field">
+                      <label for="type" class="utilisateurs-form-label">Type de compte <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <p-select
+                        id="type"
+                        #typeModel="ngModel"
+                        [(ngModel)]="model.type"
+                        name="type"
+                        [options]="userTypeOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        [disabled]="fieldsDisabled"
+                        [invalid]="(submitted || typeModel.touched || typeModel.dirty) && !model.type"
+                        (onChange)="onTypeChange()"
+                        fluid
+                        [attr.aria-invalid]="(submitted || typeModel.touched || typeModel.dirty) && !model.type"
+                        aria-describedby="type-error"
+                      ></p-select>
+                      <small id="type-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || typeModel.touched || typeModel.dirty) && !model.type && isEditing">Type de compte obligatoire.</small>
+                    </div>
+
+                    <div class="utilisateurs-form-field" *ngIf="isRoleSelectable">
+                      <label for="role" class="utilisateurs-form-label">R&ocirc;le <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <p-select
+                        id="role"
+                        #roleModel="ngModel"
+                        [(ngModel)]="model.role"
+                        name="role"
+                        [options]="filteredRoles"
+                        optionLabel="label"
+                        optionValue="value"
+                        [disabled]="fieldsDisabled"
+                        [invalid]="(submitted || roleModel.touched || roleModel.dirty) && !model.role"
+                        fluid
+                        [attr.aria-invalid]="(submitted || roleModel.touched || roleModel.dirty) && !model.role"
+                        aria-describedby="role-error"
+                      ></p-select>
+                      <small id="role-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || roleModel.touched || roleModel.dirty) && !model.role && isEditing">R&ocirc;le obligatoire.</small>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                  <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
+                    <button type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [disabled]="!isStep2Valid() || formDisabled" class="utilisateurs-form-next"></button>
+                  </div>
+                </div>
+              </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="3">
+              <ng-template pTemplate="content">
+                <section class="space-y-8">
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-7 py-1">
+                    <div class="utilisateurs-form-field">
+                      <label for="nom" class="utilisateurs-form-label">Nom <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <input id="nom" #nomModel="ngModel" name="nom" type="text" pInputText fluid [(ngModel)]="model.nom" [invalid]="(submitted || nomModel.touched || nomModel.dirty) && !model.nom?.trim()" [disabled]="fieldsDisabled" [attr.aria-invalid]="(submitted || nomModel.touched || nomModel.dirty) && !model.nom?.trim()" aria-describedby="nom-error" class="w-full" />
+                      <small id="nom-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || nomModel.touched || nomModel.dirty) && !model.nom?.trim() && isEditing">Nom obligatoire.</small>
+                    </div>
+                    <div class="utilisateurs-form-field">
+                      <label for="prenom" class="utilisateurs-form-label">Pr&eacute;nom <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <input id="prenom" #prenomModel="ngModel" name="prenom" type="text" pInputText fluid [(ngModel)]="model.prenom" [invalid]="(submitted || prenomModel.touched || prenomModel.dirty) && !model.prenom?.trim()" [disabled]="fieldsDisabled" [attr.aria-invalid]="(submitted || prenomModel.touched || prenomModel.dirty) && !model.prenom?.trim()" aria-describedby="prenom-error" class="w-full" />
+                      <small id="prenom-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || prenomModel.touched || prenomModel.dirty) && !model.prenom?.trim() && isEditing">Pr&eacute;nom obligatoire.</small>
+                    </div>
+                    <div class="utilisateurs-form-field">
+                      <label for="ville" class="utilisateurs-form-label">Ville <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <input id="ville" #villeModel="ngModel" name="ville" type="text" pInputText fluid [(ngModel)]="model.ville" [invalid]="(submitted || villeModel.touched || villeModel.dirty) && !model.ville?.trim()" [disabled]="fieldsDisabled" [attr.aria-invalid]="(submitted || villeModel.touched || villeModel.dirty) && !model.ville?.trim()" aria-describedby="ville-error" class="w-full" />
+                      <small id="ville-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || villeModel.touched || villeModel.dirty) && !model.ville?.trim() && isEditing">Ville obligatoire.</small>
+                    </div>
+                    <div class="utilisateurs-form-field">
+                      <label for="quartier" class="utilisateurs-form-label">Quartier <span class="text-red-500" *ngIf="isEditing" aria-hidden="true">*</span></label>
+                      <input id="quartier" #quartierModel="ngModel" name="quartier" type="text" pInputText fluid [(ngModel)]="model.quartier" [invalid]="(submitted || quartierModel.touched || quartierModel.dirty) && !model.quartier?.trim()" [disabled]="fieldsDisabled" [attr.aria-invalid]="(submitted || quartierModel.touched || quartierModel.dirty) && !model.quartier?.trim()" aria-describedby="quartier-error" class="w-full" />
+                      <small id="quartier-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || quartierModel.touched || quartierModel.dirty) && !model.quartier?.trim() && isEditing">Quartier obligatoire.</small>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                  <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
+                    <button type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [disabled]="!isStep3Valid() || formDisabled" class="utilisateurs-form-next"></button>
+                  </div>
+                </div>
+              </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="4">
+              <ng-template pTemplate="content">
+                <section class="space-y-8">
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-7 py-1">
+                    <div class="utilisateurs-form-field">
+                      <label for="email" class="utilisateurs-form-label">Email</label>
+                      <input id="email" name="email" type="email" pInputText fluid [(ngModel)]="model.email" [disabled]="fieldsDisabled" placeholder="exemple@email.com" class="w-full" />
+                    </div>
+
+                    <div class="utilisateurs-form-field xl:col-span-2" *ngIf="mode === 'create'">
+                      <label for="password" class="utilisateurs-form-label">Mot de passe <span class="text-red-500" aria-hidden="true">*</span></label>
+                      <p-password
+                        id="password"
+                        #passwordModel="ngModel"
+                        [(ngModel)]="model.password"
+                        name="password"
+                        [toggleMask]="true"
+                        [feedback]="true"
+                        [invalid]="(submitted || passwordModel.touched || passwordModel.dirty) && !!passwordError"
+                        [disabled]="fieldsDisabled"
+                        fluid
+                        placeholder="Min. 8 caracteres, majuscules, minuscules et chiffres"
+                        promptLabel="Entrez un mot de passe"
+                        weakLabel="Faible"
+                        mediumLabel="Moyen"
+                        strongLabel="Fort"
+                        [attr.aria-invalid]="(submitted || passwordModel.touched || passwordModel.dirty) && !!passwordError"
+                        aria-describedby="password-error"
+                      ></p-password>
+                      <small id="password-error" class="utilisateurs-form-error" role="alert" *ngIf="(submitted || passwordModel.touched || passwordModel.dirty) && passwordError && isEditing">{{ passwordError }}</small>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                  <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
+                    <button *ngIf="hasIdentityStep" type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [disabled]="!isStep4Valid() || formDisabled" class="utilisateurs-form-next"></button>
+                    <button *ngIf="!hasIdentityStep" type="submit" pButton pRipple [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'" icon="pi pi-check" [loading]="loading" [disabled]="!isValid() || loading || formDisabled" class="utilisateurs-form-submit" aria-busy="loading"></button>
+                  </div>
+                </div>
+              </ng-template>
+            </p-step-panel>
+
+            <p-step-panel *ngIf="hasIdentityStep" [value]="5">
+              <ng-template pTemplate="content">
+                <section class="space-y-6">
+                  <p class="text-sm text-gray-500">Ces informations peuvent etre ajoutees plus tard.</p>
+                  <div class="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-7 py-1">
+                    <div class="utilisateurs-form-field">
+                      <label for="date_naissance" class="utilisateurs-form-label">Date de naissance</label>
+                      <p-datepicker id="date_naissance" [(ngModel)]="dateNaissanceObj" name="date_naissance" [showIcon]="true" dateFormat="dd/mm/yy" placeholder="jj/mm/aaaa" [disabled]="fieldsDisabled" [maxDate]="today" fluid></p-datepicker>
+                    </div>
+
+                    <div class="utilisateurs-form-field">
+                      <label for="piece_type" class="utilisateurs-form-label">Type de piece</label>
+                      <p-select id="piece_type" [(ngModel)]="model.piece_type" name="piece_type" [options]="pieceTypeOptions" optionLabel="label" optionValue="value" [disabled]="fieldsDisabled" [showClear]="true" (onChange)="onPieceTypeChange()" fluid></p-select>
+                      <small class="text-gray-500 block mt-1.5 text-sm" *ngIf="isKycActive">Tous les champs ci-dessous sont requis.</small>
+                    </div>
+
+                    <div class="utilisateurs-form-field">
+                      <label for="piece_numero" class="utilisateurs-form-label">Numero de piece <span class="text-red-500" *ngIf="isKycActive" aria-hidden="true">*</span></label>
+                      <input id="piece_numero" name="piece_numero" type="text" pInputText fluid [(ngModel)]="model.piece_numero" [disabled]="fieldsDisabled" placeholder="Ex: GN-123456789" [invalid]="!!kycErrors['piece_numero']" (ngModelChange)="onKycFieldChange()" [attr.aria-invalid]="!!kycErrors['piece_numero']" [attr.aria-describedby]="kycErrors['piece_numero'] ? 'piece_numero-error' : null" class="w-full" />
+                      <small id="piece_numero-error" class="utilisateurs-form-error" role="alert" *ngIf="kycErrors['piece_numero']">{{ kycErrors['piece_numero'] }}</small>
+                    </div>
+
+                    <div class="utilisateurs-form-field">
+                      <label for="piece_pays" class="utilisateurs-form-label">Pays de delivrance <span class="text-red-500" *ngIf="isKycActive" aria-hidden="true">*</span></label>
+                      <p-select id="piece_pays" [(ngModel)]="model.piece_pays" name="piece_pays" [options]="countries" optionLabel="name" optionValue="code" [disabled]="fieldsDisabled" [showClear]="true" [invalid]="!!kycErrors['piece_pays']" (onChange)="onKycFieldChange()" fluid [attr.aria-invalid]="!!kycErrors['piece_pays']" aria-describedby="piece_pays-error"></p-select>
+                      <small id="piece_pays-error" class="utilisateurs-form-error" role="alert" *ngIf="kycErrors['piece_pays']">{{ kycErrors['piece_pays'] }}</small>
+                    </div>
+
+                    <div class="utilisateurs-form-field">
+                      <label for="piece_delivree_le" class="utilisateurs-form-label">Delivree le <span class="text-red-500" *ngIf="isKycActive" aria-hidden="true">*</span></label>
+                      <input id="piece_delivree_le" name="piece_delivree_le" type="date" pInputText fluid [(ngModel)]="model.piece_delivree_le" [disabled]="fieldsDisabled" [invalid]="!!kycErrors['piece_delivree_le']" (change)="onKycFieldChange()" [attr.aria-invalid]="!!kycErrors['piece_delivree_le']" aria-describedby="piece_delivree_le-error" class="w-full" />
+                      <small id="piece_delivree_le-error" class="utilisateurs-form-error" role="alert" *ngIf="kycErrors['piece_delivree_le']">{{ kycErrors['piece_delivree_le'] }}</small>
+                    </div>
+
+                    <div class="utilisateurs-form-field">
+                      <label for="piece_expire_le" class="utilisateurs-form-label">Expire le <span class="text-red-500" *ngIf="isKycActive" aria-hidden="true">*</span></label>
+                      <input id="piece_expire_le" name="piece_expire_le" type="date" pInputText fluid [(ngModel)]="model.piece_expire_le" [disabled]="fieldsDisabled" [invalid]="!!kycErrors['piece_expire_le'] || !!kycErrors['dates']" (change)="onKycFieldChange()" [attr.aria-invalid]="!!kycErrors['piece_expire_le'] || !!kycErrors['dates']" aria-describedby="piece_expire_le-error" class="w-full" />
+                      <small id="piece_expire_le-error" class="utilisateurs-form-error" role="alert" *ngIf="kycErrors['piece_expire_le']">{{ kycErrors['piece_expire_le'] }}</small>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="mb-4" *ngIf="kycErrors['dates']">
+                  <small class="utilisateurs-form-error flex items-center gap-1.5" role="alert">
+                    <i class="pi pi-exclamation-triangle text-xs" aria-hidden="true"></i>
+                    {{ kycErrors['dates'] }}
+                  </small>
+                </div>
+
+                <div class="utilisateurs-form-actions flex flex-wrap items-center justify-between gap-3 pt-8 mt-8 border-t border-gray-200" *ngIf="isEditing">
+                  <button type="button" pButton pRipple label="Pr&eacute;c&eacute;dent" icon="pi pi-arrow-left" severity="secondary" (click)="goPrev()" [disabled]="loading" class="utilisateurs-form-prev"></button>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
+                    <button type="submit" pButton pRipple [label]="mode === 'create' ? 'Enregistrer' : 'Sauvegarder'" icon="pi pi-check" [loading]="loading" [disabled]="!isValid() || loading || formDisabled" class="utilisateurs-form-submit" aria-busy="loading"></button>
+                  </div>
+                </div>
+              </ng-template>
+            </p-step-panel>
+          </p-step-panels>
+        </p-stepper>
+      </form>
     </div>
   </div>
 </div>
