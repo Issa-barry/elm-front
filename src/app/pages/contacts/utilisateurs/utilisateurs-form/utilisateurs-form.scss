@@ -82,6 +82,12 @@
 
     .p-step-panels {
       padding-top: 0.25rem;
+      overflow: visible;
+    }
+
+    .p-step-panel,
+    .p-step-content {
+      overflow: visible;
     }
   }
 }

@@ -33,6 +33,7 @@
                         optionValue="code"
                         [disabled]="fieldsDisabled"
                         (onCountryChange)="onCountryChange()"
+                        [appendTo]="'body'"
                         fluid
                         [attr.aria-invalid]="(submitted || codePaysModel.touched || codePaysModel.dirty) && !phoneCountry"
                         aria-describedby="codePays-error"
@@ -104,6 +105,7 @@
                         [disabled]="fieldsDisabled"
                         [invalid]="(submitted || typeModel.touched || typeModel.dirty) && !model.type"
                         (onChange)="onTypeChange()"
+                        [appendTo]="'body'"
                         fluid
                         [attr.aria-invalid]="(submitted || typeModel.touched || typeModel.dirty) && !model.type"
                         aria-describedby="type-error"
@@ -121,6 +123,7 @@
                         [options]="filteredRoles"
                         optionLabel="label"
                         optionValue="value"
+                        [appendTo]="'body'"
                         [disabled]="fieldsDisabled"
                         [invalid]="(submitted || roleModel.touched || roleModel.dirty) && !model.role"
                         fluid
@@ -236,7 +239,7 @@
 
                     <div class="utilisateurs-form-field">
                       <label for="piece_type" class="utilisateurs-form-label">Type de piece</label>
-                      <p-select id="piece_type" [(ngModel)]="model.piece_type" name="piece_type" [options]="pieceTypeOptions" optionLabel="label" optionValue="value" [disabled]="fieldsDisabled" [showClear]="true" (onChange)="onPieceTypeChange()" fluid></p-select>
+                      <p-select id="piece_type" [(ngModel)]="model.piece_type" name="piece_type" [options]="pieceTypeOptions" optionLabel="label" optionValue="value" [appendTo]="'body'" [disabled]="fieldsDisabled" [showClear]="true" (onChange)="onPieceTypeChange()" fluid></p-select>
                       <small class="text-gray-500 block mt-1.5 text-sm" *ngIf="isKycActive">Tous les champs ci-dessous sont requis.</small>
                     </div>
 
@@ -248,7 +251,7 @@
 
                     <div class="utilisateurs-form-field">
                       <label for="piece_pays" class="utilisateurs-form-label">Pays de delivrance <span class="text-red-500" *ngIf="isKycActive" aria-hidden="true">*</span></label>
-                      <p-select id="piece_pays" [(ngModel)]="model.piece_pays" name="piece_pays" [options]="countries" optionLabel="name" optionValue="code" [disabled]="fieldsDisabled" [showClear]="true" [invalid]="!!kycErrors['piece_pays']" (onChange)="onKycFieldChange()" fluid [attr.aria-invalid]="!!kycErrors['piece_pays']" aria-describedby="piece_pays-error"></p-select>
+                      <p-select id="piece_pays" [(ngModel)]="model.piece_pays" name="piece_pays" [options]="countries" optionLabel="name" optionValue="code" [appendTo]="'body'" [disabled]="fieldsDisabled" [showClear]="true" [invalid]="!!kycErrors['piece_pays']" (onChange)="onKycFieldChange()" fluid [attr.aria-invalid]="!!kycErrors['piece_pays']" aria-describedby="piece_pays-error"></p-select>
                       <small id="piece_pays-error" class="utilisateurs-form-error" role="alert" *ngIf="kycErrors['piece_pays']">{{ kycErrors['piece_pays'] }}</small>
                     </div>
 
