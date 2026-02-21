@@ -77,8 +77,12 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return this.mode !== 'create';
   }
 
+  get summaryStep(): number {
+    return this.hasIdentityStep ? 6 : 5;
+  }
+
   get lastStep(): number {
-    return this.hasIdentityStep ? 5 : 4;
+    return this.summaryStep;
   }
 
   /** Date de naissance sous forme de Date pour le p-datepicker */
@@ -412,6 +416,47 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return country ? country.dialCode : '';
   }
 
+  displayValue(value?: string | null): string {
+    const normalized = value?.trim();
+    return normalized ? normalized : '-';
+  }
+
+  get selectedTypeLabel(): string {
+    if (!this.model.type) return '-';
+    const option = this.userTypeOptions.find(o => o.value === this.model.type);
+    return option ? option.label : this.model.type;
+  }
+
+  get selectedRoleLabel(): string {
+    if (!this.model.role) return '-';
+    const option = this.availableRoles.find(r => r.value === this.model.role);
+    if (option) return option.label;
+    return this.model.role.charAt(0).toUpperCase() + this.model.role.slice(1).replace(/_/g, ' ');
+  }
+
+  get selectedPieceTypeLabel(): string {
+    if (!this.model.piece_type) return '-';
+    const option = this.pieceTypeOptions.find(o => o.value === this.model.piece_type);
+    return option ? option.label : this.model.piece_type;
+  }
+
+  get passwordSummary(): string {
+    const hasPassword = !!this.model.password?.trim();
+    if (this.mode === 'create') return hasPassword ? 'Defini' : '-';
+    return hasPassword ? 'Mis a jour' : 'Non modifie';
+  }
+
+  formatDateForDisplay(value?: string | null): string {
+    if (!value) return '-';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-FR');
+  }
+
+  formatDateObjectForDisplay(value: Date | null): string {
+    if (!value) return '-';
+    return value.toLocaleDateString('fr-FR');
+  }
+
   onCountryChange() {
     if (this.model.phone) {
       this.validatePhone();
@@ -500,8 +545,14 @@ export class UtilisateursForm implements OnInit, OnChanges {
       return;
     }
 
-    if (this.activeStep === 4 && this.isStep4Valid() && this.hasIdentityStep) {
-      this.activeStep = 5;
+    if (this.activeStep === 4 && this.isStep4Valid()) {
+      this.activeStep = this.hasIdentityStep ? 5 : this.summaryStep;
+      this.submitted = false;
+      return;
+    }
+
+    if (this.hasIdentityStep && this.activeStep === 5 && this.isStep5Valid()) {
+      this.activeStep = this.summaryStep;
       this.submitted = false;
     }
   }
@@ -526,11 +577,34 @@ export class UtilisateursForm implements OnInit, OnChanges {
     this.initializeModel();
   }
 
+  private goToFirstInvalidStep(): void {
+    if (!this.isStep1Valid()) {
+      this.activeStep = 1;
+      return;
+    }
+    if (!this.isStep2Valid()) {
+      this.activeStep = 2;
+      return;
+    }
+    if (!this.isStep3Valid()) {
+      this.activeStep = 3;
+      return;
+    }
+    if (!this.isStep4Valid()) {
+      this.activeStep = 4;
+      return;
+    }
+    if (this.hasIdentityStep && !this.checkKyc()) {
+      this.activeStep = 5;
+    }
+  }
+
   onSubmit() {
     this.submitted = true;
     this.setKycErrors();      // dÃ©clenche l'affichage des erreurs KYC
 
     if (!this.isValid()) {
+      this.goToFirstInvalidStep();
       return;
     }
 
