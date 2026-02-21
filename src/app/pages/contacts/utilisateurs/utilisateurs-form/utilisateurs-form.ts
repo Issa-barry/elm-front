@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
 import { AccordionModule } from 'primeng/accordion';
 import { DatePicker } from 'primeng/datepicker';
+import { StepperModule } from 'primeng/stepper';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 import { User, UserType, PieceType, PIECE_TYPE_LABELS, Civilite, CIVILITE_LABELS } from '@/models/user.model';
 import { COUNTRIES } from '@/models/country.model';
@@ -29,8 +30,8 @@ export interface UserFormData {
   role?: string;
   reference?: string;
   civilite?: Civilite | null;
-  date_naissance?: string | null;   // format YYYY-MM-DD envoyé au backend
-  // Pièce d'identité (optionnel, mais tous requis si piece_type est renseigné)
+  date_naissance?: string | null;   // format YYYY-MM-DD envoyÃ© au backend
+  // PiÃ¨ce d'identitÃ© (optionnel, mais tous requis si piece_type est renseignÃ©)
   piece_type?: PieceType;
   piece_numero?: string;
   piece_delivree_le?: string;
@@ -53,12 +54,15 @@ export interface UserFormData {
     PasswordModule,
     AccordionModule,
     DatePicker,
+    StepperModule,
   ],
 })
 export class UtilisateursForm implements OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialData: Partial<User> | null = null;
   @Input() loading = false;
+  /** Quand true, dÃ©sactive tous les champs et le bouton Enregistrer (ex. contexte Â« Toutes les usines Â»). */
+  @Input() formDisabled = false;
 
   @Output() submitForm = new EventEmitter<UserFormData>();
   @Output() cancel = new EventEmitter<void>();
@@ -66,6 +70,20 @@ export class UtilisateursForm implements OnInit, OnChanges {
   submitted = false;
   isEditing = false;
   model: UserFormData = {};
+  /** Ã‰tape courante du stepper (1 = TÃ©lÃ©phone, 2 = Type+RÃ´le, 3 = Infos perso, 4 = AccÃ¨s, 5 = PiÃ¨ce). */
+  activeStep = 1;
+
+  get hasIdentityStep(): boolean {
+    return this.mode !== 'create';
+  }
+
+  get summaryStep(): number {
+    return this.hasIdentityStep ? 6 : 5;
+  }
+
+  get lastStep(): number {
+    return this.summaryStep;
+  }
 
   /** Date de naissance sous forme de Date pour le p-datepicker */
   dateNaissanceObj: Date | null = null;
@@ -73,7 +91,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
   /** Date max pour le datepicker (aujourd'hui) */
   readonly today = new Date();
 
-  // Types de compte
+  // Types de compte (pour p-select et liste)
   readonly userTypeOptions: { label: string; value: UserType }[] = [
     { label: 'Staff',        value: 'staff' },
     { label: 'Client',       value: 'client' },
@@ -81,33 +99,33 @@ export class UtilisateursForm implements OnInit, OnChanges {
     { label: 'Investisseur', value: 'investisseur' },
   ];
 
-  // Civilité
+  // CivilitÃ©
   readonly civiliteOptions: { label: string; value: Civilite }[] = (
     Object.entries(CIVILITE_LABELS) as [Civilite, string][]
   ).map(([value, label]) => ({ label, value }));
 
-  // Rôles réservés au staff (sélection manuelle)
+  // RÃ´les rÃ©servÃ©s au staff (sÃ©lection manuelle)
   private readonly STAFF_ROLES = ['admin', 'manager', 'comptable', 'agent_vente', 'employe'];
 
-  // Rôles disponibles (chargés depuis l'API)
+  // RÃ´les disponibles (chargÃ©s depuis l'API)
   availableRoles: { label: string; value: string }[] = [];
 
-  // Options pièces d'identité
+  // Options piÃ¨ces d'identitÃ©
   readonly pieceTypeOptions: { label: string; value: PieceType }[] = (
     Object.entries(PIECE_TYPE_LABELS) as [PieceType, string][]
   ).map(([value, label]) => ({ label, value }));
 
-  // Validation du téléphone
+  // Validation du tÃ©lÃ©phone
   phoneError: string | null = null;
   phoneCountry: string = 'GN';
 
   // Validation du mot de passe
   passwordError: string | null = null;
 
-  // Validation KYC — erreurs par champ
+  // Validation KYC â€” erreurs par champ
   kycErrors: Record<string, string> = {};
 
-  // Liste des pays pour le sélecteur
+  // Liste des pays pour le sÃ©lecteur
   countries = COUNTRIES;
 
   constructor(private roleService: RoleService) {}
@@ -140,13 +158,13 @@ export class UtilisateursForm implements OnInit, OnChanges {
         this.availableRoles = [
           { label: 'Admin', value: 'admin' },
           { label: 'Manager', value: 'manager' },
-          { label: 'Employé', value: 'employe' },
+          { label: 'Employe', value: 'employe' },
         ];
       }
     });
   }
 
-  // ── Type → rôles filtrés ──────────────────────────────
+  // â”€â”€ Type â†’ rÃ´les filtrÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   get filteredRoles(): { label: string; value: string }[] {
     if (this.model.type === 'staff') {
@@ -168,17 +186,17 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  // ── KYC ──────────────────────────────────────────────
+  // â”€â”€ KYC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  /** Vrai dès que piece_type est sélectionné → tous les autres champs KYC deviennent requis */
+  /** Vrai dÃ¨s que piece_type est sÃ©lectionnÃ© â†’ tous les autres champs KYC deviennent requis */
   get isKycActive(): boolean {
     return !!this.model.piece_type;
   }
 
-  /** Appelé lorsque piece_type change */
+  /** AppelÃ© lorsque piece_type change */
   onPieceTypeChange(): void {
     if (!this.model.piece_type) {
-      // On vide le bloc KYC quand le type est retiré
+      // On vide le bloc KYC quand le type est retirÃ©
       this.model.piece_numero    = undefined;
       this.model.piece_pays      = undefined;
       this.model.piece_delivree_le = undefined;
@@ -189,14 +207,14 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  /** Appelé sur chaque champ KYC après soumission (re-validation en temps réel) */
+  /** AppelÃ© sur chaque champ KYC aprÃ¨s soumission (re-validation en temps rÃ©el) */
   onKycFieldChange(): void {
     if (this.submitted && this.isKycActive) {
       this.setKycErrors();
     }
   }
 
-  /** Vérification pure (sans side-effect) — utilisée par isValid() */
+  /** VÃ©rification pure (sans side-effect) â€” utilisÃ©e par isValid() */
   private checkKyc(): boolean {
     if (!this.model.piece_type) return true;
 
@@ -216,26 +234,26 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return true;
   }
 
-  /** Renseigne kycErrors avec les messages à afficher */
+  /** Renseigne kycErrors avec les messages Ã  afficher */
   private setKycErrors(): void {
     this.kycErrors = {};
     if (!this.model.piece_type) return;
 
     if (!this.model.piece_numero?.trim()) {
-      this.kycErrors['piece_numero'] = 'Numéro de pièce obligatoire.';
+      this.kycErrors['piece_numero'] = 'Numero de piece obligatoire.';
     }
     if (!this.model.piece_pays) {
-      this.kycErrors['piece_pays'] = 'Pays de délivrance obligatoire.';
+      this.kycErrors['piece_pays'] = 'Pays de delivrance obligatoire.';
     }
 
     if (!this.model.piece_delivree_le) {
-      this.kycErrors['piece_delivree_le'] = 'Date de délivrance obligatoire.';
+      this.kycErrors['piece_delivree_le'] = 'Date de delivrance obligatoire.';
     } else {
       const today = new Date();
       today.setHours(23, 59, 59, 999);
       const delivree = new Date(this.model.piece_delivree_le);
       if (delivree > today) {
-        this.kycErrors['piece_delivree_le'] = 'La date de délivrance ne peut pas être dans le futur.';
+        this.kycErrors['piece_delivree_le'] = 'La date de delivrance ne peut pas etre dans le futur.';
       }
     }
 
@@ -243,17 +261,17 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.kycErrors['piece_expire_le'] = "Date d'expiration obligatoire.";
     }
 
-    // Cohérence croisée expire > delivree
+    // CohÃ©rence croisÃ©e expire > delivree
     if (this.model.piece_delivree_le && this.model.piece_expire_le) {
       const delivree = new Date(this.model.piece_delivree_le);
       const expire   = new Date(this.model.piece_expire_le);
       if (expire <= delivree) {
-        this.kycErrors['dates'] = "La date d'expiration doit être postérieure à la date de délivrance.";
+        this.kycErrors['dates'] = "La date d'expiration doit etre posterieure a la date de delivrance.";
       }
     }
   }
 
-  // ─────────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private initializeModel() {
     if (this.initialData) {
@@ -305,6 +323,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     this.phoneError    = null;
     this.passwordError = null;
     this.kycErrors     = {};
+    this.activeStep    = 1;
   }
 
   detectPhoneCountry(phone: string) {
@@ -314,20 +333,20 @@ export class UtilisateursForm implements OnInit, OnChanges {
         this.phoneCountry = phoneNumber.country;
       }
     } catch (error) {
-      // Garder le pays par défaut
+      // Garder le pays par dÃ©faut
     }
   }
 
   validatePhone(): boolean {
     if (!this.model.phone?.trim()) {
-      this.phoneError = 'Téléphone obligatoire.';
+      this.phoneError = 'Telephone obligatoire.';
       return false;
     }
 
     try {
       const isValid = isValidPhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
       if (!isValid) {
-        this.phoneError = `Numéro invalide pour ${this.getCountryName(this.phoneCountry)}.`;
+        this.phoneError = `Numero invalide pour ${this.getCountryName(this.phoneCountry)}.`;
         return false;
       }
 
@@ -340,10 +359,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
         return true;
       }
 
-      this.phoneError = 'Format de numéro invalide.';
+      this.phoneError = 'Format de numero invalide.';
       return false;
     } catch (error) {
-      this.phoneError = 'Format de numéro invalide.';
+      this.phoneError = 'Format de numero invalide.';
       return false;
     }
   }
@@ -364,7 +383,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     const password = this.model.password || '';
 
     if (password.length < 8) {
-      this.passwordError = 'Le mot de passe doit contenir au moins 8 caractères.';
+      this.passwordError = 'Le mot de passe doit contenir au moins 8 caracteres.';
       return false;
     }
 
@@ -375,11 +394,6 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
     if (!/[0-9]/.test(password)) {
       this.passwordError = 'Le mot de passe doit contenir au moins un chiffre.';
-      return false;
-    }
-
-    if (this.model.password !== this.model.password_confirmation) {
-      this.passwordError = 'Les mots de passe ne correspondent pas.';
       return false;
     }
 
@@ -402,6 +416,47 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return country ? country.dialCode : '';
   }
 
+  displayValue(value?: string | null): string {
+    const normalized = value?.trim();
+    return normalized ? normalized : '-';
+  }
+
+  get selectedTypeLabel(): string {
+    if (!this.model.type) return '-';
+    const option = this.userTypeOptions.find(o => o.value === this.model.type);
+    return option ? option.label : this.model.type;
+  }
+
+  get selectedRoleLabel(): string {
+    if (!this.model.role) return '-';
+    const option = this.availableRoles.find(r => r.value === this.model.role);
+    if (option) return option.label;
+    return this.model.role.charAt(0).toUpperCase() + this.model.role.slice(1).replace(/_/g, ' ');
+  }
+
+  get selectedPieceTypeLabel(): string {
+    if (!this.model.piece_type) return '-';
+    const option = this.pieceTypeOptions.find(o => o.value === this.model.piece_type);
+    return option ? option.label : this.model.piece_type;
+  }
+
+  get passwordSummary(): string {
+    const hasPassword = !!this.model.password?.trim();
+    if (this.mode === 'create') return hasPassword ? 'Defini' : '-';
+    return hasPassword ? 'Mis a jour' : 'Non modifie';
+  }
+
+  formatDateForDisplay(value?: string | null): string {
+    if (!value) return '-';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('fr-FR');
+  }
+
+  formatDateObjectForDisplay(value: Date | null): string {
+    if (!value) return '-';
+    return value.toLocaleDateString('fr-FR');
+  }
+
   onCountryChange() {
     if (this.model.phone) {
       this.validatePhone();
@@ -420,26 +475,93 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  isValid(): boolean {
-    if (!this.model.type)  return false;
-    if (!this.model.role)  return false;
+  /** Valide l'Ã©tape 1 (TÃ©lÃ©phone) : Pays + TÃ©lÃ©phone. */
+  isStep1Valid(): boolean {
+    if (!this.phoneCountry || !this.model.phone?.trim()) return false;
+    try {
+      return isValidPhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
+    } catch {
+      return false;
+    }
+  }
 
-    const basicValidation = !!(
+  /** Valide l'Ã©tape 2 (Type + RÃ´le) : Type de compte + RÃ´le si staff. */
+  isStep2Valid(): boolean {
+    if (!this.model.type) return false;
+    if (this.isRoleSelectable && !this.model.role) return false;
+    return true;
+  }
+
+  /** Valide l'Ã©tape 3 (Informations personnelles) : Nom + PrÃ©nom + Ville + Quartier. */
+  isStep3Valid(): boolean {
+    return !!(
       this.model.nom?.trim() &&
       this.model.prenom?.trim() &&
-      this.model.phone?.trim() &&
       this.model.ville?.trim() &&
       this.model.quartier?.trim()
     );
-    if (!basicValidation) return false;
+  }
 
-    if (!this.validatePhone()) return false;
-
+  /** Valide l'Ã©tape 4 (AccÃ¨s) : Email (optionnel) + Mot de passe si crÃ©ation. */
+  isStep4Valid(): boolean {
     if (this.mode === 'create' && !this.validatePassword()) return false;
-
-    if (!this.checkKyc()) return false;
-
     return true;
+  }
+
+  /** Ã‰tape 5 (PiÃ¨ce) facultative : pas de blocage Suivant ; validation KYC seulement si type piÃ¨ce renseignÃ©. */
+  isStep5Valid(): boolean {
+    return true;
+  }
+
+  isValid(): boolean {
+    if (!this.isStep1Valid()) return false;
+    if (!this.isStep2Valid()) return false;
+    if (!this.isStep3Valid()) return false;
+    if (!this.isStep4Valid()) return false;
+    if (!this.checkKyc()) return false;
+    return true;
+  }
+
+  goNext(): void {
+    this.submitted = true;
+
+    if (this.activeStep === 1) {
+      if (this.validatePhone()) {
+        this.activeStep = 2;
+        this.submitted = false;
+      }
+      return;
+    }
+
+    if (this.activeStep === 2 && this.isStep2Valid()) {
+      this.activeStep = 3;
+      this.submitted = false;
+      return;
+    }
+
+    if (this.activeStep === 3 && this.isStep3Valid()) {
+      this.activeStep = 4;
+      this.submitted = false;
+      return;
+    }
+
+    if (this.activeStep === 4 && this.isStep4Valid()) {
+      this.activeStep = this.hasIdentityStep ? 5 : this.summaryStep;
+      this.submitted = false;
+      return;
+    }
+
+    if (this.hasIdentityStep && this.activeStep === 5 && this.isStep5Valid()) {
+      this.activeStep = this.summaryStep;
+      this.submitted = false;
+    }
+  }
+
+  goPrev(): void {
+    if (this.activeStep > 1) {
+      this.activeStep = this.activeStep - 1;
+      this.submitted = false;
+    }
   }
 
   enableEditing() {
@@ -455,16 +577,40 @@ export class UtilisateursForm implements OnInit, OnChanges {
     this.initializeModel();
   }
 
+  private goToFirstInvalidStep(): void {
+    if (!this.isStep1Valid()) {
+      this.activeStep = 1;
+      return;
+    }
+    if (!this.isStep2Valid()) {
+      this.activeStep = 2;
+      return;
+    }
+    if (!this.isStep3Valid()) {
+      this.activeStep = 3;
+      return;
+    }
+    if (!this.isStep4Valid()) {
+      this.activeStep = 4;
+      return;
+    }
+    if (this.hasIdentityStep && !this.checkKyc()) {
+      this.activeStep = 5;
+    }
+  }
+
   onSubmit() {
     this.submitted = true;
-    this.setKycErrors();      // déclenche l'affichage des erreurs KYC
+    this.setKycErrors();      // dÃ©clenche l'affichage des erreurs KYC
 
     if (!this.isValid()) {
+      this.goToFirstInvalidStep();
       return;
     }
 
     this.submitForm.emit({
       ...this.model,
+      password_confirmation: this.model.password,
       date_naissance: this.formatDate(this.dateNaissanceObj) ?? undefined,
     });
   }
@@ -474,12 +620,12 @@ export class UtilisateursForm implements OnInit, OnChanges {
   }
 
   get fieldsDisabled(): boolean {
-    return (this.mode === 'edit' && !this.isEditing) || this.loading;
+    return (this.mode === 'edit' && !this.isEditing) || this.loading || this.formDisabled;
   }
 
   get formTitle(): string {
     if (this.mode === 'create') {
-      return 'Créer un compte utilisateur';
+      return 'Creer un compte utilisateur';
     }
     const reference = this.model.reference?.trim();
     return reference

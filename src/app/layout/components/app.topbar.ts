@@ -17,6 +17,7 @@ import { TooltipModule } from 'primeng/tooltip';
 
 import { LayoutService } from '@/layout/service/layout.service';
 import { AppBreadcrumb } from './app.breadcrumb';
+import { AppUsineSelector } from './app.usine-selector';
 import { NotificationService } from '@/services/notifications/notification.service';
 import { ApiNotification } from '@/models/notification.model';
 
@@ -31,6 +32,7 @@ import { ApiNotification } from '@/models/notification.model';
         CommonModule,
         StyleClassModule,
         AppBreadcrumb,
+        AppUsineSelector,
         InputTextModule,
         ButtonModule,
         IconFieldModule,
@@ -201,6 +203,11 @@ import { ApiNotification } from '@/models/notification.model';
                         <p-inputicon class="pi pi-search" />
                         <input type="text" pInputText placeholder="Rechercher..." class="w-48 sm:w-full" />
                     </p-iconfield>
+                </li>
+
+                <!-- ── Sélecteur d'usine ── -->
+                <li class="topbar-usine">
+                    <app-usine-selector />
                 </li>
 
                 <li class="ml-3">

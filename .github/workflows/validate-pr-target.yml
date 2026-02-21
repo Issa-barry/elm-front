@@ -1,0 +1,37 @@
+name: Validate PR target branch
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch flow
+        run: |
+          BASE="${{ github.event.pull_request.base.ref }}"
+          HEAD="${{ github.event.pull_request.head.ref }}"
+
+          echo "HEAD=$HEAD → BASE=$BASE"
+
+          # Toute branche "non release" (ex: agence, produits, feature/x)
+          # doit merger UNIQUEMENT vers dev
+          if [[ "$HEAD" != "dev" && "$HEAD" != "pre-prod" && "$HEAD" != "main" ]] && [[ "$BASE" != "dev" ]]; then
+            echo "❌ Toute branche ($HEAD) doit merger UNIQUEMENT vers dev"
+            exit 1
+          fi
+
+          # dev -> pre-prod uniquement
+          if [[ "$HEAD" == "dev" ]] && [[ "$BASE" != "pre-prod" ]]; then
+            echo "❌ dev peut merger UNIQUEMENT vers pre-prod"
+            exit 1
+          fi
+
+          # pre-prod -> main uniquement
+          if [[ "$HEAD" == "pre-prod" ]] && [[ "$BASE" != "main" ]]; then
+            echo "❌ pre-prod peut merger UNIQUEMENT vers main"
+            exit 1
+          fi
+
+          echo "✅ Flux de branches valide" 

@@ -76,10 +76,19 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Créer un nouvel utilisateur (via le endpoint register)
+   * Créer un nouvel utilisateur (via le endpoint register).
+   * Utilisé par la page d'inscription publique (/auth/register).
    */
   createUser(data: CreateUserDto): Observable<ApiResponse<{ user: User; access_token: string }>> {
     return this.http.post<ApiResponse<{ user: User; access_token: string }>>(`${this.authUrl}/register`, data);
+  }
+
+  /**
+   * Créer un utilisateur via l'API métier (POST /users).
+   * À combiner avec UsineService.assignUser pour l'assignation à l'usine courante.
+   */
+  createUserViaApi(data: CreateUserDto): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(this.apiUrl, data);
   }
 
   /**

@@ -43,7 +43,7 @@ export class LayoutService {
         primary: 'indigo',
         inputStyle: 'outlined',
         surface: null,
-        darkTheme: true,
+        darkTheme: false,
         menuMode: 'static',
         menuTheme: 'colorScheme',
     };

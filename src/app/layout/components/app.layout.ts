@@ -2,6 +2,7 @@ import { Component, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
+import { ToastModule } from 'primeng/toast';
 import { AppTopbar } from './app.topbar';
 import { AppSidebar } from './app.sidebar';
 import { LayoutService } from '@/layout/service/layout.service';
@@ -20,6 +21,7 @@ const BODY_CLASS_ACCUEIL = 'layout-on-accueil';
         RouterModule,
         AppConfigurator,
         AppProfileSidebar,
+        ToastModule,
     ],
     template: `<div class="layout-container" [ngClass]="containerClass">
         <div app-sidebar></div>
@@ -32,6 +34,7 @@ const BODY_CLASS_ACCUEIL = 'layout-on-accueil';
         <div app-profilesidebar></div>
         <app-configurator></app-configurator>
         <div class="layout-mask animate-fadein"></div>
+        <p-toast position="top-right" [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
     </div> `,
 })
 export class AppLayout implements OnDestroy {

@@ -2,6 +2,27 @@
   display: block;
 }
 
+.usine-assignation-reminder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: var(--blue-50, #eff6ff);
+  color: var(--blue-800, #1e40af);
+  font-size: 0.875rem;
+  border: 1px solid var(--blue-200, #bfdbfe);
+
+  .pi {
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+}
+
+.usine-context-message {
+  display: block;
+}
+
 .edit-mobile-header {
   display: none;
 }
