@@ -13,11 +13,13 @@ import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumbe
 import { User, UserType, PieceType, PIECE_TYPE_LABELS, Civilite, CIVILITE_LABELS } from '@/models/user.model';
 import { COUNTRIES } from '@/models/country.model';
 import { RoleService } from '@/services/role/role.service';
+import { UserService } from '@/services/users/users.service';
 
 export interface UserFormData {
   nom?: string;
   prenom?: string;
   phone?: string;
+  normalized_phone?: string;
   email?: string | null;
   pays?: string;
   code_pays?: string;
@@ -117,6 +119,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
   // Validation du tÃ©lÃ©phone
   phoneError: string | null = null;
+  phoneCheckLoading = false;
   phoneCountry: string = 'GN';
 
   // Validation du mot de passe
@@ -128,7 +131,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
   // Liste des pays pour le sÃ©lecteur
   countries = COUNTRIES;
 
-  constructor(private roleService: RoleService) {}
+  constructor(
+    private roleService: RoleService,
+    private userService: UserService,
+  ) {}
 
   ngOnInit() {
     this.loadRoles();
@@ -319,11 +325,12 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.detectPhoneCountry(this.model.phone);
     }
 
-    this.submitted     = false;
-    this.phoneError    = null;
-    this.passwordError = null;
-    this.kycErrors     = {};
-    this.activeStep    = 1;
+    this.submitted         = false;
+    this.phoneError        = null;
+    this.phoneCheckLoading = false;
+    this.passwordError     = null;
+    this.kycErrors         = {};
+    this.activeStep        = 1;
   }
 
   detectPhoneCountry(phone: string) {
@@ -526,10 +533,53 @@ export class UtilisateursForm implements OnInit, OnChanges {
     this.submitted = true;
 
     if (this.activeStep === 1) {
-      if (this.validatePhone()) {
+      if (!this.validatePhone()) return;
+
+      // En mode édition, pas de vérification backend
+      if (this.mode !== 'create') {
         this.activeStep = 2;
         this.submitted = false;
+        return;
       }
+
+      // Mode création : vérifier la disponibilité du numéro côté serveur
+      const phone = (this.model.phone || '').replace(/\s+/g, '');
+      const code_phone_pays = this.getSelectedCountryDialCode();
+
+      this.phoneCheckLoading = true;
+      this.userService.checkPhone({ phone, code_phone_pays }).subscribe({
+        next: (response) => {
+          this.phoneCheckLoading = false;
+          if (response.data.available) {
+            if (response.data.normalized_phone) {
+              this.model.normalized_phone = response.data.normalized_phone;
+            }
+            this.activeStep = 2;
+            this.submitted = false;
+          } else {
+            this.phoneError = 'Ce numéro de téléphone est déjà utilisé.';
+          }
+        },
+        error: (err) => {
+          this.phoneCheckLoading = false;
+          if (err.status === 422) {
+            const errors = err.error?.errors;
+            if (errors?.phone) {
+              this.phoneError = Array.isArray(errors.phone) ? errors.phone[0] : errors.phone;
+            } else if (errors?.code_phone_pays) {
+              this.phoneError = Array.isArray(errors.code_phone_pays)
+                ? errors.code_phone_pays[0]
+                : errors.code_phone_pays;
+            } else {
+              this.phoneError = err.error?.message || 'Données invalides.';
+            }
+          } else if (err.status === 401 || err.status === 403) {
+            this.phoneError = 'Session expirée ou accès non autorisé. Veuillez vous reconnecter.';
+          } else {
+            this.phoneError = 'Impossible de vérifier le numéro. Veuillez réessayer.';
+          }
+        },
+      });
       return;
     }
 

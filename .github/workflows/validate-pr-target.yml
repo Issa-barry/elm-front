@@ -2,9 +2,28 @@ name: Validate PR target branch
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    branches:
+      - dev
+      - pre-prod
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+
+# Annule les runs précédents pour le même PR dès qu'un nouveau commit est poussé.
+concurrency:
+  group: validate-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
+  # Nom stable : GitHub crée le check "Validate PR target branch / validate"
+  # NE PAS renommer ce job sans mettre à jour la branch protection.
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -34,4 +53,4 @@ jobs:
             exit 1
           fi
 
-          echo "✅ Flux de branches valide" 
+          echo "✅ Flux de branches valide"

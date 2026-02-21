@@ -82,7 +82,7 @@
 
                 <div class="utilisateurs-form-step-actions flex flex-wrap items-center justify-end gap-3 pt-8 mt-8" *ngIf="isEditing">
                   <button type="button" pButton pRipple label="Annuler" icon="pi pi-times" severity="secondary" (click)="onCancel()" [disabled]="loading" class="utilisateurs-form-cancel"></button>
-                  <button type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [disabled]="!isStep1Valid() || formDisabled" class="utilisateurs-form-next"></button>
+                  <button type="button" pButton pRipple label="Suivant" icon="pi pi-arrow-right" iconPos="right" (click)="goNext()" [loading]="phoneCheckLoading" [disabled]="!isStep1Valid() || formDisabled || phoneCheckLoading" class="utilisateurs-form-next"></button>
                 </div>
               </ng-template>
             </p-step-panel>
