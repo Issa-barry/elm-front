@@ -19,7 +19,7 @@ import { COUNTRIES } from '@/models/country.model';
   providers: [MessageService],
   imports: [CommonModule, ToastModule, MessageModule, UtilisateursForm],
 })
-export class UtilisateursNew {
+export class UtilisateursNew { 
   loading = false;
 
   constructor(
