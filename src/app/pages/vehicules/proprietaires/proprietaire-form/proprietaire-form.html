@@ -1,0 +1,166 @@
+<p-toast />
+
+<div class="card">
+  <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block">
+    {{ isEditMode ? 'Modifier le propriétaire' : 'Nouveau propriétaire' }}
+  </span>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- ══ Identité ════════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+      <div class="col-span-12 lg:col-span-2">
+        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Identité</div>
+        <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal">
+          <!-- Informations personnelles du propriétaire. -->
+        </p>
+      </div>
+      <div class="col-span-12 lg:col-span-10">
+        <div class="grid grid-cols-12 gap-4">
+
+          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="font-medium text-surface-900 dark:text-surface-0">
+              Prénom <span class="text-red-500">*</span>
+            </label>
+            <input pInputText fluid formControlName="prenom" placeholder="ex : Mamadou"
+                   [class.ng-invalid]="isInvalid('prenom')" [class.ng-dirty]="isInvalid('prenom')" />
+            @if (isInvalid('prenom')) {
+              <small class="text-red-500">Prénom requis.</small>
+            }
+          </div>
+
+          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="font-medium text-surface-900 dark:text-surface-0">
+              Nom <span class="text-red-500">*</span>
+            </label>
+            <input pInputText fluid formControlName="nom" placeholder="ex : Diallo"
+                   [class.ng-invalid]="isInvalid('nom')" [class.ng-dirty]="isInvalid('nom')" />
+            @if (isInvalid('nom')) {
+              <small class="text-red-500">Nom requis.</small>
+            }
+          </div>
+
+          <!-- Pays + Téléphone -->
+          <div class="mb-2 col-span-12 grid grid-cols-12 gap-3">
+            <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+              <label class="font-medium text-surface-900 dark:text-surface-0">
+                Pays <span class="text-red-500">*</span>
+              </label>
+              <p-select
+                [(ngModel)]="phoneCountry"
+                [ngModelOptions]="{standalone: true}"
+                [options]="countries"
+                optionLabel="name"
+                optionValue="code"
+                placeholder="Pays"
+                (onChange)="onCountryChange()"
+                styleClass="w-full"
+              >
+                <ng-template #item let-c>
+                  <div class="flex items-center gap-2">
+                    <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
+                    <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
+                    <span class="text-sm">{{ c.name }}</span>
+                  </div>
+                </ng-template>
+                <ng-template #selectedItem let-c>
+                  <div class="flex items-center gap-2" *ngIf="c">
+                    <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
+                    <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
+                    <span class="text-sm">{{ c.name }}</span>
+                  </div>
+                </ng-template>
+              </p-select>
+            </div>
+
+            <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+              <label class="font-medium text-surface-900 dark:text-surface-0">
+                Téléphone <span class="text-red-500">*</span>
+              </label>
+              <input pInputText fluid formControlName="phone" type="tel"
+                     placeholder="ex : 622 00 00 00"
+                     (input)="onPhoneInput()" (blur)="onPhoneBlur()"
+                     [class.ng-invalid]="isInvalid('phone') || !!phoneError"
+                     [class.ng-dirty]="isInvalid('phone') || !!phoneError" />
+              @if (isInvalid('phone') && !phoneError) {
+                <small class="text-red-500">Téléphone requis.</small>
+              }
+              @if (phoneError) {
+                <small class="text-red-500">{{ phoneError }}</small>
+              }
+            </div>
+          </div>
+
+           
+       
+    
+              <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+                <label class="font-medium text-surface-900 dark:text-surface-0">
+                  Ville <span class="text-red-500">*</span>
+                </label>
+                <input pInputText fluid formControlName="ville" placeholder="ex : Conakry"
+                       [class.ng-invalid]="isInvalid('ville')" [class.ng-dirty]="isInvalid('ville')" />
+                @if (isInvalid('ville')) {
+                  <small class="text-red-500">Ville requise.</small>
+                }
+              </div>
+    
+              <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+                <label class="font-medium text-surface-900 dark:text-surface-0">
+                  Quartier <span class="text-red-500">*</span>
+                </label>
+                <input pInputText fluid formControlName="quartier" placeholder="ex : Ratoma"
+                       [class.ng-invalid]="isInvalid('quartier')" [class.ng-dirty]="isInvalid('quartier')" />
+                @if (isInvalid('quartier')) {
+                  <small class="text-red-500">Quartier requis.</small>
+                }
+              </div> 
+ 
+          <!-- Email -->
+          <div class="mb-4 col-span-12 flex flex-col gap-1">
+            <label class="font-medium text-surface-900 dark:text-surface-0">
+              Email
+              <span class="text-surface-400 text-sm font-normal ml-1">(facultatif)</span>
+            </label>
+            <input pInputText fluid formControlName="email" type="email"
+                   placeholder="ex : mamadou@exemple.com"
+                   [class.ng-invalid]="isInvalid('email')" [class.ng-dirty]="isInvalid('email')" />
+            @if (isInvalid('email')) {
+              <small class="text-red-500">Adresse email invalide.</small>
+            }
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+     
+    <!-- ══ Statut (édition uniquement) ════════════════════════════════════ -->
+    @if (isEditMode) {
+      <div class="grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+        <div class="col-span-12 lg:col-span-2">
+          <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Statut</div>
+          <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal">
+            <!-- Activer ou désactiver ce propriétaire. -->
+          </p>
+        </div>
+        <div class="col-span-12 lg:col-span-10 flex items-center gap-3">
+          <p-toggleswitch formControlName="is_active" inputId="is_active" />
+          <label for="is_active" class="cursor-pointer text-sm font-medium text-surface-900 dark:text-surface-0">
+            {{ form.get('is_active')?.value ? 'Actif' : 'Inactif' }}
+          </label>
+        </div>
+      </div>
+    }
+
+    <!-- ══ Actions ════════════════════════════════════════════════════════ -->
+    <div class="flex gap-2 justify-end">
+      <button pButton pRipple type="button" text label="Annuler"
+              (click)="onCancel()" [disabled]="loading"></button>
+      <button pButton pRipple type="submit"
+              [label]="isEditMode ? 'Enregistrer' : 'Créer le propriétaire'"
+              icon="pi pi-check" [loading]="loading"></button>
+    </div>
+
+  </form>
+</div>

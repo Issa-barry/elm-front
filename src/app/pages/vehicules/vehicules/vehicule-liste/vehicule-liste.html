@@ -1,0 +1,184 @@
+<p-toast />
+<p-confirmdialog />
+
+<div class="card">
+  <p-table
+    #dt
+    [value]="vehicules()"
+    [loading]="loading"
+    [paginator]="true"
+    paginatorDropdownAppendTo="body"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['nom_vehicule', 'immatriculation', 'type_vehicule', 'proprietaire.nom', 'livreur_principal.nom']"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="  {first} / {last} de {totalRecords} véhicules"
+    [showCurrentPageReport]="true"
+    [rowHover]="true"
+  >
+    <ng-template #caption>
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <p-iconfield class="w-full sm:w-80 order-1 sm:order-0">
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Rechercher un véhicule..."
+            (input)="onGlobalFilter(dt, $event)"
+            class="w-full"
+          />
+        </p-iconfield>
+        <div class="flex gap-2 w-full sm:w-auto flex-order-0 sm:flex-order-1">
+          @if (canCreate) {
+            <button
+              (click)="goNew()"
+              pButton
+              outlined
+              class="flex-shrink-0"
+              icon="pi pi-plus"
+              label="Nouveau"
+            ></button>
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="nom_vehicule" style="width:20%">
+          <span class="flex items-center gap-2">
+            Véhicule <p-sortIcon field="nom_vehicule" />
+          </span>
+        </th>
+        <th pSortableColumn="immatriculation" style="width:12%">
+          <span class="flex items-center gap-2">
+            Immatriculation <p-sortIcon field="immatriculation" />
+          </span>
+        </th>
+        <th style="width:9%">Type</th>
+        <th style="width:17%">Propriétaire</th>
+        <th style="width:17%">Livreur</th>
+        <th style="width:9%" class="text-center">Statut</th>
+        @if (canUpdate || canDelete) {
+          <th style="width:5%" class="text-center">Actions</th>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-v>
+      <tr>
+        <!-- Véhicule : photo ou initiales -->
+        <td>
+          <div class="flex items-center gap-2">
+            @if (v.photo_url) {
+              <img
+                [src]="v.photo_url"
+                [alt]="v.nom_vehicule"
+                style="width: 64px"
+                class="rounded"
+              />
+            } @else {
+              <span
+                class="inline-flex items-center justify-center rounded bg-primary text-white font-bold text-sm"
+                style="width:64px;height:64px"
+              >
+                {{ getInitials(v) }}
+              </span>
+            }
+            <div>
+              <div class="font-medium">{{ v.nom_vehicule }}</div>
+              @if (v.marque || v.modele) {
+                <div class="text-xs text-surface-400">{{ v.marque }} {{ v.modele }}</div>
+              }
+            </div>
+          </div>
+        </td>
+
+        <!-- Immatriculation -->
+        <td>
+          <code class="text-sm surface-100 px-2 py-1 border-round">{{ v.immatriculation }}</code>
+        </td>
+
+        <!-- Type -->
+        <td class="text-sm">{{ getTypeLabel(v) }}</td>
+
+        <!-- Propriétaire -->
+        <td>
+          @if (v.proprietaire) {
+            <span class="font-medium text-sm">{{ v.proprietaire.prenom }} {{ v.proprietaire.nom }}</span>
+            <br />
+            <span class="text-surface-400 text-xs">{{ v.proprietaire.phone }}</span>
+          } @else {
+            <span class="text-surface-400">—</span>
+          }
+        </td>
+
+        <!-- Livreur -->
+        <td>
+          @if (v.livreur_principal) {
+            <span class="font-medium text-sm">{{ v.livreur_principal.prenom }} {{ v.livreur_principal.nom }}</span>
+            <br />
+            <span class="text-surface-400 text-xs">{{ v.livreur_principal.phone }}</span>
+          } @else {
+            <span class="text-surface-400">—</span>
+          }
+        </td>
+
+        <!-- Statut -->
+        <td class="text-center">
+          <p-tag
+            [value]="v.is_active ? 'Actif' : 'Inactif'"
+            [severity]="v.is_active ? 'success' : 'warn'"
+          />
+        </td>
+
+        <!-- Actions -->
+        @if (canUpdate || canDelete) {
+          <td>
+            <div class="flex gap-1 justify-center">
+              @if (canUpdate) {
+                <button pButton type="button" icon="pi pi-pen-to-square"
+                        text rounded size="small"
+                        pTooltip="Modifier" tooltipPosition="top"
+                        (click)="goEdit(v)"></button>
+                <button pButton type="button"
+                        [icon]="v.is_active ? 'pi pi-lock' : 'pi pi-lock-open'"
+                        [severity]="v.is_active ? 'warn' : 'success'"
+                        text rounded size="small"
+                        [pTooltip]="v.is_active ? 'Désactiver' : 'Activer'" tooltipPosition="top"
+                        (click)="toggleStatus(v)"></button>
+              }
+              @if (canDelete) {
+                <button pButton type="button" icon="pi pi-trash"
+                        severity="danger" text rounded size="small"
+                        pTooltip="Supprimer" tooltipPosition="top"
+                        (click)="deleteVehicule(v)"></button>
+              }
+            </div>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td [attr.colspan]="(canUpdate || canDelete) ? 7 : 6" class="text-center py-8">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-car text-4xl"></i>
+            <span>Aucun véhicule trouvé</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3, 4, 5]; track $index) {
+        <tr>
+          @for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>

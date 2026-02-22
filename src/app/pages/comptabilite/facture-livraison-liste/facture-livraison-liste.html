@@ -1,0 +1,208 @@
+<p-toast />
+
+<div class="card">
+  <p-toolbar styleClass="mb-4">
+    <ng-template #start>
+      <h2 class="text-xl font-semibold m-0 flex align-items-center gap-2">
+        <i class="pi pi-truck text-primary"></i>
+        Factures livraison
+      </h2>
+    </ng-template>
+    <ng-template #end>
+      @if (canCreate) {
+        <p-button label="Nouvelle facture" icon="pi pi-plus" (onClick)="openCreateDialog()" />
+      }
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="factures()"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['vehicule.marque', 'vehicule.immatriculation', 'statut']"
+    styleClass="p-datatable-gridlines"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="{first} à {last} sur {totalRecords} factures"
+    [showCurrentPageReport]="true"
+  >
+    <ng-template #caption>
+      <div class="flex justify-end">
+        <p-iconfield>
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Rechercher…"
+            (input)="onGlobalFilter(dt, $event)"
+            class="w-full md:w-20rem"
+          />
+        </p-iconfield>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="id" style="min-width:6rem">N° <p-sortIcon field="id" /></th>
+        <th style="min-width:14rem">Véhicule</th>
+        <th pSortableColumn="date_facture" style="min-width:9rem">Date <p-sortIcon field="date_facture" /></th>
+        <th pSortableColumn="montant" style="min-width:10rem">Montant <p-sortIcon field="montant" /></th>
+        <th style="min-width:8rem">Encaissé</th>
+        <th pSortableColumn="statut" style="min-width:8rem">Statut <p-sortIcon field="statut" /></th>
+        <th style="min-width:6rem">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-f>
+      <tr>
+        <td class="font-mono text-sm text-color-secondary">#{{ f.id }}</td>
+        <td>
+          @if (f.vehicule) {
+            <span class="font-medium">{{ f.vehicule.marque }} {{ f.vehicule.modele }}</span>
+            <br />
+            <code class="text-xs text-color-secondary">{{ f.vehicule.immatriculation }}</code>
+          } @else {
+            <span class="text-color-secondary">—</span>
+          }
+        </td>
+        <td class="text-sm">{{ formatDateDisplay(f.date_facture) }}</td>
+        <td class="font-semibold">{{ formatMontant(f.montant) }}</td>
+        <td>
+          @if (f.montant_encaisse != null) {
+            <span class="text-sm text-green-600 font-medium">{{ formatMontant(f.montant_encaisse) }}</span>
+          } @else {
+            <span class="text-color-secondary text-sm">—</span>
+          }
+        </td>
+        <td>
+          <p-tag
+            [value]="getStatutLabel(f.statut)"
+            [severity]="getStatutSeverity(f.statut)"
+          />
+        </td>
+        <td>
+          <p-button
+            icon="pi pi-eye"
+            severity="info"
+            [text]="true"
+            [rounded]="true"
+            pTooltip="Voir détail"
+            (onClick)="goDetail(f.id)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7" class="text-center py-8">
+          <i class="pi pi-file text-4xl mb-3 block" style="opacity:.25"></i>
+          <p class="text-color-secondary m-0">Aucune facture livraison.</p>
+          @if (canCreate) {
+            <p-button
+              label="Créer une facture"
+              icon="pi pi-plus"
+              [text]="true"
+              styleClass="mt-3"
+              (onClick)="openCreateDialog()"
+            />
+          }
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3]; track $index) {
+        <tr>
+          @for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- ── Dialog : Nouvelle facture ─────────────────────────────────────── -->
+<p-dialog
+  header="Nouvelle facture livraison"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+  [draggable]="false"
+>
+  <form [formGroup]="createForm" novalidate>
+    <div class="flex flex-col gap-4">
+
+      <!-- Véhicule -->
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Véhicule <span class="text-red-500">*</span></label>
+        <p-select
+          formControlName="vehicule_id"
+          [options]="vehiculeOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Sélectionner un véhicule"
+          [filter]="true"
+          filterPlaceholder="Rechercher…"
+          styleClass="w-full"
+          [ngClass]="{'ng-invalid ng-dirty': isInvalid('vehicule_id')}"
+        />
+        @if (isInvalid('vehicule_id')) {
+          <small class="text-red-500">Sélectionnez un véhicule.</small>
+        }
+      </div>
+
+      <!-- Montant -->
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Montant (GNF) <span class="text-red-500">*</span></label>
+        <p-inputNumber
+          formControlName="montant"
+          [min]="1"
+          suffix=" GNF"
+          [useGrouping]="true"
+          styleClass="w-full"
+          [ngClass]="{'ng-invalid ng-dirty': isInvalid('montant')}"
+        />
+        @if (isInvalid('montant')) {
+          <small class="text-red-500">Montant requis (> 0).</small>
+        }
+      </div>
+
+      <!-- Date -->
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Date de facturation <span class="text-red-500">*</span></label>
+        <p-datepicker
+          formControlName="date_facture"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          styleClass="w-full"
+          [ngClass]="{'ng-invalid ng-dirty': isInvalid('date_facture')}"
+        />
+        @if (isInvalid('date_facture')) {
+          <small class="text-red-500">Date requise.</small>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Description <span class="text-color-secondary">(optionnel)</span></label>
+        <textarea
+          pTextarea
+          formControlName="description"
+          rows="2"
+          placeholder="Informations complémentaires…"
+          class="w-full"
+        ></textarea>
+      </div>
+
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" [disabled]="saving" />
+    <p-button label="Créer" icon="pi pi-save" (onClick)="onSaveFacture()" [loading]="saving" />
+  </ng-template>
+</p-dialog>

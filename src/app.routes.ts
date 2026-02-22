@@ -36,6 +36,10 @@ export const appRoutes: Routes = [
                 path: 'produits',
                 loadChildren: () => import('@/pages/produits/produits.routes'),
             },
+            {
+                path: 'vehicules',
+                loadChildren: () => import('@/pages/vehicules/vehicules.routes'),
+            },
              {
                 path: 'parametres',
                 loadChildren: () => import('@/pages/parametres/parametres.routes'),

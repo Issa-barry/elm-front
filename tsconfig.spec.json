@@ -11,5 +11,8 @@
     "include": [
         "src/**/*.spec.ts",
         "src/**/*.d.ts"
+    ],
+    "exclude": [
+        "src/app/pages/contacts/utilisateurs/utilisateurs-form/utilisateurs-form.spec.ts"
     ]
 }

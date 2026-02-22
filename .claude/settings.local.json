@@ -17,7 +17,8 @@
       "Bash(git push:*)",
       "Bash(npx tsc:*)",
       "Bash(npx ng lint:*)",
-      "Bash(npx ng test:*)"
+      "Bash(npx ng test:*)",
+      "Bash(xargs cat:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"

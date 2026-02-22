@@ -1,0 +1,275 @@
+<p-toast />
+
+<!-- Navigation ──────────────────────────────────────────────────────── -->
+<div class="flex align-items-center gap-3 mb-5 px-4 pt-4 md:px-6">
+  <p-button
+    icon="pi pi-arrow-left"
+    severity="secondary"
+    [text]="true"
+    pTooltip="Retour aux factures"
+    (onClick)="goBack()"
+  />
+  <div>
+    <h1 class="text-xl font-semibold m-0">Détail facture livraison</h1>
+    @if (facture && !loading) {
+      <span class="text-color-secondary text-sm">
+        Facture #{{ facture.id }} — {{ formatDate(facture.date_facture) }}
+      </span>
+    }
+  </div>
+</div>
+
+@if (loading) {
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 md:px-6">
+    @for (_ of [1, 2, 3, 4]; track $index) {
+      <p-card><p-skeleton height="6rem" /></p-card>
+    }
+  </div>
+} @else if (facture) {
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 md:px-6">
+
+    <!-- Colonne principale ─────────────────────────────────────────── -->
+    <div class="lg:col-span-2 flex flex-col gap-4">
+
+      <!-- Infos facture -->
+      <p-card>
+        <ng-template #header>
+          <div class="flex align-items-center justify-content-between px-5 pt-4 pb-2">
+            <div class="flex align-items-center gap-2">
+              <i class="pi pi-file-invoice text-primary text-xl"></i>
+              <h2 class="text-base font-semibold m-0">Facture #{{ facture.id }}</h2>
+            </div>
+            <p-tag
+              [value]="getStatutLabel(facture.statut)"
+              [severity]="getStatutSeverity(facture.statut)"
+            />
+          </div>
+        </ng-template>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-color-secondary text-sm m-0 mb-1">Montant total</p>
+            <p class="text-2xl font-bold m-0 text-primary">{{ formatMontant(facture.montant) }}</p>
+          </div>
+          <div>
+            <p class="text-color-secondary text-sm m-0 mb-1">Date de facture</p>
+            <p class="font-semibold m-0">{{ formatDate(facture.date_facture) }}</p>
+          </div>
+          @if (facture.montant_encaisse != null) {
+            <div>
+              <p class="text-color-secondary text-sm m-0 mb-1">Encaissé</p>
+              <p class="font-semibold text-green-600 m-0">{{ formatMontant(facture.montant_encaisse) }}</p>
+            </div>
+            <div>
+              <p class="text-color-secondary text-sm m-0 mb-1">Restant</p>
+              <p class="font-semibold text-red-500 m-0">{{ formatMontant(facture.montant_restant) }}</p>
+            </div>
+          }
+        </div>
+
+        @if (facture.montant_encaisse != null) {
+          <!-- Barre de progression -->
+          <p-divider />
+          <div>
+            <div class="flex justify-content-between mb-1 text-sm">
+              <span class="text-color-secondary">Progression encaissement</span>
+              <span class="font-semibold">{{ progressPct }}%</span>
+            </div>
+            <div class="surface-200 border-round overflow-hidden" style="height:.5rem">
+              <div
+                class="bg-primary border-round transition-all"
+                style="height:100%"
+                [style.width]="progressPct + '%'"
+              ></div>
+            </div>
+          </div>
+        }
+
+        @if (facture.description) {
+          <p-divider />
+          <p class="text-color-secondary text-sm m-0">{{ facture.description }}</p>
+        }
+      </p-card>
+
+      <!-- Véhicule associé -->
+      @if (facture.vehicule) {
+        <p-card>
+          <ng-template #header>
+            <div class="flex align-items-center gap-2 px-5 pt-4 pb-2">
+              <i class="pi pi-car text-blue-500 text-xl"></i>
+              <h2 class="text-base font-semibold m-0">Véhicule associé</h2>
+            </div>
+          </ng-template>
+          <div class="flex align-items-center gap-3">
+            <span
+              class="flex align-items-center justify-content-center bg-blue-100 text-blue-700 border-circle font-bold"
+              style="width:3rem;height:3rem"
+            >
+              {{ facture.vehicule.marque?.charAt(0) }}{{ facture.vehicule.modele?.charAt(0) }}
+            </span>
+            <div>
+              <p class="font-semibold m-0">{{ facture.vehicule.marque }} {{ facture.vehicule.modele }}</p>
+              <code class="text-sm text-color-secondary">{{ facture.vehicule.immatriculation }}</code>
+            </div>
+          </div>
+        </p-card>
+      }
+
+      <!-- Encaissements -->
+      @if (facture.encaissements && facture.encaissements.length > 0) {
+        <p-card>
+          <ng-template #header>
+            <div class="flex align-items-center gap-2 px-5 pt-4 pb-2">
+              <i class="pi pi-wallet text-green-500 text-xl"></i>
+              <h2 class="text-base font-semibold m-0">Encaissements</h2>
+            </div>
+          </ng-template>
+          <div class="flex flex-col gap-2">
+            @for (enc of facture.encaissements; track enc.id) {
+              <div class="flex justify-content-between align-items-center p-3 surface-100 border-round">
+                <div>
+                  <span class="font-medium">{{ formatMontant(enc.montant) }}</span>
+                  <span class="text-color-secondary text-sm ml-2">— {{ enc.mode_paiement }}</span>
+                </div>
+                <span class="text-color-secondary text-sm">{{ formatDate(enc.date_encaissement) }}</span>
+              </div>
+            }
+          </div>
+        </p-card>
+      }
+
+    </div>
+
+    <!-- Colonne latérale : Commission ──────────────────────────────── -->
+    <div class="flex flex-col gap-4">
+      <p-card>
+        <ng-template #header>
+          <div class="flex align-items-center gap-2 px-5 pt-4 pb-2">
+            <i class="pi pi-percentage text-orange-500 text-xl"></i>
+            <h2 class="text-base font-semibold m-0">Commission</h2>
+          </div>
+        </ng-template>
+
+        @if (!commission) {
+          <div class="text-center py-3">
+            <p class="text-color-secondary text-sm mb-3">
+              Calculez la commission pour cette facture.
+            </p>
+            <p-button
+              label="Calculer la commission"
+              icon="pi pi-calculator"
+              severity="secondary"
+              [outlined]="true"
+              [loading]="commissionLoading"
+              (onClick)="calculerCommission()"
+            />
+          </div>
+        } @else {
+          <div class="flex flex-col gap-3">
+            <!-- Statut commission -->
+            <div class="flex justify-content-between align-items-center">
+              <span class="text-sm text-color-secondary">Statut</span>
+              @if (commission.est_payee) {
+                <p-tag value="Payée" severity="success" />
+              } @else {
+                <p-tag value="Non payée" severity="danger" />
+              }
+            </div>
+
+            <p-divider styleClass="my-1" />
+
+            <div class="flex justify-content-between">
+              <span class="text-sm text-color-secondary">Montant net</span>
+              <span class="font-semibold">{{ formatMontant(commission.montant_net) }}</span>
+            </div>
+            <div class="flex justify-content-between">
+              <span class="text-sm text-color-secondary">
+                Propriétaire ({{ commission.part_proprietaire_pct }}%)
+              </span>
+              <span class="font-semibold text-blue-600">{{ formatMontant(commission.montant_proprietaire) }}</span>
+            </div>
+            <div class="flex justify-content-between">
+              <span class="text-sm text-color-secondary">
+                Livreur ({{ commission.part_livreur_pct }}%)
+              </span>
+              <span class="font-semibold text-orange-600">{{ formatMontant(commission.montant_livreur) }}</span>
+            </div>
+
+            <p-divider styleClass="my-1" />
+
+            <!-- Bouton payer commission (bloqué si facture non payée) -->
+            <div class="flex flex-col gap-2">
+              <p-button
+                label="Payer la commission"
+                icon="pi pi-credit-card"
+                [disabled]="!canPayCommission"
+                [loading]="payerLoading"
+                (onClick)="openPayerDialog()"
+                styleClass="w-full"
+              />
+
+              @if (!canPayCommission && !commission.est_payee) {
+                <small class="text-orange-600 text-center">
+                  <i class="pi pi-info-circle mr-1"></i>
+                  La facture doit être entièrement payée avant de régler la commission.
+                </small>
+              }
+            </div>
+
+            <p-button
+              label="Recalculer"
+              icon="pi pi-refresh"
+              severity="secondary"
+              [text]="true"
+              [loading]="commissionLoading"
+              (onClick)="calculerCommission()"
+              styleClass="w-full"
+            />
+          </div>
+        }
+      </p-card>
+    </div>
+
+  </div>
+}
+
+<!-- ── Dialog : Paiement commission ──────────────────────────────────── -->
+<p-dialog
+  header="Payer la commission"
+  [(visible)]="commissionDialogVisible"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  [draggable]="false"
+>
+  @if (commission) {
+    <div class="mb-4 p-3 surface-100 border-round">
+      <p class="text-sm m-0 text-color-secondary mb-1">Récapitulatif</p>
+      <p class="m-0">Propriétaire : <strong>{{ formatMontant(commission.montant_proprietaire) }}</strong></p>
+      <p class="m-0">Livreur : <strong>{{ formatMontant(commission.montant_livreur) }}</strong></p>
+    </div>
+  }
+
+  <form [formGroup]="commissionForm" novalidate>
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Mode de paiement <span class="text-red-500">*</span></label>
+        <p-select
+          formControlName="mode_paiement"
+          [options]="modePaiementOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Notes <span class="text-color-secondary">(optionnel)</span></label>
+        <input pInputText formControlName="notes" placeholder="Remarques…" />
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [outlined]="true" (onClick)="commissionDialogVisible = false" [disabled]="payerLoading" />
+    <p-button label="Confirmer le paiement" icon="pi pi-check" (onClick)="onPayerCommission()" [loading]="payerLoading" />
+  </ng-template>
+</p-dialog>
