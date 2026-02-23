@@ -14,8 +14,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // Rediriger vers la page de login avec l'URL de retour
+  // replaceUrl: true évite l'accumulation d'entrées dans l'historique (notamment quand l'URL n'a pas de #)
   router.navigate(['/auth/login'], {
-    queryParams: { returnUrl: state.url }
+    queryParams: { returnUrl: state.url },
+    replaceUrl: true
   });
   return false;
 };

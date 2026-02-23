@@ -1,0 +1,340 @@
+// ─── Full-screen mobile container ────────────────────────────────────────────
+.fv-liste-page-wrap {
+    @media (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        margin: calc(-0.25rem - env(safe-area-inset-top)) -0.875rem 0;
+        margin-bottom: calc(-0.875rem - env(safe-area-inset-bottom));
+        padding: 0 0.875rem calc(0.875rem + env(safe-area-inset-bottom));
+        padding-left: calc(0.875rem + env(safe-area-inset-left));
+        padding-right: calc(0.875rem + env(safe-area-inset-right));
+        background: var(--p-surface-50);
+    }
+}
+
+.fv-mobile-scroll {
+    @media (max-width: 768px) {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0.75rem 0 1rem;
+    }
+}
+
+// ─── Mobile sticky header ─────────────────────────────────────────────────────
+.fv-liste-mobile-header {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .fv-liste-mobile-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: calc(0.75rem + env(safe-area-inset-top)) 0 0.75rem;
+        margin: 0 -0.875rem;
+        margin-left: calc(-0.875rem - env(safe-area-inset-left));
+        margin-right: calc(-0.875rem - env(safe-area-inset-right));
+        padding-left: calc(0.875rem + env(safe-area-inset-left));
+        padding-right: calc(0.875rem + env(safe-area-inset-right));
+        flex-shrink: 0;
+        background: var(--p-surface-0);
+        border-bottom: 1px solid var(--p-surface-200);
+        position: sticky;
+        top: 0;
+        z-index: 25;
+    }
+
+    :host-context(.app-dark) .fv-liste-mobile-header {
+        background: var(--p-surface-800);
+        border-bottom-color: var(--p-surface-700);
+    }
+
+    :host ::ng-deep .fv-liste-mobile-back.p-button {
+        color: var(--p-primary-600) !important;
+    }
+
+    .fv-liste-mobile-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--p-surface-900);
+        flex: 1;
+        text-align: center;
+    }
+
+    :host-context(.app-dark) .fv-liste-mobile-title {
+        color: var(--p-surface-0);
+    }
+
+    // Mobile: cacher la table desktop, montrer les cartes
+    .fv-tableau-desktop {
+        display: none !important;
+    }
+
+    .fv-factures-mobile {
+        display: flex;
+    }
+}
+
+// ─── Mobile filter chips ──────────────────────────────────────────────────────
+.fv-mobile-filters {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .fv-mobile-filters {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding: 0.75rem 0 0.25rem;
+        flex-shrink: 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+}
+
+.fv-filter-chip {
+    flex-shrink: 0;
+    padding: 0.35rem 0.875rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--p-surface-200);
+    background: var(--p-surface-0);
+    color: var(--p-surface-600);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &.is-active {
+        background: var(--p-primary-600);
+        border-color: var(--p-primary-600);
+        color: #fff;
+    }
+}
+
+:host-context(.app-dark) .fv-filter-chip {
+    background: var(--p-surface-800);
+    border-color: var(--p-surface-600);
+    color: var(--p-surface-300);
+
+    &.is-active {
+        background: var(--p-primary-500);
+        border-color: var(--p-primary-500);
+        color: #fff;
+    }
+}
+
+// ─── Mobile cards ─────────────────────────────────────────────────────────────
+.fv-factures-mobile {
+    display: none;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.fv-facture-card {
+    background: var(--p-surface-0);
+    border: 1px solid var(--p-surface-200);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.fv-facture-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.fv-facture-card__ref {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--p-surface-900);
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+}
+
+.fv-facture-card__vehicule {
+    font-size: 0.82rem;
+    color: var(--p-surface-500);
+    margin-top: 0.2rem;
+}
+
+.fv-facture-card__amounts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.fv-amount-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.fv-amount-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+    color: var(--p-surface-400);
+}
+
+.fv-amount-value {
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--p-surface-800);
+
+    &--success { color: #059669; }
+    &--danger  { color: #dc2626; }
+}
+
+.fv-facture-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--p-surface-100);
+}
+
+.fv-facture-card__actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+.fv-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &--impayee  { background: #fef2f2; color: #dc2626; }
+    &--partiel  { background: #fffbeb; color: #d97706; }
+    &--payee    { background: #ecfdf5; color: #059669; }
+    &--annulee  { background: var(--p-surface-100); color: var(--p-surface-500); }
+}
+
+// ─── Slideover encaissement ───────────────────────────────────────────────────
+.fv-enc-slideover {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    @media (max-width: 768px) {
+        left: 0;
+        right: 0;
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        box-sizing: border-box;
+    }
+}
+
+.fv-enc-slideover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--p-surface-200);
+    flex-shrink: 0;
+}
+
+.fv-enc-slideover-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--p-surface-900);
+}
+
+.fv-enc-slideover-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.25rem 1.5rem;
+}
+
+.fv-enc-slideover-footer {
+    padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--p-surface-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.fv-enc-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    background: var(--p-surface-50);
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--p-surface-600);
+}
+
+// ─── Dark mode ────────────────────────────────────────────────────────────────
+:host-context(.app-dark) {
+    .fv-facture-card {
+        background: var(--p-surface-800);
+        border-color: var(--p-surface-600);
+    }
+
+    .fv-facture-card__ref    { color: var(--p-surface-100); }
+    .fv-facture-card__vehicule { color: var(--p-surface-400); }
+
+    .fv-facture-card__footer {
+        border-top-color: var(--p-surface-600);
+    }
+
+    .fv-amount-value {
+        color: var(--p-surface-100);
+        &--success { color: #34d399; }
+        &--danger  { color: #f87171; }
+    }
+
+    .fv-badge {
+        &--impayee  { background: rgba(220, 38, 38, 0.15); color: #f87171; }
+        &--partiel  { background: rgba(217, 119, 6, 0.15); color: #fbbf24; }
+        &--payee    { background: rgba(5, 150, 105, 0.15); color: #34d399; }
+        &--annulee  { background: var(--p-surface-700); color: var(--p-surface-400); }
+    }
+
+    .fv-enc-slideover-header { border-bottom-color: var(--p-surface-700); }
+    .fv-enc-slideover-title  { color: var(--p-surface-0); }
+    .fv-enc-slideover-footer { border-top-color: var(--p-surface-700); }
+
+    .fv-enc-preview {
+        background: var(--p-surface-700);
+        color: var(--p-surface-300);
+    }
+
+    @media (max-width: 768px) {
+        .fv-liste-page-wrap {
+            background: var(--p-surface-900);
+        }
+    }
+}

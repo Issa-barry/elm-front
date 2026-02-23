@@ -3,73 +3,70 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import {
-  FactureLivraison,
-  StoreFactureLivraisonDto,
-  EncaissementLivraison,
-  StoreEncaissementLivraisonDto,
-  CommissionCalcul,
-  PaiementCommissionDto,
-  StoreDeductionDto,
-} from '@/models/livraison.model';
+  FactureVente,
+  EncaissementVente,
+  StoreEncaissementVenteDto,
+  StatutFacture,
+} from '@/models/vente.model';
 
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
+  errors?: Record<string, string[]>;
+}
+
+export interface PaginatedData<T> {
+  data: T[];
+  links: any;
+  meta: { current_page: number; last_page: number; total: number; per_page: number };
 }
 
 @Injectable({ providedIn: 'root' })
 export class FactureLivraisonService {
-  private readonly facturesUrl = `${environment.apiUrl}/livraisons/factures`;
-  private readonly encaissementsUrl = `${environment.apiUrl}/encaissements-livraisons`;
+  private readonly facturesUrl = `${environment.apiUrl}/ventes/factures`;
+  private readonly encaissementsUrl = `${environment.apiUrl}/ventes/encaissements`;
 
   constructor(private http: HttpClient) {}
 
-  // ── Factures simplifiées ──────────────────────────────────────────────
-  getFactures(): Observable<ApiResponse<FactureLivraison[]>> {
-    return this.http.get<ApiResponse<FactureLivraison[]>>(this.facturesUrl);
+  // ── Factures ──────────────────────────────────────────────────────────
+
+  getFactures(params?: {
+    statut?: StatutFacture;
+    vehicule_id?: number;
+  }): Observable<ApiResponse<PaginatedData<FactureVente>>> {
+    let httpParams = new HttpParams();
+    if (params?.statut) httpParams = httpParams.set('statut', params.statut);
+    if (params?.vehicule_id) httpParams = httpParams.set('vehicule_id', String(params.vehicule_id));
+    return this.http.get<ApiResponse<PaginatedData<FactureVente>>>(this.facturesUrl, {
+      params: httpParams,
+    });
   }
 
-  getFacture(id: number): Observable<ApiResponse<FactureLivraison>> {
-    return this.http.get<ApiResponse<FactureLivraison>>(`${this.facturesUrl}/${id}`);
+  getFacture(id: number): Observable<ApiResponse<FactureVente>> {
+    return this.http.get<ApiResponse<FactureVente>>(`${this.facturesUrl}/${id}`);
   }
 
-  createFacture(data: StoreFactureLivraisonDto): Observable<ApiResponse<FactureLivraison>> {
-    return this.http.post<ApiResponse<FactureLivraison>>(this.facturesUrl, data);
+  annulerFacture(id: number): Observable<ApiResponse<FactureVente>> {
+    return this.http.post<ApiResponse<FactureVente>>(`${this.facturesUrl}/${id}/annuler`, {});
   }
 
-  // ── Commissions ───────────────────────────────────────────────────────
-  getCommissionCalcul(factureId: number): Observable<ApiResponse<CommissionCalcul>> {
-    return this.http.get<ApiResponse<CommissionCalcul>>(
-      `${this.facturesUrl}/${factureId}/commissions/calcul`
-    );
-  }
+  // ── Encaissements ─────────────────────────────────────────────────────
 
-  payerCommission(factureId: number, data: PaiementCommissionDto): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
-      `${this.facturesUrl}/${factureId}/commissions/paiement`,
-      data
-    );
-  }
-
-  // ── Déductions ────────────────────────────────────────────────────────
-  addDeduction(factureId: number, data: StoreDeductionDto): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(
-      `${this.facturesUrl}/${factureId}/deductions`,
-      data
-    );
-  }
-
-  // ── Encaissements (workflow classique) ────────────────────────────────
-  getEncaissements(search?: string): Observable<ApiResponse<EncaissementLivraison[]>> {
-    let params = new HttpParams();
-    if (search) params = params.set('search', search);
-    return this.http.get<ApiResponse<EncaissementLivraison[]>>(this.encaissementsUrl, { params });
+  getEncaissements(params?: {
+    facture_vente_id?: number;
+  }): Observable<ApiResponse<PaginatedData<EncaissementVente>>> {
+    let httpParams = new HttpParams();
+    if (params?.facture_vente_id)
+      httpParams = httpParams.set('facture_vente_id', String(params.facture_vente_id));
+    return this.http.get<ApiResponse<PaginatedData<EncaissementVente>>>(this.encaissementsUrl, {
+      params: httpParams,
+    });
   }
 
   createEncaissement(
-    data: StoreEncaissementLivraisonDto
-  ): Observable<ApiResponse<EncaissementLivraison>> {
-    return this.http.post<ApiResponse<EncaissementLivraison>>(this.encaissementsUrl, data);
+    data: StoreEncaissementVenteDto
+  ): Observable<ApiResponse<EncaissementVente>> {
+    return this.http.post<ApiResponse<EncaissementVente>>(this.encaissementsUrl, data);
   }
 }

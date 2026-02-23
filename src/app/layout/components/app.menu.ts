@@ -41,6 +41,14 @@ export class AppMenu {
                 label: 'Modules',
                 icon: 'pi pi-th-large',
                 items: [
+                    // ── Ventes ─────────────────────────────────────────────────────
+                    {
+                        label: 'Ventes',
+                        icon: 'pi pi-fw pi-shopping-cart',
+                        routerLink: ['/ventes/commandes'],
+                        visible: this.hasAnyPermission(permissions, ['commandes.read', 'factures-livraisons.read', 'encaissements.read']),
+                    },
+
                     // ── Comptabilité ───────────────────────────────────────────────
                     {
                         label: 'Comptabilité',
@@ -54,9 +62,14 @@ export class AppMenu {
                             'facturepacking.read',
                             'factures-livraisons.read',
                             'encaissements.read',
-                            'commissions.read',
                         ]),
                         items: [
+                            {
+                                label: 'Factures vente',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures'],
+                                visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                            },
                             {
                                 label: 'Facture packing',
                                 icon: 'pi pi-fw pi-money-bill',
@@ -69,12 +82,6 @@ export class AppMenu {
                                     'facturepackings.read',
                                     'facturepacking.read',
                                 ]),
-                            },
-                            {
-                                label: 'Factures livraison',
-                                icon: 'pi pi-fw pi-truck',
-                                routerLink: ['/comptabilite/factures-livraison'],
-                                visible: true,
                             },
                         ],
                     },

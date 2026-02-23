@@ -2,12 +2,10 @@ import { Component, Input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  AbstractControl,
   FormBuilder,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { MessageService } from 'primeng/api';
@@ -15,7 +13,6 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
-import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageModule } from 'primeng/message';
@@ -31,19 +28,11 @@ import { UsineService } from '@/services/usine/usine.service';
 import {
   CAPACITE_DEFAULTS,
   Livreur,
-  MODE_COMMISSION_OPTIONS,
   Proprietaire,
   TYPE_VEHICULE_OPTIONS,
   Vehicule,
 } from '@/models/vehicule.model';
 import { AccessibleUsine } from '@/models/usine.model';
-
-function commissionSumValidator(group: AbstractControl): ValidationErrors | null {
-  if (group.get('pris_en_charge_par_usine')?.value) return null;
-  const pp = +(group.get('pourcentage_proprietaire')?.value ?? 0);
-  const pl = +(group.get('pourcentage_livreur')?.value ?? 0);
-  return Math.abs(pp + pl - 100) <= 0.01 ? null : { commissionTotal: true };
-}
 
 @Component({
   selector: 'app-vehicule-form',
@@ -56,7 +45,6 @@ function commissionSumValidator(group: AbstractControl): ValidationErrors | null
     InputTextModule,
     InputNumberModule,
     SelectModule,
-    CheckboxModule,
     ToastModule,
     TooltipModule,
     MessageModule,
@@ -83,7 +71,6 @@ export class VehiculeForm implements OnInit {
   readonly livreurs = signal<(Livreur & { _label: string })[]>([]);
 
   typeVehiculeOptions = TYPE_VEHICULE_OPTIONS;
-  modeCommissionOptions = MODE_COMMISSION_OPTIONS;
 
   constructor(
     private fb: FormBuilder,
@@ -111,11 +98,6 @@ export class VehiculeForm implements OnInit {
         capacite_packs:           this.vehicule.capacite_packs,
         proprietaire_id:          this.vehicule.proprietaire_id,
         livreur_principal_id:     this.vehicule.livreur_principal_id ?? null,
-        pris_en_charge_par_usine: this.vehicule.pris_en_charge_par_usine,
-        mode_commission:          this.vehicule.mode_commission,
-        valeur_commission:        +this.vehicule.valeur_commission,
-        pourcentage_proprietaire: +this.vehicule.pourcentage_proprietaire,
-        pourcentage_livreur:      +this.vehicule.pourcentage_livreur,
         is_active:                this.vehicule.is_active,
       });
     }
@@ -173,14 +155,8 @@ export class VehiculeForm implements OnInit {
         capacite_packs:           [null],
         proprietaire_id:          [null, Validators.required],
         livreur_principal_id:     [null],
-        pris_en_charge_par_usine: [false],
-        mode_commission:          ['forfait', Validators.required],
-        valeur_commission:        [0, [Validators.required, Validators.min(0)]],
-        pourcentage_proprietaire: [50, [Validators.required, Validators.min(0), Validators.max(100)]],
-        pourcentage_livreur:      [50, [Validators.required, Validators.min(0), Validators.max(100)]],
         is_active:                [true],
       },
-      { validators: [commissionSumValidator] },
     );
   }
 
@@ -225,23 +201,6 @@ export class VehiculeForm implements OnInit {
   isInvalid(name: string): boolean {
     const c = this.form.get(name)!;
     return c.invalid && (c.dirty || c.touched);
-  }
-
-  get prisEnCharge(): boolean {
-    return !!this.form.get('pris_en_charge_par_usine')?.value;
-  }
-
-  get modeCommission(): string {
-    return this.form.get('mode_commission')?.value ?? '';
-  }
-
-  get pourcentageTotal(): number {
-    return +(this.form.get('pourcentage_proprietaire')?.value ?? 0)
-         + +(this.form.get('pourcentage_livreur')?.value ?? 0);
-  }
-
-  get pourcentageValide(): boolean {
-    return this.prisEnCharge || Math.abs(this.pourcentageTotal - 100) <= 0.01;
   }
 
   // ── Soumission ─────────────────────────────────────────────────────────
@@ -292,11 +251,6 @@ export class VehiculeForm implements OnInit {
     if (v.capacite_packs != null)         fd.append('capacite_packs', String(v.capacite_packs));
     fd.append('proprietaire_id',          String(v.proprietaire_id));
     if (v.livreur_principal_id != null)   fd.append('livreur_principal_id', String(v.livreur_principal_id));
-    fd.append('pris_en_charge_par_usine', v.pris_en_charge_par_usine ? '1' : '0');
-    fd.append('mode_commission',          v.mode_commission);
-    fd.append('valeur_commission',        String(v.valeur_commission));
-    fd.append('pourcentage_proprietaire', String(v.pourcentage_proprietaire));
-    fd.append('pourcentage_livreur',      String(v.pourcentage_livreur));
     fd.append('is_active',               v.is_active ? '1' : '0');
     if (this.photoFile) fd.append('photo', this.photoFile);
     return fd;

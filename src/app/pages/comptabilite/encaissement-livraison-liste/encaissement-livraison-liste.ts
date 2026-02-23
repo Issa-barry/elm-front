@@ -21,11 +21,11 @@ import { CardModule } from 'primeng/card';
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
 import {
-  EncaissementLivraison,
+  EncaissementVente,
   MODE_PAIEMENT_OPTIONS,
-  StoreEncaissementLivraisonDto,
-  ModePaiementLivraison,
-} from '@/models/livraison.model';
+  StoreEncaissementVenteDto,
+  ModePaiement,
+} from '@/models/vente.model';
 
 @Component({
   selector: 'app-encaissement-livraison-liste',
@@ -53,7 +53,7 @@ import {
   templateUrl: './encaissement-livraison-liste.html',
 })
 export class EncaissementLivraisonListe implements OnInit {
-  encaissements = signal<EncaissementLivraison[]>([]);
+  encaissements = signal<EncaissementVente[]>([]);
 
   loading = false;
   saving = false;
@@ -64,9 +64,9 @@ export class EncaissementLivraisonListe implements OnInit {
 
   canCreate = false;
 
-  // Stats calculées
+  // Stats calculées (montant est une string décimale côté API)
   totalEncaisse = computed(() =>
-    this.encaissements().reduce((sum, e) => sum + (e.montant ?? 0), 0)
+    this.encaissements().reduce((sum, e) => sum + parseFloat(String(e.montant ?? 0)), 0)
   );
 
   constructor(
@@ -85,11 +85,11 @@ export class EncaissementLivraisonListe implements OnInit {
 
   private initForm() {
     this.createForm = this.fb.group({
-      facture_livraison_id: [null],
+      facture_vente_id: [null, [Validators.required, Validators.min(1)]],
       montant: [null, [Validators.required, Validators.min(1)]],
       mode_paiement: ['especes', Validators.required],
       date_encaissement: [new Date(), Validators.required],
-      notes: [''],
+      note: [''],
     });
   }
 
@@ -97,7 +97,7 @@ export class EncaissementLivraisonListe implements OnInit {
     this.loading = true;
     this.factureService.getEncaissements().subscribe({
       next: (resp) => {
-        this.encaissements.set(Array.isArray(resp.data) ? resp.data : []);
+        this.encaissements.set(resp.data?.data ?? []);
         this.loading = false;
       },
       error: (err) => {
@@ -117,12 +117,12 @@ export class EncaissementLivraisonListe implements OnInit {
     if (this.createForm.invalid || this.saving) return;
 
     const v = this.createForm.value;
-    const dto: StoreEncaissementLivraisonDto = {
+    const dto: StoreEncaissementVenteDto = {
+      facture_vente_id: v.facture_vente_id,
       montant: v.montant,
-      mode_paiement: v.mode_paiement as ModePaiementLivraison,
+      mode_paiement: v.mode_paiement as ModePaiement,
       date_encaissement: this.formatDate(v.date_encaissement),
-      notes: v.notes || undefined,
-      facture_livraison_id: v.facture_livraison_id || undefined,
+      note: v.note || undefined,
     };
 
     this.saving = true;
@@ -165,8 +165,10 @@ export class EncaissementLivraisonListe implements OnInit {
     return new Date(d).toLocaleDateString('fr-FR');
   }
 
-  formatMontant(n: number): string {
-    return new Intl.NumberFormat('fr-FR').format(n ?? 0) + ' GNF';
+  formatMontant(n: string | number | undefined | null): string {
+    if (n == null || n === '') return '—';
+    const num = typeof n === 'string' ? parseFloat(n) : n;
+    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   getModePaiementLabel(mode: string): string {

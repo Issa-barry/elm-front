@@ -1,6 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
@@ -12,27 +11,24 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
-import { TooltipModule } from 'primeng/tooltip';
+import { DatePickerModule } from 'primeng/datepicker';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { DialogModule } from 'primeng/dialog';
-import { DatePickerModule } from 'primeng/datepicker';
+import { CardModule } from 'primeng/card';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
 import {
-  FactureVente,
-  STATUT_FACTURE_LABELS,
-  STATUT_FACTURE_SEVERITY,
-  StatutFacture,
+  EncaissementVente,
   MODE_PAIEMENT_OPTIONS,
   StoreEncaissementVenteDto,
   ModePaiement,
 } from '@/models/vente.model';
 
 @Component({
-  selector: 'app-facture-livraison-liste',
+  selector: 'app-encaissement-vente-liste',
   standalone: true,
   imports: [
     CommonModule,
@@ -46,159 +42,136 @@ import {
     InputNumberModule,
     TagModule,
     SkeletonModule,
+    DialogModule,
     SelectModule,
-    TooltipModule,
+    DatePickerModule,
     InputIconModule,
     IconFieldModule,
-    DialogModule,
-    DatePickerModule,
+    CardModule,
   ],
   providers: [MessageService],
-  templateUrl: './facture-livraison-liste.html',
+  templateUrl: './encaissement-vente-liste.html',
 })
-export class FactureLivraisonListe implements OnInit {
-  factures = signal<FactureVente[]>([]);
+export class EncaissementVenteListe implements OnInit {
+  encaissements = signal<EncaissementVente[]>([]);
 
   loading = false;
-  encaissementSaving = false;
-  encaissementDialogVisible = false;
+  saving = false;
+  dialogVisible = false;
 
-  encaissementForm!: FormGroup;
+  createForm!: FormGroup;
   modePaiementOptions = MODE_PAIEMENT_OPTIONS;
-  selectedFacture: FactureVente | null = null;
 
-  canEncaissement = false;
+  canCreate = false;
 
-  statutOptions = [
-    { label: 'Toutes', value: null },
-    { label: 'Impayées', value: 'impayee' },
-    { label: 'Partielles', value: 'partiel' },
-    { label: 'Payées', value: 'payee' },
-    { label: 'Annulées', value: 'annulee' },
-  ];
-  selectedStatut: StatutFacture | null = null;
+  totalEncaisse = computed(() =>
+    this.encaissements().reduce((sum, e) => sum + parseFloat(String(e.montant ?? 0)), 0)
+  );
 
   constructor(
     private fb: FormBuilder,
     private factureService: FactureLivraisonService,
     private authService: AuthService,
-    private messageService: MessageService,
-    private router: Router
+    private messageService: MessageService
   ) {
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
+    this.canCreate = this.authService.hasPermission('encaissements.create');
   }
 
   ngOnInit() {
-    this.loadFactures();
+    this.initForm();
+    this.loadEncaissements();
   }
 
-  loadFactures() {
-    this.loading = true;
-    const params = this.selectedStatut ? { statut: this.selectedStatut } : undefined;
-    this.factureService.getFactures(params).subscribe({
-      next: (resp) => {
-        this.factures.set(resp.data?.data ?? []);
-        this.loading = false;
-      },
-      error: (err) => {
-        this.loading = false;
-        this.showApiError(err, 'charger les factures');
-      },
-    });
-  }
-
-  onStatutChange() {
-    this.loadFactures();
-  }
-
-  goDetail(id: number) {
-    this.router.navigate(['/comptabilite/factures-livraison', id]);
-  }
-
-  // ── Encaissement ──────────────────────────────────────────────────────
-
-  canAddEncaissement(f: FactureVente): boolean {
-    return this.canEncaissement && f.statut_facture !== 'payee' && f.statut_facture !== 'annulee';
-  }
-
-  openEncaissementDialog(facture: FactureVente) {
-    this.selectedFacture = facture;
-    this.encaissementForm = this.fb.group({
+  private initForm() {
+    this.createForm = this.fb.group({
+      facture_vente_id: [null, [Validators.required, Validators.min(1)]],
       montant: [null, [Validators.required, Validators.min(1)]],
       mode_paiement: ['especes', Validators.required],
       date_encaissement: [new Date(), Validators.required],
       note: [''],
     });
-    this.encaissementDialogVisible = true;
   }
 
-  isInvalid(name: string): boolean {
-    const c = this.encaissementForm.get(name)!;
-    return c.invalid && (c.dirty || c.touched);
+  loadEncaissements() {
+    this.loading = true;
+    this.factureService.getEncaissements().subscribe({
+      next: (resp) => {
+        this.encaissements.set(resp.data?.data ?? []);
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.showApiError(err, 'charger les encaissements');
+      },
+    });
+  }
+
+  openCreateDialog() {
+    this.initForm();
+    this.dialogVisible = true;
   }
 
   onSaveEncaissement() {
-    this.encaissementForm.markAllAsTouched();
-    if (this.encaissementForm.invalid || !this.selectedFacture || this.encaissementSaving) return;
+    this.createForm.markAllAsTouched();
+    if (this.createForm.invalid || this.saving) return;
 
-    const v = this.encaissementForm.value;
+    const v = this.createForm.value;
     const dto: StoreEncaissementVenteDto = {
-      facture_vente_id: this.selectedFacture.id,
+      facture_vente_id: v.facture_vente_id,
       montant: v.montant,
       mode_paiement: v.mode_paiement as ModePaiement,
-      date_encaissement: this.formatDateIso(v.date_encaissement),
+      date_encaissement: this.formatDate(v.date_encaissement),
       note: v.note || undefined,
     };
 
-    this.encaissementSaving = true;
+    this.saving = true;
     this.factureService.createEncaissement(dto).subscribe({
       next: () => {
-        this.encaissementSaving = false;
-        this.encaissementDialogVisible = false;
+        this.saving = false;
+        this.dialogVisible = false;
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
           detail: 'Encaissement enregistré.',
           life: 3000,
         });
-        this.loadFactures();
+        this.loadEncaissements();
       },
       error: (err) => {
-        this.encaissementSaving = false;
+        this.saving = false;
         this.showApiError(err, "enregistrer l'encaissement");
       },
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────
-
   onGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
-  getStatutLabel(s: StatutFacture): string {
-    return STATUT_FACTURE_LABELS[s] ?? s;
+  isInvalid(name: string): boolean {
+    const c = this.createForm.get(name)!;
+    return c.invalid && (c.dirty || c.touched);
   }
 
-  getStatutSeverity(s: StatutFacture) {
-    return STATUT_FACTURE_SEVERITY[s] ?? 'info';
-  }
-
-  formatDateDisplay(d: string): string {
-    if (!d) return '—';
-    return new Date(d).toLocaleDateString('fr-FR');
-  }
-
-  formatDateIso(d: Date | string): string {
+  formatDate(d: Date | string): string {
     if (!d) return '';
     const date = typeof d === 'string' ? new Date(d) : d;
     return date.toISOString().split('T')[0];
+  }
+
+  formatDateDisplay(d: string | undefined): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR');
   }
 
   formatMontant(n: string | number | undefined | null): string {
     if (n == null || n === '') return '—';
     const num = typeof n === 'string' ? parseFloat(n) : n;
     return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
+  }
+
+  getModePaiementLabel(mode: string): string {
+    return MODE_PAIEMENT_OPTIONS.find((m) => m.value === mode)?.label ?? mode;
   }
 
   private showApiError(err: any, action: string) {

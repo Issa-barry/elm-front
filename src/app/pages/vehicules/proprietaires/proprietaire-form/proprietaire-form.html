@@ -41,54 +41,62 @@
           </div>
 
           <!-- Pays + Téléphone -->
-          <div class="mb-2 col-span-12 grid grid-cols-12 gap-3">
-            <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-              <label class="font-medium text-surface-900 dark:text-surface-0">
-                Pays <span class="text-red-500">*</span>
-              </label>
-              <p-select
-                [(ngModel)]="phoneCountry"
-                [ngModelOptions]="{standalone: true}"
-                [options]="countries"
-                optionLabel="name"
-                optionValue="code"
-                placeholder="Pays"
-                (onChange)="onCountryChange()"
-                styleClass="w-full"
-              >
-                <ng-template #item let-c>
-                  <div class="flex items-center gap-2">
-                    <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
-                    <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
-                    <span class="text-sm">{{ c.name }}</span>
-                  </div>
-                </ng-template>
-                <ng-template #selectedItem let-c>
-                  <div class="flex items-center gap-2" *ngIf="c">
-                    <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
-                    <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
-                    <span class="text-sm">{{ c.name }}</span>
-                  </div>
-                </ng-template>
-              </p-select>
+          <div class="mb-4 col-span-12">
+            <div class="grid grid-cols-12 gap-3">
+
+              <!-- Sélecteur de pays -->
+              <div class="col-span-12 md:col-span-4 flex flex-col gap-1">
+                <label class="font-medium text-surface-900 dark:text-surface-0">
+                  Pays <span class="text-red-500">*</span>
+                </label>
+                <p-select
+                  [(ngModel)]="phoneCountry"
+                  [ngModelOptions]="{standalone: true}"
+                  [options]="countries"
+                  optionLabel="name"
+                  optionValue="code"
+                  placeholder="Pays"
+                  (onChange)="onCountryChange()"
+                  fluid
+                >
+                  <ng-template #item let-c>
+                    <div class="flex items-center gap-2">
+                      <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
+                      <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
+                      <span class="text-sm">{{ c.name }}</span>
+                    </div>
+                  </ng-template>
+                  <ng-template #selectedItem let-c>
+                    <div class="flex items-center gap-2" *ngIf="c">
+                      <img [src]="c.flag" [alt]="c.name" class="w-5 h-auto rounded-sm" />
+                      <span class="font-semibold text-primary text-sm">{{ c.dialCode }}</span>
+                      <span class="text-sm">{{ c.name }}</span>
+                    </div>
+                  </ng-template>
+                </p-select>
+              </div>
+
+              <!-- Champ téléphone -->
+              <div class="col-span-12 md:col-span-8 flex flex-col gap-1">
+                <label class="font-medium text-surface-900 dark:text-surface-0">
+                  Téléphone <span class="text-red-500">*</span>
+                </label>
+                <input pInputText fluid formControlName="phone" type="tel"
+                       placeholder="ex : 622 00 00 00"
+                       (input)="onPhoneInput()" (blur)="onPhoneBlur()"
+                       [class.ng-invalid]="isInvalid('phone') || !!phoneError"
+                       [class.ng-dirty]="isInvalid('phone') || !!phoneError" />
+              </div>
+
             </div>
 
-            <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-              <label class="font-medium text-surface-900 dark:text-surface-0">
-                Téléphone <span class="text-red-500">*</span>
-              </label>
-              <input pInputText fluid formControlName="phone" type="tel"
-                     placeholder="ex : 622 00 00 00"
-                     (input)="onPhoneInput()" (blur)="onPhoneBlur()"
-                     [class.ng-invalid]="isInvalid('phone') || !!phoneError"
-                     [class.ng-dirty]="isInvalid('phone') || !!phoneError" />
-              @if (isInvalid('phone') && !phoneError) {
-                <small class="text-red-500">Téléphone requis.</small>
-              }
-              @if (phoneError) {
-                <small class="text-red-500">{{ phoneError }}</small>
-              }
-            </div>
+            <!-- Messages d'erreur -->
+            @if (isInvalid('phone') && !phoneError) {
+              <small class="text-red-500 block mt-1">Téléphone requis.</small>
+            }
+            @if (phoneError) {
+              <small class="text-red-500 block mt-1">{{ phoneError }}</small>
+            }
           </div>
 
            

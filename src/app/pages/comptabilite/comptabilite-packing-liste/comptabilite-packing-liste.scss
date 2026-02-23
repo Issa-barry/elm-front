@@ -12,6 +12,11 @@
     margin-bottom: 0;
 }
 
+.compta-mobile-shell__table {
+    display: block;
+    margin-top: 1rem;
+}
+
 // Header mobile (masqué sur desktop)
 .compta-packing-mobile-header {
     display: none;
@@ -105,5 +110,9 @@
     .compta-mobile-shell__stats {
         margin-top: 1.25rem;
         margin-bottom: 0 !important;
+    }
+
+    .compta-mobile-shell__table {
+        margin-top: 0.75rem;
     }
 }

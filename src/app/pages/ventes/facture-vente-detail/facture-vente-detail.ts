@@ -29,7 +29,7 @@ import {
 } from '@/models/vente.model';
 
 @Component({
-  selector: 'app-facture-livraison-detail',
+  selector: 'app-facture-vente-detail',
   standalone: true,
   imports: [
     CommonModule,
@@ -48,9 +48,10 @@ import {
     InputTextModule,
   ],
   providers: [MessageService],
-  templateUrl: './facture-livraison-detail.html',
+  templateUrl: './facture-vente-detail.html',
+  styleUrls: ['./facture-vente-detail.scss'],
 })
-export class FactureLivraisonDetail implements OnInit {
+export class FactureVenteDetail implements OnInit {
   facture: FactureVente | null = null;
 
   loading = false;
@@ -115,7 +116,7 @@ export class FactureLivraisonDetail implements OnInit {
               : this.httpErrorDetail(err, 'charger la facture'),
           life: 4000,
         });
-        setTimeout(() => this.router.navigate(['/comptabilite/factures-livraison']), 2500);
+        setTimeout(() => this.router.navigate(['/ventes/factures']), 2500);
       },
     });
   }
@@ -211,7 +212,7 @@ export class FactureLivraisonDetail implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/comptabilite/factures-livraison']);
+    this.router.navigate(['/ventes/factures']);
   }
 
   // ── Règles métier ─────────────────────────────────────────────────────

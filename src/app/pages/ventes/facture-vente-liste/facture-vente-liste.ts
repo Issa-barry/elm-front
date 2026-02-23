@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,6 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { DialogModule } from 'primeng/dialog';
 import { DatePickerModule } from 'primeng/datepicker';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
@@ -32,7 +31,7 @@ import {
 } from '@/models/vente.model';
 
 @Component({
-  selector: 'app-facture-livraison-liste',
+  selector: 'app-facture-vente-liste',
   standalone: true,
   imports: [
     CommonModule,
@@ -50,13 +49,13 @@ import {
     TooltipModule,
     InputIconModule,
     IconFieldModule,
-    DialogModule,
     DatePickerModule,
   ],
   providers: [MessageService],
-  templateUrl: './facture-livraison-liste.html',
+  templateUrl: './facture-vente-liste.html',
+  styleUrls: ['./facture-vente-liste.scss'],
 })
-export class FactureLivraisonListe implements OnInit {
+export class FactureVenteListe implements OnInit {
   factures = signal<FactureVente[]>([]);
 
   loading = false;
@@ -83,13 +82,28 @@ export class FactureLivraisonListe implements OnInit {
     private factureService: FactureLivraisonService,
     private authService: AuthService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {
     this.canEncaissement = this.authService.hasPermission('encaissements.create');
   }
 
+  goBack() {
+    this.location.back();
+  }
+
   ngOnInit() {
+    this.initEncaissementForm();
     this.loadFactures();
+  }
+
+  private initEncaissementForm() {
+    this.encaissementForm = this.fb.group({
+      montant: [null, [Validators.required, Validators.min(1)]],
+      mode_paiement: ['especes', Validators.required],
+      date_encaissement: [new Date(), Validators.required],
+      note: [''],
+    });
   }
 
   loadFactures() {
@@ -112,7 +126,7 @@ export class FactureLivraisonListe implements OnInit {
   }
 
   goDetail(id: number) {
-    this.router.navigate(['/comptabilite/factures-livraison', id]);
+    this.router.navigate(['/ventes/factures', id]);
   }
 
   // ── Encaissement ──────────────────────────────────────────────────────
@@ -123,12 +137,8 @@ export class FactureLivraisonListe implements OnInit {
 
   openEncaissementDialog(facture: FactureVente) {
     this.selectedFacture = facture;
-    this.encaissementForm = this.fb.group({
-      montant: [null, [Validators.required, Validators.min(1)]],
-      mode_paiement: ['especes', Validators.required],
-      date_encaissement: [new Date(), Validators.required],
-      note: [''],
-    });
+    this.initEncaissementForm();
+    this.encaissementForm.patchValue({ montant: facture.montant_restant });
     this.encaissementDialogVisible = true;
   }
 

@@ -205,8 +205,8 @@ import { ApiNotification } from '@/models/notification.model';
                     </p-iconfield>
                 </li>
 
-                <!-- ── Sélecteur d'usine ── -->
-                <li class="topbar-usine">
+                <!-- ── Sélecteur d'usine (desktop uniquement) ── -->
+                <li class="topbar-usine hidden md:flex items-center">
                     <app-usine-selector />
                 </li>
 

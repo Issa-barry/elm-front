@@ -1,6 +1,5 @@
 // Types alignés avec le backend Laravel (TypeVehicule enum)
 export type TypeVehicule = 'camion' | 'vanne' | 'tricycle' | 'pick_up' | 'autre';
-export type ModeCommission = 'forfait' | 'pourcentage';
 
 export const TYPE_VEHICULE_OPTIONS: { label: string; value: TypeVehicule }[] = [
   { label: 'Camion',   value: 'camion' },
@@ -17,11 +16,6 @@ export const CAPACITE_DEFAULTS: Partial<Record<TypeVehicule, number>> = {
   tricycle: 70,
   pick_up:  100,
 };
-
-export const MODE_COMMISSION_OPTIONS: { label: string; value: ModeCommission }[] = [
-  { label: 'Forfait (montant fixe)', value: 'forfait' },
-  { label: 'Pourcentage (%)',        value: 'pourcentage' },
-];
 
 export const TYPE_VEHICULE_LABELS: Record<TypeVehicule, string> = {
   camion:   'Camion',
@@ -64,12 +58,10 @@ export interface Vehicule {
   proprietaire_id: number;
   proprietaire?: Proprietaire;
   livreur_principal_id?: number | null;
+  /** snake_case depuis l'API (compatibilité) */
   livreur_principal?: Livreur | null;
-  pris_en_charge_par_usine: boolean;
-  mode_commission: ModeCommission;
-  valeur_commission: number;
-  pourcentage_proprietaire: number;
-  pourcentage_livreur: number;
+  /** camelCase sérialisé par VehiculeResource */
+  livreurPrincipal?: Livreur | null;
   photo_path?: string;
   photo_url?: string | null;
   is_active: boolean;

@@ -1,0 +1,424 @@
+<p-toast />
+
+<div class="cv-liste-page-wrap">
+
+  <!-- ── En-tête mobile sticky ────────────────────────────────────────── -->
+  <div class="cv-liste-mobile-header">
+    <p-button [text]="true" [rounded]="true" icon="pi pi-arrow-left"
+              styleClass="cv-mobile-back" (onClick)="goBack()" />
+    <h1 class="cv-liste-mobile-title">Commandes</h1>
+    @if (canCreate) {
+      <p-button [text]="true" [rounded]="true" icon="pi pi-plus"
+                styleClass="cv-mobile-create" (onClick)="openCreateDialog()" />
+    } @else {
+      <div style="width:2.5rem"></div>
+    }
+  </div>
+
+  <!-- ── Recherche mobile ──────────────────────────────────────────────── -->
+  <div class="cv-mobile-search">
+    <p-iconfield class="w-full">
+      <p-inputicon class="pi pi-search" />
+      <input pInputText type="text" class="w-full"
+             placeholder="Rechercher une commande…"
+             (input)="mobileSearchQuery = $any($event.target).value" />
+    </p-iconfield>
+  </div>
+
+  <!-- ── Zone scroll mobile ────────────────────────────────────────────── -->
+  <div class="cv-mobile-scroll">
+    <div class="cv-commandes-mobile">
+
+      @if (loading) {
+        @for (_ of [1, 2, 3, 4]; track $index) {
+          <div class="cv-commande-card">
+            <p-skeleton height="5rem" borderRadius="8px" />
+          </div>
+        }
+      } @else if (filteredCommandes.length === 0) {
+        <div class="flex flex-col items-center gap-3 py-12 text-surface-500">
+          <i class="pi pi-shopping-cart text-4xl"></i>
+          <span>Aucune commande de vente</span>
+          @if (canCreate) {
+            <p-button label="Créer une commande" icon="pi pi-plus" [text]="true"
+                      (onClick)="openCreateDialog()" />
+          }
+        </div>
+      } @else {
+        @for (c of filteredCommandes; track c.id) {
+          <div class="cv-commande-card" (click)="goDetail(c.id)">
+
+            <!-- Ligne 1 : Référence + Statut -->
+            <div class="cv-commande-card__top">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex-shrink-0">
+                  <i class="pi pi-truck text-xs"></i>
+                </div>
+                <span class="cv-commande-card__ref">{{ c.reference }}</span>
+              </div>
+              <div class="flex-shrink-0">
+                @if (c.facture) {
+                  <p-tag [value]="getStatutLabel(c.facture.statut_facture)"
+                         [severity]="getStatutSeverity(c.facture.statut_facture)" />
+                } @else {
+                  <span class="text-xs text-surface-400">—</span>
+                }
+              </div>
+            </div>
+
+            <!-- Ligne 2 : Véhicule + Livreur -->
+            <div class="flex flex-col gap-0.5">
+              @if (c.vehicule) {
+                <div class="cv-commande-card__vehicule">
+                  <i class="pi pi-car text-xs mr-1 text-surface-400"></i>
+                  {{ c.vehicule.nom_vehicule }}
+                  <span class="cv-commande-card__immat ml-1">· {{ c.vehicule.immatriculation }}</span>
+                </div>
+              }
+              @let livreur = c.vehicule?.livreurPrincipal ?? c.vehicule?.livreur_principal;
+              @if (livreur) {
+                <div class="cv-commande-card__livreur">
+                  <i class="pi pi-user text-xs"></i>
+                  {{ livreur.prenom }} {{ livreur.nom }}
+                </div>
+              }
+            </div>
+
+            <!-- Ligne 3 : Total + Verrouillage -->
+            <div class="cv-commande-card__middle">
+              <div class="cv-amount-item">
+                <span class="cv-amount-label">Total</span>
+                <span class="cv-amount-value">{{ formatMontant(c.total_commande) }}</span>
+              </div>
+              <div class="cv-amount-item">
+                <span class="cv-amount-label">Date</span>
+                <span class="cv-amount-value" style="font-size:0.82rem; font-weight:500">
+                  {{ formatDate(c.created_at) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Footer : lock + actions -->
+            <div class="cv-commande-card__footer" (click)="$event.stopPropagation()">
+              <div>
+                @if (isLocked(c)) {
+                  <span class="cv-lock-badge">
+                    <i class="pi pi-lock text-xs"></i> Verrouillée
+                  </span>
+                }
+              </div>
+              <div class="cv-commande-card__actions">
+                <p-button icon="pi pi-eye" severity="info" [text]="true" [rounded]="true" size="small"
+                          (onClick)="goDetail(c.id)" />
+                @if (canUpdate) {
+                  <p-button icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true" size="small"
+                            [disabled]="isLocked(c)" (onClick)="openEditDialog(c)" />
+                }
+                @if (canDelete) {
+                  <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" size="small"
+                            [disabled]="isLocked(c)" (onClick)="openDeleteDialog(c)" />
+                }
+              </div>
+            </div>
+
+          </div>
+        }
+      }
+
+    </div>
+  </div><!-- /cv-mobile-scroll -->
+
+  <!-- ── Table desktop ────────────────────────────────────────────────── -->
+  <div class="cv-tableau-desktop card">
+    <p-table
+      #dt
+      [value]="commandes()"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="20"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [globalFilterFields]="['reference', 'vehicule.nom_vehicule', 'vehicule.immatriculation']"
+      [rowHover]="true"
+      responsiveLayout="scroll"
+      currentPageReportTemplate="{first} / {last} de {totalRecords} commandes"
+      [showCurrentPageReport]="true"
+    >
+      <ng-template #caption>
+        <div class="flex flex-wrap gap-2 items-center justify-between">
+          <p-iconfield class="w-full sm:w-80">
+            <p-inputicon class="pi pi-search" />
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)"
+                   placeholder="Rechercher une commande..." class="w-full" />
+          </p-iconfield>
+          <div class="flex gap-2 w-full sm:w-auto">
+            @if (canCreate) {
+              <p-button label="Nouvelle commande" icon="pi pi-plus" [outlined]="true" (onClick)="openCreateDialog()" />
+            }
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="reference" class="white-space-nowrap" style="width:20%">
+            <span class="flex items-center gap-2">Commande <p-sortIcon field="reference" /></span>
+          </th>
+          <th pSortableColumn="vehicule.nom_vehicule" class="white-space-nowrap" style="width:20%">
+            <span class="flex items-center gap-2">Véhicule <p-sortIcon field="vehicule.nom_vehicule" /></span>
+          </th>
+          <th style="width:14%"><span class="flex items-center gap-2">Livreur</span></th>
+          <th pSortableColumn="total_commande" class="white-space-nowrap" style="width:13%">
+            <span class="flex items-center gap-2">Total <p-sortIcon field="total_commande" /></span>
+          </th>
+          <th style="width:13%"><span class="flex items-center gap-2">Statut facture</span></th>
+          <th pSortableColumn="created_at" class="white-space-nowrap" style="width:10%">
+            <span class="flex items-center gap-2">Date <p-sortIcon field="created_at" /></span>
+          </th>
+          <th style="width:10%">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-c>
+        <tr>
+          <td (click)="goDetail(c.id)" class="cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex-shrink-0">
+                <i class="pi pi-truck text-sm"></i>
+              </div>
+              <div class="font-semibold font-mono text-sm">{{ c.reference }}</div>
+            </div>
+          </td>
+
+          <td>
+            @if (c.vehicule) {
+              <div>
+                <div class="font-medium text-sm">{{ c.vehicule.nom_vehicule }}</div>
+                <code class="text-xs text-surface-400">{{ c.vehicule.immatriculation }}</code>
+              </div>
+            } @else {
+              <span class="text-surface-400 text-sm">—</span>
+            }
+          </td>
+
+          <td>
+            @let livreur = c.vehicule?.livreurPrincipal ?? c.vehicule?.livreur_principal;
+            @if (livreur) {
+              <div>
+                <div class="font-medium text-sm">{{ livreur.prenom }} {{ livreur.nom }}</div>
+                @if (livreur.phone) {
+                  <div class="text-xs text-surface-400 font-mono">{{ livreur.phone }}</div>
+                }
+              </div>
+            } @else {
+              <span class="text-surface-400 text-sm">—</span>
+            }
+          </td>
+
+          <td class="font-semibold">{{ formatMontant(c.total_commande) }}</td>
+
+          <td>
+            @if (c.facture) {
+              <div class="flex flex-col gap-1">
+                <p-tag [value]="getStatutLabel(c.facture.statut_facture)" [severity]="getStatutSeverity(c.facture.statut_facture)" />
+                @if (isLocked(c)) {
+                  <span class="text-xs text-surface-400 flex items-center gap-1">
+                    <i class="pi pi-lock text-xs"></i> Verrouillée
+                  </span>
+                }
+              </div>
+            } @else {
+              <span class="text-surface-400 text-sm">—</span>
+            }
+          </td>
+
+          <td class="text-sm text-surface-500">{{ formatDate(c.created_at) }}</td>
+
+          <td>
+            <div class="flex gap-1">
+              <p-button icon="pi pi-eye" severity="info" [text]="true" [rounded]="true"
+                        pTooltip="Voir le détail" tooltipPosition="top" (onClick)="goDetail(c.id)" />
+              @if (canUpdate) {
+                <p-button icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true"
+                          [disabled]="isLocked(c)"
+                          [pTooltip]="isLocked(c) ? 'Verrouillée — encaissements existants' : 'Modifier'"
+                          tooltipPosition="top" (onClick)="openEditDialog(c)" />
+              }
+              @if (canDelete) {
+                <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
+                          [disabled]="isLocked(c)"
+                          [pTooltip]="isLocked(c) ? 'Verrouillée — encaissements existants' : 'Supprimer'"
+                          tooltipPosition="top" (onClick)="openDeleteDialog(c)" />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="7" class="text-center py-10">
+            <div class="flex flex-col items-center gap-3 text-surface-500">
+              <i class="pi pi-shopping-cart text-4xl"></i>
+              <span>Aucune commande de vente</span>
+              @if (canCreate) {
+                <p-button label="Créer une commande" icon="pi pi-plus" [text]="true" (onClick)="openCreateDialog()" />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #loadingbody>
+        @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          <tr>@for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {<td><p-skeleton /></td>}</tr>
+        }
+      </ng-template>
+    </p-table>
+  </div><!-- /cv-tableau-desktop -->
+
+</div><!-- /cv-liste-page-wrap -->
+
+<!-- ── Mobile : slideover plein écran ──────────────────────────────── -->
+@if (dialogVisible && isMobile()) {
+  <app-commande-mobile-form
+    [editMode]="editMode"
+    [saving]="saving"
+    [form]="createForm"
+    [vehiculeOptions]="vehiculeOptions"
+    [produitOptions]="produitOptions"
+    [produitData]="produitData"
+    (onSave)="onSaveCommande()"
+    (onClose)="dialogVisible = false"
+    (onAddLigne)="addLigne()"
+    (onRemoveLigne)="removeLigne($event)"
+    (onProduitChange)="onProduitChange($event.i, $event.id)"
+  />
+}
+
+<!-- ── Desktop : dialog classique ─────────────────────────────────── -->
+@if (!isMobile()) {
+<p-dialog
+  [header]="editMode ? 'Modifier la commande' : 'Nouvelle commande de vente'"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  styleClass="cv-commande-dialog"
+  [style]="{ width: '58rem', maxWidth: '96vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <form [formGroup]="createForm" novalidate>
+    <div class="flex flex-col gap-5">
+
+      <div class="flex flex-col gap-2">
+        <label class="font-medium text-sm">Véhicule <span class="text-red-500">*</span></label>
+        <p-select formControlName="vehicule_id" [options]="vehiculeOptions" optionLabel="label" optionValue="value"
+                  placeholder="Sélectionner un véhicule" [filter]="true" filterPlaceholder="Rechercher…"
+                  styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': isInvalid('vehicule_id')}" />
+        @if (isInvalid('vehicule_id')) { <small class="text-red-500">Sélectionnez un véhicule.</small> }
+      </div>
+
+      <p-divider styleClass="my-0" />
+
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <span class="font-medium text-sm">Lignes de commande <span class="text-red-500">*</span></span>
+          <p-button label="Ajouter une ligne" icon="pi pi-plus" [text]="true" size="small" (onClick)="addLigne()" />
+        </div>
+
+        <div class="grid gap-2 px-3 text-xs font-semibold text-surface-400 uppercase tracking-wide"
+             style="grid-template-columns: 1fr 8rem 8rem 5rem 8rem 2.5rem">
+          <span>Produit</span>
+          <span class="text-center">Prix usine</span>
+          <span class="text-center">Prix vente</span>
+          <span class="text-center">Qté</span>
+          <span class="text-right">Total</span>
+          <span></span>
+        </div>
+
+        <div formArrayName="lignes" class="flex flex-col gap-2">
+          @for (ligne of lignes.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="grid gap-2 items-center px-3 py-2 surface-50 border-round border-1 surface-border"
+                 style="grid-template-columns: 1fr 8rem 8rem 5rem 8rem 2.5rem">
+              <div class="flex flex-col gap-1 min-w-0">
+                <p-select formControlName="produit_id" [options]="produitOptions" optionLabel="label" optionValue="value"
+                          placeholder="Choisir…" [filter]="true" filterPlaceholder="Rechercher…" styleClass="w-full"
+                          [ngClass]="{'ng-invalid ng-dirty': isLigneInvalid(i, 'produit_id')}"
+                          (onChange)="onProduitChange(i, $event.value)" />
+                @if (isLigneInvalid(i, 'produit_id')) { <small class="text-red-500">Requis</small> }
+              </div>
+
+              <div class="text-center">
+                @if (getPrixUsine(i) > 0) {
+                  <span class="text-xs text-surface-400 font-mono">{{ formatMontant(getPrixUsine(i)) }}</span>
+                } @else { <span class="text-surface-300 text-xs">—</span> }
+              </div>
+
+              <p-inputNumber formControlName="prix_vente" [min]="0" [useGrouping]="true"
+                             styleClass="w-full" inputStyleClass="w-full text-right text-sm"
+                             [ngClass]="{'ng-invalid ng-dirty': isLigneInvalid(i, 'prix_vente')}" />
+
+              <p-inputNumber formControlName="qte" [min]="1" [useGrouping]="false"
+                             styleClass="w-full" inputStyleClass="w-full text-center text-sm"
+                             [ngClass]="{'ng-invalid ng-dirty': isLigneInvalid(i, 'qte')}" />
+
+              <div class="text-right">
+                @if (getTotalLigne(i) > 0) {
+                  <span class="font-semibold text-sm text-primary">{{ formatMontant(getTotalLigne(i)) }}</span>
+                } @else { <span class="text-surface-300 text-sm">—</span> }
+              </div>
+
+              <div class="flex justify-center">
+                <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" size="small"
+                          [disabled]="lignes.length === 1" (onClick)="removeLigne(i)" />
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="flex items-center justify-between px-3 py-3 border-round"
+             style="background: var(--p-primary-50, #eef2ff); border: 1px solid var(--p-primary-200, #c7d2fe)">
+          <span class="font-medium text-sm">Total commande</span>
+          <span class="font-bold text-xl text-primary">{{ formatMontant(totalDialog) }}</span>
+        </div>
+      </div>
+
+      @if (!editMode) {
+        <div class="flex items-center gap-2 px-3 py-2 surface-100 border-round text-sm text-surface-400">
+          <i class="pi pi-info-circle flex-shrink-0"></i>
+          <span>Une facture sera générée automatiquement à la création de la commande.</span>
+        </div>
+      }
+
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" [disabled]="saving" />
+    <p-button [label]="editMode ? 'Enregistrer les modifications' : 'Créer la commande'"
+              icon="pi pi-check" (onClick)="onSaveCommande()" [loading]="saving" />
+  </ng-template>
+</p-dialog>
+}<!-- /!isMobile -->
+
+<!-- ── Dialog : Confirmation suppression ──────────────────────────── -->
+<p-dialog
+  header="Supprimer la commande"
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  [style]="{ width: '26rem' }"
+  [draggable]="false"
+>
+  <div class="flex items-center gap-3 py-2">
+    <i class="pi pi-exclamation-triangle text-orange-500 text-3xl flex-shrink-0"></i>
+    <p class="m-0 text-sm">
+      Supprimer la commande <strong>{{ commandeToDelete?.reference }}</strong> ?
+      Cette action est irréversible.
+    </p>
+  </div>
+  <ng-template #footer>
+    <p-button label="Annuler" severity="secondary" [outlined]="true"
+              (onClick)="deleteDialogVisible = false" [disabled]="deleteLoading" />
+    <p-button label="Supprimer" icon="pi pi-trash" severity="danger"
+              (onClick)="confirmerSuppression()" [loading]="deleteLoading" />
+  </ng-template>
+</p-dialog>

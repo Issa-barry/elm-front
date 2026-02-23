@@ -40,6 +40,10 @@ export const appRoutes: Routes = [
                 path: 'vehicules',
                 loadChildren: () => import('@/pages/vehicules/vehicules.routes'),
             },
+            {
+                path: 'ventes',
+                loadChildren: () => import('@/pages/ventes/ventes.routes'),
+            },
              {
                 path: 'parametres',
                 loadChildren: () => import('@/pages/parametres/parametres.routes'),
