@@ -16,6 +16,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProprietaireService } from '@/services/proprietaires/proprietaire.service';
 import { Proprietaire } from '@/models/vehicule.model';
 import { AuthService } from '@/services/auth/auth.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-proprietaire-liste',
@@ -32,6 +33,7 @@ import { AuthService } from '@/services/auth/auth.service';
     IconFieldModule,
     TooltipModule,
     ConfirmDialogModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './proprietaire-liste.html',

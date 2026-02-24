@@ -68,7 +68,7 @@
             </div>
           </div>
         </td>
-        <td class="text-sm">{{ p.phone }}</td>
+        <td class="text-sm">{{ p.phone | phoneFormat }}</td>
         <td class="text-sm text-surface-500">{{ p.email || '—' }}</td>
         <td class="text-sm">{{ p.ville || '—' }}</td>
         <td class="text-sm">{{ p.pays || '—' }}</td>

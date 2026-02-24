@@ -19,6 +19,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { VehiculeService } from '@/services/vehicules/vehicule.service';
 import { Vehicule, TYPE_VEHICULE_LABELS } from '@/models/vehicule.model';
 import { AuthService } from '@/services/auth/auth.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-vehicule-liste',
@@ -39,6 +40,7 @@ import { AuthService } from '@/services/auth/auth.service';
     IconFieldModule,
     RippleModule,
     ConfirmDialogModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './vehicule-liste.html',

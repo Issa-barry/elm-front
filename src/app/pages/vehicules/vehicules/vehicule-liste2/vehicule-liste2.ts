@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -7,178 +8,135 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { StyleClassModule } from 'primeng/styleclass';
+import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
+import { MessageService } from 'primeng/api';
 
-interface Order {
-    id: number;
-    orderNumber: string;
-    product: string;
-    variant: string;
-    image: string;
-    date: string;
-    status: string;
-    statusLabel: string;
-    statusIcon: string;
-    statusColor: string;
-    total: string;
-}
+import { VehiculeService } from '@/services/vehicules/vehicule.service';
+import { Vehicule, TYPE_VEHICULE_LABELS } from '@/models/vehicule.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface FilterOption {
     label: string;
     value: string;
 }
 
-interface Customer {
-    name: string;
-    address: string;
-    city: string;
-    country: string;
-    zipCode: string;
-    phone: string;
-}
-
-interface Payment {
-    cardNumber: string;
-    subtotal: string;
-    shipping: string;
-    tax: string;
-}
-
 @Component({
   selector: 'app-vehicule-liste2',
-   templateUrl: './vehicule-liste2.html',
+  templateUrl: './vehicule-liste2.html',
   styleUrl: './vehicule-liste2.scss',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SelectModule, StyleClassModule],
+  imports: [CommonModule, RouterModule, PhoneFormatPipe, FormsModule, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SelectModule, StyleClassModule, ToastModule, TooltipModule],
+  providers: [MessageService],
 })
-export class VehiculeListe2 {
+export class VehiculeListe2 implements OnInit {
   searchQuery = signal<string>('');
   selectedFilter = signal<string>('all');
+  vehicules = signal<Vehicule[]>([]);
+  total = signal<number>(0);
+  loading = false;
 
   filterOptions: FilterOption[] = [
-      { label: 'All Orders', value: 'all' },
-      { label: 'Pending', value: 'pending' },
-      { label: 'In Delivery', value: 'delivery' },
-      { label: 'Delivered', value: 'delivered' }
+      { label: 'Tous', value: 'all' },
+      { label: 'Actifs', value: 'actif' },
+      { label: 'Inactifs', value: 'inactif' },
   ];
 
-  orders: Order[] = [
-      {
-          id: 1,
-          orderNumber: '#72831',
-          product: 'Modern Brass Pendant Light',
-          variant: 'Matte Gold Finish',
-          image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/orderhistory/row-expansion-1.jpg',
-          date: '15 Feb, 2025',
-          status: 'pending',
-          statusLabel: 'Pending',
-          statusIcon: 'pi-clock',
-          statusColor: 'surface',
-          total: '$109.08'
-      },
-      {
-          id: 2,
-          orderNumber: '#71293',
-          product: 'Scandinavian Dining Chair',
-          variant: 'Natural Oak',
-          image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/orderhistory/row-expansion-2.jpg',
-          date: '8 Feb, 2025',
-          status: 'delivery',
-          statusLabel: 'In Delivery',
-          statusIcon: 'pi-truck',
-          statusColor: 'orange',
-          total: '$159.08'
-      },
-      {
-          id: 3,
-          orderNumber: '#69847',
-          product: 'Mid-Century Storage Cabinet',
-          variant: 'Walnut Wood',
-          image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/orderhistory/row-expansion-3.jpg',
-          date: '25 Jan, 2025',
-          status: 'delivered',
-          statusLabel: 'Delivered',
-          statusIcon: 'pi-check',
-          statusColor: 'green',
-          total: '$449.00'
-      }
-  ];
+  constructor(
+    private vehiculeService: VehiculeService,
+    private messageService: MessageService,
+    private router: Router,
+  ) {}
 
-  orderCustomers: Record<number, Customer> = {
-      1: {
-          name: 'Sarah Johnson',
-          address: '123 Pine Street, Seattle, WA, 98101',
-          city: 'Seattle',
-          country: 'United States',
-          zipCode: '98101',
-          phone: '+1 (206) 555-0173'
-      },
-      2: {
-          name: 'Michael Chen',
-          address: '456 Oak Avenue, Portland, OR, 97201',
-          city: 'Portland',
-          country: 'United States',
-          zipCode: '97201',
-          phone: '+1 (503) 555-0142'
-      },
-      3: {
-          name: 'Emma Rodriguez',
-          address: '789 Maple Drive, Austin, TX, 78701',
-          city: 'Austin',
-          country: 'United States',
-          zipCode: '78701',
-          phone: '+1 (512) 555-0198'
-      }
-  };
+  goEdit(v: Vehicule): void {
+    this.router.navigate(['/vehicules', v.id, 'edit']);
+  }
 
-  orderPayments: Record<number, Payment> = {
-      1: {
-          cardNumber: '**** 4892',
-          subtotal: '$89.00',
-          shipping: '$12.00',
-          tax: '$8.08'
+  ngOnInit() {
+    this.loadVehicules();
+  }
+
+  loadVehicules() {
+    this.loading = true;
+    this.vehiculeService.getAll().subscribe({
+      next: (resp) => {
+        this.vehicules.set(resp.data?.data ?? []);
+        this.total.set(resp.data?.total ?? 0);
+        this.loading = false;
       },
-      2: {
-          cardNumber: '**** 7321',
-          subtotal: '$139.00',
-          shipping: '$15.00',
-          tax: '$5.08'
+      error: (err) => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err.error?.message || 'Impossible de charger les véhicules.',
+          life: 5000,
+        });
       },
-      3: {
-          cardNumber: '**** 9854',
-          subtotal: '$399.00',
-          shipping: '$20.00',
-          tax: '$30.00'
-      }
-  };
+    });
+  }
 
   filteredOrders = computed(() => {
-      let filtered = this.orders;
+      let filtered = this.vehicules();
 
       if (this.selectedFilter() !== 'all') {
-          filtered = filtered.filter((order) => order.status === this.selectedFilter());
+          filtered = filtered.filter(v =>
+              this.selectedFilter() === 'actif' ? v.is_active : !v.is_active
+          );
       }
 
       if (this.searchQuery().trim()) {
           const query = this.searchQuery().toLowerCase().trim();
-          filtered = filtered.filter((order) => order.orderNumber.toLowerCase().includes(query) || order.product.toLowerCase().includes(query) || order.variant.toLowerCase().includes(query));
+          filtered = filtered.filter(v =>
+              v.nom_vehicule.toLowerCase().includes(query) ||
+              v.immatriculation.toLowerCase().includes(query)
+          );
       }
 
       return filtered;
   });
 
-  toggleChevron(orderId: number): void {
-      const chevronClass = `.chevron-icon-${orderId}`;
-      const chevronElement = document.querySelector(chevronClass);
+  toggleChevron(vehiculeId: number): void {
+      const chevronElement = document.querySelector(`.chevron-icon-${vehiculeId}`);
       if (chevronElement) {
           chevronElement.classList.toggle('rotate-180');
       }
   }
 
-  getOrderCustomer(orderId: number): Customer {
-      return this.orderCustomers[orderId] || this.orderCustomers[1];
+  getTypeLabel(v: Vehicule): string {
+    return TYPE_VEHICULE_LABELS[v.type_vehicule] ?? v.type_vehicule;
   }
 
-  getOrderPayment(orderId: number): Payment {
-      return this.orderPayments[orderId] || this.orderPayments[1];
+  getStatusColor(v: Vehicule): string {
+    return v.is_active ? 'green' : 'surface';
+  }
+
+  getStatusIcon(v: Vehicule): string {
+    return v.is_active ? 'pi-check-circle' : 'pi-times-circle';
+  }
+
+  getStatusLabel(v: Vehicule): string {
+    return v.is_active ? 'Actif' : 'Inactif';
+  }
+
+  getProprietaireNom(v: Vehicule): string {
+    const p = v.proprietaire;
+    if (!p) return '—';
+    return `${p.prenom} ${p.nom}`.trim();
+  }
+
+  getLivreur(v: Vehicule) {
+    return v.livreur_principal ?? v.livreurPrincipal ?? null;
+  }
+
+  getLivreurNom(v: Vehicule): string {
+    const l = this.getLivreur(v);
+    if (!l) return '—';
+    return `${l.prenom} ${l.nom}`.trim();
+  }
+
+  formatDate(dateStr?: string | null): string {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('fr-FR');
   }
 }

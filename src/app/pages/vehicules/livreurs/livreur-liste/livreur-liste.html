@@ -61,7 +61,7 @@
             <span class="font-medium">{{ fullName(l) }}</span>
           </div>
         </td>
-        <td class="text-sm">{{ l.phone }}</td>
+        <td class="text-sm">{{ l.phone | phoneFormat }}</td>
         <td>
           @if (l.is_active) {
             <p-tag value="Actif" severity="success" />

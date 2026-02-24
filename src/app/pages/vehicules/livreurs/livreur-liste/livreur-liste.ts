@@ -16,6 +16,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { LivreurService } from '@/services/livreurs/livreur.service';
 import { Livreur } from '@/models/vehicule.model';
 import { AuthService } from '@/services/auth/auth.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-livreur-liste',
@@ -32,6 +33,7 @@ import { AuthService } from '@/services/auth/auth.service';
     IconFieldModule,
     TooltipModule,
     ConfirmDialogModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './livreur-liste.html',

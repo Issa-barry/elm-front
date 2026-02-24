@@ -164,7 +164,7 @@
                     </span>
                     <div>
                       <div class="font-medium text-sm">{{ p.prenom }} {{ p.nom }}</div>
-                      <div class="text-xs text-surface-500">{{ p.phone }}</div>
+                      <div class="text-xs text-surface-500">{{ p.phone | phoneFormat }}</div>
                     </div>
                   </div>
                 </ng-template>
@@ -211,7 +211,7 @@
                     </span>
                     <div>
                       <div class="font-medium text-sm">{{ l.prenom }} {{ l.nom }}</div>
-                      <div class="text-xs text-surface-500">{{ l.phone }}</div>
+                      <div class="text-xs text-surface-500">{{ l.phone | phoneFormat }}</div>
                     </div>
                   </div>
                 </ng-template>

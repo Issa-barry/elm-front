@@ -69,7 +69,7 @@
                     <p class="text-surface-400 text-xs m-0 mb-1">Propriétaire</p>
                     <p class="font-medium m-0">{{ commande.vehicule.proprietaire.prenom }} {{ commande.vehicule.proprietaire.nom }}</p>
                     @if (commande.vehicule.proprietaire.phone) {
-                      <p class="text-surface-400 text-xs m-0">{{ commande.vehicule.proprietaire.phone }}</p>
+                      <p class="text-surface-400 text-xs m-0">{{ commande.vehicule.proprietaire.phone | phoneFormat }}</p>
                     }
                   </div>
                 }
@@ -79,7 +79,7 @@
                     @let livreur = commande.vehicule.livreurPrincipal ?? commande.vehicule.livreur_principal;
                     <p class="font-medium m-0">{{ livreur?.prenom }} {{ livreur?.nom }}</p>
                     @if (livreur?.phone) {
-                      <p class="text-surface-400 text-xs m-0">{{ livreur?.phone }}</p>
+                      <p class="text-surface-400 text-xs m-0">{{ livreur?.phone | phoneFormat }}</p>
                     }
                   </div>
                 }

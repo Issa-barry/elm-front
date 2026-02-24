@@ -7,6 +7,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { StyleClassModule } from 'primeng/styleclass';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface Order {
     id: number;
@@ -48,7 +49,7 @@ interface Payment {
    templateUrl: './facture-vente-liste2.html',
   styleUrl: './facture-vente-liste2.scss',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SelectModule, StyleClassModule],
+  imports: [CommonModule, FormsModule, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SelectModule, StyleClassModule, PhoneFormatPipe],
 })
 export class FactureVenteListe2 {
   searchQuery = signal<string>('');

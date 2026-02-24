@@ -49,7 +49,7 @@
                 </div>
                 <div>
                   <div class="font-medium">{{ prestataire.prenom }} {{ prestataire.nom }}</div>
-                  <div class="text-sm text-surface-500">{{ prestataire.phone }}</div>
+                  <div class="text-sm text-surface-500">{{ prestataire.phone | phoneFormat }}</div>
                 </div>
               </div>
             </ng-template>

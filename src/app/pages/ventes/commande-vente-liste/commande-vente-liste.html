@@ -206,7 +206,7 @@
               <div>
                 <div class="font-medium text-sm">{{ livreur.prenom }} {{ livreur.nom }}</div>
                 @if (livreur.phone) {
-                  <div class="text-xs text-surface-400 font-mono">{{ livreur.phone }}</div>
+                  <div class="text-xs text-surface-400 font-mono">{{ livreur.phone | phoneFormat }}</div>
                 }
               </div>
             } @else {

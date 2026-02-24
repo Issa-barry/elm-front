@@ -33,6 +33,7 @@ import {
   Vehicule,
 } from '@/models/vehicule.model';
 import { AccessibleUsine } from '@/models/usine.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-vehicule-form',
@@ -50,6 +51,7 @@ import { AccessibleUsine } from '@/models/usine.model';
     MessageModule,
     SkeletonModule,
     ToggleSwitchModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService],
   templateUrl: './vehicule-form.html',

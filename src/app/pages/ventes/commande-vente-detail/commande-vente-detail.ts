@@ -15,6 +15,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
@@ -46,6 +47,7 @@ import {
     SelectModule,
     DatePickerModule,
     InputTextModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService],
   templateUrl: './commande-vente-detail.html',

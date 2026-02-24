@@ -116,7 +116,7 @@
           @if (v.proprietaire) {
             <span class="font-medium text-sm">{{ v.proprietaire.prenom }} {{ v.proprietaire.nom }}</span>
             <br />
-            <span class="text-surface-400 text-xs">{{ v.proprietaire.phone }}</span>
+            <span class="text-surface-400 text-xs">{{ v.proprietaire.phone | phoneFormat }}</span>
           } @else {
             <span class="text-surface-400">—</span>
           }
@@ -127,7 +127,7 @@
           @if (v.livreur_principal) {
             <span class="font-medium text-sm">{{ v.livreur_principal.prenom }} {{ v.livreur_principal.nom }}</span>
             <br />
-            <span class="text-surface-400 text-xs">{{ v.livreur_principal.phone }}</span>
+            <span class="text-surface-400 text-xs">{{ v.livreur_principal.phone | phoneFormat }}</span>
           } @else {
             <span class="text-surface-400">—</span>
           }

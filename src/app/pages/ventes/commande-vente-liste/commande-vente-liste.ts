@@ -32,6 +32,7 @@ import {
   UpdateCommandeVenteDto,
 } from '@/models/vente.model';
 import { Vehicule } from '@/models/vehicule.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface ProduitData {
   prixUsine: number;
@@ -60,6 +61,7 @@ interface ProduitData {
     IconFieldModule,
     DividerModule,
     CommandeMobileForm,
+    PhoneFormatPipe,
   ],
   providers: [MessageService],
   templateUrl: './commande-vente-liste.html',
