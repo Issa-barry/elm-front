@@ -1,6 +1,109 @@
 <p-toast></p-toast>
 
-<div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
+<!-- ===== VUE MOBILE (≤768px) — même pattern que utilisateurs-liste ===== -->
+<div class="vehicules-mobile-app">
+
+  <header class="mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour"
+      (click)="goBack()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Véhicules</h1>
+      <p class="mobile-subtitle">{{ total() }} véhicule{{ total() > 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu #filterMenu [model]="mobileFilterMenuItems" [popup]="true" appendTo="body" styleClass="mobile-filter-menu" />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer"
+      (click)="filterMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+
+    <section class="mobile-search">
+      <p-iconfield iconPosition="left">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Nom, immatriculation…"
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    @if (!loading && filteredOrders().length) {
+      <section class="mobile-list">
+        @for (v of filteredOrders(); track v.id) {
+          <article class="mobile-vehicule-card" (click)="goEdit(v)">
+
+            <!-- Avatar : photo si disponible, sinon initiales -->
+            @if (v.photo_url) {
+              <img class="mobile-card-avatar-img" [src]="v.photo_url" [alt]="v.nom_vehicule" />
+            } @else {
+              <div class="mobile-card-avatar" aria-hidden="true">
+                {{ getInitials(v.nom_vehicule) }}
+              </div>
+            }
+
+            <div class="mobile-card-body">
+              <div class="mobile-card-name">{{ v.nom_vehicule }}</div>
+              <div class="mobile-card-meta">{{ v.immatriculation }} · {{ getTypeLabel(v) }}</div>
+              <div class="mobile-card-footer">
+                <p-tag
+                  [value]="v.is_active ? 'Actif' : 'Inactif'"
+                  [severity]="v.is_active ? 'success' : 'danger'"
+                  styleClass="mobile-status-tag"
+                />
+                <div class="mobile-card-actions">
+                  <button
+                    pButton pRipple
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-text p-button-sm"
+                    pTooltip="Modifier"
+                    tooltipPosition="top"
+                    (click)="goEdit(v); $event.stopPropagation()"
+                  ></button>
+                </div>
+              </div>
+            </div>
+
+          </article>
+        }
+      </section>
+    }
+
+    @if (loading) {
+      <div class="mobile-state">Chargement…</div>
+    }
+
+    @if (!loading && filteredOrders().length === 0) {
+      <div class="mobile-state">Aucun véhicule trouvé.</div>
+    }
+
+  </div>
+
+  <button
+    type="button"
+    class="mobile-fab"
+    aria-label="Nouveau véhicule"
+    (click)="goNew()"
+  >
+    <i class="pi pi-plus"></i>
+  </button>
+</div>
+
+<!-- ===== VUE DESKTOP (>768px) — inchangée ===== -->
+<div class="vehicules-desktop bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
     <div class="flex flex-col lg:flex-row md:justify-between items-start lg:items-end gap-4 mb-8">
         <div class="flex flex-col gap-2 flex-1">
             <h1 class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight">Vehicules</h1>
@@ -60,19 +163,12 @@
 
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
                         <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Type</div>
                             <div class="px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-md">
                                 <span class="text-surface-600 dark:text-surface-300 text-sm font-bold">{{ getTypeLabel(v) }}</span>
                             </div>
                         </div>
 
-                        <div class="flex flex-col items-start sm:items-center flex-1">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Capacité</div>
-                            <!-- <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Capacité = 70</span> -->
-                        </div>
-
                         <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Status</div>
                             <div
                                 [ngClass]="{
                                     'px-2 py-1 rounded-md flex items-center gap-1': true,
@@ -106,11 +202,10 @@
                         </div>
 
                         <div class="flex flex-col items-start sm:items-center flex-1">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Capacité</div>
                             <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">{{ v.capacite_packs }}</span>
                         </div>
 
-                        <div class="flex items-center justify-start sm:justify-center gap-1 flex-1">
+                        <div class="flex items-center justify-center gap-1 flex-1">
                             <button
                                 pButton
                                 severity="secondary"
@@ -199,33 +294,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
-                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
-                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Encaissements</h3>
-                                <div class="flex items-center gap-4">
-                                     <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight"><i class="pi pi-plus"></i></span>
-                                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Ajouter</span>
-                                </div>
-                            </div>
-                            <div class="p-6 flex flex-col gap-5">
-                                <div class="flex flex-col gap-4">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Espèces</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">7000 FG</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Espèces</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">7000 FG</span>
-                                    </div>
-                                    <div class="h-px bg-surface-200 dark:bg-surface-700"></div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Total</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">14 000 FG</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
             </div>

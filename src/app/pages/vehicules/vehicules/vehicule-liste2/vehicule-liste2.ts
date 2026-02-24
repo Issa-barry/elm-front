@@ -2,15 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MenuItem, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 import { SelectModule } from 'primeng/select';
 import { StyleClassModule } from 'primeng/styleclass';
+import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
-import { MessageService } from 'primeng/api';
 
 import { VehiculeService } from '@/services/vehicules/vehicule.service';
 import { Vehicule, TYPE_VEHICULE_LABELS } from '@/models/vehicule.model';
@@ -26,7 +29,12 @@ interface FilterOption {
   templateUrl: './vehicule-liste2.html',
   styleUrl: './vehicule-liste2.scss',
   standalone: true,
-  imports: [CommonModule, RouterModule, PhoneFormatPipe, FormsModule, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SelectModule, StyleClassModule, ToastModule, TooltipModule],
+  imports: [
+    CommonModule, RouterModule, PhoneFormatPipe, FormsModule,
+    ButtonModule, IconFieldModule, InputIconModule, InputTextModule,
+    MenuModule, RippleModule, SelectModule, StyleClassModule,
+    TagModule, ToastModule, TooltipModule,
+  ],
   providers: [MessageService],
 })
 export class VehiculeListe2 implements OnInit {
@@ -42,18 +50,21 @@ export class VehiculeListe2 implements OnInit {
       { label: 'Inactifs', value: 'inactif' },
   ];
 
+  mobileFilterMenuItems: MenuItem[] = [];
+
   constructor(
     private vehiculeService: VehiculeService,
     private messageService: MessageService,
     private router: Router,
   ) {}
 
-  goEdit(v: Vehicule): void {
-    this.router.navigate(['/vehicules', v.id, 'edit']);
-  }
-
   ngOnInit() {
     this.loadVehicules();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous', icon: 'pi pi-list',         command: () => this.selectedFilter.set('all') },
+      { label: 'Actifs', icon: 'pi pi-check-circle', command: () => this.selectedFilter.set('actif') },
+      { label: 'Inactifs', icon: 'pi pi-times-circle', command: () => this.selectedFilter.set('inactif') },
+    ];
   }
 
   loadVehicules() {
@@ -96,11 +107,29 @@ export class VehiculeListe2 implements OnInit {
       return filtered;
   });
 
+  goEdit(v: Vehicule): void {
+    this.router.navigate(['/vehicules', v.id, 'edit']);
+  }
+
+  goNew(): void {
+    this.router.navigate(['/vehicules/nouveau']);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/vehicules']);
+  }
+
   toggleChevron(vehiculeId: number): void {
       const chevronElement = document.querySelector(`.chevron-icon-${vehiculeId}`);
       if (chevronElement) {
           chevronElement.classList.toggle('rotate-180');
       }
+  }
+
+  getInitials(name: string): string {
+    const words = (name ?? '').split(' ').filter(Boolean);
+    if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+    return (words[0]?.substring(0, 2) ?? '??').toUpperCase();
   }
 
   getTypeLabel(v: Vehicule): string {
