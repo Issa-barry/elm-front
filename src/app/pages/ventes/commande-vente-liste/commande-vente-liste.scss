@@ -32,6 +32,13 @@
     display: none;
 }
 
+// ─── Mobile cards container (base hidden, shown inside @media below) ──────────
+.cv-commandes-mobile {
+    display: none;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
 @media (max-width: 768px) {
     .cv-liste-mobile-header {
         display: flex;
@@ -96,12 +103,6 @@
 }
 
 // ─── Mobile cards ─────────────────────────────────────────────────────────────
-.cv-commandes-mobile {
-    display: none;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
 .cv-commande-card {
     background: var(--p-surface-0);
     border: 1px solid var(--p-surface-200);

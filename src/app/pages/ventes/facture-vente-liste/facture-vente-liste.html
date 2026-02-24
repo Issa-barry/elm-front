@@ -326,17 +326,11 @@
 
       <div class="fv-enc-slideover-footer">
         <p-button
-          label="Annuler"
-          severity="secondary"
-          [text]="true"
-          (onClick)="encaissementDialogVisible = false"
-          [disabled]="encaissementSaving"
-        />
-        <p-button
           label="Enregistrer"
           icon="pi pi-check"
           [loading]="encaissementSaving"
           (onClick)="onSaveEncaissement()"
+          fluid
         />
       </div>
 

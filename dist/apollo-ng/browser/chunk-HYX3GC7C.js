@@ -1,0 +1,1 @@
+var e={impayee:"Impay\xE9e",partiel:"Partielle",payee:"Pay\xE9e",annulee:"Annul\xE9e"},n={impayee:"danger",partiel:"warn",payee:"success",annulee:"secondary"},t=[{label:"Esp\xE8ces",value:"especes"},{label:"Mobile Money",value:"mobile_money"},{label:"Virement",value:"virement"},{label:"Ch\xE8que",value:"cheque"}];export{e as a,n as b,t as c};

@@ -393,9 +393,10 @@
   </form>
 
   <ng-template #footer>
-    <p-button label="Annuler" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" [disabled]="saving" />
-    <p-button [label]="editMode ? 'Enregistrer les modifications' : 'Créer la commande'"
-              icon="pi pi-check" (onClick)="onSaveCommande()" [loading]="saving" />
+    <div class="w-full">
+      <p-button [label]="editMode ? 'Enregistrer les modifications' : 'Créer la commande'"
+                icon="pi pi-check" (onClick)="onSaveCommande()" [loading]="saving" fluid />
+    </div>
   </ng-template>
 </p-dialog>
 }<!-- /!isMobile -->

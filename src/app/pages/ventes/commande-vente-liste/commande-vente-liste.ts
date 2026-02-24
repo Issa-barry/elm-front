@@ -1,5 +1,5 @@
 import { Component, HostListener, Inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule, DOCUMENT, Location } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
@@ -132,7 +132,6 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     private authService: AuthService,
     private messageService: MessageService,
     private router: Router,
-    private location: Location,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('commandes.create');
@@ -187,6 +186,16 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   }
 
   addLigne() {
+    if (this.defaultProduitId) {
+      const existingIdx = this.lignes.controls.findIndex(
+        ctrl => ctrl.get('produit_id')?.value === this.defaultProduitId
+      );
+      if (existingIdx !== -1) {
+        const ctrl = this.lignes.at(existingIdx);
+        ctrl.patchValue({ qte: (ctrl.get('qte')?.value ?? 1) + 1 });
+        return;
+      }
+    }
     this.lignes.push(this.createLigneGroup());
     if (this.defaultProduitId) {
       const i = this.lignes.length - 1;
@@ -203,6 +212,15 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     const data = this.produitData.get(produitId);
     if (data) {
       this.lignes.at(i).patchValue({ prix_vente: data.prixVente });
+    }
+    const duplicateIdx = this.lignes.controls.findIndex(
+      (ctrl, idx) => idx !== i && ctrl.get('produit_id')?.value === produitId
+    );
+    if (duplicateIdx !== -1) {
+      const addedQte = this.lignes.at(i).get('qte')?.value ?? 1;
+      const existingQte = this.lignes.at(duplicateIdx).get('qte')?.value ?? 1;
+      this.lignes.at(duplicateIdx).patchValue({ qte: existingQte + addedQte });
+      this.lignes.removeAt(i);
     }
   }
 
@@ -377,7 +395,7 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   }
 
   goBack() {
-    this.location.back();
+    this.router.navigate(['/']);
   }
 
   goDetail(id: number) {

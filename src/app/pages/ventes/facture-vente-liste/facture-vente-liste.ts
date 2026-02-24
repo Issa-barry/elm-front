@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -82,14 +82,13 @@ export class FactureVenteListe implements OnInit {
     private factureService: FactureLivraisonService,
     private authService: AuthService,
     private messageService: MessageService,
-    private router: Router,
-    private location: Location
+    private router: Router
   ) {
     this.canEncaissement = this.authService.hasPermission('encaissements.create');
   }
 
   goBack() {
-    this.location.back();
+    this.router.navigate(['/']);
   }
 
   ngOnInit() {

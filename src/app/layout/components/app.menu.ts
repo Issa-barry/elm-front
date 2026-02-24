@@ -71,6 +71,12 @@ export class AppMenu {
                                 visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
                             },
                             {
+                                label: 'Factures vente liste 2',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures-vente-liste2'],
+                                visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                            },
+                            {
                                 label: 'Facture packing',
                                 icon: 'pi pi-fw pi-money-bill',
                                 routerLink: ['/comptabilite/comptabilite-packing-liste'],

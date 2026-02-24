@@ -45,65 +45,74 @@
 
     <ng-template #header>
       <tr>
-        <th pSortableColumn="nom_vehicule" style="width:20%">
+        <th pSortableColumn="nom_vehicule">
           <span class="flex items-center gap-2">
             Véhicule <p-sortIcon field="nom_vehicule" />
           </span>
         </th>
-        <th pSortableColumn="immatriculation" style="width:12%">
+        <th pSortableColumn="immatriculation" class="hidden sm:table-cell" style="width:12%">
           <span class="flex items-center gap-2">
             Immatriculation <p-sortIcon field="immatriculation" />
           </span>
         </th>
-        <th style="width:9%">Type</th>
-        <th style="width:17%">Propriétaire</th>
-        <th style="width:17%">Livreur</th>
-        <th style="width:9%" class="text-center">Statut</th>
+        <th class="hidden md:table-cell" style="width:9%">Type</th>
+        <th class="hidden lg:table-cell" style="width:17%">Propriétaire</th>
+        <th class="hidden lg:table-cell" style="width:17%">Livreur</th>
+        <th class="hidden sm:table-cell text-center" style="width:9%">Statut</th>
         @if (canUpdate || canDelete) {
-          <th style="width:5%" class="text-center">Actions</th>
+          <th class="text-center" style="width:5%">Actions</th>
         }
       </tr>
     </ng-template>
 
     <ng-template #body let-v>
       <tr>
-        <!-- Véhicule : photo ou initiales -->
+        <!-- Véhicule : photo ou initiales + infos condensées sur mobile -->
         <td>
           <div class="flex items-center gap-2">
             @if (v.photo_url) {
               <img
                 [src]="v.photo_url"
                 [alt]="v.nom_vehicule"
-                style="width: 64px"
-                class="rounded"
+                class="rounded flex-shrink-0"
+                style="width:48px;height:48px;object-fit:cover"
               />
             } @else {
               <span
-                class="inline-flex items-center justify-center rounded bg-primary text-white font-bold text-sm"
-                style="width:64px;height:64px"
+                class="inline-flex items-center justify-center rounded bg-primary text-white font-bold text-sm flex-shrink-0"
+                style="width:48px;height:48px"
               >
                 {{ getInitials(v) }}
               </span>
             }
-            <div>
-              <div class="font-medium">{{ v.nom_vehicule }}</div>
+            <div class="min-w-0">
+              <div class="font-medium truncate">{{ v.nom_vehicule }}</div>
               @if (v.marque || v.modele) {
                 <div class="text-xs text-surface-400">{{ v.marque }} {{ v.modele }}</div>
               }
+              <!-- Immatriculation visible uniquement sur mobile -->
+              <code class="sm:hidden text-xs surface-100 px-1 py-0.5 rounded">{{ v.immatriculation }}</code>
+              <!-- Statut visible uniquement sur mobile -->
+              <div class="sm:hidden mt-1">
+                <p-tag
+                  [value]="v.is_active ? 'Actif' : 'Inactif'"
+                  [severity]="v.is_active ? 'success' : 'warn'"
+                />
+              </div>
             </div>
           </div>
         </td>
 
-        <!-- Immatriculation -->
-        <td>
+        <!-- Immatriculation — masqué sur mobile -->
+        <td class="hidden sm:table-cell">
           <code class="text-sm surface-100 px-2 py-1 border-round">{{ v.immatriculation }}</code>
         </td>
 
-        <!-- Type -->
-        <td class="text-sm">{{ getTypeLabel(v) }}</td>
+        <!-- Type — masqué sur mobile/sm -->
+        <td class="hidden md:table-cell text-sm">{{ getTypeLabel(v) }}</td>
 
-        <!-- Propriétaire -->
-        <td>
+        <!-- Propriétaire — masqué sous lg -->
+        <td class="hidden lg:table-cell">
           @if (v.proprietaire) {
             <span class="font-medium text-sm">{{ v.proprietaire.prenom }} {{ v.proprietaire.nom }}</span>
             <br />
@@ -113,8 +122,8 @@
           }
         </td>
 
-        <!-- Livreur -->
-        <td>
+        <!-- Livreur — masqué sous lg -->
+        <td class="hidden lg:table-cell">
           @if (v.livreur_principal) {
             <span class="font-medium text-sm">{{ v.livreur_principal.prenom }} {{ v.livreur_principal.nom }}</span>
             <br />
@@ -124,8 +133,8 @@
           }
         </td>
 
-        <!-- Statut -->
-        <td class="text-center">
+        <!-- Statut — masqué sur mobile -->
+        <td class="hidden sm:table-cell text-center">
           <p-tag
             [value]="v.is_active ? 'Actif' : 'Inactif'"
             [severity]="v.is_active ? 'success' : 'warn'"

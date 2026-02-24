@@ -32,6 +32,13 @@
     display: none;
 }
 
+// ─── Mobile cards container (base hidden, shown inside @media below) ──────────
+.fv-factures-mobile {
+    display: none;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
 @media (max-width: 768px) {
     .fv-liste-mobile-header {
         display: flex;
@@ -136,12 +143,6 @@
 }
 
 // ─── Mobile cards ─────────────────────────────────────────────────────────────
-.fv-factures-mobile {
-    display: none;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
 .fv-facture-card {
     background: var(--p-surface-0);
     border: 1px solid var(--p-surface-200);
@@ -278,9 +279,6 @@
 .fv-enc-slideover-footer {
     padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--p-surface-200);
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
     flex-shrink: 0;
 }
 

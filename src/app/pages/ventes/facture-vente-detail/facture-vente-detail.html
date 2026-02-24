@@ -27,6 +27,9 @@
         pTooltip="Annuler la facture"
         (onClick)="openAnnulerDialog()"
       />
+    } @else {
+      <!-- Spacer pour centrer le titre -->
+      <span style="width:2.15rem;height:2.15rem;flex-shrink:0"></span>
     }
   </header>
 
@@ -59,7 +62,7 @@
     }
   </div>
 
-  <!-- ── Slideover encaissement (full-screen mobile / side panel desktop) ─ -->
+  <!-- ── Slideover encaissement ─────────────────────────────────────────── -->
   @if (encaissementDialogVisible) {
     <div class="fixed inset-0 z-50">
       <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="encaissementDialogVisible = false"></div>
@@ -136,17 +139,11 @@
 
         <div class="fv-enc-slideover-footer">
           <p-button
-            label="Annuler"
-            severity="secondary"
-            [outlined]="true"
-            (onClick)="encaissementDialogVisible = false"
-            [disabled]="encaissementSaving"
-          />
-          <p-button
             label="Enregistrer"
             icon="pi pi-save"
             (onClick)="onSaveEncaissement()"
             [loading]="encaissementSaving"
+            fluid
           />
         </div>
 
@@ -163,145 +160,77 @@
           <p-card><p-skeleton height="6rem" /></p-card>
         }
       </div>
+
     } @else if (facture) {
 
-      <!-- Stats bar -->
-      <div class="fv-stats-bar mx-4 md:mx-6">
-        <div class="fv-stats-bar__item">
-          <div class="fv-stats-bar__icon"><i class="pi pi-wallet"></i></div>
-          <div>
-            <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_net) }}</div>
-            <div class="fv-stats-bar__label">Montant net</div>
-          </div>
-        </div>
-        <div class="fv-stats-bar__divider"></div>
-        <div class="fv-stats-bar__item">
-          <div class="fv-stats-bar__icon"><i class="pi pi-check-circle"></i></div>
-          <div>
-            <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_encaisse) }}</div>
-            <div class="fv-stats-bar__label">Encaissé</div>
-          </div>
-        </div>
-        <div class="fv-stats-bar__divider"></div>
-        <div class="fv-stats-bar__item">
-          <div class="fv-stats-bar__icon"><i class="pi pi-clock"></i></div>
-          <div>
-            <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_restant) }}</div>
-            <div class="fv-stats-bar__label">Restant</div>
-          </div>
-        </div>
-      </div>
+      <!-- ══════════════ MOBILE ══════════════ -->
+      <div class="fv-mobile-only">
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 md:px-6">
+        <!-- Hero card -->
+        <div class="fv-hero">
 
-        <!-- Infos facture -->
-        <p-card>
-          <ng-template #header>
-            <div class="flex align-items-center justify-content-between px-5 pt-4 pb-2">
-              <div class="flex align-items-center gap-2">
-                <i class="pi pi-file-invoice text-primary text-xl"></i>
-                <h2 class="text-base font-semibold m-0 font-mono">{{ facture.reference }}</h2>
-              </div>
-              <p-tag
-                [value]="getStatutLabel(facture.statut_facture)"
-                [severity]="getStatutSeverity(facture.statut_facture)"
-              />
-            </div>
-          </ng-template>
+          <div class="fv-hero__top">
+            <code class="fv-hero__ref">{{ facture.reference }}</code>
+            <p-tag
+              [value]="getStatutLabel(facture.statut_facture)"
+              [severity]="getStatutSeverity(facture.statut_facture)"
+            />
+          </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <p class="text-color-secondary text-sm m-0 mb-1">Montant brut</p>
-              <p class="text-2xl font-bold m-0 text-primary">{{ formatMontant(facture.montant_brut) }}</p>
+          <div class="fv-hero__center">
+            <div class="fv-hero__amount">{{ formatMontant(facture.montant_net) }}</div>
+            <div class="fv-hero__amount-label">Montant net</div>
+          </div>
+
+          <div class="fv-hero__progress">
+            <div class="fv-hero__progress-track">
+              <div class="fv-hero__progress-fill" [style.width]="progressPct + '%'"></div>
             </div>
-            <div>
-              <p class="text-color-secondary text-sm m-0 mb-1">Montant net</p>
-              <p class="text-xl font-semibold m-0">{{ formatMontant(facture.montant_net) }}</p>
+            <span class="fv-hero__progress-pct">{{ progressPct }}%</span>
+          </div>
+
+          <div class="fv-hero__split">
+            <div class="fv-hero__split-col">
+              <i class="pi pi-check-circle fv-hero__split-icon fv-hero__split-icon--green"></i>
+              <div class="fv-hero__split-val fv-hero__split-val--green">{{ formatMontant(facture.montant_encaisse) }}</div>
+              <div class="fv-hero__split-lbl">Encaissé</div>
             </div>
-            <div>
-              <p class="text-color-secondary text-sm m-0 mb-1">Encaissé</p>
-              <p class="font-semibold text-green-600 m-0">{{ formatMontant(facture.montant_encaisse) }}</p>
-            </div>
-            <div>
-              <p class="text-color-secondary text-sm m-0 mb-1">Restant</p>
-              <p class="font-semibold text-red-500 m-0">{{ formatMontant(facture.montant_restant) }}</p>
-            </div>
-            <div>
-              <p class="text-color-secondary text-sm m-0 mb-1">Date de création</p>
-              <p class="font-semibold m-0">{{ formatDate(facture.created_at) }}</p>
+            <div class="fv-hero__split-sep"></div>
+            <div class="fv-hero__split-col">
+              <i class="pi pi-clock fv-hero__split-icon fv-hero__split-icon--red"></i>
+              <div class="fv-hero__split-val fv-hero__split-val--red">{{ formatMontant(facture.montant_restant) }}</div>
+              <div class="fv-hero__split-lbl">Restant</div>
             </div>
           </div>
 
-          <!-- Barre de progression -->
-          <p-divider />
-          <div>
-            <div class="flex justify-content-between mb-1 text-sm">
-              <span class="text-color-secondary">Progression encaissement</span>
-              <span class="font-semibold">{{ progressPct }}%</span>
-            </div>
-            <div class="fv-progress-wrap">
-              <div class="fv-progress-fill" [style.width]="progressPct + '%'"></div>
-            </div>
-          </div>
-        </p-card>
-
-        <!-- Véhicule associé -->
-        @if (facture.vehicule) {
-          <p-card>
-            <ng-template #header>
-              <div class="flex align-items-center gap-2 px-5 pt-4 pb-2">
-                <i class="pi pi-car text-blue-500 text-xl"></i>
-                <h2 class="text-base font-semibold m-0">Véhicule associé</h2>
-              </div>
-            </ng-template>
-            <div class="flex align-items-center gap-3">
-              <span
-                class="flex align-items-center justify-content-center bg-blue-100 text-blue-700 border-circle font-bold text-lg"
-                style="width:3rem;height:3rem"
-              >
-                {{ facture.vehicule.nom_vehicule?.charAt(0) }}
+          <div class="fv-hero__meta">
+            <span class="fv-hero__meta-item">
+              <i class="pi pi-calendar"></i>
+              {{ formatDate(facture.created_at) }}
+            </span>
+            @if (facture.vehicule) {
+              <span class="fv-hero__meta-item">
+                <i class="pi pi-car"></i>
+                {{ facture.vehicule.nom_vehicule }}
               </span>
-              <div>
-                <p class="font-semibold m-0">{{ facture.vehicule.nom_vehicule }}</p>
-                <code class="text-sm text-color-secondary">{{ facture.vehicule.immatriculation }}</code>
-                @if (facture.vehicule.proprietaire) {
-                  <p class="text-sm text-color-secondary m-0 mt-1">
-                    Propriétaire : {{ facture.vehicule.proprietaire.prenom }} {{ facture.vehicule.proprietaire.nom }}
-                  </p>
-                }
-                @if (facture.vehicule.livreurPrincipal) {
-                  <p class="text-sm text-color-secondary m-0">
-                    Livreur : {{ facture.vehicule.livreurPrincipal.prenom }} {{ facture.vehicule.livreurPrincipal.nom }}
-                  </p>
-                }
-              </div>
-            </div>
-          </p-card>
-        }
+            }
+          </div>
 
-        <!-- Encaissements -->
-        <p-card class="lg:col-span-2">
-          <ng-template #header>
-            <div class="flex align-items-center justify-content-between px-5 pt-4 pb-2">
-              <div class="flex align-items-center gap-2">
-                <i class="pi pi-wallet text-green-500 text-xl"></i>
-                <h2 class="text-base font-semibold m-0">Encaissements</h2>
-              </div>
-              @if (canAddEncaissement) {
-                <p-button
-                  label="Ajouter"
-                  icon="pi pi-plus"
-                  severity="success"
-                  [outlined]="true"
-                  [text]="true"
-                  size="small"
-                  (onClick)="openEncaissementDialog()"
-                />
-              }
-            </div>
-          </ng-template>
+        </div>
 
-          @if (facture.encaissements && facture.encaissements.length > 0) {
+        <!-- Section encaissements -->
+        <div class="fv-section">
+          <h2 class="fv-section__title">
+            <i class="pi pi-wallet"></i>
+            Encaissements
+          </h2>
+
+          @if (!facture.encaissements?.length) {
+            <div class="fv-section__empty">
+              <i class="pi pi-inbox"></i>
+              <span>Aucun encaissement enregistré</span>
+            </div>
+          } @else {
             <div class="flex flex-col gap-2">
               @for (enc of facture.encaissements; track enc.id) {
                 <div class="fv-enc-card">
@@ -316,12 +245,181 @@
                 </div>
               }
             </div>
-          } @else {
-            <p class="text-color-secondary text-sm text-center py-2 m-0">Aucun encaissement.</p>
           }
-        </p-card>
+        </div>
 
       </div>
+
+      <!-- FAB Encaisser (mobile only) -->
+      @if (canAddEncaissement) {
+        <button class="fv-fab" (click)="openEncaissementDialog()" aria-label="Ajouter un encaissement">
+          <i class="pi pi-plus"></i>
+          <span class="fv-fab__label">Encaisser</span>
+        </button>
+      }
+
+      <!-- ══════════════ DESKTOP ══════════════ -->
+      <div class="fv-desktop-only">
+
+        <!-- Stats bar -->
+        <div class="fv-stats-bar mx-4 md:mx-6">
+          <div class="fv-stats-bar__item">
+            <div class="fv-stats-bar__icon"><i class="pi pi-wallet"></i></div>
+            <div>
+              <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_net) }}</div>
+              <div class="fv-stats-bar__label">Montant net</div>
+            </div>
+          </div>
+          <div class="fv-stats-bar__divider"></div>
+          <div class="fv-stats-bar__item">
+            <div class="fv-stats-bar__icon"><i class="pi pi-check-circle"></i></div>
+            <div>
+              <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_encaisse) }}</div>
+              <div class="fv-stats-bar__label">Encaissé</div>
+            </div>
+          </div>
+          <div class="fv-stats-bar__divider"></div>
+          <div class="fv-stats-bar__item">
+            <div class="fv-stats-bar__icon"><i class="pi pi-clock"></i></div>
+            <div>
+              <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_restant) }}</div>
+              <div class="fv-stats-bar__label">Restant</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4 md:px-6">
+
+          <!-- Infos facture -->
+          <p-card>
+            <ng-template #header>
+              <div class="flex align-items-center justify-content-between px-5 pt-4 pb-2">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-file-invoice text-primary text-xl"></i>
+                  <h2 class="text-base font-semibold m-0 font-mono">{{ facture.reference }}</h2>
+                </div>
+                <p-tag
+                  [value]="getStatutLabel(facture.statut_facture)"
+                  [severity]="getStatutSeverity(facture.statut_facture)"
+                />
+              </div>
+            </ng-template>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-color-secondary text-sm m-0 mb-1">Montant brut</p>
+                <p class="text-2xl font-bold m-0 text-primary">{{ formatMontant(facture.montant_brut) }}</p>
+              </div>
+              <div>
+                <p class="text-color-secondary text-sm m-0 mb-1">Montant net</p>
+                <p class="text-xl font-semibold m-0">{{ formatMontant(facture.montant_net) }}</p>
+              </div>
+              <div>
+                <p class="text-color-secondary text-sm m-0 mb-1">Encaissé</p>
+                <p class="font-semibold text-green-600 m-0">{{ formatMontant(facture.montant_encaisse) }}</p>
+              </div>
+              <div>
+                <p class="text-color-secondary text-sm m-0 mb-1">Restant</p>
+                <p class="font-semibold text-red-500 m-0">{{ formatMontant(facture.montant_restant) }}</p>
+              </div>
+              <div>
+                <p class="text-color-secondary text-sm m-0 mb-1">Date de création</p>
+                <p class="font-semibold m-0">{{ formatDate(facture.created_at) }}</p>
+              </div>
+            </div>
+
+            <p-divider />
+            <div>
+              <div class="flex justify-content-between mb-1 text-sm">
+                <span class="text-color-secondary">Progression encaissement</span>
+                <span class="font-semibold">{{ progressPct }}%</span>
+              </div>
+              <div class="fv-progress-wrap">
+                <div class="fv-progress-fill" [style.width]="progressPct + '%'"></div>
+              </div>
+            </div>
+          </p-card>
+
+          <!-- Véhicule associé -->
+          @if (facture.vehicule) {
+            <p-card>
+              <ng-template #header>
+                <div class="flex align-items-center gap-2 px-5 pt-4 pb-2">
+                  <i class="pi pi-car text-blue-500 text-xl"></i>
+                  <h2 class="text-base font-semibold m-0">Véhicule associé</h2>
+                </div>
+              </ng-template>
+              <div class="flex align-items-center gap-3">
+                <span
+                  class="flex align-items-center justify-content-center bg-blue-100 text-blue-700 border-circle font-bold text-lg"
+                  style="width:3rem;height:3rem"
+                >
+                  {{ facture.vehicule.nom_vehicule?.charAt(0) }}
+                </span>
+                <div>
+                  <p class="font-semibold m-0">{{ facture.vehicule.nom_vehicule }}</p>
+                  <code class="text-sm text-color-secondary">{{ facture.vehicule.immatriculation }}</code>
+                  @if (facture.vehicule.proprietaire) {
+                    <p class="text-sm text-color-secondary m-0 mt-1">
+                      Propriétaire : {{ facture.vehicule.proprietaire.prenom }} {{ facture.vehicule.proprietaire.nom }}
+                    </p>
+                  }
+                  @if (facture.vehicule.livreurPrincipal) {
+                    <p class="text-sm text-color-secondary m-0">
+                      Livreur : {{ facture.vehicule.livreurPrincipal.prenom }} {{ facture.vehicule.livreurPrincipal.nom }}
+                    </p>
+                  }
+                </div>
+              </div>
+            </p-card>
+          }
+
+          <!-- Encaissements -->
+          <p-card class="lg:col-span-2">
+            <ng-template #header>
+              <div class="flex align-items-center justify-content-between px-5 pt-4 pb-2">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-wallet text-green-500 text-xl"></i>
+                  <h2 class="text-base font-semibold m-0">Encaissements</h2>
+                </div>
+                @if (canAddEncaissement) {
+                  <p-button
+                    label="Ajouter"
+                    icon="pi pi-plus"
+                    severity="success"
+                    [outlined]="true"
+                    [text]="true"
+                    size="small"
+                    (onClick)="openEncaissementDialog()"
+                  />
+                }
+              </div>
+            </ng-template>
+
+            @if (facture.encaissements && facture.encaissements.length > 0) {
+              <div class="flex flex-col gap-2">
+                @for (enc of facture.encaissements; track enc.id) {
+                  <div class="fv-enc-card">
+                    <div>
+                      <div class="fv-enc-card__amount">{{ formatMontant(enc.montant) }}</div>
+                      @if (enc.note) {
+                        <div class="fv-enc-card__note">{{ enc.note }}</div>
+                      }
+                      <div class="fv-enc-card__date">{{ formatDate(enc.date_encaissement) }}</div>
+                    </div>
+                    <span class="fv-enc-card__mode">{{ enc.mode_paiement }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-color-secondary text-sm text-center py-2 m-0">Aucun encaissement.</p>
+            }
+          </p-card>
+
+        </div>
+
+      </div><!-- /.fv-desktop-only -->
+
     }
 
   </div><!-- /.fv-detail-mobile-scroll -->

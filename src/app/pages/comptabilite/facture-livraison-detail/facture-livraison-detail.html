@@ -240,8 +240,9 @@
   </form>
 
   <ng-template #footer>
-    <p-button label="Annuler" severity="secondary" [outlined]="true" (onClick)="encaissementDialogVisible = false" [disabled]="encaissementSaving" />
-    <p-button label="Enregistrer" icon="pi pi-save" (onClick)="onSaveEncaissement()" [loading]="encaissementSaving" />
+    <div class="w-full">
+      <p-button label="Enregistrer" icon="pi pi-save" (onClick)="onSaveEncaissement()" [loading]="encaissementSaving" fluid />
+    </div>
   </ng-template>
 </p-dialog>
 

@@ -224,17 +224,9 @@
           </div>
         </td>
         <td>
-          <ng-container *ngIf="(user.role_names?.length || user.roles?.length); else noRole">
-            <p-tag
-              *ngFor="let role of (user.role_names || user.roles)"
-              [value]="role"
-              [severity]="getRoleSeverity(role)"
-              class="mr-1"
-            ></p-tag>
-          </ng-container>
-          <ng-template #noRole>
-            <span class="text-surface-400">-</span>
-          </ng-template>
+          <span class="text-sm text-surface-700">
+            {{ (user.role_names || user.roles)?.join(', ') || '-' }}
+          </span>
         </td>
         <td>
           <div class="flex items-center gap-2">

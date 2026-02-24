@@ -16,6 +16,18 @@ export default [
     loadComponent: () => import('./commande-vente-detail/commande-vente-detail').then(c => c.CommandeVenteDetail),
   },
   {
+    path: 'factures-vente-liste2',
+    loadComponent: () => import('./facture-vente-liste2/facture-vente-liste2').then(c => c.FactureVenteListe2),
+  },
+  {
+    path: 'factures-vente-detail2/:id',
+    loadComponent: () => import('./facture-vente-detail2/facture-vente-detail2').then(c => c.FactureVenteDetail2),
+  },
+  {
+    path: 'factures-vente',
+    loadComponent: () => import('./facture-vente-liste/facture-vente-liste').then(c => c.FactureVenteListe),
+  },
+  {
     path: 'factures',
     loadComponent: () => import('./facture-vente-liste/facture-vente-liste').then(c => c.FactureVenteListe),
   },

@@ -203,7 +203,8 @@
   </form>
 
   <ng-template #footer>
-    <p-button label="Annuler" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" [disabled]="saving" />
-    <p-button label="Enregistrer" icon="pi pi-save" (onClick)="onSaveEncaissement()" [loading]="saving" />
+    <div class="w-full">
+      <p-button label="Enregistrer" icon="pi pi-save" (onClick)="onSaveEncaissement()" [loading]="saving" fluid />
+    </div>
   </ng-template>
 </p-dialog>
