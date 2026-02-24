@@ -14,12 +14,15 @@ import { ProprietaireEdit }  from './proprietaires/proprietaire-edit/proprietair
 import { LivreurListe } from './livreurs/livreur-liste/livreur-liste';
 import { LivreurForm }  from './livreurs/livreur-form/livreur-form';
 import { LivreurEdit }  from './livreurs/livreur-edit/livreur-edit';
+import { VehiculeListe2 } from './vehicules/vehicule-liste2/vehicule-liste2';
 
 export default [
   // Véhicules
   { path: '',         component: VehiculeListe },
   { path: 'nouveau',  component: VehiculeForm  },
   { path: ':id/edit', component: VehiculeEdit  },
+
+  { path: 'vehicules-liste2',         component: VehiculeListe2 },
 
   // Propriétaires
   { path: 'proprietaires',          component: ProprietaireListe },

@@ -44,13 +44,13 @@ interface Payment {
 }
 
 @Component({
-  selector: 'app-facture-vente-detail2',
-  templateUrl: './facture-vente-detail2.html',
-  styleUrl: './facture-vente-detail2.scss',
+  selector: 'app-vehicule-liste2',
+   templateUrl: './vehicule-liste2.html',
+  styleUrl: './vehicule-liste2.scss',
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule, IconFieldModule, InputIconModule, InputTextModule, SelectModule, StyleClassModule],
 })
-export class FactureVenteDetail2 {
+export class VehiculeListe2 {
   searchQuery = signal<string>('');
   selectedFilter = signal<string>('all');
 

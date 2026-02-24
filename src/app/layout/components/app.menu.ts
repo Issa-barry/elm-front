@@ -115,6 +115,11 @@ export class AppMenu {
                                 routerLink: ['/vehicules'],
                             },
                             {
+                                label: 'Liste des véhicules 2',
+                                icon: 'pi pi-fw pi-list',
+                                routerLink: ['/vehicules/vehicules-liste2'],
+                            },
+                            {
                                 label: 'Propriétaires',
                                 icon: 'pi pi-fw pi-user',
                                 routerLink: ['/vehicules/proprietaires'],
