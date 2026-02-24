@@ -349,28 +349,67 @@
                   <h2 class="text-base font-semibold m-0">Véhicule associé</h2>
                 </div>
               </ng-template>
-              <div class="flex align-items-center gap-3">
-                <span
-                  class="flex align-items-center justify-content-center bg-blue-100 text-blue-700 border-circle font-bold text-lg"
-                  style="width:3rem;height:3rem"
-                >
-                  {{ facture.vehicule.nom_vehicule?.charAt(0) }}
-                </span>
+
+              <!-- Photo + nom + immat -->
+              <div class="flex align-items-center gap-3 mb-4">
+                @if (facture.vehicule.photo_url) {
+                  <img
+                    [src]="facture.vehicule.photo_url"
+                    [alt]="facture.vehicule.nom_vehicule"
+                    class="border-circle flex-shrink-0"
+                    style="width:4rem;height:4rem;object-fit:cover"
+                  />
+                } @else {
+                  <span
+                    class="flex align-items-center justify-content-center bg-blue-100 text-blue-700 border-circle font-bold text-xl flex-shrink-0"
+                    style="width:4rem;height:4rem"
+                  >
+                    {{ facture.vehicule.nom_vehicule?.charAt(0) }}
+                  </span>
+                }
                 <div>
-                  <p class="font-semibold m-0">{{ facture.vehicule.nom_vehicule }}</p>
+                  <p class="font-bold text-lg m-0">{{ facture.vehicule.nom_vehicule }}</p>
                   <code class="text-sm text-color-secondary">{{ facture.vehicule.immatriculation }}</code>
-                  @if (facture.vehicule.proprietaire) {
-                    <p class="text-sm text-color-secondary m-0 mt-1">
-                      Propriétaire : {{ facture.vehicule.proprietaire.prenom }} {{ facture.vehicule.proprietaire.nom }}
-                    </p>
-                  }
-                  @if (facture.vehicule.livreurPrincipal) {
-                    <p class="text-sm text-color-secondary m-0">
-                      Livreur : {{ facture.vehicule.livreurPrincipal.prenom }} {{ facture.vehicule.livreurPrincipal.nom }}
-                    </p>
-                  }
                 </div>
               </div>
+
+              <!-- Propriétaire -->
+              @if (facture.vehicule.proprietaire) {
+                <div class="flex align-items-center gap-3 mb-3">
+                  <span class="border-circle flex-shrink-0 bg-surface-100 dark:bg-surface-700"
+                        style="width:2.5rem;height:2.5rem;display:inline-flex;align-items:center;justify-content:center">
+                    <i class="pi pi-user text-surface-500" style="font-size:1rem"></i>
+                  </span>
+                  <div>
+                    <p class="text-sm text-color-secondary m-0 mb-1">Propriétaire</p>
+                    <p class="font-semibold m-0">
+                      {{ facture.vehicule.proprietaire.prenom }} {{ facture.vehicule.proprietaire.nom }}
+                    </p>
+                    @if (facture.vehicule.proprietaire.phone) {
+                      <p class="text-sm text-color-secondary m-0">{{ facture.vehicule.proprietaire.phone | phoneFormat }}</p>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Livreur principal -->
+              @if (facture.vehicule.livreurPrincipal || facture.vehicule.livreur_principal) {
+                @let livreur = facture.vehicule.livreurPrincipal ?? facture.vehicule.livreur_principal!;
+                <div class="flex align-items-center gap-3">
+                  <span class="border-circle flex-shrink-0 bg-green-100 dark:bg-green-900"
+                        style="width:2.5rem;height:2.5rem;display:inline-flex;align-items:center;justify-content:center">
+                    <i class="pi pi-truck text-green-600" style="font-size:1rem"></i>
+                  </span>
+                  <div>
+                    <p class="text-sm text-color-secondary m-0 mb-1">Livreur principal</p>
+                    <p class="font-semibold m-0">{{ livreur.prenom }} {{ livreur.nom }}</p>
+                    @if (livreur.phone) {
+                      <p class="text-sm text-color-secondary m-0">{{ livreur.phone | phoneFormat }}</p>
+                    }
+                  </div>
+                </div>
+              }
+
             </p-card>
           }
 

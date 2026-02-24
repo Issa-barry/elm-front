@@ -18,6 +18,7 @@ import { InputTextModule } from 'primeng/inputtext';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import {
   FactureVente,
   STATUT_FACTURE_LABELS,
@@ -46,6 +47,7 @@ import {
     InputNumberModule,
     DatePickerModule,
     InputTextModule,
+    PhoneFormatPipe,
   ],
   providers: [MessageService],
   templateUrl: './facture-vente-detail.html',

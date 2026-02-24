@@ -31,6 +31,7 @@ export interface FactureVenteVehicule {
   id: number;
   nom_vehicule: string;
   immatriculation: string;
+  photo_url?: string;
   proprietaire?: { nom: string; prenom: string; phone?: string };
   livreurPrincipal?: { nom: string; prenom: string; phone?: string };
   livreur_principal?: { nom: string; prenom: string; phone?: string };
