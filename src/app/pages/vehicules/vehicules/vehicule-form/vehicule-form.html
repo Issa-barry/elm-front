@@ -1,23 +1,69 @@
 <p-toast />
 
-<div class="card">
-  <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block">
+<div class="card vehicule-form">
+
+  <!-- ═══ HEADER MOBILE (sticky, caché sur desktop via SCSS) ═══ -->
+  <header class="mobile-vf-header">
+    <button
+      pButton pRipple type="button"
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-vf-back"
+      aria-label="Retour"
+      (click)="onCancel()"
+    ></button>
+    <div class="mobile-vf-title-wrap">
+      <h1 class="mobile-vf-title">{{ isEditMode ? 'Modifier le véhicule' : 'Nouveau véhicule' }}</h1>
+    </div>
+    <!-- placeholder pour garder le titre centré -->
+    <div style="width:2.25rem;flex-shrink:0"></div>
+  </header>
+
+  <!-- Titre desktop -->
+  <span class="text-surface-900 dark:text-surface-0 text-xl font-bold mb-6 block vf-desktop-title">
     {{ isEditMode ? 'Modifier le véhicule' : 'Nouveau véhicule' }}
   </span>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
     <!-- ══ Section 1 : Véhicule ════════════════════════════════════════════ -->
-    <div class="grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
-      <div class="col-span-12 lg:col-span-2">
-        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Véhicule</div>
+    <div class="vf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+      <div class="vf-section-label col-span-12 lg:col-span-2">
+        <div class="vf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Véhicule</div>
       </div>
       <div class="col-span-12 lg:col-span-10">
         <div class="grid grid-cols-12 gap-4">
 
+          <!-- Photo (remontera via order: -1 sur mobile) -->
+          <div class="col-span-12 flex flex-col items-start gap-2 photo-upload-section">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 block">
+              Photo du véhicule
+              <span class="text-surface-400 text-sm font-normal ml-1">(optionnelle)</span>
+            </label>
+            @if (photoPreview) {
+              <div class="vf-photo-preview relative inline-block">
+                <img [src]="photoPreview" alt="Aperçu"
+                     class="rounded border border-surface-200"
+                     style="max-height:9rem;max-width:18rem;object-fit:cover;display:block" />
+                <button pButton pRipple type="button" icon="pi pi-times" severity="danger" size="small"
+                        [rounded]="true" [raised]="true"
+                        class="absolute top-0 right-0 m-1"
+                        (click)="removePhoto()"></button>
+              </div>
+            } @else {
+              <label class="vf-upload-zone flex flex-col items-center justify-center cursor-pointer rounded border-2 border-dashed surface-100 hover:surface-200 transition-colors"
+                     style="min-height:7rem;max-width:18rem;width:100%"
+                     (click)="photoInput.click()">
+                <i class="pi pi-cloud-upload text-2xl text-surface-400 mb-2"></i>
+                <span class="text-surface-400 text-sm text-center px-3">jpg, png, webp — max 3 Mo</span>
+              </label>
+              <input #photoInput type="file" accept="image/jpeg,image/png,image/webp"
+                     class="hidden" (change)="onPhotoChange($event)" />
+            }
+          </div>
+
           <!-- Nom du véhicule -->
-          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-            <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
               Nom du véhicule <span class="text-red-500">*</span>
             </label>
             <input pInputText fluid formControlName="nom_vehicule" placeholder="Ex : Camion Bleu 01"
@@ -29,8 +75,8 @@
           </div>
 
           <!-- Immatriculation -->
-          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-            <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
               Immatriculation <span class="text-red-500">*</span>
             </label>
             <input pInputText fluid formControlName="immatriculation" placeholder="RC-1234-AB"
@@ -42,8 +88,8 @@
           </div>
 
           <!-- Type de véhicule -->
-          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-            <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
               Type de véhicule <span class="text-red-500">*</span>
             </label>
             <p-select
@@ -62,8 +108,8 @@
           </div>
 
           <!-- Capacité -->
-          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-            <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
               Capacité (packs)
               <span class="text-surface-400 text-sm font-normal ml-1">— auto selon type</span>
             </label>
@@ -71,50 +117,22 @@
                            [useGrouping]="false" styleClass="w-full" />
           </div>
 
-          <!-- Photo -->
-          <div class="col-span-12 flex flex-col items-start gap-2">
-            <label class="font-medium text-surface-900 dark:text-surface-0 block">
-              Photo du véhicule
-              <span class="text-surface-400 text-sm font-normal ml-1">(optionnelle)</span>
-            </label>
-            @if (photoPreview) {
-              <div class="relative inline-block">
-                <img [src]="photoPreview" alt="Aperçu"
-                     class="rounded border border-surface-200"
-                     style="max-height:9rem;max-width:18rem;object-fit:cover;display:block" />
-                <button pButton pRipple type="button" icon="pi pi-times" severity="danger" size="small"
-                        [rounded]="true" [raised]="true"
-                        class="absolute top-0 right-0 m-1"
-                        (click)="removePhoto()"></button>
-              </div>
-            } @else {
-              <label class="flex flex-col items-center justify-center cursor-pointer rounded border-2 border-dashed surface-100 hover:surface-200 transition-colors"
-                     style="min-height:7rem;max-width:18rem;width:100%"
-                     (click)="photoInput.click()">
-                <i class="pi pi-cloud-upload text-2xl text-surface-400 mb-2"></i>
-                <span class="text-surface-400 text-sm text-center px-3">jpg, png, webp — max 3 Mo</span>
-              </label>
-              <input #photoInput type="file" accept="image/jpeg,image/png,image/webp"
-                     class="hidden" (change)="onPhotoChange($event)" />
-            }
-          </div>
-
         </div>
       </div>
     </div>
 
     <!-- ══ Section 2 : Rattachement ════════════════════════════════════════ -->
-    <div class="grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
-      <div class="col-span-12 lg:col-span-2">
-        <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Rattachement</div>
+    <div class="vf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+      <div class="vf-section-label col-span-12 lg:col-span-2">
+        <div class="vf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Rattachement</div>
       </div>
       <div class="col-span-12 lg:col-span-10">
         <div class="grid grid-cols-12 gap-4">
 
           <!-- Usine (création uniquement) -->
           @if (!isEditMode) {
-            <div class="mb-4 col-span-12 flex flex-col gap-1">
-              <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+            <div class="vf-field mb-4 col-span-12 flex flex-col gap-1">
+              <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
                 Usine <span class="text-red-500">*</span>
               </label>
               <p-select
@@ -137,8 +155,8 @@
           }
 
           <!-- Propriétaire -->
-          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-            <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
               Propriétaire <span class="text-red-500">*</span>
             </label>
             @if (loadingData) {
@@ -183,8 +201,8 @@
           </div>
 
           <!-- Livreur principal -->
-          <div class="mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
-            <label class="font-medium text-surface-900 dark:text-surface-0 mb-1 block">
+          <div class="vf-field mb-4 col-span-12 md:col-span-6 flex flex-col gap-1">
+            <label class="vf-label font-medium text-surface-900 dark:text-surface-0 mb-1 block">
               Livreur principal
               <span class="text-surface-400 text-sm font-normal ml-1">(optionnel)</span>
             </label>
@@ -225,9 +243,9 @@
 
     <!-- ══ Section 3 : Statut (mode édition uniquement) ════════════════════ -->
     @if (isEditMode) {
-      <div class="grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
-        <div class="col-span-12 lg:col-span-2">
-          <div class="text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Statut</div>
+      <div class="vf-section grid grid-cols-12 gap-4 pb-8 mb-8 border-b border-surface-200 dark:border-surface-700">
+        <div class="vf-section-label col-span-12 lg:col-span-2">
+          <div class="vf-section-title text-surface-900 dark:text-surface-0 font-medium text-xl mb-4">Statut</div>
           <p class="m-0 p-0 text-surface-600 dark:text-surface-200 leading-normal">
             Activer ou désactiver ce véhicule.
           </p>
@@ -242,7 +260,7 @@
     }
 
     <!-- ══ Actions ════════════════════════════════════════════════════════ -->
-    <div class="col-span-12 flex gap-2 justify-end">
+    <div class="vf-actions col-span-12 flex gap-2 justify-end">
       <button pButton pRipple type="button" text label="Annuler"
               (click)="onCancel()" [disabled]="loading"></button>
       <button pButton pRipple type="submit"

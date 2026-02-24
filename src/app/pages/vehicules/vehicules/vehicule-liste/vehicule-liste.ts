@@ -1,8 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { TableModule, Table } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -13,6 +13,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
+import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
@@ -38,12 +39,14 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TooltipModule,
     InputIconModule,
     IconFieldModule,
+    MenuModule,
     RippleModule,
     ConfirmDialogModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './vehicule-liste.html',
+  styleUrl: './vehicule-liste.scss',
 })
 export class VehiculeListe implements OnInit {
   vehicules = signal<Vehicule[]>([]);
@@ -52,12 +55,36 @@ export class VehiculeListe implements OnInit {
   canUpdate = false;
   canDelete = false;
 
+  // ─── Mobile ────────────────────────────────────────────────────────────────
+  searchQuery = signal<string>('');
+  selectedFilter = signal<string>('all');
+  mobileFilterMenuItems: MenuItem[] = [];
+
+  total = computed(() => this.vehicules().length);
+
+  filteredVehicules = computed(() => {
+    let list = this.vehicules();
+    if (this.selectedFilter() !== 'all') {
+      list = list.filter(v =>
+        this.selectedFilter() === 'actif' ? v.is_active : !v.is_active
+      );
+    }
+    const q = this.searchQuery().toLowerCase().trim();
+    if (q) {
+      list = list.filter(v =>
+        v.nom_vehicule.toLowerCase().includes(q) ||
+        v.immatriculation.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  });
+
   constructor(
     private vehiculeService: VehiculeService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.canCreate = this.authService.hasPermission('vehicules.create');
     this.canUpdate = this.authService.hasPermission('vehicules.update');
@@ -66,6 +93,11 @@ export class VehiculeListe implements OnInit {
 
   ngOnInit() {
     this.loadVehicules();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',     icon: 'pi pi-list',          command: () => this.selectedFilter.set('all') },
+      { label: 'Actifs',   icon: 'pi pi-check-circle',  command: () => this.selectedFilter.set('actif') },
+      { label: 'Inactifs', icon: 'pi pi-times-circle',  command: () => this.selectedFilter.set('inactif') },
+    ];
   }
 
   loadVehicules() {
@@ -85,6 +117,10 @@ export class VehiculeListe implements OnInit {
         });
       },
     });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
   }
 
   goNew() {
@@ -138,11 +174,6 @@ export class VehiculeListe implements OnInit {
 
   onGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('fr-FR');
   }
 
   getInitials(v: Vehicule): string {

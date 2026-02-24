@@ -55,6 +55,7 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
   ],
   providers: [MessageService],
   templateUrl: './vehicule-form.html',
+  styleUrl: './vehicule-form.scss',
 })
 export class VehiculeForm implements OnInit {
   /** Si défini → mode édition, sinon → mode création */
