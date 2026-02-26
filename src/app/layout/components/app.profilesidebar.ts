@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '@/services/auth/auth.service';
 import { finalize } from 'rxjs';
 import { AppUsineSelector } from './app.usine-selector';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 
 @Component({
     selector: '[app-profilesidebar]',
@@ -23,7 +24,12 @@ import { AppUsineSelector } from './app.usine-selector';
             <div class="flex flex-col mx-auto md:mx-0">
                 <span class="mb-2 font-semibold">Role : {{ userRole() }}</span>
                 <span class="text-surface-500 dark:text-surface-400 font-medium mb-2">{{ userName() }}</span>
-                <span class="text-surface-500 dark:text-surface-400 font-medium mb-6">{{ userReference() }}</span>
+                <span class="text-surface-500 dark:text-surface-400 font-medium mb-2">{{ userReference() }}</span>
+                @if (usineName()) {
+                    <span class="text-surface-500 dark:text-surface-400 font-medium mb-6 flex items-center gap-1">
+                        <i class="pi pi-building text-xs"></i> {{ usineName() }}
+                    </span>
+                }
 
                 <!-- ── Sélecteur d'usine (mobile uniquement, caché sur desktop) ── -->
                 <div class="mb-6 md:hidden">
@@ -82,7 +88,8 @@ export class AppProfileSidebar {
 
     constructor(
         public layoutService: LayoutService,
-        private authService: AuthService
+        private authService: AuthService,
+        private usineContext: UsineContextService
     ) {}
 
     visible = computed(() => this.layoutService.layoutState().profileSidebarVisible);
@@ -100,6 +107,8 @@ export class AppProfileSidebar {
     });
 
     userReference = computed(() => this.authService.currentUser()?.reference ?? '');
+
+    usineName = computed(() => this.usineContext.currentUsine()?.nom ?? '');
 
     onDrawerHide() {
         this.layoutService.layoutState.update((state) => ({

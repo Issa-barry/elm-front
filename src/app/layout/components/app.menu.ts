@@ -73,6 +73,12 @@ export class AppMenu {
                                 visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
                             },
                             {
+                                label: 'Commissions 2',
+                                icon: 'pi pi-fw pi-percentage',
+                                routerLink: ['/ventes/commissions2'],
+                                visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                            },
+                            {
                                 label: 'Factures vente',
                                 icon: 'pi pi-fw pi-receipt',
                                 routerLink: ['/ventes/factures'],

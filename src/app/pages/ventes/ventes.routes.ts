@@ -43,5 +43,9 @@ export default [
     path: 'commissions',
     loadComponent: () => import('./commission-vente-liste/commission-vente-liste').then(c => c.CommissionVenteListe),
   },
+  {
+    path: 'commissions2',
+    loadComponent: () => import('./commissions/comission-vente-liste2/comission-vente-liste2').then(c => c.ComissionVenteListe2),
+  },
   { path: '**', redirectTo: '/notfound' },
 ] as Routes;
