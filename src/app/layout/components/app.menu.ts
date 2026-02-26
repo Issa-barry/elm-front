@@ -45,21 +45,8 @@ export class AppMenu {
                     {
                         label: 'Ventes',
                         icon: 'pi pi-fw pi-shopping-cart',
-                        visible: this.hasAnyPermission(permissions, ['commandes.read', 'factures-livraisons.read', 'encaissements.read', 'commissions.read']),
-                        items: [
-                            {
-                                label: 'Commandes',
-                                icon: 'pi pi-fw pi-list',
-                                routerLink: ['/ventes/commandes'],
-                                visible: this.hasAnyPermission(permissions, ['commandes.read']),
-                            },
-                            {
-                                label: 'Commissions',
-                                icon: 'pi pi-fw pi-percentage',
-                                routerLink: ['/ventes/commissions'],
-                                visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
-                            },
-                        ],
+                        routerLink: ['/ventes/commandes'],
+                        visible: this.hasAnyPermission(permissions, ['commandes.read']),
                     },
 
                     // ── Comptabilité ───────────────────────────────────────────────
@@ -67,6 +54,8 @@ export class AppMenu {
                         label: 'Comptabilité',
                         icon: 'pi pi-fw pi-calculator',
                         visible: this.hasAnyPermission(permissions, [
+                            'commissions.read',
+                            'commandes.read',
                             'facture-packings.read',
                             'facture-packing.read',
                             'facture_packings.read',
@@ -77,6 +66,12 @@ export class AppMenu {
                             'encaissements.read',
                         ]),
                         items: [
+                            {
+                                label: 'Commissions',
+                                icon: 'pi pi-fw pi-percentage',
+                                routerLink: ['/ventes/commissions'],
+                                visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                            },
                             {
                                 label: 'Factures vente',
                                 icon: 'pi pi-fw pi-receipt',

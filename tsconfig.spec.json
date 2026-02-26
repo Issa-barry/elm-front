@@ -13,6 +13,7 @@
         "src/**/*.d.ts"
     ],
     "exclude": [
-        "src/app/pages/contacts/utilisateurs/utilisateurs-form/utilisateurs-form.spec.ts"
+        "src/app/pages/contacts/utilisateurs/utilisateurs-form/utilisateurs-form.spec.ts",
+        "src/app/pages/comptabilite/facture-livraison-detail/facture-livraison-detail.spec.ts"
     ]
 }

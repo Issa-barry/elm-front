@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
@@ -47,10 +48,10 @@ export class CommissionStatsWidget implements OnInit, OnChanges {
   load(): void {
     this.loading.set(true);
     forkJoin({
-      eligible: this.service.getAll({ per_page: 200, statut: 'eligible' }),
-      enAttente: this.service.getAll({ per_page: 1, statut: 'en_attente' }),
-      partiellement: this.service.getAll({ per_page: 1, statut: 'partiellement_versee' }),
-      versee: this.service.getAll({ per_page: 1, statut: 'versee' }),
+      eligible: this.service.getAll(new HttpParams().set('per_page', '200').set('statut', 'eligible')),
+      enAttente: this.service.getAll(new HttpParams().set('per_page', '1').set('statut', 'en_attente')),
+      partiellement: this.service.getAll(new HttpParams().set('per_page', '1').set('statut', 'partiellement_versee')),
+      versee: this.service.getAll(new HttpParams().set('per_page', '1').set('statut', 'versee')),
     }).subscribe({
       next: (r) => {
         const eligibleItems = r.eligible.data?.data ?? [];
