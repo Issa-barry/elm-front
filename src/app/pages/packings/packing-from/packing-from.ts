@@ -11,6 +11,7 @@ import { Ripple } from 'primeng/ripple';
 import { Prestataire } from '@/models/prestataire.model';
 import { Packing, CreatePackingDto, PackingStatut } from '@/models/packing.model';
 import { MoneyPipe } from '@/pipes/money.pipe';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 // Classe locale pour le formulaire avec méthodes de calcul
 class PackingFormModel {
@@ -58,7 +59,8 @@ class PackingFormModel {
     InputGroup,
     InputGroupAddon,
     Ripple,
-    MoneyPipe
+    MoneyPipe,
+    PhoneFormatPipe,
   ],
   templateUrl: './packing-from.html',
   styleUrl: './packing-from.scss',

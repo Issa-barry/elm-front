@@ -1,0 +1,349 @@
+<p-toast />
+
+<div class="fv-liste-page-wrap">
+
+  <!-- ── Mobile sticky header ──────────────────────────────────────────── -->
+  <header class="fv-liste-mobile-header">
+    <p-button
+      icon="pi pi-arrow-left"
+      [text]="true"
+      [rounded]="true"
+      styleClass="fv-liste-mobile-back"
+      aria-label="Retour"
+      (onClick)="goBack()"
+    />
+    <h1 class="fv-liste-mobile-title">Factures de vente</h1>
+    <!-- Spacer pour centrer le titre -->
+    <div style="width:2.5rem; flex-shrink:0"></div>
+  </header>
+
+  <!-- ── Mobile filter chips ───────────────────────────────────────────── -->
+  <div class="fv-mobile-filters">
+    @for (opt of statutOptions; track opt.value) {
+      <button
+        type="button"
+        class="fv-filter-chip"
+        [class.is-active]="selectedStatut === opt.value"
+        (click)="selectedStatut = $any(opt.value); onStatutChange()"
+      >{{ opt.label }}</button>
+    }
+  </div>
+
+  <!-- ── Scrollable area ────────────────────────────────────────────────── -->
+  <div class="fv-mobile-scroll">
+
+    <!-- Mobile cards (≤ 768px) ───────────────────────────────────────── -->
+    <div class="fv-factures-mobile">
+      @if (loading) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <div class="fv-facture-card"><p-skeleton height="5.5rem" /></div>
+        }
+      } @else if (factures().length === 0) {
+        <div class="flex flex-col items-center gap-3 text-surface-500 py-12">
+          <i class="pi pi-file-invoice text-4xl"></i>
+          <span class="text-sm">Aucune facture de vente</span>
+        </div>
+      } @else {
+        @for (f of factures(); track f.id) {
+          <article class="fv-facture-card">
+            <div class="fv-facture-card__top">
+              <div style="min-width:0">
+                <div class="fv-facture-card__ref">{{ f.reference }}</div>
+                @if (f.vehicule) {
+                  <div class="fv-facture-card__vehicule">
+                    {{ f.vehicule.nom_vehicule }} · {{ f.vehicule.immatriculation }}
+                  </div>
+                }
+              </div>
+              <span class="fv-badge fv-badge--{{ f.statut_facture }}">{{ getStatutLabel(f.statut_facture) }}</span>
+            </div>
+
+            <div class="fv-facture-card__amounts">
+              <div class="fv-amount-item">
+                <span class="fv-amount-label">Brut</span>
+                <span class="fv-amount-value">{{ formatMontant(f.montant_brut) }}</span>
+              </div>
+              <div class="fv-amount-item">
+                <span class="fv-amount-label">Encaissé</span>
+                <span class="fv-amount-value fv-amount-value--success">{{ formatMontant(f.montant_encaisse) }}</span>
+              </div>
+              <div class="fv-amount-item">
+                <span class="fv-amount-label">Restant</span>
+                <span class="fv-amount-value fv-amount-value--danger">{{ formatMontant(f.montant_restant) }}</span>
+              </div>
+            </div>
+
+            <div class="fv-facture-card__footer">
+              <span class="text-xs text-surface-400">{{ formatDateDisplay(f.created_at) }}</span>
+              <div class="fv-facture-card__actions">
+                <p-button
+                  icon="pi pi-eye"
+                  severity="info"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Voir détail"
+                  tooltipPosition="top"
+                  (onClick)="goDetail(f.id)"
+                />
+                @if (canAddEncaissement(f)) {
+                  <p-button
+                    icon="pi pi-wallet"
+                    severity="success"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Encaisser"
+                    tooltipPosition="top"
+                    (onClick)="openEncaissementDialog(f)"
+                  />
+                }
+              </div>
+            </div>
+          </article>
+        }
+      }
+    </div>
+
+    <!-- Desktop table (hidden ≤ 768px) ──────────────────────────────────── -->
+    <div class="card fv-tableau-desktop">
+      <p-table
+        #dt
+        [value]="factures()"
+        [loading]="loading"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['reference', 'vehicule.nom_vehicule', 'vehicule.immatriculation', 'statut_facture']"
+        [rowHover]="true"
+        responsiveLayout="scroll"
+        currentPageReportTemplate="{first} / {last} de {totalRecords} factures"
+        [showCurrentPageReport]="true"
+      >
+        <ng-template #caption>
+          <div class="flex flex-wrap gap-2 items-center justify-between">
+            <p-iconfield class="w-full sm:w-80">
+              <p-inputicon class="pi pi-search" />
+              <input
+                pInputText
+                type="text"
+                placeholder="Rechercher une facture..."
+                (input)="onGlobalFilter(dt, $event)"
+                class="w-full"
+              />
+            </p-iconfield>
+            <div class="flex gap-2 w-full sm:w-auto">
+              <p-select
+                [options]="statutOptions"
+                [(ngModel)]="selectedStatut"
+                optionLabel="label"
+                optionValue="value"
+                (onChange)="onStatutChange()"
+                placeholder="Tous les statuts"
+                [showClear]="true"
+                [style]="{ 'min-width': '160px' }"
+              />
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template #header>
+          <tr>
+            <th pSortableColumn="reference" class="white-space-nowrap" style="width:20%">
+              <span class="flex items-center gap-2">Facture <p-sortIcon field="reference" /></span>
+            </th>
+            <th pSortableColumn="vehicule.nom_vehicule" class="white-space-nowrap" style="width:20%">
+              <span class="flex items-center gap-2">Véhicule <p-sortIcon field="vehicule.nom_vehicule" /></span>
+            </th>
+            <th pSortableColumn="montant_brut" class="white-space-nowrap" style="width:13%">
+              <span class="flex items-center gap-2">Montant brut <p-sortIcon field="montant_brut" /></span>
+            </th>
+            <th style="width:11%"><span class="flex items-center gap-2">Encaissé</span></th>
+            <th style="width:11%"><span class="flex items-center gap-2">Restant</span></th>
+            <th pSortableColumn="statut_facture" class="white-space-nowrap" style="width:10%">
+              <span class="flex items-center gap-2">Statut <p-sortIcon field="statut_facture" /></span>
+            </th>
+            <th style="width:8%">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-f>
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary-100 text-primary-700 flex-shrink-0">
+                  <i class="pi pi-file-invoice text-sm"></i>
+                </div>
+                <div class="font-semibold font-mono text-sm">{{ f.reference }}</div>
+              </div>
+            </td>
+            <td>
+              @if (f.vehicule) {
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-100 text-surface-600 flex-shrink-0">
+                    <i class="pi pi-truck text-xs"></i>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium">{{ f.vehicule.nom_vehicule }}</div>
+                    <div class="text-xs text-surface-400 font-mono">{{ f.vehicule.immatriculation }}</div>
+                  </div>
+                </div>
+              } @else {
+                <span class="text-surface-300 text-sm">—</span>
+              }
+            </td>
+            <td class="font-semibold">{{ formatMontant(f.montant_brut) }}</td>
+            <td>
+              <span class="text-sm text-green-600 dark:text-green-400 font-medium">{{ formatMontant(f.montant_encaisse) }}</span>
+            </td>
+            <td>
+              <span class="text-sm text-red-500 dark:text-red-400 font-medium">{{ formatMontant(f.montant_restant) }}</span>
+            </td>
+            <td>
+              <p-tag
+                [value]="getStatutLabel(f.statut_facture)"
+                [severity]="getStatutSeverity(f.statut_facture)"
+              />
+            </td>
+            <td>
+              <div class="flex gap-1">
+                <p-button
+                  icon="pi pi-eye"
+                  severity="info"
+                  [text]="true"
+                  [rounded]="true"
+                  pTooltip="Voir détail"
+                  tooltipPosition="top"
+                  (onClick)="goDetail(f.id)"
+                />
+                @if (canAddEncaissement(f)) {
+                  <p-button
+                    icon="pi pi-wallet"
+                    severity="success"
+                    [text]="true"
+                    [rounded]="true"
+                    pTooltip="Encaisser"
+                    tooltipPosition="top"
+                    (onClick)="openEncaissementDialog(f)"
+                  />
+                }
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="7" class="text-center py-10">
+              <div class="flex flex-col items-center gap-3 text-surface-500">
+                <i class="pi pi-file-invoice text-4xl"></i>
+                <span>Aucune facture de vente</span>
+                <span class="text-sm text-surface-400">Les factures sont générées automatiquement lors de la création d'une commande.</span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template #loadingbody>
+          @for (_ of [1, 2, 3, 4, 5]; track $index) {
+            <tr>
+              @for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {
+                <td><p-skeleton /></td>
+              }
+            </tr>
+          }
+        </ng-template>
+      </p-table>
+    </div>
+
+  </div><!-- /.fv-mobile-scroll -->
+
+</div><!-- /.fv-liste-page-wrap -->
+
+
+<!-- ── Slideover encaissement ────────────────────────────────────────────── -->
+@if (encaissementDialogVisible) {
+  <div class="fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="encaissementDialogVisible = false"></div>
+    <div class="fv-enc-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
+
+      <div class="fv-enc-slideover-header">
+        <h2 class="fv-enc-slideover-title">Enregistrer un encaissement</h2>
+        <p-button
+          icon="pi pi-times"
+          severity="secondary"
+          [text]="true"
+          [rounded]="true"
+          (onClick)="encaissementDialogVisible = false"
+        />
+      </div>
+
+      <div class="fv-enc-slideover-body">
+        @if (selectedFacture) {
+          <div class="fv-enc-preview">
+            <span>Restant à payer</span>
+            <span class="font-bold text-red-500">{{ formatMontant(selectedFacture.montant_restant) }}</span>
+          </div>
+        }
+
+        <form [formGroup]="encaissementForm" (ngSubmit)="onSaveEncaissement()">
+          <div class="flex flex-col gap-4">
+
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm">Montant (GNF) <span class="text-red-500">*</span></label>
+              <p-inputnumber
+                formControlName="montant"
+                [min]="1"
+                [useGrouping]="true"
+                suffix=" GNF"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                [ngClass]="{ 'ng-invalid ng-dirty': isInvalid('montant') }"
+              />
+              @if (isInvalid('montant')) {
+                <small class="text-red-500">Montant requis (minimum 1 GNF)</small>
+              }
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm">Mode de paiement <span class="text-red-500">*</span></label>
+              <p-select
+                formControlName="mode_paiement"
+                [options]="modePaiementOptions"
+                optionLabel="label"
+                optionValue="value"
+                styleClass="w-full"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm">Date d'encaissement <span class="text-red-500">*</span></label>
+              <p-datepicker
+                formControlName="date_encaissement"
+                dateFormat="dd/mm/yy"
+                [showIcon]="true"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm">Note <span class="text-color-secondary text-xs">(optionnel)</span></label>
+              <input pInputText formControlName="note" placeholder="Remarques…" class="w-full" />
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <div class="fv-enc-slideover-footer">
+        <p-button
+          label="Enregistrer"
+          icon="pi pi-check"
+          [loading]="encaissementSaving"
+          (onClick)="onSaveEncaissement()"
+          fluid
+        />
+      </div>
+
+    </div>
+  </div>
+}

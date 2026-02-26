@@ -151,7 +151,8 @@
     body.prestateurs-mobile-pwa,
     body.packings-mobile-pwa,
     body.comptabilite-packing-mobile-pwa,
-    body.comptabilite-packing-detail-mobile-pwa {
+    body.comptabilite-packing-detail-mobile-pwa,
+    body.ventes-mobile-pwa {
         /* Comme pour produit : menu du haut (recherche, profil) masqué sur liste mobile */
         .layout-topbar {
             display: none !important;

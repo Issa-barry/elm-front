@@ -35,42 +35,55 @@ export class AppMenu {
     private buildMenuModel(permissions: string[]) {
         return [
             {
-                // label: 'Statistiques',
-                // icon: 'pi pi-home',
-                items: [
-                    // {
-                    //     label: 'E-Commerce',
-                    //     icon: 'pi pi-fw pi-home',
-                    //     routerLink: ['/'],
-                    // },
-                    // {
-                    //     label: 'Banking',
-                    //     icon: 'pi pi-fw pi-image',
-                    //     routerLink: ['/dashboard-banking'],
-                    // },
-                    // {
-                    //     label: 'Stock',
-                    //     icon: 'pi pi-fw pi-image',
-                    //     routerLink: ['/dashboard-banking'],
-                    // },
-                ],
+                items: [],
             },
             {
                 label: 'Modules',
                 icon: 'pi pi-th-large',
                 items: [
+                    // ── Ventes ─────────────────────────────────────────────────────
+                    {
+                        label: 'Ventes',
+                        icon: 'pi pi-fw pi-shopping-cart',
+                        routerLink: ['/ventes/commandes'],
+                        visible: this.hasAnyPermission(permissions, ['commandes.read']),
+                    },
+
+                    // ── Comptabilité ───────────────────────────────────────────────
                     {
                         label: 'Comptabilité',
                         icon: 'pi pi-fw pi-calculator',
                         visible: this.hasAnyPermission(permissions, [
+                            'commissions.read',
+                            'commandes.read',
                             'facture-packings.read',
                             'facture-packing.read',
                             'facture_packings.read',
                             'facture_packing.read',
                             'facturepackings.read',
                             'facturepacking.read',
+                            'factures-livraisons.read',
+                            'encaissements.read',
                         ]),
                         items: [
+                            {
+                                label: 'Commissions',
+                                icon: 'pi pi-fw pi-percentage',
+                                routerLink: ['/ventes/commissions'],
+                                visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                            },
+                            {
+                                label: 'Factures vente',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures'],
+                                visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                            },
+                            {
+                                label: 'Factures vente liste 2',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures-vente-liste2'],
+                                visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                            },
                             {
                                 label: 'Facture packing',
                                 icon: 'pi pi-fw pi-money-bill',
@@ -84,30 +97,11 @@ export class AppMenu {
                                     'facturepacking.read',
                                 ]),
                             },
-                            // {
-                            //     label: 'Sailaire véhicule',
-                            //     icon: 'pi pi-fw pi-list',
-                            //     routerLink: ['/apps/blog/detail'],
-                            // },
-                            // {
-                            //     label: 'Salaire employé',
-                            //     icon: 'pi pi-fw pi-pencil',
-                            //     routerLink: ['/apps/blog/edit'],
-                            // },
                         ],
                     },
 
-                    // {
-                    //     label: 'Ventes',
-                    //     icon: 'pi pi-fw pi-comments',
-                    //     routerLink: ['/apps/chat'],
-                    // },
-                    // {
-                    //     label: 'Achats',
-                    //     icon: 'pi pi-fw pi-folder',
-                    //     routerLink: ['/apps/files'],
-                    // },
-                     {
+                    // ── Packing ────────────────────────────────────────────────────
+                    {
                         label: 'Packing',
                         icon: 'pi pi-fw pi-box',
                         routerLink: ['/packings'],
@@ -116,6 +110,37 @@ export class AppMenu {
                             'packing.read',
                         ]),
                     },
+
+                    // ── Véhicules ──────────────────────────────────────────────────
+                    {
+                        label: 'Véhicules',
+                        icon: 'pi pi-fw pi-car',
+                        visible: true,
+                        items: [
+                            {
+                                label: 'Liste des véhicules',
+                                icon: 'pi pi-fw pi-list',
+                                routerLink: ['/vehicules'],
+                            },
+                            {
+                                label: 'Liste des véhicules 2',
+                                icon: 'pi pi-fw pi-list',
+                                routerLink: ['/vehicules/vehicules-liste2'],
+                            },
+                            {
+                                label: 'Propriétaires',
+                                icon: 'pi pi-fw pi-user',
+                                routerLink: ['/vehicules/proprietaires'],
+                            },
+                            {
+                                label: 'Livreurs',
+                                icon: 'pi pi-fw pi-truck',
+                                routerLink: ['/vehicules/livreurs'],
+                            },
+                        ],
+                    },
+
+                    // ── Contacts ───────────────────────────────────────────────────
                     {
                         label: 'Contacts',
                         icon: 'pi pi-fw pi-address-book',
@@ -126,7 +151,6 @@ export class AppMenu {
                             'prestateur.read',
                         ]),
                         items: [
-                            
                             {
                                 label: 'Prestateurs-externes',
                                 icon: 'pi pi-fw pi-briefcase',
@@ -144,30 +168,15 @@ export class AppMenu {
                                 routerLink: ['contacts/utilisateurs'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'users.read',
-                                    'users.read',
-                                    'users.read',
                                     'user.read',
                                     'utilisateurs.read',
                                     'utilisateur.read',
                                 ]),
                             },
-                            // {
-                            //     label: 'Fournisseurs',
-                            //     icon: 'pi pi-fw pi-users',
-                            //     routerLink: ['profile/list'],
-                            // },
-                            //  {
-                            //     label: 'Véhicules',
-                            //     icon: 'pi pi-fw pi-truck',
-                            //     routerLink: ['/apps/mail/inbox'],
-                            // },
-                            // {
-                            //     label: 'Employés',
-                            //     icon: 'pi pi-fw pi-user',
-                            //     routerLink: ['/apps/mail/detail/1000'],
-                            // },
                         ],
                     },
+
+                    // ── Produits ───────────────────────────────────────────────────
                     {
                         label: 'Produits',
                         icon: 'pi pi-fw pi-barcode',
@@ -186,7 +195,6 @@ export class AppMenu {
 
     private hasAnyPermission(userPermissions: unknown[] | undefined, required: string[]): boolean {
         if (!userPermissions || userPermissions.length === 0) {
-            // Mode strict pour le menu: sans permission explicite, on masque l'entrée.
             return false;
         }
 
@@ -213,5 +221,3 @@ export class AppMenu {
         return required.some((permission) => normalized.has(permission.toLowerCase()));
     }
 }
-
-

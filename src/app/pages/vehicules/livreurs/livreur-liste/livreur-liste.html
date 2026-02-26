@@ -1,0 +1,113 @@
+<p-toast />
+<p-confirmdialog />
+
+<div class="card">
+  <p-table
+    #dt
+    [value]="livreurs()"
+    [loading]="loading"
+    [paginator]="true"
+    paginatorDropdownAppendTo="body"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['nom', 'prenom', 'phone']"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="  {first} / {last} de {totalRecords} livreurs"
+    [showCurrentPageReport]="true"
+    [rowHover]="true"
+  >
+    <ng-template #caption>
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <p-iconfield class="w-full sm:w-80 order-1 sm:order-0">
+          <p-inputicon class="pi pi-search" />
+          <input pInputText type="text" placeholder="Rechercher un livreur..."
+                 (input)="onGlobalFilter(dt, $event)" class="w-full" />
+        </p-iconfield>
+        <div class="flex gap-2 w-full sm:w-auto">
+          @if (canCreate) {
+            <button pButton outlined icon="pi pi-plus" label="Nouveau livreur"
+                    (click)="goNew()"></button>
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="prenom" style="width:35%">
+          <span class="flex items-center gap-2">Nom <p-sortIcon field="prenom" /></span>
+        </th>
+        <th pSortableColumn="phone" style="width:25%">
+          <span class="flex items-center gap-2">Téléphone <p-sortIcon field="phone" /></span>
+        </th>
+        <th style="width:20%">Statut</th>
+        <th pSortableColumn="created_at" style="width:10%">
+          <span class="flex items-center gap-2">Ajouté <p-sortIcon field="created_at" /></span>
+        </th>
+        @if (canUpdate || canDelete) {
+          <th style="width:10%" class="text-center">Actions</th>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-l>
+      <tr>
+        <td>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center justify-center rounded-full bg-primary text-white font-bold text-xs flex-shrink-0"
+                  style="width:2rem;height:2rem">
+              {{ l.prenom[0] }}{{ l.nom[0] }}
+            </span>
+            <span class="font-medium">{{ fullName(l) }}</span>
+          </div>
+        </td>
+        <td class="text-sm">{{ l.phone | phoneFormat }}</td>
+        <td>
+          @if (l.is_active) {
+            <p-tag value="Actif" severity="success" />
+          } @else {
+            <p-tag value="Inactif" severity="secondary" />
+          }
+        </td>
+        <td class="text-surface-500 text-sm">—</td>
+        @if (canUpdate || canDelete) {
+          <td>
+            <div class="flex gap-1 justify-center">
+              @if (canUpdate) {
+                <button pButton type="button" icon="pi pi-pen-to-square"
+                        text rounded size="small" pTooltip="Modifier" tooltipPosition="top"
+                        (click)="goEdit(l)"></button>
+              }
+              @if (canDelete) {
+                <button pButton type="button" icon="pi pi-trash" severity="danger"
+                        text rounded size="small" pTooltip="Supprimer" tooltipPosition="top"
+                        (click)="deleteLivreur(l)"></button>
+              }
+            </div>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td [attr.colspan]="(canUpdate || canDelete) ? 5 : 4" class="text-center py-8">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-truck text-4xl"></i>
+            <span>Aucun livreur trouvé</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3, 4, 5]; track $index) {
+        <tr>
+          @for (__ of [1, 2, 3, 4, 5]; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>

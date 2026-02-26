@@ -1,0 +1,248 @@
+<div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
+    <div class="flex flex-col lg:flex-row md:justify-between items-start lg:items-end gap-4 mb-8">
+        <div class="flex flex-col gap-2 flex-1">
+            <h1 class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight">My Orders</h1>
+            <p class="text-surface-500 dark:text-surface-400 text-xl leading-tight">Manage, Track, and Review Your Purchases</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-start md:items-end gap-4">
+            <div class="w-full md:w-54">
+                <p-iconfield iconPosition="left">
+                    <p-inputicon class="pi pi-search text-surface-400"></p-inputicon>
+                    <input
+                        pInputText
+                        [(ngModel)]="searchQuery"
+                        placeholder="Search"
+                        class="w-full px-3 py-2 bg-surface-0 dark:bg-surface-900 border border-surface-300 dark:border-surface-600 rounded-md text-surface-900 dark:text-surface-0"
+                    />
+                </p-iconfield>
+            </div>
+
+            <div class="w-full md:w-auto">
+                <p-select
+                    [(ngModel)]="selectedFilter"
+                    [options]="filterOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Filter"
+                    styleClass="w-full md:w-40 bg-surface-0 dark:bg-surface-900 border border-surface-300 dark:border-surface-600"
+                    [appendTo]="'body'"
+                >
+                    <ng-template pTemplate="dropdownicon">
+                        <i class="pi pi-chevron-down text-surface-400"></i>
+                    </ng-template>
+                </p-select>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-6">
+        @for (order of filteredOrders(); track order.id; let index = $index) {
+            <div class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden transition-all duration-300">
+                <div
+                    class="p-6 flex flex-col lg:flex-row justify-start lg:items-center gap-6 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
+                    pStyleClass=".order-content-{{ order.id }}"
+                    enterFromClass="hidden"
+                    enterActiveClass="animate-slidedown"
+                    leaveToClass="hidden"
+                    leaveActiveClass="animate-slideup"
+                    (click)="toggleChevron(order.id)"
+                >
+                    <div class="flex items-center gap-4 flex-1">
+                        <img class="w-12 h-12 rounded" [src]="order.image" [alt]="order.product" />
+                        <div class="flex flex-col gap-2">
+                            <div class="text-surface-900 dark:text-surface-0 text-lg font-medium leading-tight">{{ order.product }}</div>
+                            <div class="text-surface-500 dark:text-surface-400 text-base leading-tight">{{ order.variant }}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
+                        <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
+                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Order</div>
+                            <div class="px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-md">
+                                <span class="text-surface-600 dark:text-surface-300 text-sm font-bold">{{ order.orderNumber }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-start sm:items-center flex-1">
+                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Date</div>
+                            <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">{{ order.date }}</span>
+                        </div>
+
+                        <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
+                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Status</div>
+                            <div
+                                [ngClass]="{
+                                    'px-2 py-1 rounded-md flex items-center gap-1': true,
+                                    'bg-surface-100 dark:bg-surface-800': order.statusColor === 'surface',
+                                    'bg-orange-100 dark:bg-orange-900': order.statusColor === 'orange',
+                                    'bg-green-100 dark:bg-green-900': order.statusColor === 'green'
+                                }"
+                            >
+                                <i
+                                    [class]="
+                                        'text-xs pi ' +
+                                        order.statusIcon +
+                                        ' ' +
+                                        (order.statusColor === 'surface'
+                                            ? 'text-surface-600 dark:text-surface-300'
+                                            : order.statusColor === 'orange'
+                                              ? 'text-orange-700 dark:text-orange-300'
+                                              : 'text-green-700 dark:text-green-300')
+                                    "
+                                ></i>
+                                <span
+                                    [ngClass]="{
+                                        'text-sm font-bold': true,
+                                        'text-surface-600 dark:text-surface-300': order.statusColor === 'surface',
+                                        'text-orange-700 dark:text-orange-300': order.statusColor === 'orange',
+                                        'text-green-700 dark:text-green-300': order.statusColor === 'green'
+                                    }"
+                                    >{{ order.statusLabel }}</span
+                                >
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-start sm:items-center flex-1">
+                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Total</div>
+                            <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">{{ order.total }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-start sm:justify-center flex-1">
+                            <button
+                                pButton
+                                severity="secondary"
+                                [text]="true"
+                                [rounded]="true"
+                                class="w-10 h-10"
+                                pStyleClass=".order-content-{{ order.id }}"
+                                enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown"
+                                leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                (click)="toggleChevron(order.id); $event.stopPropagation()"
+                            >
+                                <i [class]="'pi pi-chevron-down chevron-icon-' + order.id + ' transition-transform duration-300'" pButtonIcon></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div [class]="'order-content-' + order.id + ' hidden overflow-hidden'">
+                    <div class="flex flex-col gap-6 p-6 border-t border-surface-200 dark:border-surface-700">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                                <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                    <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Billing Address</h3>
+                                </div>
+                                <div class="p-6 flex flex-col gap-5">
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Name</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).name }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Address</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).address }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">City</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).city }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Country</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).country }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Zip Code</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).zipCode }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Phone</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).phone | phoneFormat }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                                <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                    <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Shipping Address</h3>
+                                </div>
+                                <div class="p-6 flex flex-col gap-5">
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Name</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).name }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Address</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).address }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">City</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).city }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Country</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).country }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Zip Code</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).zipCode }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Phone</span>
+                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderCustomer(order.id).phone | phoneFormat }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Payment Information</h3>
+                                <div class="flex items-center gap-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                        <ellipse cx="5.85" cy="9.00027" rx="4.725" ry="4.725" fill="#EF4444" />
+                                        <ellipse cx="12.1508" cy="9.00027" rx="4.725" ry="4.725" fill="#F59E0B" />
+                                        <path
+                                            d="M9.00078 12.5224C9.96747 11.6573 10.5758 10.4 10.5758 9.00059C10.5758 7.60119 9.96747 6.34393 9.00078 5.47876C8.03409 6.34393 7.42578 7.60119 7.42578 9.00059C7.42578 10.4 8.03409 11.6573 9.00078 12.5224Z"
+                                            fill="#F97316"
+                                        />
+                                    </svg>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderPayment(order.id).cardNumber }}</span>
+                                </div>
+                            </div>
+                            <div class="p-6 flex flex-col gap-5">
+                                <div class="flex flex-col gap-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Subtotal</span>
+                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderPayment(order.id).subtotal }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Shipping</span>
+                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderPayment(order.id).shipping }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Estimated Tax</span>
+                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ getOrderPayment(order.id).tax }}</span>
+                                    </div>
+                                    <div class="h-px bg-surface-200 dark:bg-surface-700"></div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Total</span>
+                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ order.total }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (filteredOrders().length === 0) {
+            <div class="text-center py-12">
+                <div class="text-surface-500 dark:text-surface-400 text-lg mb-2">No orders found</div>
+                <div class="text-surface-400 dark:text-surface-500 text-base">Try adjusting your search or filter criteria</div>
+            </div>
+        }
+    </div>
+</div>

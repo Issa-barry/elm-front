@@ -6,10 +6,11 @@ import { LayoutService } from '@/layout/service/layout.service';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '@/services/auth/auth.service';
 import { finalize } from 'rxjs';
+import { AppUsineSelector } from './app.usine-selector';
 
 @Component({
     selector: '[app-profilesidebar]',
-    imports: [ButtonModule, DrawerModule, BadgeModule, RouterModule],
+    imports: [ButtonModule, DrawerModule, BadgeModule, RouterModule, AppUsineSelector],
     template: `
         <p-drawer
             [visible]="visible()"
@@ -22,7 +23,15 @@ import { finalize } from 'rxjs';
             <div class="flex flex-col mx-auto md:mx-0">
                 <span class="mb-2 font-semibold">Role : {{ userRole() }}</span>
                 <span class="text-surface-500 dark:text-surface-400 font-medium mb-2">{{ userName() }}</span>
-                <span class="text-surface-500 dark:text-surface-400 font-medium mb-8">{{ userReference() }}</span>
+                <span class="text-surface-500 dark:text-surface-400 font-medium mb-6">{{ userReference() }}</span>
+
+                <!-- ── Sélecteur d'usine (mobile uniquement, caché sur desktop) ── -->
+                <div class="mb-6 md:hidden">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-surface-400 m-0 mb-2">
+                        <i class="pi pi-building mr-1"></i> Usine
+                    </p>
+                    <app-usine-selector />
+                </div>
 
                 <ul class="list-none m-0 p-0">
                     <li>

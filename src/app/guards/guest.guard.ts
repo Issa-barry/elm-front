@@ -12,6 +12,6 @@ export const guestGuard: CanActivateFn = () => {
   }
 
   // Si déjà connecté, rediriger vers le dashboard
-  router.navigate(['/dashboard']);
+  router.navigate(['/']);
   return false;
 };

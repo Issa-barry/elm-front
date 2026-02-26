@@ -279,13 +279,5 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     return nomComplet.substring(0, 2).toUpperCase();
   }
 
-  getRoleSeverity(role: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    const severities: Record<string, 'success' | 'info' | 'warn' | 'danger'> = {
-      'admin': 'danger',
-      'manager': 'warn',
-      'employe': 'info',
-      'superviseur': 'success',
-    };
-    return severities[role?.toLowerCase()] || 'secondary';
-  }
 }
+

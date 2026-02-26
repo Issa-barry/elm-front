@@ -372,13 +372,12 @@ export class AuthService {
    */
   private handleError(error: any): Observable<never> {
     console.error('Erreur API:', error);
-    
-    // Si erreur 401, déconnecter l'utilisateur
+
+    // Si erreur 401, vider l'état local (la navigation vers /auth/login est gérée par authInterceptor)
     if (error.status === 401) {
       this.clearAuth();
-      this.router.navigate(['/auth/login']);
     }
-    
+
     return throwError(() => error);
   }
 
