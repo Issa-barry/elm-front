@@ -43,6 +43,17 @@ export interface UserFilters {
   page?: number;
 }
 
+// Interfaces pour la vérification du téléphone
+export interface CheckPhoneRequest {
+  phone: string;
+  code_phone_pays: string;
+}
+
+export interface CheckPhoneResponse {
+  available: boolean;
+  normalized_phone?: string;
+}
+
 // Interface pour la mise à jour
 export interface UpdateUserDto {
   nom?: string;
@@ -226,6 +237,14 @@ export class UserService {
     }
     
     return this.http.get<PaginatedResponse<User>>(this.apiUrl, { params });
+  }
+
+  /**
+   * Vérifier si un numéro de téléphone est disponible (non utilisé par un autre compte).
+   * À appeler en mode création avant de passer à l'étape 2 du stepper.
+   */
+  checkPhone(data: CheckPhoneRequest): Observable<ApiResponse<CheckPhoneResponse>> {
+    return this.http.post<ApiResponse<CheckPhoneResponse>>(`${this.apiUrl}/check-phone`, data);
   }
 
   /**

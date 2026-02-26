@@ -19,7 +19,7 @@ import { COUNTRIES } from '@/models/country.model';
   providers: [MessageService],
   imports: [CommonModule, ToastModule, MessageModule, UtilisateursForm],
 })
-export class UtilisateursNew {
+export class UtilisateursNew { 
   loading = false;
 
   constructor(
@@ -51,7 +51,7 @@ export class UtilisateursNew {
     const payload: CreateUserDto = {
       nom: data.nom || '',
       prenom: data.prenom || '',
-      phone: (data.phone || '').replace(/\s+/g, ''),
+      phone: (data.normalized_phone || data.phone || '').replace(/\s+/g, ''),
       email: data.email || undefined,
       pays: data.pays || 'Guinée',
       code_pays: data.code_pays || 'GN',
