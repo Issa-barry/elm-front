@@ -19,6 +19,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { DividerModule } from 'primeng/divider';
 
 import { CommandeMobileForm } from './commande-mobile-form/commande-mobile-form';
+import { CommissionDetailDialog } from '../commission-detail-dialog/commission-detail-dialog';
 import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
 import { VehiculeService } from '@/services/vehicules/vehicule.service';
 import { ProduitService } from '@/services/produits/produits.service';
@@ -28,6 +29,9 @@ import {
   STATUT_FACTURE_LABELS,
   STATUT_FACTURE_SEVERITY,
   StatutFacture,
+  StatutCommission,
+  STATUT_COMMISSION_LABELS,
+  STATUT_COMMISSION_SEVERITY,
   StoreCommandeVenteDto,
   UpdateCommandeVenteDto,
 } from '@/models/vente.model';
@@ -62,6 +66,7 @@ interface ProduitData {
     DividerModule,
     CommandeMobileForm,
     PhoneFormatPipe,
+    CommissionDetailDialog,
   ],
   providers: [MessageService],
   templateUrl: './commande-vente-liste.html',
@@ -89,6 +94,10 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   canCreate = false;
   canUpdate = false;
   canDelete = false;
+
+  // Commission detail dialog
+  selectedCommissionId = signal<number | null>(null);
+  commissionDetailVisible = signal(false);
   produitData = new Map<number, ProduitData>();
   defaultProduitId: number | null = null;
   mobileSearchQuery = '';
@@ -394,6 +403,20 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
         });
       },
     });
+  }
+
+  openCommissionDetail(commissionId: number, event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectedCommissionId.set(commissionId);
+    this.commissionDetailVisible.set(true);
+  }
+
+  getCommissionLabel(s: StatutCommission): string {
+    return STATUT_COMMISSION_LABELS[s] ?? s;
+  }
+
+  getCommissionSeverity(s: StatutCommission) {
+    return STATUT_COMMISSION_SEVERITY[s] ?? 'info';
   }
 
   goBack() {

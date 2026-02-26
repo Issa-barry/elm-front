@@ -1,0 +1,168 @@
+<p-toast />
+
+<!-- ── Widgets statistiques ──────────────────────────────────────────── -->
+<app-commission-stats-widget [refreshTrigger]="statsRefreshTrigger()" />
+
+<div class="card">
+
+  <!-- ── Filtres ────────────────────────────────────────────────────── -->
+  <div class="flex flex-wrap items-end gap-3 mb-5">
+
+    <div class="flex flex-col gap-1" style="min-width:13rem">
+      <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Statut</label>
+      <p-select
+        [ngModel]="filterStatut()"
+        (ngModelChange)="filterStatut.set($event)"
+        [options]="statutOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Tous les statuts"
+        styleClass="w-full"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Date début</label>
+      <p-datepicker
+        [ngModel]="filterDateDebut()"
+        (ngModelChange)="filterDateDebut.set($event)"
+        dateFormat="dd/mm/yy"
+        [showClear]="true"
+        placeholder="Du…"
+        inputStyleClass="w-36"
+      />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Date fin</label>
+      <p-datepicker
+        [ngModel]="filterDateFin()"
+        (ngModelChange)="filterDateFin.set($event)"
+        dateFormat="dd/mm/yy"
+        [showClear]="true"
+        placeholder="Au…"
+        inputStyleClass="w-36"
+      />
+    </div>
+
+    <div class="flex gap-2 pb-0.5">
+      <p-button label="Filtrer" icon="pi pi-filter" (onClick)="applyFilters()" />
+      <p-button label="Réinitialiser" icon="pi pi-filter-slash" [outlined]="true"
+                severity="secondary" (onClick)="resetFilters()" />
+    </div>
+
+  </div>
+
+  <!-- ── Table ──────────────────────────────────────────────────────── -->
+  <p-table
+    [value]="commissions()"
+    [loading]="loading()"
+    [lazy]="true"
+    (onLazyLoad)="onLazyLoad($event)"
+    [paginator]="true"
+    [rows]="perPage()"
+    [totalRecords]="totalRecords()"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [rowHover]="true"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="{first} / {last} de {totalRecords} commissions"
+    [showCurrentPageReport]="true"
+    styleClass="p-datatable-sm"
+  >
+    <ng-template #caption>
+      <div class="flex items-center">
+        <span class="text-xl font-semibold">Commissions sur ventes</span>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th style="width:18%">Réf. commande</th>
+        <th style="width:16%">Véhicule</th>
+        <th style="width:13%">Livreur</th>
+        <th style="width:11%" class="text-right">Commission totale</th>
+        <th style="width:10%" class="text-right">Part livreur</th>
+        <th style="width:10%" class="text-right">Part propriétaire</th>
+        <th style="width:10%">Statut</th>
+        <th style="width:9%">Date éligibilité</th>
+        <th style="width:3%"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-c>
+      <tr class="cursor-pointer" (click)="openDetail(c)">
+
+        <td>
+          <span class="font-mono text-sm font-semibold">{{ c.commande?.reference ?? '—' }}</span>
+        </td>
+
+        <td>
+          <div class="font-medium text-sm">{{ c.vehicule?.nom_vehicule }}</div>
+          <code class="text-xs text-surface-400">{{ c.vehicule?.immatriculation }}</code>
+        </td>
+
+        <td class="text-sm">{{ c.livreur?.prenom }} {{ c.livreur?.nom }}</td>
+
+        <td class="text-right">
+          <span class="font-semibold text-primary">{{ formatMontant(c.montant_commission_total) }}</span>
+        </td>
+
+        <td class="text-right text-sm">{{ formatMontant(c.part_livreur) }}</td>
+
+        <td class="text-right text-sm">
+          @if (parseFloat(c.part_proprietaire) > 0) {
+            {{ formatMontant(c.part_proprietaire) }}
+          } @else {
+            <span class="text-surface-300">—</span>
+          }
+        </td>
+
+        <td>
+          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" />
+        </td>
+
+        <td class="text-sm text-surface-500">{{ formatDate(c.eligible_at) }}</td>
+
+        <td (click)="$event.stopPropagation()">
+          <p-button icon="pi pi-eye" severity="info" [text]="true" [rounded]="true"
+                    pTooltip="Voir le détail" tooltipPosition="top"
+                    (onClick)="openDetail(c)" />
+        </td>
+
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="9" class="text-center py-10">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-percentage text-4xl"></i>
+            <span>Aucune commission trouvée</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3, 4, 5]; track $index) {
+        <tr>
+          @for (__ of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+
+  </p-table>
+
+</div>
+
+<!-- ── Dialog détail ──────────────────────────────────────────────── -->
+@if (selectedCommissionId()) {
+  <app-commission-detail-dialog
+    [commissionId]="selectedCommissionId()!"
+    [visible]="detailVisible()"
+    (visibleChange)="detailVisible.set($event)"
+    (onVersementDone)="onVersementDone()"
+  />
+}

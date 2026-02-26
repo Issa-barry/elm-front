@@ -170,8 +170,9 @@
           <th pSortableColumn="total_commande" class="white-space-nowrap" style="width:13%">
             <span class="flex items-center gap-2">Total <p-sortIcon field="total_commande" /></span>
           </th>
-          <th style="width:13%"><span class="flex items-center gap-2">Statut facture</span></th>
-          <th pSortableColumn="created_at" class="white-space-nowrap" style="width:10%">
+          <th style="width:11%"><span class="flex items-center gap-2">Statut facture</span></th>
+          <th style="width:10%"><span class="flex items-center gap-2">Commission</span></th>
+          <th pSortableColumn="created_at" class="white-space-nowrap" style="width:9%">
             <span class="flex items-center gap-2">Date <p-sortIcon field="created_at" /></span>
           </th>
           <th style="width:10%">Actions</th>
@@ -231,6 +232,25 @@
             }
           </td>
 
+          <td>
+            @if (c.commission) {
+              @if (c.commission.statut === 'versee') {
+                <p-tag severity="success" value="Versée" />
+              } @else {
+                <p-tag
+                  [value]="formatMontant(c.commission.montant_commission_total)"
+                  [severity]="getCommissionSeverity(c.commission.statut)"
+                  styleClass="cursor-pointer"
+                  (click)="openCommissionDetail(c.commission.id, $event)"
+                  pTooltip="Voir la commission"
+                  tooltipPosition="top"
+                />
+              }
+            } @else {
+              <span class="text-surface-300 text-xs">—</span>
+            }
+          </td>
+
           <td class="text-sm text-surface-500">{{ formatDate(c.created_at) }}</td>
 
           <td>
@@ -256,7 +276,7 @@
 
       <ng-template #emptymessage>
         <tr>
-          <td colspan="7" class="text-center py-10">
+          <td colspan="8" class="text-center py-10">
             <div class="flex flex-col items-center gap-3 text-surface-500">
               <i class="pi pi-shopping-cart text-4xl"></i>
               <span>Aucune commande de vente</span>
@@ -270,7 +290,7 @@
 
       <ng-template #loadingbody>
         @for (_ of [1, 2, 3, 4, 5]; track $index) {
-          <tr>@for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {<td><p-skeleton /></td>}</tr>
+          <tr>@for (__ of [1, 2, 3, 4, 5, 6, 7, 8]; track $index) {<td><p-skeleton /></td>}</tr>
         }
       </ng-template>
     </p-table>
@@ -423,3 +443,12 @@
               (onClick)="confirmerSuppression()" [loading]="deleteLoading" />
   </ng-template>
 </p-dialog>
+
+<!-- ── Dialog : Détail commission ─────────────────────────────────── -->
+@if (selectedCommissionId()) {
+  <app-commission-detail-dialog
+    [commissionId]="selectedCommissionId()!"
+    [visible]="commissionDetailVisible()"
+    (visibleChange)="commissionDetailVisible.set($event)"
+  />
+}

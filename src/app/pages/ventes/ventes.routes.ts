@@ -39,5 +39,9 @@ export default [
     path: 'encaissements',
     loadComponent: () => import('./encaissement-vente-liste/encaissement-vente-liste').then(c => c.EncaissementVenteListe),
   },
+  {
+    path: 'commissions',
+    loadComponent: () => import('./commission-vente-liste/commission-vente-liste').then(c => c.CommissionVenteListe),
+  },
   { path: '**', redirectTo: '/notfound' },
 ] as Routes;

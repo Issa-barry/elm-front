@@ -4,10 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
-import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
@@ -36,10 +34,8 @@ import {
     CommonModule,
     ReactiveFormsModule,
     ButtonModule,
-    CardModule,
     TagModule,
     SkeletonModule,
-    DividerModule,
     ToastModule,
     TooltipModule,
     DialogModule,
@@ -228,6 +224,16 @@ export class CommandeVenteDetail implements OnInit {
   formatDate(d: string | undefined): string {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('fr-FR');
+  }
+
+  getModeLabel(mode: string): string {
+    const labels: Record<string, string> = {
+      especes: 'Espèces',
+      mobile_money: 'Mobile Money',
+      virement: 'Virement bancaire',
+      cheque: 'Chèque',
+    };
+    return labels[mode] ?? mode;
   }
 
   totalLignes(): number {

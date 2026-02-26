@@ -99,6 +99,7 @@ export interface CommandeVente {
     FactureVente,
     'id' | 'reference' | 'montant_brut' | 'montant_net' | 'statut_facture' | 'montant_encaisse' | 'montant_restant' | 'encaissements'
   >;
+  commission?: CommissionResume;
   created_at: string;
 }
 
@@ -116,4 +117,100 @@ export interface StoreCommandeVenteDto {
 export interface UpdateCommandeVenteDto {
   vehicule_id?: number;
   lignes?: StoreLigneCommandeDto[];
+}
+
+// ── Commissions ────────────────────────────────────────────────────────
+
+export type StatutCommission =
+  | 'en_attente'
+  | 'eligible'
+  | 'partiellement_versee'
+  | 'versee'
+  | 'annulee';
+
+export type StatutVersement = 'en_attente' | 'effectue' | 'annule';
+export type BeneficiaireType = 'livreur' | 'proprietaire';
+
+export const STATUT_COMMISSION_LABELS: Record<StatutCommission, string> = {
+  en_attente: 'En attente',
+  eligible: 'Éligible',
+  partiellement_versee: 'Partiellement versée',
+  versee: 'Versée',
+  annulee: 'Annulée',
+};
+
+export const STATUT_COMMISSION_SEVERITY: Record<
+  StatutCommission,
+  'success' | 'info' | 'warn' | 'danger' | 'secondary'
+> = {
+  en_attente: 'warn',
+  eligible: 'info',
+  partiellement_versee: 'secondary',
+  versee: 'success',
+  annulee: 'danger',
+};
+
+export const STATUT_VERSEMENT_LABELS: Record<StatutVersement, string> = {
+  en_attente: 'En attente',
+  effectue: 'Effectué',
+  annule: 'Annulé',
+};
+
+export const STATUT_VERSEMENT_SEVERITY: Record<
+  StatutVersement,
+  'success' | 'info' | 'warn' | 'danger' | 'secondary'
+> = {
+  en_attente: 'warn',
+  effectue: 'success',
+  annule: 'danger',
+};
+
+export interface Beneficiaire {
+  id: number;
+  nom: string;
+  prenom: string;
+  phone: string;
+}
+
+export interface VersementCommission {
+  id: number;
+  commission_vente_id: number;
+  beneficiaire_type: BeneficiaireType;
+  beneficiaire_id: number;
+  montant_attendu: string;
+  montant_verse: string | null;
+  statut: StatutVersement;
+  verse_at: string | null;
+  note: string | null;
+}
+
+/** Résumé embarqué dans CommandeVente */
+export interface CommissionResume {
+  id: number;
+  statut: StatutCommission;
+  montant_commission_total: string;
+  part_livreur: string;
+  part_proprietaire: string;
+}
+
+/** Alias conservé pour rétrocompatibilité */
+export type CommissionVenteSummary = CommissionResume;
+
+export interface CommissionVente extends CommissionResume {
+  commande_vente_id: number;
+  vehicule_id: number;
+  livreur_id: number | null;
+  proprietaire_id: number | null;
+  taux_livreur_snapshot: string;
+  eligible_at: string | null;
+  created_at: string;
+  commande?: { id: number; reference: string; total_commande: string };
+  vehicule?: { id: number; nom_vehicule: string; immatriculation: string };
+  livreur?: Beneficiaire | null;
+  proprietaire?: Beneficiaire | null;
+  versements: VersementCommission[];
+}
+
+export interface StoreVersementDto {
+  note?: string;
 }
