@@ -80,7 +80,7 @@ export class VehiculeListe2 implements OnInit {
 
   loadVehicules(): void {
     this.loading = true;
-    this.vehiculeService.getAll({ inactifs: true }).subscribe({
+    this.vehiculeService.getAll().subscribe({
       next: (resp) => {
         this.vehicules.set(resp.data?.data ?? []);
         this.total.set(resp.data?.total ?? 0);

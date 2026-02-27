@@ -76,16 +76,6 @@
                 (click)="goToEdit($event, prestataire.id)"
                 [disabled]="!canUpdate"
               ></button>
-              <button
-                *ngIf="canDelete"
-                pButton
-                pRipple
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                [pTooltip]="'Supprimer'"
-                tooltipPosition="top"
-                (click)="$event.stopPropagation(); deletePrestataire($event, prestataire.id)"
-              ></button>
             </div>
           </div>
         </div>

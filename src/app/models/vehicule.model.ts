@@ -74,5 +74,5 @@ export interface Vehicule {
 export interface VehiculeFilters {
   search?: string;
   per_page?: number;
-  inactifs?: boolean;
+  statut?: 'actif' | 'inactif';
 }
