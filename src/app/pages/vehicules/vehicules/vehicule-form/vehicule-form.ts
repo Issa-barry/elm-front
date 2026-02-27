@@ -58,10 +58,11 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
   styleUrl: './vehicule-form.scss',
 })
 export class VehiculeForm implements OnInit {
-  /** Si défini → mode édition, sinon → mode création */
   @Input() vehicule?: Vehicule;
 
-  get isEditMode(): boolean { return !!this.vehicule; }
+  get isEditMode(): boolean {
+    return !!this.vehicule;
+  }
 
   form!: FormGroup;
   loading = false;
@@ -89,81 +90,78 @@ export class VehiculeForm implements OnInit {
   }
 
   ngOnInit(): void {
-    // Mode édition : pré-remplir le formulaire
     if (this.vehicule) {
-      this.photoPreview = this.vehicule.photo_url ?? null;
-      this.form.patchValue({
-        nom_vehicule:             this.vehicule.nom_vehicule,
-        marque:                   this.vehicule.marque ?? null,
-        modele:                   this.vehicule.modele ?? null,
-        immatriculation:          this.vehicule.immatriculation,
-        type_vehicule:            this.vehicule.type_vehicule,
-        capacite_packs:           this.vehicule.capacite_packs,
-        proprietaire_id:          this.vehicule.proprietaire_id,
-        livreur_principal_id:     this.vehicule.livreur_principal_id ?? null,
-        is_active:                this.vehicule.is_active,
-      });
+      this.applyVehiculeToForm(this.vehicule);
     }
 
-    // Charger usines
     const fromContext = this.usineContext.accessibleUsines();
     if (fromContext.length > 0) {
       this.usineOptions.set(fromContext);
     } else {
       this.usineService.getAll().subscribe({
         next: (resp) => {
-          const list: AccessibleUsine[] = (resp.data ?? []).map(u => ({
-            id: u.id, nom: u.nom, code: u.code, type: u.type, statut: u.statut,
+          const list: AccessibleUsine[] = (resp.data ?? []).map((u) => ({
+            id: u.id,
+            nom: u.nom,
+            code: u.code,
+            type: u.type,
+            statut: u.statut,
           }));
           this.usineOptions.set(list);
           if (list.length > 0 && this.usineContext.currentUsineId() === null) {
-            const def = list.find(u => u.id === this.usineContext.defaultUsineId()) ?? list[0];
-            this.usineContext.switchUsine(def.id);
+            const fallback = list.find((u) => u.id === this.usineContext.defaultUsineId()) ?? list[0];
+            this.usineContext.switchUsine(fallback.id);
           }
         },
         error: () => {},
       });
     }
 
-    // Charger propriétaires et livreurs en parallèle
     this.loadingData = true;
     forkJoin({
-      proprietaires: this.proprietaireService.getAll(),
-      livreurs:      this.livreurService.getAll(),
+      proprietaires: this.proprietaireService.getAll('actif'),
+      livreurs: this.livreurService.getAll('actif'),
     }).subscribe({
       next: ({ proprietaires, livreurs }) => {
-        this.proprietaires.set((proprietaires.data?.data ?? []).map(p => ({ ...p, _label: `${p.prenom} ${p.nom} — ${p.phone}` })));
-        this.livreurs.set((livreurs.data?.data ?? []).map(l => ({ ...l, _label: `${l.prenom} ${l.nom} — ${l.phone}` })));
+        this.proprietaires.set(
+          (proprietaires.data?.data ?? []).map((p) => ({
+            ...p,
+            _label: `${p.prenom} ${p.nom} - ${p.phone}`,
+          })),
+        );
+        this.livreurs.set(
+          (livreurs.data?.data ?? []).map((l) => ({
+            ...l,
+            _label: `${l.prenom} ${l.nom} - ${l.phone}`,
+          })),
+        );
         this.loadingData = false;
       },
       error: () => {
         this.loadingData = false;
         this.messageService.add({
-          severity: 'warn', summary: 'Chargement partiel',
-          detail: 'Impossible de charger la liste des propriétaires / livreurs.',
+          severity: 'warn',
+          summary: 'Chargement partiel',
+          detail: 'Impossible de charger la liste des proprietaires / livreurs.',
           life: 5000,
         });
       },
     });
   }
 
-  private buildForm() {
-    this.form = this.fb.group(
-      {
-        nom_vehicule:             ['', [Validators.required, Validators.maxLength(100)]],
-        marque:                   [null, Validators.maxLength(100)],
-        modele:                   [null, Validators.maxLength(100)],
-        immatriculation:          ['', [Validators.required, Validators.maxLength(20)]],
-        type_vehicule:            [null, Validators.required],
-        capacite_packs:           [null],
-        proprietaire_id:          [null, Validators.required],
-        livreur_principal_id:     [null],
-        is_active:                [true],
-      },
-    );
+  private buildForm(): void {
+    this.form = this.fb.group({
+      nom_vehicule: ['', [Validators.required, Validators.maxLength(100)]],
+      marque: [null, Validators.maxLength(100)],
+      modele: [null, Validators.maxLength(100)],
+      immatriculation: ['', [Validators.required, Validators.maxLength(20)]],
+      type_vehicule: [null, Validators.required],
+      capacite_packs: [null],
+      proprietaire_id: [null, Validators.required],
+      livreur_principal_id: [null],
+      is_active: [true],
+    });
   }
-
-  // ── Usine ──────────────────────────────────────────────────────────────
 
   get usineMissing(): boolean {
     return !this.isEditMode && this.usineContext.currentUsineId() === null;
@@ -173,61 +171,69 @@ export class VehiculeForm implements OnInit {
     this.usineContext.switchUsine(id);
   }
 
-  // ── Type véhicule → auto-remplir capacité ────────────────────────────
-
   onTypeVehiculeChange(type: string): void {
     const ctrl = this.form.get('capacite_packs');
-    if (!ctrl?.value && type) {
-      const def = CAPACITE_DEFAULTS[type as keyof typeof CAPACITE_DEFAULTS];
-      if (def) ctrl?.setValue(def);
-    }
+    if (!ctrl || ctrl.value || !type) return;
+
+    const def = CAPACITE_DEFAULTS[type as keyof typeof CAPACITE_DEFAULTS];
+    if (def) ctrl.setValue(def);
   }
 
-  // ── Photo ──────────────────────────────────────────────────────────────
-
-  onPhotoChange(event: Event) {
+  onPhotoChange(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     this.photoFile = file;
     const reader = new FileReader();
     reader.onload = () => (this.photoPreview = reader.result as string);
     reader.readAsDataURL(file);
   }
 
-  removePhoto() {
+  removePhoto(): void {
     this.photoFile = null;
     this.photoPreview = null;
   }
-
-  // ── Helpers formulaire ────────────────────────────────────────────────
 
   isInvalid(name: string): boolean {
     const c = this.form.get(name)!;
     return c.invalid && (c.dirty || c.touched);
   }
 
-  // ── Soumission ─────────────────────────────────────────────────────────
-
-  onSubmit() {
+  onSubmit(): void {
     if (this.usineMissing) {
-      this.messageService.add({ severity: 'warn', summary: 'Usine requise', detail: 'Veuillez sélectionner une usine.', life: 5000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Usine requise',
+        detail: 'Veuillez selectionner une usine.',
+        life: 5000,
+      });
       return;
     }
 
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      return;
+    }
 
     this.loading = true;
+
     const req$ = this.isEditMode
       ? this.vehiculeService.update(this.vehicule!.id, this.buildFormData())
       : this.vehiculeService.create(this.buildFormData());
 
     req$.subscribe({
       next: () => {
+        if (this.isEditMode && this.vehicule) {
+          this.reloadEditedVehicule(this.vehicule.id);
+          return;
+        }
+
         this.loading = false;
         this.messageService.add({
-          severity: 'success', summary: 'Succès',
-          detail: this.isEditMode ? 'Véhicule mis à jour avec succès.' : 'Véhicule créé avec succès.',
+          severity: 'success',
+          summary: 'Succes',
+          detail: 'Vehicule cree avec succes.',
           life: 3000,
         });
         setTimeout(() => this.router.navigate(['/vehicules']), 1500);
@@ -242,44 +248,119 @@ export class VehiculeForm implements OnInit {
   private buildFormData(): FormData {
     const v = this.form.value;
     const fd = new FormData();
+
     if (!this.isEditMode) {
       const usineId = this.usineContext.currentUsineId();
-      if (usineId != null) fd.append('usine_id', String(usineId));
+      if (usineId != null) {
+        fd.append('usine_id', String(usineId));
+      }
     }
-    fd.append('nom_vehicule',             v.nom_vehicule);
-    if (v.marque)  fd.append('marque', v.marque);
-    if (v.modele)  fd.append('modele', v.modele);
-    fd.append('immatriculation',          v.immatriculation);
-    fd.append('type_vehicule',            v.type_vehicule);
-    if (v.capacite_packs != null)         fd.append('capacite_packs', String(v.capacite_packs));
-    fd.append('proprietaire_id',          String(v.proprietaire_id));
-    if (v.livreur_principal_id != null)   fd.append('livreur_principal_id', String(v.livreur_principal_id));
-    fd.append('is_active',               v.is_active ? '1' : '0');
+
+    fd.append('nom_vehicule', v.nom_vehicule);
+    if (v.marque) fd.append('marque', v.marque);
+    if (v.modele) fd.append('modele', v.modele);
+    fd.append('immatriculation', v.immatriculation);
+    fd.append('type_vehicule', v.type_vehicule);
+    if (v.capacite_packs != null) fd.append('capacite_packs', String(v.capacite_packs));
+    fd.append('proprietaire_id', String(v.proprietaire_id));
+    if (v.livreur_principal_id != null) fd.append('livreur_principal_id', String(v.livreur_principal_id));
+    fd.append('is_active', v.is_active ? '1' : '0');
     if (this.photoFile) fd.append('photo', this.photoFile);
+
     return fd;
   }
 
-  onCancel() {
+  private reloadEditedVehicule(id: number): void {
+    this.vehiculeService.getOne(id).subscribe({
+      next: (resp) => {
+        this.vehicule = resp.data;
+        this.applyVehiculeToForm(resp.data);
+        this.photoFile = null;
+        this.form.markAsPristine();
+        this.form.markAsUntouched();
+        this.loading = false;
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: 'Vehicule mis a jour avec succes.',
+          life: 3000,
+        });
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Mise a jour enregistree',
+          detail: 'Le vehicule est modifie mais le rechargement a echoue.',
+          life: 5000,
+        });
+      },
+    });
+  }
+
+  private applyVehiculeToForm(vehicule: Vehicule): void {
+    this.photoPreview = vehicule.photo_url ?? null;
+    this.form.patchValue({
+      nom_vehicule: vehicule.nom_vehicule,
+      marque: vehicule.marque ?? null,
+      modele: vehicule.modele ?? null,
+      immatriculation: vehicule.immatriculation,
+      type_vehicule: vehicule.type_vehicule,
+      capacite_packs: vehicule.capacite_packs,
+      proprietaire_id: vehicule.proprietaire_id,
+      livreur_principal_id: vehicule.livreur_principal_id ?? null,
+      is_active: vehicule.is_active,
+    });
+  }
+
+  onCancel(): void {
     this.router.navigate(['/vehicules']);
   }
 
-  private handleApiError(err: any) {
+  private handleApiError(err: any): void {
     if (err.status === 422 && err.error?.errors) {
       const msgs = Object.values(err.error.errors).flat() as string[];
-      msgs.forEach(m => this.messageService.add({ severity: 'error', summary: 'Erreur de validation', detail: m, life: 5000 }));
+      msgs.forEach((m) =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur de validation',
+          detail: m,
+          life: 5000,
+        }),
+      );
       return;
     }
+
     const configs: Record<number, { severity: string; summary: string; detail: string }> = {
-      401: { severity: 'error', summary: 'Session expirée',      detail: 'Votre session a expiré. Veuillez vous reconnecter.' },
-      403: { severity: 'error', summary: 'Accès refusé',         detail: "Vous n'avez pas la permission." },
-      409: { severity: 'warn',  summary: 'Conflit',              detail: err.error?.message || 'Cette immatriculation existe déjà pour cette usine.' },
-      0:   { severity: 'error', summary: 'Serveur inaccessible', detail: 'Impossible de joindre le serveur.' },
+      401: {
+        severity: 'error',
+        summary: 'Session expiree',
+        detail: 'Votre session a expire. Veuillez vous reconnecter.',
+      },
+      403: {
+        severity: 'error',
+        summary: 'Acces refuse',
+        detail: "Vous n'avez pas la permission.",
+      },
+      409: {
+        severity: 'warn',
+        summary: 'Conflit',
+        detail: err.error?.message || 'Cette immatriculation existe deja pour cette usine.',
+      },
+      0: {
+        severity: 'error',
+        summary: 'Serveur inaccessible',
+        detail: 'Impossible de joindre le serveur.',
+      },
     };
+
     const cfg = configs[err.status] ?? {
       severity: 'error',
-      summary:  `Erreur ${err.status || ''}`.trim(),
-      detail:   err.error?.message || 'Une erreur inattendue est survenue.',
+      summary: `Erreur ${err.status || ''}`.trim(),
+      detail: err.error?.message || 'Une erreur inattendue est survenue.',
     };
+
     this.messageService.add({ ...cfg, life: 5000 });
   }
 }

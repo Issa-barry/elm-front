@@ -20,8 +20,8 @@ import { Vehicule, TYPE_VEHICULE_LABELS } from '@/models/vehicule.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface FilterOption {
-    label: string;
-    value: string;
+  label: string;
+  value: string;
 }
 
 @Component({
@@ -30,10 +30,21 @@ interface FilterOption {
   styleUrl: './vehicule-liste2.scss',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, PhoneFormatPipe, FormsModule,
-    ButtonModule, IconFieldModule, InputIconModule, InputTextModule,
-    MenuModule, RippleModule, SelectModule, StyleClassModule,
-    TagModule, ToastModule, TooltipModule,
+    CommonModule,
+    RouterModule,
+    PhoneFormatPipe,
+    FormsModule,
+    ButtonModule,
+    IconFieldModule,
+    InputIconModule,
+    InputTextModule,
+    MenuModule,
+    RippleModule,
+    SelectModule,
+    StyleClassModule,
+    TagModule,
+    ToastModule,
+    TooltipModule,
   ],
   providers: [MessageService],
 })
@@ -45,9 +56,9 @@ export class VehiculeListe2 implements OnInit {
   loading = false;
 
   filterOptions: FilterOption[] = [
-      { label: 'Tous', value: 'all' },
-      { label: 'Actifs', value: 'actif' },
-      { label: 'Inactifs', value: 'inactif' },
+    { label: 'Tous', value: 'all' },
+    { label: 'Actifs', value: 'actif' },
+    { label: 'Inactifs', value: 'inactif' },
   ];
 
   mobileFilterMenuItems: MenuItem[] = [];
@@ -58,18 +69,18 @@ export class VehiculeListe2 implements OnInit {
     private router: Router,
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadVehicules();
     this.mobileFilterMenuItems = [
-      { label: 'Tous', icon: 'pi pi-list',         command: () => this.selectedFilter.set('all') },
-      { label: 'Actifs', icon: 'pi pi-check-circle', command: () => this.selectedFilter.set('actif') },
-      { label: 'Inactifs', icon: 'pi pi-times-circle', command: () => this.selectedFilter.set('inactif') },
+      { label: 'Tous', icon: 'pi pi-list', command: () => this.setSelectedFilter('all') },
+      { label: 'Actifs', icon: 'pi pi-check-circle', command: () => this.setSelectedFilter('actif') },
+      { label: 'Inactifs', icon: 'pi pi-times-circle', command: () => this.setSelectedFilter('inactif') },
     ];
   }
 
-  loadVehicules() {
+  loadVehicules(): void {
     this.loading = true;
-    this.vehiculeService.getAll().subscribe({
+    this.vehiculeService.getAll({ inactifs: true }).subscribe({
       next: (resp) => {
         this.vehicules.set(resp.data?.data ?? []);
         this.total.set(resp.data?.total ?? 0);
@@ -80,7 +91,7 @@ export class VehiculeListe2 implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: err.error?.message || 'Impossible de charger les véhicules.',
+          detail: err.error?.message || 'Impossible de charger les vehicules.',
           life: 5000,
         });
       },
@@ -88,24 +99,36 @@ export class VehiculeListe2 implements OnInit {
   }
 
   filteredOrders = computed(() => {
-      let filtered = this.vehicules();
+    let filtered = this.vehicules();
+    const selected = this.selectedFilter();
 
-      if (this.selectedFilter() !== 'all') {
-          filtered = filtered.filter(v =>
-              this.selectedFilter() === 'actif' ? v.is_active : !v.is_active
-          );
-      }
+    if (selected !== 'all') {
+      filtered = filtered.filter((v) => {
+        const active = this.isVehiculeActive(v);
+        return selected === 'actif' ? active : !active;
+      });
+    }
 
-      if (this.searchQuery().trim()) {
-          const query = this.searchQuery().toLowerCase().trim();
-          filtered = filtered.filter(v =>
-              v.nom_vehicule.toLowerCase().includes(query) ||
-              v.immatriculation.toLowerCase().includes(query)
-          );
-      }
+    const query = this.searchQuery().toLowerCase().trim();
+    if (query) {
+      filtered = filtered.filter((v) =>
+        v.nom_vehicule.toLowerCase().includes(query) ||
+        v.immatriculation.toLowerCase().includes(query) ||
+        (v.marque ?? '').toLowerCase().includes(query) ||
+        (v.modele ?? '').toLowerCase().includes(query),
+      );
+    }
 
-      return filtered;
+    return filtered;
   });
+
+  setSelectedFilter(value: string): void {
+    if (value === 'all' || value === 'actif' || value === 'inactif') {
+      this.selectedFilter.set(value);
+    } else {
+      this.selectedFilter.set('all');
+    }
+  }
 
   goEdit(v: Vehicule): void {
     this.router.navigate(['/vehicules', v.id, 'edit']);
@@ -120,10 +143,10 @@ export class VehiculeListe2 implements OnInit {
   }
 
   toggleChevron(vehiculeId: number): void {
-      const chevronElement = document.querySelector(`.chevron-icon-${vehiculeId}`);
-      if (chevronElement) {
-          chevronElement.classList.toggle('rotate-180');
-      }
+    const chevronElement = document.querySelector(`.chevron-icon-${vehiculeId}`);
+    if (chevronElement) {
+      chevronElement.classList.toggle('rotate-180');
+    }
   }
 
   getInitials(name: string): string {
@@ -137,20 +160,20 @@ export class VehiculeListe2 implements OnInit {
   }
 
   getStatusColor(v: Vehicule): string {
-    return v.is_active ? 'green' : 'surface';
+    return this.isVehiculeActive(v) ? 'green' : 'surface';
   }
 
   getStatusIcon(v: Vehicule): string {
-    return v.is_active ? 'pi-check-circle' : 'pi-times-circle';
+    return this.isVehiculeActive(v) ? 'pi-check-circle' : 'pi-times-circle';
   }
 
   getStatusLabel(v: Vehicule): string {
-    return v.is_active ? 'Actif' : 'Inactif';
+    return this.isVehiculeActive(v) ? 'Actif' : 'Inactif';
   }
 
   getProprietaireNom(v: Vehicule): string {
     const p = v.proprietaire;
-    if (!p) return '—';
+    if (!p) return '-';
     return `${p.prenom} ${p.nom}`.trim();
   }
 
@@ -160,12 +183,17 @@ export class VehiculeListe2 implements OnInit {
 
   getLivreurNom(v: Vehicule): string {
     const l = this.getLivreur(v);
-    if (!l) return '—';
+    if (!l) return '-';
     return `${l.prenom} ${l.nom}`.trim();
   }
 
   formatDate(dateStr?: string | null): string {
-    if (!dateStr) return '—';
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('fr-FR');
+  }
+
+  private isVehiculeActive(v: Vehicule): boolean {
+    const status = (v as { is_active: unknown }).is_active;
+    return status === true || status === 1 || status === '1';
   }
 }

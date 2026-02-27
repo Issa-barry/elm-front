@@ -127,7 +127,7 @@
             <div class="w-full md:w-auto">
                 <p-select
                     [ngModel]="selectedFilter()"
-                    (ngModelChange)="selectedFilter.set($event)"
+                    (ngModelChange)="setSelectedFilter($event)"
                     [options]="filterOptions"
                     optionLabel="label"
                     optionValue="value"

@@ -37,7 +37,10 @@ export class ProprietaireService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<ApiResponse<PaginatedData<Proprietaire>>> {
+  getAll(statut?: 'actif' | 'inactif'): Observable<ApiResponse<PaginatedData<Proprietaire>>> {
+    if (statut) {
+      return this.http.get<ApiResponse<PaginatedData<Proprietaire>>>(this.baseUrl, { params: { statut } });
+    }
     return this.http.get<ApiResponse<PaginatedData<Proprietaire>>>(this.baseUrl);
   }
 

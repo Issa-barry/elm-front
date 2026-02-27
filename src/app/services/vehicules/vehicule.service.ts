@@ -28,6 +28,7 @@ export class VehiculeService {
     let params = new HttpParams();
     if (filters?.search) params = params.set('search', filters.search);
     if (filters?.per_page) params = params.set('per_page', String(filters.per_page));
+    if (filters?.inactifs) params = params.set('inactifs', 'true');
     return this.http.get<ApiResponse<PaginatedData<Vehicule>>>(this.baseUrl, { params });
   }
 

@@ -3,14 +3,12 @@
 
 <div class="card">
   <p-table
-    #dt
-    [value]="livreurs()"
+    [value]="filteredLivreurs()"
     [loading]="loading"
     [paginator]="true"
     paginatorDropdownAppendTo="body"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
-    [globalFilterFields]="['nom', 'prenom', 'phone']"
     responsiveLayout="scroll"
     currentPageReportTemplate="  {first} / {last} de {totalRecords} livreurs"
     [showCurrentPageReport]="true"
@@ -20,10 +18,25 @@
       <div class="flex flex-wrap gap-2 items-center justify-between">
         <p-iconfield class="w-full sm:w-80 order-1 sm:order-0">
           <p-inputicon class="pi pi-search" />
-          <input pInputText type="text" placeholder="Rechercher un livreur..."
-                 (input)="onGlobalFilter(dt, $event)" class="w-full" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Rechercher un livreur..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            class="w-full"
+          />
         </p-iconfield>
         <div class="flex gap-2 w-full sm:w-auto">
+          <p-select
+            [options]="filterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedFilter()"
+            (ngModelChange)="setSelectedFilter($event)"
+            placeholder="Tous"
+            class="w-full sm:w-44"
+          />
           @if (canCreate) {
             <button pButton outlined icon="pi pi-plus" label="Nouveau livreur"
                     (click)="goNew()"></button>
@@ -69,7 +82,9 @@
             <p-tag value="Inactif" severity="secondary" />
           }
         </td>
-        <td class="text-surface-500 text-sm">—</td>
+        <td class="text-surface-500 text-sm">
+          {{ l.created_at ? (l.created_at | date:'dd/MM/yy') : '-' }}
+        </td>
         @if (canUpdate || canDelete) {
           <td>
             <div class="flex gap-1 justify-center">
@@ -111,3 +126,4 @@
     </ng-template>
   </p-table>
 </div>
+

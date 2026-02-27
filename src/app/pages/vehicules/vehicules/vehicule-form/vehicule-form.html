@@ -1,6 +1,12 @@
 <p-toast />
 
 <div class="card vehicule-form">
+  @if (loading) {
+    <div class="vf-loading-overlay" aria-live="polite" aria-busy="true">
+      <i class="pi pi-spin pi-spinner text-xl"></i>
+      <span>{{ isEditMode ? 'Mise a jour du vehicule...' : 'Creation du vehicule...' }}</span>
+    </div>
+  }
 
   <!-- ═══ HEADER MOBILE (sticky, caché sur desktop via SCSS) ═══ -->
   <header class="mobile-vf-header">

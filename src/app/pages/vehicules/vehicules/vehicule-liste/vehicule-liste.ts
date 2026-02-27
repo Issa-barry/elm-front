@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
-import { TableModule, Table } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -71,10 +71,7 @@ export class VehiculeListe implements OnInit {
     }
     const q = this.searchQuery().toLowerCase().trim();
     if (q) {
-      list = list.filter(v =>
-        v.nom_vehicule.toLowerCase().includes(q) ||
-        v.immatriculation.toLowerCase().includes(q)
-      );
+      list = list.filter((v) => this.matchesSearch(v, q));
     }
     return list;
   });
@@ -172,10 +169,6 @@ export class VehiculeListe implements OnInit {
     });
   }
 
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
   getInitials(v: Vehicule): string {
     const words = (v.nom_vehicule ?? '').split(' ').filter(Boolean);
     if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
@@ -184,6 +177,31 @@ export class VehiculeListe implements OnInit {
 
   getTypeLabel(v: Vehicule): string {
     return TYPE_VEHICULE_LABELS[v.type_vehicule] ?? v.type_vehicule;
+  }
+
+  private matchesSearch(v: Vehicule, query: string): boolean {
+    const owner = v.proprietaire
+      ? `${v.proprietaire.prenom ?? ''} ${v.proprietaire.nom ?? ''} ${v.proprietaire.phone ?? ''}`
+      : '';
+    const driver = v.livreur_principal
+      ? `${v.livreur_principal.prenom ?? ''} ${v.livreur_principal.nom ?? ''} ${v.livreur_principal.phone ?? ''}`
+      : '';
+    const searchable = [
+      v.nom_vehicule,
+      v.immatriculation,
+      v.marque,
+      v.modele,
+      v.type_vehicule,
+      this.getTypeLabel(v),
+      owner,
+      driver,
+      v.is_active ? 'actif' : 'inactif',
+    ]
+      .filter((value) => !!value)
+      .join(' ')
+      .toLowerCase();
+
+    return searchable.includes(query);
   }
 
   private httpErrorSummary(err: any): string {
