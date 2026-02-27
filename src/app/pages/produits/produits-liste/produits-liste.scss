@@ -629,17 +629,34 @@
 // ================================
 // DESKTOP — Filter bar
 // ================================
-.desktop-filter-bar {
+.desktop-products-caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+
+.desktop-products-search {
+    width: 100%;
+    max-width: 22rem;
+}
+
+.desktop-products-actions {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 0 1rem;
     flex-wrap: wrap;
-    border-bottom: 1px solid var(--p-surface-100);
-    margin-bottom: 0.5rem;
+    margin-left: auto;
+    justify-content: flex-end;
+}
 
-    :host-context(.app-dark) & {
-        border-bottom-color: var(--p-surface-700);
+@media screen and (max-width: 1200px) {
+    .desktop-products-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: flex-start;
     }
 }
 
@@ -647,29 +664,14 @@
     min-width: 11rem;
 }
 
-.desktop-filter-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.desktop-filter-toggle-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--p-surface-600);
-}
-
 .desktop-filter-count {
-    margin-left: auto;
     font-size: 0.82rem;
     color: var(--p-surface-400);
     font-weight: 500;
+    white-space: nowrap;
 }
 
 :host-context(.app-dark) {
-    .desktop-filter-toggle-label {
-        color: var(--p-surface-400);
-    }
     .desktop-filter-count {
         color: var(--p-surface-500);
     }

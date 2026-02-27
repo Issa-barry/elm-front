@@ -12,36 +12,39 @@ export default [
         path: '',
         component: ComptabilitePackingListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['facture-packings.read'] },
+        data: { breadcrumb: 'comptabilite',  permissions: ['facture-packings.read'] },
     },
     {
         path: 'comptabilite-packing-liste',
         component: ComptabilitePackingListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['facture-packings.read'] },
+        data: { breadcrumb: 'comptabilite-packing-liste',  permissions: ['facture-packings.read'] },
     },
     {
         path: 'comptabilite-packing-detail/:id',
         component: ComptabilitePackingDetail,
         canActivate: [authorizationGuard],
-        data: { permissions: ['facture-packings.read'] },
+        data: { breadcrumb: 'comptabilite-packing-detail',  permissions: ['facture-packings.read'] },
     },
 
     // ── Factures livraison ───────────────────────────────────────────────
     {
         path: 'factures-livraison',
         component: FactureLivraisonListe,
-    },
+            data: { breadcrumb: 'factures-livraison' },
+},
     {
         path: 'factures-livraison/:id',
         component: FactureLivraisonDetail,
-    },
+            data: { breadcrumb: 'factures-livraison' },
+},
 
     // ── Encaissements livraison ──────────────────────────────────────────
     {
         path: 'encaissements-livraison',
         component: EncaissementLivraisonListe,
-    },
+            data: { breadcrumb: 'encaissements-livraison' },
+},
 
     { path: '**', redirectTo: '/notfound' },
 ] as Routes;

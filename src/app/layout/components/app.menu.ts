@@ -73,6 +73,12 @@ export class AppMenu {
                                 visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
                             },
                             {
+                                label: 'Commissions 2',
+                                icon: 'pi pi-fw pi-percentage',
+                                routerLink: ['/ventes/commissions2'],
+                                visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                            },
+                            {
                                 label: 'Factures vente',
                                 icon: 'pi pi-fw pi-receipt',
                                 routerLink: ['/ventes/factures'],
@@ -153,7 +159,7 @@ export class AppMenu {
                         items: [
                             {
                                 label: 'Prestateurs-externes',
-                                icon: 'pi pi-fw pi-briefcase',
+                                icon: 'pi pi-fw pi-users',
                                 routerLink: ['contacts/prestateurs'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'prestataires.read',
@@ -164,7 +170,7 @@ export class AppMenu {
                             },
                             {
                                 label: 'Utilisateurs',
-                                icon: 'pi pi-fw pi-briefcase',
+                                icon: 'pi pi-fw pi-user',
                                 routerLink: ['contacts/utilisateurs'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'users.read',

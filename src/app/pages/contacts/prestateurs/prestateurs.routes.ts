@@ -10,25 +10,25 @@ export default [
         path: '',
         component: PrestateursListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.read'] },
+        data: { breadcrumb: 'prestateurs',  permissions: ['prestataires.read'] },
     },
     {
         path: 'prestateurs',
         component: PrestateursListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.read'] },
+        data: { breadcrumb: 'prestateurs',  permissions: ['prestataires.read'] },
     },
     {
         path: 'new',
         component: PrestateursNew,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.create'] },
+        data: { breadcrumb: 'new',  permissions: ['prestataires.create'] },
     },
     {
         path: 'edit/:id',
         component: PrestateursEdit,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.update'] },
+        data: { breadcrumb: 'edit',  permissions: ['prestataires.update'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

@@ -9,25 +9,25 @@ export default [
         path: '',
         component: PackingListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['packings.read'] },
+        data: { breadcrumb: 'packings',  permissions: ['packings.read'] },
     },
     {
         path: 'packings',
         component: PackingListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['packings.read'] },
+        data: { breadcrumb: 'packings',  permissions: ['packings.read'] },
     },
     {
         path: 'packings-new',
         component: PackingNew,
         canActivate: [authorizationGuard],
-        data: { permissions: ['packings.create'] },
+        data: { breadcrumb: 'packings-new',  permissions: ['packings.create'] },
     },
     {
         path: 'packings-edit/:id',
         component: PackingEdit,
         canActivate: [authorizationGuard],
-        data: { permissions: ['packings.update'] },
+        data: { breadcrumb: 'packings-edit',  permissions: ['packings.update'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

@@ -17,6 +17,7 @@ import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
+import { DatePickerModule } from 'primeng/datepicker';
 
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
 import {
@@ -50,6 +51,7 @@ interface VersementTarget {
     SkeletonModule,
     DividerModule,
     TextareaModule,
+    DatePickerModule,
   ],
   providers: [MessageService],
   templateUrl: './commission-detail-dialog.html',
@@ -66,6 +68,7 @@ export class CommissionDetailDialog implements OnChanges {
   versementDialogVisible = false;
   versementTarget = signal<VersementTarget | null>(null);
   versementNote = '';
+  versementDate: Date = new Date();
   versementLoading = false;
 
   parseFloat = parseFloat;
@@ -129,6 +132,7 @@ export class CommissionDetailDialog implements OnChanges {
       nom: this.getBeneficiaireNom(c, v),
     });
     this.versementNote = '';
+    this.versementDate = new Date();
     this.versementDialogVisible = true;
   }
 
@@ -136,11 +140,16 @@ export class CommissionDetailDialog implements OnChanges {
     const target = this.versementTarget();
     if (!target || this.versementLoading) return;
     this.versementLoading = true;
+    const dateIso = this.versementDate instanceof Date
+      ? this.versementDate.toISOString().split('T')[0]
+      : String(this.versementDate);
+
     this.commissionService
       .verser(
         target.commissionId,
         target.versement.beneficiaire_type as BeneficiaireType,
-        this.versementNote || undefined
+        this.versementNote || undefined,
+        dateIso
       )
       .subscribe({
         next: () => {

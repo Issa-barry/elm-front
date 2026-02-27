@@ -4,31 +4,31 @@ export default [
     {
         path: 'blog',
         loadChildren: () => import('./blog/blog.routes'),
-        data: { breadcrumb: 'Blog' }
+        data: { breadcrumb: 'blog' }
     },
     {
         path: 'chat',
         loadComponent: () => import('./chat').then((c) => c.Chat),
-        data: { breadcrumb: 'Chat' }
+        data: { breadcrumb: 'chat' }
     },
     {
         path: 'files',
         loadComponent: () => import('./files').then((c) => c.Files),
-        data: { breadcrumb: 'Files' }
+        data: { breadcrumb: 'files' }
     },
     {
         path: 'mail',
         loadChildren: () => import('./mail/mail.routes'),
-        data: { breadcrumb: 'Mail' }
+        data: { breadcrumb: 'mail' }
     },
     {
         path: 'tasklist',
         loadComponent: () => import('./tasklist').then((c) => c.TaskList),
-        data: { breadcrumb: 'Tasklist' }
+        data: { breadcrumb: 'tasklist' }
     },
     {
         path: 'kanban',
         loadComponent: () => import('./kanban').then((c) => c.Kanban),
-        data: { breadcrumb: 'Kanban' }
+        data: { breadcrumb: 'kanban' }
     }
 ] as Routes;

@@ -18,21 +18,21 @@ import { VehiculeListe2 } from './vehicules/vehicule-liste2/vehicule-liste2';
 
 export default [
   // Véhicules
-  { path: '',         component: VehiculeListe },
-  { path: 'nouveau',  component: VehiculeForm  },
-  { path: ':id/edit', component: VehiculeEdit  },
+  { path: '',         component: VehiculeListe, data: { breadcrumb: 'vehicules' }},
+  { path: 'nouveau',  component: VehiculeForm, data: { breadcrumb: 'nouveau' }},
+  { path: ':id/edit', component: VehiculeEdit, data: { breadcrumb: 'edit' }},
 
-  { path: 'vehicules-liste2',         component: VehiculeListe2 },
+  { path: 'vehicules-liste2',         component: VehiculeListe2, data: { breadcrumb: 'vehicules-liste2' }},
 
   // Propriétaires
-  { path: 'proprietaires',          component: ProprietaireListe },
-  { path: 'proprietaires/nouveau',  component: ProprietaireForm  },
-  { path: 'proprietaires/:id/edit', component: ProprietaireEdit  },
+  { path: 'proprietaires',          component: ProprietaireListe, data: { breadcrumb: 'proprietaires' }},
+  { path: 'proprietaires/nouveau',  component: ProprietaireForm, data: { breadcrumb: 'nouveau' }},
+  { path: 'proprietaires/:id/edit', component: ProprietaireEdit, data: { breadcrumb: 'edit' }},
 
   // Livreurs
-  { path: 'livreurs',          component: LivreurListe },
-  { path: 'livreurs/nouveau',  component: LivreurForm  },
-  { path: 'livreurs/:id/edit', component: LivreurEdit  },
+  { path: 'livreurs',          component: LivreurListe, data: { breadcrumb: 'livreurs' }},
+  { path: 'livreurs/nouveau',  component: LivreurForm, data: { breadcrumb: 'nouveau' }},
+  { path: 'livreurs/:id/edit', component: LivreurEdit, data: { breadcrumb: 'edit' }},
 
   { path: '**', redirectTo: '/notfound' },
 ] as Routes;

@@ -1,0 +1,252 @@
+<p-toast />
+
+<div class="card p-6">
+
+  <!-- ── En-tête : salutation + avatar ─────────────────────────────── -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold m-0">{{ greeting() }}, {{ userName() }}</h2>
+    <div
+      class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm select-none"
+      style="background: var(--p-primary-color)"
+    >
+      {{ userInitial() }}
+    </div>
+  </div>
+
+  <!-- ── Aperçu + tous les filtres ────────────────────────────────── -->
+  <div class="flex flex-wrap justify-between items-end gap-3 mb-5">
+    <span class="font-semibold text-lg">Aperçu</span>
+
+    <div class="flex flex-wrap items-end gap-3">
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Statut</label>
+        <p-select
+          [(ngModel)]="filterStatut"
+          [options]="statutOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Tous les statuts"
+          styleClass="w-48"
+          (onChange)="applyFilters()"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Date début</label>
+        <p-datepicker
+          [(ngModel)]="filterDateDebut"
+          dateFormat="dd/mm/yy"
+          [showClear]="true"
+          placeholder="Du…"
+          inputStyleClass="w-32"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Date fin</label>
+        <p-datepicker
+          [(ngModel)]="filterDateFin"
+          dateFormat="dd/mm/yy"
+          [showClear]="true"
+          placeholder="Au…"
+          inputStyleClass="w-32"
+        />
+      </div>
+
+      <div class="flex gap-2 pb-0.5">
+        <p-button label="Filtrer" icon="pi pi-filter" (onClick)="applyFilters()" />
+        <p-button
+          label="Réinitialiser"
+          icon="pi pi-filter-slash"
+          [outlined]="true"
+          severity="secondary"
+          (onClick)="resetFilters()"
+        />
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── 4 widgets statistiques ─────────────────────────────────────── -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+
+    <!-- Montant éligible -->
+    <div>
+      <p class="text-surface-500 text-sm m-0 mb-1">Montant éligible</p>
+      @if (statsLoading()) {
+        <p-skeleton height="2rem" styleClass="mb-2" />
+        <p-skeleton height="1.25rem" width="60%" />
+      } @else {
+        <div class="text-2xl font-bold mb-2">{{ formatMontant(stats()?.eligibleMontant) }}</div>
+        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+          <i class="pi pi-arrow-up text-[10px]"></i>
+          {{ stats()?.eligibleCount }} éligible(s)
+        </span>
+      }
+    </div>
+
+    <!-- Commission moyenne -->
+    <div>
+      <p class="text-surface-500 text-sm m-0 mb-1">Commission moyenne</p>
+      @if (statsLoading()) {
+        <p-skeleton height="2rem" styleClass="mb-2" />
+        <p-skeleton height="1.25rem" width="60%" />
+      } @else {
+        <div class="text-2xl font-bold mb-2">{{ formatMontant(stats()?.moyenneCommission) }}</div>
+        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+          <i class="pi pi-percentage text-[10px]"></i>
+          par commission
+        </span>
+      }
+    </div>
+
+    <!-- En attente -->
+    <div>
+      <p class="text-surface-500 text-sm m-0 mb-1">En attente</p>
+      @if (statsLoading()) {
+        <p-skeleton height="2rem" styleClass="mb-2" />
+        <p-skeleton height="1.25rem" width="60%" />
+      } @else {
+        <div class="text-2xl font-bold mb-2">{{ stats()?.enAttenteCount }}</div>
+        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+          <i class="pi pi-clock text-[10px]"></i>
+          + {{ stats()?.partiellementCount }} partielles
+        </span>
+      }
+    </div>
+
+    <!-- Versées -->
+    <div>
+      <p class="text-surface-500 text-sm m-0 mb-1">Versées</p>
+      @if (statsLoading()) {
+        <p-skeleton height="2rem" styleClass="mb-2" />
+        <p-skeleton height="1.25rem" width="60%" />
+      } @else {
+        <div class="text-2xl font-bold mb-2">{{ stats()?.verseeCount }}</div>
+        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+          <i class="pi pi-check text-[10px]"></i>
+          soldées
+        </span>
+      }
+    </div>
+
+  </div>
+
+  <p-divider />
+
+  <!-- ── Table commissions récentes ────────────────────────────────── -->
+  <p-table
+    [value]="commissions()"
+    [loading]="loading()"
+    [lazy]="true"
+    (onLazyLoad)="onPageChange($event)"
+    [paginator]="true"
+    [rows]="perPage()"
+    [totalRecords]="totalRecords()"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [rowHover]="true"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="{first} / {last} de {totalRecords}"
+    [showCurrentPageReport]="true"
+    styleClass="p-datatable-sm"
+  >
+
+    <ng-template #caption>
+      <span class="font-semibold text-lg">Commissions récentes</span>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th>N° commande</th>
+        <th>Date</th>
+        <th>Livreur</th>
+        <th>Véhicule</th>
+        <th class="text-right">Montant</th>
+        <th>Statut</th>
+        <th></th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-c>
+      <tr class="cursor-pointer" (click)="openDetail(c)">
+
+        <td>
+          <span class="font-mono text-sm font-semibold">{{ c.commande?.reference ?? '—' }}</span>
+        </td>
+
+        <td class="text-sm text-surface-500">{{ formatDate(c.eligible_at) }}</td>
+
+        <td>
+          <div class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+              [style.background]="getAvatarColor(c)"
+            >
+              {{ getInitials(c) }}
+            </div>
+            <span class="text-sm">{{ c.livreur?.prenom }} {{ c.livreur?.nom }}</span>
+          </div>
+        </td>
+
+        <td>
+          <div class="text-sm font-medium">{{ c.vehicule?.nom_vehicule ?? '—' }}</div>
+          <code class="text-xs text-surface-400">{{ c.vehicule?.immatriculation }}</code>
+        </td>
+
+        <td class="text-right">
+          <span class="font-semibold text-primary">{{ formatMontant(c.montant_commission_total) }}</span>
+        </td>
+
+        <td>
+          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" />
+        </td>
+
+        <td (click)="$event.stopPropagation()">
+          <p-button
+            icon="pi pi-eye"
+            severity="info"
+            [text]="true"
+            [rounded]="true"
+            pTooltip="Voir le détail"
+            tooltipPosition="top"
+            (onClick)="openDetail(c)"
+          />
+        </td>
+
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7" class="text-center py-10">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-percentage text-4xl"></i>
+            <span>Aucune commission trouvée</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3, 4, 5]; track $index) {
+        <tr>
+          @for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+
+  </p-table>
+
+</div>
+
+@if (selectedCommissionId()) {
+  <app-commission-detail-dialog
+    [commissionId]="selectedCommissionId()!"
+    [visible]="detailVisible()"
+    (visibleChange)="detailVisible.set($event)"
+    (onVersementDone)="onVersementDone()"
+  />
+}

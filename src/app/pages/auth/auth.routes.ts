@@ -9,12 +9,12 @@ import { LockScreen } from './lockscreen';
 import { Login } from './login/login';
 
 export default [
-    { path: 'access', component: Access },
-    { path: 'error', component: Error },
-    { path: 'login', component: Login },
-    { path: 'register', component: Register },
-    { path: 'forgotpassword', component: ForgotPassword },
-    { path: 'newpassword', component: NewPassword },
-    { path: 'verification', component: Verification },
-    { path: 'lockscreen', component: LockScreen }
+    { path: 'access', component: Access, data: { breadcrumb: 'access' }},
+    { path: 'error', component: Error, data: { breadcrumb: 'error' }},
+    { path: 'login', component: Login, data: { breadcrumb: 'login' }},
+    { path: 'register', component: Register, data: { breadcrumb: 'register' }},
+    { path: 'forgotpassword', component: ForgotPassword, data: { breadcrumb: 'forgotpassword' }},
+    { path: 'newpassword', component: NewPassword, data: { breadcrumb: 'newpassword' }},
+    { path: 'verification', component: Verification, data: { breadcrumb: 'verification' }},
+    { path: 'lockscreen', component: LockScreen, data: { breadcrumb: 'lockscreen' }}
 ] as Routes;

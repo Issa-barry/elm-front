@@ -156,6 +156,17 @@
       </div>
 
       <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium">Date de versement <span class="text-red-500">*</span></label>
+        <p-datepicker
+          [(ngModel)]="versementDate"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
         <label class="text-sm font-medium">
           Note / Justificatif
           <span class="text-surface-400 font-normal">(optionnel)</span>
