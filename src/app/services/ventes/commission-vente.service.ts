@@ -34,11 +34,15 @@ export class CommissionVenteService {
   verser(
     id: number,
     type: BeneficiaireType,
-    note?: string
+    note?: string,
+    date_versement?: string
   ): Observable<ApiResponse<null>> {
+    const body: Record<string, string> = {};
+    if (note) body['note'] = note;
+    if (date_versement) body['date_versement'] = date_versement;
     return this.http.post<ApiResponse<null>>(
       `${this.url}/${id}/versements/${type}`,
-      note ? { note } : {}
+      body
     );
   }
 }
