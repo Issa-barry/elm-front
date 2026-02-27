@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { RippleModule } from 'primeng/ripple';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 
 import { ProprietaireService } from '@/services/proprietaires/proprietaire.service';
@@ -26,9 +27,11 @@ import { COUNTRIES, Country } from '@/models/country.model';
     SelectModule,
     ToastModule,
     ToggleSwitchModule,
+    RippleModule,
   ],
   providers: [MessageService],
   templateUrl: './proprietaire-form.html',
+  styleUrl: './proprietaire-form.scss',
 })
 export class ProprietaireForm implements OnInit {
   @Input() proprietaire?: Proprietaire;

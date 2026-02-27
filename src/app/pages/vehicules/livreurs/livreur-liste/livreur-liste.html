@@ -1,7 +1,92 @@
 <p-toast />
 <p-confirmdialog />
 
-<div class="card">
+<!-- ══ MOBILE : app shell (masqué sur desktop) ══════════════════════════════ -->
+<div class="livreur-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goBack()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Livreurs</h1>
+      <p class="mobile-subtitle">{{ filteredLivreurs().length }} livreur{{ filteredLivreurs().length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #filterMenu
+      [model]="mobileFilterMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="filterMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Nom, téléphone..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && filteredLivreurs().length; else mobileListState">
+      <article
+        class="mobile-livreur-card"
+        *ngFor="let l of filteredLivreurs()"
+        (click)="goEdit(l)"
+      >
+        <div class="mobile-card-avatar">{{ l.prenom[0] }}{{ l.nom[0] }}</div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ fullName(l) }}</div>
+          <div class="mobile-card-meta">{{ l.phone | phoneFormat }}</div>
+          <div class="mobile-card-footer">
+            @if (l.is_active) {
+              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag" />
+            } @else {
+              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag" />
+            }
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !filteredLivreurs().length">Aucun livreur trouvé.</div>
+    </ng-template>
+  </div>
+
+  @if (canCreate) {
+    <button
+      type="button"
+      class="mobile-fab"
+      aria-label="Nouveau livreur"
+      (click)="goNew()"
+    >
+      <i class="pi pi-plus"></i>
+    </button>
+  }
+</div>
+
+<!-- ══ DESKTOP : tableau standard (masqué sur mobile) ═══════════════════════ -->
+<div class="card livreur-desktop">
   <p-table
     [value]="filteredLivreurs()"
     [loading]="loading"
@@ -126,4 +211,3 @@
     </ng-template>
   </p-table>
 </div>
-

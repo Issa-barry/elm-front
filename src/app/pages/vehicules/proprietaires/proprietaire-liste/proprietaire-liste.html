@@ -1,7 +1,98 @@
 <p-toast />
 <p-confirmdialog />
 
-<div class="card">
+<!-- ══ MOBILE : app shell (masqué sur desktop) ══════════════════════════════ -->
+<div class="proprietaire-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goBack()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Propriétaires</h1>
+      <p class="mobile-subtitle">{{ filteredProprietaires().length }} propriétaire{{ filteredProprietaires().length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #filterMenu
+      [model]="mobileFilterMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="filterMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Nom, téléphone, ville..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && filteredProprietaires().length; else mobileListState">
+      <article
+        class="mobile-proprietaire-card"
+        *ngFor="let p of filteredProprietaires()"
+        (click)="goEdit(p)"
+      >
+        <div class="mobile-card-avatar">{{ p.prenom[0] }}{{ p.nom[0] }}</div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ fullName(p) }}</div>
+          <div class="mobile-card-meta">
+            {{ p.phone | phoneFormat }}
+            @if (p.ville) { · {{ p.ville }} }
+          </div>
+          <div class="mobile-card-footer">
+            @if (p.is_active) {
+              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag" />
+            } @else {
+              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag" />
+            }
+            @if (p.email) {
+              <span class="mobile-card-email">{{ p.email }}</span>
+            }
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !filteredProprietaires().length">Aucun propriétaire trouvé.</div>
+    </ng-template>
+  </div>
+
+  @if (canCreate) {
+    <button
+      type="button"
+      class="mobile-fab"
+      aria-label="Nouveau propriétaire"
+      (click)="goNew()"
+    >
+      <i class="pi pi-plus"></i>
+    </button>
+  }
+</div>
+
+<!-- ══ DESKTOP : tableau standard (masqué sur mobile) ═══════════════════════ -->
+<div class="card proprietaire-desktop">
   <p-table
     [value]="filteredProprietaires()"
     [loading]="loading"
@@ -106,28 +197,15 @@
             <div class="flex gap-1 justify-center">
               @if (canUpdate) {
                 <button
-                  pButton
-                  type="button"
-                  icon="pi pi-pen-to-square"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Modifier"
-                  tooltipPosition="top"
+                  pButton type="button" icon="pi pi-pen-to-square"
+                  text rounded size="small" pTooltip="Modifier" tooltipPosition="top"
                   (click)="goEdit(p)"
                 ></button>
               }
               @if (canDelete) {
                 <button
-                  pButton
-                  type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Supprimer"
-                  tooltipPosition="top"
+                  pButton type="button" icon="pi pi-trash" severity="danger"
+                  text rounded size="small" pTooltip="Supprimer" tooltipPosition="top"
                   (click)="deleteProprietaire(p)"
                 ></button>
               }

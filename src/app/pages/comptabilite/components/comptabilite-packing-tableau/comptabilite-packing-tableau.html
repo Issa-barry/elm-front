@@ -1,6 +1,95 @@
 <p-toast />
 
-<div class="card">
+<!-- ══ MOBILE : app shell (masqué sur desktop) ═══════════════════════════════ -->
+<div class="cpt-mobile-app">
+  <header class="cpt-mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text cpt-back"
+      aria-label="Retour"
+      (click)="goBack()"
+    ></button>
+    <div class="cpt-title-wrap">
+      <h1 class="cpt-title">Comptabilité Packing</h1>
+      <p class="cpt-subtitle">{{ filteredPrestataires().length }} prestataire{{ filteredPrestataires().length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #filterMenu
+      [model]="mobileFilterMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text cpt-filter-btn"
+      aria-label="Filtrer par statut"
+      (click)="filterMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="cpt-mobile-scroll">
+    <!-- Recherche -->
+    <section class="cpt-mobile-search">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Rechercher un prestataire..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    <!-- Liste -->
+    <section class="cpt-mobile-list">
+      @if (loading) {
+        @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          <div class="cpt-mobile-card cpt-skeleton">
+            <div class="cpt-card-avatar"><p-skeleton shape="circle" size="2.75rem" /></div>
+            <div class="cpt-card-body">
+              <p-skeleton width="55%" height="0.9rem" styleClass="mb-2" />
+              <p-skeleton width="40%" height="0.75rem" />
+            </div>
+            <p-skeleton width="4.5rem" height="0.9rem" />
+          </div>
+        }
+      } @else {
+        @for (item of filteredPrestataires(); track item.prestataire_id) {
+          <article class="cpt-mobile-card" (click)="goToDetail(item)">
+            <div class="cpt-card-avatar">{{ getInitials(item.prestataire_nom) }}</div>
+            <div class="cpt-card-body">
+              <div class="cpt-card-name">{{ item.prestataire_nom }}</div>
+              <div class="cpt-card-meta">{{ item.prestataire_phone | phoneFormat }}</div>
+              <div class="cpt-card-footer">
+                <p-tag
+                  [value]="getStatutLabel(item.statut)"
+                  [severity]="getStatutSeverity(item.statut)"
+                  styleClass="cpt-status-tag"
+                />
+                <span class="cpt-card-amounts">
+                  {{ formatCurrency(item.montant_facture) }}
+                  <span class="cpt-card-reste"> · Reste : {{ formatCurrency(item.montant_restant_facture) }}</span>
+                </span>
+              </div>
+            </div>
+            <i class="pi pi-chevron-right cpt-card-arrow"></i>
+          </article>
+        } @empty {
+          <div class="cpt-mobile-state">Aucun prestataire trouvé.</div>
+        }
+      }
+    </section>
+  </div>
+</div>
+
+<!-- ══ DESKTOP : tableau standard (masqué sur mobile) ═══════════════════════ -->
+<div class="card cpt-desktop">
   <p-table
     [value]="filteredPrestataires()"
     [loading]="loading"

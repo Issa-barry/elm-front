@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
+import { MessageService, MenuItem } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
 import { SkeletonModule } from 'primeng/skeleton';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 
 import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
 import {
@@ -42,6 +44,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     DatePickerModule,
     TooltipModule,
     SkeletonModule,
+    MenuModule,
+    RippleModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService],
@@ -57,6 +61,8 @@ export class ComptabilitePackingTableau implements OnInit {
   filtrePeriodeDebut: Date | null = null;
   filtrePeriodeFin: Date | null = null;
   loading = false;
+
+  mobileFilterMenuItems: MenuItem[] = [];
 
   statutOptions = [
     { label: 'Tous', value: null },
@@ -86,7 +92,17 @@ export class ComptabilitePackingTableau implements OnInit {
     private messageService: MessageService,
   ) {}
 
-  ngOnInit(): void { this.loadComptabilite(); }
+  ngOnInit(): void {
+    this.loadComptabilite();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',    icon: 'pi pi-list',         command: () => this.filtreStatut.set(null) },
+      { label: 'Impayé',  icon: 'pi pi-times-circle', command: () => this.filtreStatut.set('impaye') },
+      { label: 'Partiel', icon: 'pi pi-clock',        command: () => this.filtreStatut.set('partiel') },
+      { label: 'Soldé',   icon: 'pi pi-check-circle', command: () => this.filtreStatut.set('solde') },
+    ];
+  }
+
+  goBack(): void { this.router.navigate(['/']); }
 
   loadComptabilite(): void {
     this.loading = true;

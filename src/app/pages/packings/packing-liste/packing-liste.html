@@ -1,7 +1,97 @@
 <p-toast />
 <p-confirmdialog />
 
-<div class="card">
+<!-- ══ MOBILE : app shell (masqué sur desktop) ══════════════════════════════ -->
+<div class="packing-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goBack()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Packings</h1>
+      <p class="mobile-subtitle">{{ filteredPackings().length }} packing{{ filteredPackings().length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #statusMenu
+      [model]="mobileFilterMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="statusMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Prestataire, référence..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && filteredPackings().length; else mobileListState">
+      <article
+        class="mobile-packing-card"
+        *ngFor="let p of filteredPackings()"
+        (click)="goEdit(p)"
+      >
+        <div class="mobile-card-avatar">{{ getInitials(p) }}</div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">
+            {{ p.prestataire ? p.prestataire.prenom + ' ' + p.prestataire.nom : '—' }}
+          </div>
+          <div class="mobile-card-meta">{{ p.prestataire?.phone | phoneFormat }} · {{ formatDateDisplay(p.date) }}</div>
+          <div class="mobile-card-footer">
+            <p-tag
+              [value]="getStatutLabel(p.statut)"
+              [severity]="getStatutSeverity(p.statut)"
+              styleClass="mobile-status-tag"
+            />
+            <span class="mobile-card-amounts">
+              {{ p.nb_rouleaux }} rouleau{{ p.nb_rouleaux !== 1 ? 'x' : '' }} · {{ formatCurrency(p.montant) }}
+            </span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !filteredPackings().length">Aucun packing trouvé.</div>
+    </ng-template>
+  </div>
+
+  @if (canCreate) {
+    <button
+      type="button"
+      class="mobile-fab"
+      aria-label="Nouveau packing"
+      (click)="goNew()"
+    >
+      <i class="pi pi-plus"></i>
+    </button>
+  }
+</div>
+
+<!-- ══ DESKTOP : tableau standard (masqué sur mobile) ═══════════════════════ -->
+<div class="card packing-desktop">
   <p-table
     [value]="filteredPackings()"
     [loading]="loading"
@@ -113,11 +203,7 @@
           }
         </td>
         <td class="text-sm">
-          @if (p.prestataire) {
-            {{ p.prestataire.phone | phoneFormat }}
-          } @else {
-            —
-          }
+          @if (p.prestataire) { {{ p.prestataire.phone | phoneFormat }} } @else { — }
         </td>
         <td class="text-sm">{{ formatDateDisplay(p.date) }}</td>
         <td class="text-sm font-medium">{{ p.nb_rouleaux }}</td>
@@ -133,28 +219,17 @@
             <div class="flex gap-1 justify-center">
               @if (canUpdate) {
                 <button
-                  pButton
-                  type="button"
-                  icon="pi pi-pen-to-square"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Modifier"
-                  tooltipPosition="top"
+                  pButton type="button" icon="pi pi-pen-to-square"
+                  text rounded size="small"
+                  pTooltip="Modifier" tooltipPosition="top"
                   (click)="goEdit(p)"
                 ></button>
               }
               @if (canDelete) {
                 <button
-                  pButton
-                  type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Supprimer"
-                  tooltipPosition="top"
+                  pButton type="button" icon="pi pi-trash"
+                  severity="danger" text rounded size="small"
+                  pTooltip="Supprimer" tooltipPosition="top"
                   (click)="deletePacking(p)"
                 ></button>
               }

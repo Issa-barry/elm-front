@@ -2,7 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -14,6 +14,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SelectModule } from 'primeng/select';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 
 import { ProprietaireService } from '@/services/proprietaires/proprietaire.service';
 import { Proprietaire } from '@/models/vehicule.model';
@@ -37,10 +39,13 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     SelectModule,
     TooltipModule,
     ConfirmDialogModule,
+    MenuModule,
+    RippleModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './proprietaire-liste.html',
+  styleUrl: './proprietaire-liste.scss',
 })
 export class ProprietaireListe implements OnInit {
   proprietaires = signal<Proprietaire[]>([]);
@@ -55,6 +60,8 @@ export class ProprietaireListe implements OnInit {
   canCreate = false;
   canUpdate = false;
   canDelete = false;
+
+  mobileFilterMenuItems: MenuItem[] = [];
 
   filteredProprietaires = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -75,7 +82,16 @@ export class ProprietaireListe implements OnInit {
     this.canDelete = this.authService.hasPermission('proprietaires.delete');
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',     icon: 'pi pi-list',         command: () => this.setSelectedFilter('all') },
+      { label: 'Actifs',   icon: 'pi pi-check-circle', command: () => this.setSelectedFilter('actif') },
+      { label: 'Inactifs', icon: 'pi pi-times-circle', command: () => this.setSelectedFilter('inactif') },
+    ];
+  }
+
+  goBack(): void { this.router.navigate(['/']); }
 
   load(): void {
     this.loading = true;
@@ -95,6 +111,7 @@ export class ProprietaireListe implements OnInit {
 
   goNew(): void { this.router.navigate(['/vehicules/proprietaires/nouveau']); }
   goEdit(p: Proprietaire): void { this.router.navigate(['/vehicules/proprietaires', p.id, 'edit']); }
+
   setSelectedFilter(value: string): void {
     if (value === 'all' || value === 'actif' || value === 'inactif') {
       this.selectedFilter.set(value);

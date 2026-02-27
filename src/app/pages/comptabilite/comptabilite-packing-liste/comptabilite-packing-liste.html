@@ -1,4 +1,2 @@
-<div class="flex flex-col gap-4">
-  <app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
-  <app-comptabilite-packing-tableau (dataChanged)="statsWidget.loadStats($event)"></app-comptabilite-packing-tableau>
-</div>
+<app-stats-comptabilite-packing-widget #statsWidget></app-stats-comptabilite-packing-widget>
+<app-comptabilite-packing-tableau (dataChanged)="statsWidget.loadStats($event)"></app-comptabilite-packing-tableau>

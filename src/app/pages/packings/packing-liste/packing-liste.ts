@@ -2,7 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService, MenuItem } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -15,6 +15,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 
 import { PackingService } from '@/services/packing/packing.service';
 import { Packing, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
@@ -41,6 +43,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     DatePickerModule,
     TooltipModule,
     ConfirmDialogModule,
+    MenuModule,
+    RippleModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
@@ -54,6 +58,8 @@ export class PackingListe implements OnInit {
   canCreate = false;
   canUpdate = false;
   canDelete = false;
+
+  mobileFilterMenuItems: MenuItem[] = [];
 
   statutOptions = [
     { label: 'Tous les statuts', value: 'all' },
@@ -93,7 +99,17 @@ export class PackingListe implements OnInit {
     this.canDelete = this.authService.hasPermission('packings.delete');
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',      icon: 'pi pi-list',         command: () => this.setStatutFilter('all') },
+      { label: 'À valider', icon: 'pi pi-clock',        command: () => this.setStatutFilter('a_valider') },
+      { label: 'Validé',    icon: 'pi pi-check-circle', command: () => this.setStatutFilter('valide') },
+      { label: 'Annulé',    icon: 'pi pi-times-circle', command: () => this.setStatutFilter('annule') },
+    ];
+  }
+
+  goBack(): void { this.router.navigate(['/']); }
 
   load(): void {
     this.loading = true;
@@ -153,6 +169,13 @@ export class PackingListe implements OnInit {
         });
       },
     });
+  }
+
+  getInitials(p: Packing): string {
+    const prenom = p.prestataire?.prenom ?? '';
+    const nom = p.prestataire?.nom ?? '';
+    if (!prenom && !nom) return '--';
+    return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
   }
 
   getStatutLabel(statut: PackingStatut): string {
