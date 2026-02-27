@@ -194,8 +194,27 @@ export class AppMenu {
                             'product.read',
                         ]),
                     },
+
+                    
                 ],
-            },
+                
+            }, //fin module
+            {
+                label: 'Autres',
+                icon: 'pi pi-fw pi-download',
+                items: [
+                    {
+                        label: 'Aide',
+                        icon: 'pi pi-fw pi-question-circle',
+                        routerLink: ['/pages/help'],
+                    },
+                    {
+                        label: 'Paramètres',
+                        icon: 'pi pi-fw pi-cog',
+                        routerLink: ['/parametres'],
+                    },
+                ],
+            }, //fin module
         ];
     }
 
