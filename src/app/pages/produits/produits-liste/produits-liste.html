@@ -211,60 +211,6 @@
 
 <!-- ==================== DESKTOP ==================== -->
 <div class="card produits-desktop">
-    <p-toolbar styleClass="mb-4">
-        <ng-template #start>
-            <p-button label="Nouveau" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="goToNewProduits()" [disabled]="!canCreate" *ngIf="canCreate" />
-            <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProduits || !selectedProduits.length" *ngIf="canDelete" />
-        </ng-template>
-
-        <ng-template #end>
-            <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
-        </ng-template>
-    </p-toolbar>
-
-    <!-- Barre de filtres desktop -->
-    <div class="desktop-filter-bar">
-        <p-select
-            [(ngModel)]="filterStatut"
-            [options]="statutOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Tous les statuts"
-            [showClear]="true"
-            (onChange)="onDesktopFilterChange()"
-            styleClass="desktop-filter-select"
-        />
-        <p-select
-            [(ngModel)]="filterType"
-            [options]="typeOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Tous les types"
-            [showClear]="true"
-            (onChange)="onDesktopFilterChange()"
-            styleClass="desktop-filter-select"
-        />
-        <div class="desktop-filter-toggle">
-            <p-toggleswitch
-                [ngModel]="filterInStock === true"
-                (ngModelChange)="filterInStock = $event ? true : null; onDesktopFilterChange()"
-            />
-            <span class="desktop-filter-toggle-label">En stock</span>
-        </div>
-        <p-button
-            *ngIf="activeFiltersCount > 0"
-            label="Réinitialiser"
-            icon="pi pi-times"
-            severity="secondary"
-            [text]="true"
-            size="small"
-            (onClick)="resetAllFilters()"
-        />
-        <span class="desktop-filter-count" *ngIf="!loading">
-            {{ produits.length }} résultat{{ produits.length > 1 ? 's' : '' }}
-        </span>
-    </div>
-
     <p-table
         #dt
         [value]="produits"
@@ -274,7 +220,6 @@
         [paginator]="true"
         [globalFilterFields]="filterFields"
         [tableStyle]="{ 'min-width': '75rem' }"
-        [(selection)]="selectedProduits"
         [rowHover]="true"
         dataKey="id"
         currentPageReportTemplate="  {first} à {last} sur {totalRecords} produits"
@@ -282,19 +227,50 @@
         [rowsPerPageOptions]="[10, 20, 30]"
     >
         <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <h5 class="m-0">Gestion des Produits</h5>
-                <p-iconfield>
+            <div class="desktop-products-caption">
+                <p-iconfield class="desktop-products-search">
                     <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher un produit..." class="w-full" />
                 </p-iconfield>
+
+                <div class="desktop-products-actions">
+                    <p-select
+                        [(ngModel)]="filterStatut"
+                        [options]="statutOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Tous les statuts"
+                        [showClear]="true"
+                        (onChange)="onDesktopFilterChange()"
+                        styleClass="desktop-filter-select"
+                    />
+                    <p-select
+                        [(ngModel)]="filterType"
+                        [options]="typeOptions"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Tous les types"
+                        [showClear]="true"
+                        (onChange)="onDesktopFilterChange()"
+                        styleClass="desktop-filter-select"
+                    />
+                    <span class="desktop-filter-count" *ngIf="!loading">
+                        {{ produits.length }} résultat{{ produits.length > 1 ? 's' : '' }}
+                    </span>
+                    <button
+                        *ngIf="canCreate"
+                        (click)="goToNewProduits()"
+                        pButton
+                        outlined
+                        class="flex-shrink-0"
+                        icon="pi pi-plus"
+                        label="Nouveau"
+                    ></button>
+                </div>
             </div>
         </ng-template>
         <ng-template #header>
             <tr>
-                <th style="width: 3rem">
-                    <p-tableHeaderCheckbox />
-                </th>
                 <th style="width: 5rem">Image</th>
                 <th style="min-width: 16rem" pSortableColumn="code">
                     <span class="flex items-center gap-2">Code <p-sortIcon field="code" /></span>
@@ -316,9 +292,6 @@
         </ng-template>
         <ng-template #body let-produit>
             <tr class="produit-row" (dblclick)="onRowDblClick($event, produit)" pTooltip="Double-cliquez pour modifier" tooltipPosition="left" [tooltipOptions]="{ showDelay: 800 }" [tooltipDisabled]="!canUpdate">
-                <td style="width: 3rem">
-                    <p-tableCheckbox [value]="produit" />
-                </td>
                 <td style="width: 5rem">
                     <img
                         *ngIf="produit.image_url"

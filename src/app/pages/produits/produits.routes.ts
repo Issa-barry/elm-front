@@ -9,25 +9,25 @@ export default [
         path: '',
         component: ProduitsListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['produits.read'] },
+        data: { breadcrumb: 'produits',  permissions: ['produits.read'] },
     },
     {
         path: 'produits',
         component: ProduitsListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['produits.read'] },
+        data: { breadcrumb: 'produits',  permissions: ['produits.read'] },
     },
     {
         path: 'produits-new',
         component: ProduitsNew,
         canActivate: [authorizationGuard],
-        data: { permissions: ['produits.create'] },
+        data: { breadcrumb: 'produits-new',  permissions: ['produits.create'] },
     },
     {
         path: 'produits-edit/:id',
         component: ProduitsEdit,
         canActivate: [authorizationGuard],
-        data: { permissions: ['produits.update'] },
+        data: { breadcrumb: 'produits-edit',  permissions: ['produits.update'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

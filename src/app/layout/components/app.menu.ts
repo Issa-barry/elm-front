@@ -159,7 +159,7 @@ export class AppMenu {
                         items: [
                             {
                                 label: 'Prestateurs-externes',
-                                icon: 'pi pi-fw pi-briefcase',
+                                icon: 'pi pi-fw pi-users',
                                 routerLink: ['contacts/prestateurs'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'prestataires.read',
@@ -170,7 +170,7 @@ export class AppMenu {
                             },
                             {
                                 label: 'Utilisateurs',
-                                icon: 'pi pi-fw pi-briefcase',
+                                icon: 'pi pi-fw pi-user',
                                 routerLink: ['contacts/utilisateurs'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'users.read',

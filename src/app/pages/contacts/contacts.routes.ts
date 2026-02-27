@@ -11,12 +11,14 @@ export default [
     // },
     {
         path: 'prestateurs',
-        loadChildren: () => import('@/pages/contacts/prestateurs/prestateurs.routes')
-    },
+        loadChildren: () => import('@/pages/contacts/prestateurs/prestateurs.routes'),
+            data: { breadcrumb: 'prestateurs' },
+},
    
     {
         path: 'utilisateurs',
-        loadChildren: () => import('@/pages/contacts/utilisateurs/utilisateurs.routes')
-    },
+        loadChildren: () => import('@/pages/contacts/utilisateurs/utilisateurs.routes'),
+            data: { breadcrumb: 'utilisateurs' },
+},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
