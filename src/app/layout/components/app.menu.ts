@@ -123,13 +123,13 @@ export class AppMenu {
                         icon: 'pi pi-fw pi-car',
                         visible: true,
                         items: [
+                            // {
+                            //     label: 'Liste des véhicules',
+                            //     icon: 'pi pi-fw pi-list',
+                            //     routerLink: ['/vehicules'],
+                            // },
                             {
-                                label: 'Liste des véhicules',
-                                icon: 'pi pi-fw pi-list',
-                                routerLink: ['/vehicules'],
-                            },
-                            {
-                                label: 'Liste des véhicules 2',
+                                label: 'Liste des véhicules ',
                                 icon: 'pi pi-fw pi-list',
                                 routerLink: ['/vehicules/vehicules-liste2'],
                             },

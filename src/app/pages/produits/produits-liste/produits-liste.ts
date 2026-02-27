@@ -388,6 +388,31 @@ export class ProduitsListe implements OnInit, OnDestroy {
         return `${new Intl.NumberFormat('fr-GN', { maximumFractionDigits: 0 }).format(value)} GNF`;
     }
 
+    /**
+     * Affiche l'alerte "Critique" uniquement quand le seuil est réellement atteint.
+     * - Produit non critique => jamais d'alerte.
+     * - Seuil produit défini => alerte si qte_stock <= seuil.
+     * - Sinon fallback backend (rupture/statut/notif).
+     */
+    shouldShowCritiqueAlert(produit: Produit): boolean {
+        if (!produit?.is_critique) return false;
+
+        const stock = Number(produit.qte_stock);
+        const seuil = produit.seuil_alerte_stock;
+        const hasValidStock = Number.isFinite(stock);
+        const hasCustomThreshold = typeof seuil === 'number' && Number.isFinite(seuil);
+
+        if (hasCustomThreshold && hasValidStock) {
+            return stock <= (seuil as number);
+        }
+
+        return (
+            produit.statut === 'rupture_stock' ||
+            produit.in_stock === false ||
+            !!produit.last_stockout_notified_at
+        );
+    }
+
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }

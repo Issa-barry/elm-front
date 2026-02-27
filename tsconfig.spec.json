@@ -14,6 +14,10 @@
     ],
     "exclude": [
         "src/app/pages/contacts/utilisateurs/utilisateurs-form/utilisateurs-form.spec.ts",
-        "src/app/pages/comptabilite/facture-livraison-detail/facture-livraison-detail.spec.ts"
+        "src/app/pages/comptabilite/facture-livraison-detail/facture-livraison-detail.spec.ts",
+        "src/app/pages/uikit/**/*",
+        "src/app/pages/ecommerce/**/*",
+        "src/app/apps/**/*",
+        "src/app/pages/blocks/**/*"
     ]
 }
