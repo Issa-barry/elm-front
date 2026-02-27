@@ -1,545 +1,158 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, OnInit, computed, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { MenuItem } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { DialogModule } from 'primeng/dialog';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { DatePickerModule } from 'primeng/datepicker';
-import { AutoCompleteModule } from 'primeng/autocomplete';
-import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
-import { SkeletonModule } from 'primeng/skeleton';
-import { MenuModule } from 'primeng/menu';
-import { forkJoin } from 'rxjs';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 
 import { PackingService } from '@/services/packing/packing.service';
-import { Packing, CreatePackingDto, UpdatePackingDto, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
-import { PrestataireService } from '@/services/prestataire/prestataire.service';
-import { Prestataire } from '@/models/prestataire.model';
-import { ParametresService } from '@/services/parametres/parametres.service';
+import { Packing, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
-import { PackingMobileForm } from '../packing-mobile-form/packing-mobile-form';
- 
-interface Column {
-  field: string; 
-  header: string;
-  customExportHeader?: string;
-}
-
-interface ExportColumn {
-  title: string;
-  dataKey: string;
-}
-
-interface StatutOption {
-  label: string; 
-  value: PackingStatut;
-}
-
 
 @Component({
   selector: 'app-packing-liste',
   standalone: true,
-   templateUrl: './packing-liste.html',
+  templateUrl: './packing-liste.html',
   styleUrl: './packing-liste.scss',
-   imports: [
+  imports: [
     CommonModule,
-    TableModule,
     FormsModule,
+    TableModule,
     ButtonModule,
-    RippleModule, 
     ToastModule,
-    ToolbarModule,
     InputTextModule,
-    SelectModule,
-    InputNumberModule,
-    DialogModule,
+    SkeletonModule,
     TagModule,
     InputIconModule,
     IconFieldModule,
-    ConfirmDialogModule,
+    SelectModule,
     DatePickerModule,
-    AutoCompleteModule,
-    TextareaModule,
     TooltipModule,
-    SkeletonModule,
-    MenuModule,
+    ConfirmDialogModule,
     PhoneFormatPipe,
-    PackingMobileForm,
   ],
-  providers: [MessageService, ConfirmationService]
+  providers: [MessageService, ConfirmationService],
 })
-export class PackingListe implements OnInit, OnDestroy {
-  filterFields: string[] = ['reference', 'prestataire.nom', 'prestataire.prenom', 'prestataire.phone', 'statut', 'montant'];
-
-  packingDialog: boolean = false;
+export class PackingListe implements OnInit {
   packings = signal<Packing[]>([]);
-  packing: Partial<Packing> = {};
-  selectedPackings: Packing[] | null = null;
-  submitted: boolean = false;
-  loading: boolean = false;
-  saving: boolean = false;
-  dialogLoading: boolean = false;
-
-  // Mobile
-  mobileSearchTerm = '';
-  readonly mobilePageSize = 10;
-  mobileVisibleCount = this.mobilePageSize;
-  mobileFormVisible = false;
-  private readonly mobileBreakpoint = 768;
-  private readonly mobilePwaClass = 'packings-mobile-pwa';
-
-  // Filtres
+  searchQuery = signal<string>('');
+  selectedStatut = signal<PackingStatut | 'all'>('all');
   filterDateRange: Date[] | null = null;
-  filterStatut: string | null = null;
+  loading = false;
+  canCreate = false;
+  canUpdate = false;
+  canDelete = false;
 
-  mobileStatusMenuItems: MenuItem[] = [
-    { label: 'Tous les statuts', command: () => this.applyMobileStatusFilter(null) },
-    { label: 'À valider', command: () => this.applyMobileStatusFilter('a_valider') },
-    { label: 'Validé', command: () => this.applyMobileStatusFilter('valide') },
-    { label: 'Annulé', command: () => this.applyMobileStatusFilter('annule') },
-  ];
-
-  // Prix rouleau par défaut (depuis les paramètres)
-  prixRouleauDefaut: number = 0;
-
-  // Pour l'autocomplete prestataire
-  prestataires: Prestataire[] = [];
-  filteredPrestataires: Prestataire[] = [];
-  selectedPrestataire: Prestataire | null = null;
-
-  statuses: StatutOption[] = [
+  statutOptions = [
+    { label: 'Tous les statuts', value: 'all' },
     { label: 'À valider', value: 'a_valider' },
     { label: 'Validé', value: 'valide' },
-    { label: 'Annulé', value: 'annule' }
+    { label: 'Annulé', value: 'annule' },
   ];
 
-  // Permissions
-  canCreate: boolean = false;
-  canUpdate: boolean = false;
-  canDelete: boolean = false;
-
-  @ViewChild('dt') dt!: Table;
-  exportColumns!: ExportColumn[];
-  cols!: Column[];
+  filteredPackings = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const list = this.packings();
+    if (!query) return list;
+    return list.filter((p) => {
+      const searchable = [
+        p.reference,
+        p.prestataire?.nom,
+        p.prestataire?.prenom,
+        p.prestataire?.phone,
+        this.getStatutLabel(p.statut),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return searchable.includes(query);
+    });
+  });
 
   constructor(
     private packingService: PackingService,
-    private prestataireService: PrestataireService,
-    private parametresService: ParametresService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
     private router: Router,
-    @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('packings.create');
     this.canUpdate = this.authService.hasPermission('packings.update');
     this.canDelete = this.authService.hasPermission('packings.delete');
   }
 
-  ngOnInit() {
-    this.loadPackings();
-    this.loadPrestataires();
-    this.loadPrixRouleauDefaut();
-    this.initColumns();
-    this.syncMobilePwaMode();
-  }
+  ngOnInit(): void { this.load(); }
 
-  ngOnDestroy() {
-    this.document.body.classList.remove(this.mobilePwaClass);
-  }
-
-  @HostListener('window:resize')
-  onWindowResize() {
-    this.syncMobilePwaMode();
-  }
-
-  goHome() {
-    this.router.navigate(['/']);
-  }
-
-  onMobileSearchChange() {
-    this.mobileVisibleCount = this.mobilePageSize;
-  }
-
-  get mobileFilteredPackings(): Packing[] {
-    const list = this.packings();
-    const term = this.mobileSearchTerm.trim().toLowerCase();
-    if (!term) return list;
-    return list.filter((p) => {
-      const ref = (p.reference || '').toLowerCase();
-      const nom = (p.prestataire?.nom || '').toLowerCase();
-      const prenom = (p.prestataire?.prenom || '').toLowerCase();
-      const phone = (p.prestataire?.phone || '').replace(/\s/g, '');
-      return ref.includes(term) || nom.includes(term) || prenom.includes(term) || phone.includes(term);
-    });
-  }
-
-  get mobileVisiblePackings(): Packing[] {
-    return this.mobileFilteredPackings.slice(0, this.mobileVisibleCount);
-  }
-
-  get canLoadMoreMobile(): boolean {
-    return this.mobileVisibleCount < this.mobileFilteredPackings.length;
-  }
-
-  loadMoreMobile() {
-    this.mobileVisibleCount += this.mobilePageSize;
-  }
-
-  trackByPackingId(_index: number, p: Packing): number {
-    return p.id;
-  }
-
-  getPrestataireInitials(prestataire: Prestataire): string {
-    if (!prestataire) return '?';
-    const n = (prestataire.nom || '').charAt(0).toUpperCase();
-    const p = (prestataire.prenom || '').charAt(0).toUpperCase();
-    return (n + p) || '?';
-  }
-
-  goToEditPacking(packing: Packing) {
-    this.router.navigate(['packings', 'packings-edit', packing.id]);
-  }
-
-  applyMobileStatusFilter(statut: PackingStatut | string | null) {
-    this.filterStatut = statut;
-    this.loadPackings();
-  }
-
-  get isMobile(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
-  }
-
-  private syncMobilePwaMode() {
-    if (typeof window === 'undefined') return;
-    if (window.innerWidth <= this.mobileBreakpoint) {
-      this.document.body.classList.add(this.mobilePwaClass);
-    } else {
-      this.document.body.classList.remove(this.mobilePwaClass);
-    }
-  }
-
-  initColumns() {
-    this.cols = [
-      { field: 'reference', header: 'Référence' },
-      { field: 'prestataire', header: 'Prestataire' },
-      { field: 'date', header: 'Date' },
-      { field: 'nb_rouleaux', header: 'Rouleaux' },
-      { field: 'montant', header: 'Montant' },
-      { field: 'statut', header: 'Statut' }
-    ];
-
-    this.exportColumns = this.cols.map((col) => ({
-      title: col.header,
-      dataKey: col.field
-    }));
-  }
-
-  onDateRangeSelect() {
-    if (this.filterDateRange && this.filterDateRange[1]) {
-      this.loadPackings();
-    }
-  }
-
-  onDateFilter() {
-    this.loadPackings();
-  }
-
-  clearDateFilters() {
-    this.filterDateRange = null;
-    this.filterStatut = null;
-    this.loadPackings();
-  }
-
-  loadPackings() {
+  load(): void {
     this.loading = true;
-    const filters: any = {};
-    if (this.filterDateRange?.[0]) {
-      filters.date_debut = this.formatDate(this.filterDateRange[0]);
-    }
-    if (this.filterDateRange?.[1]) {
-      filters.date_fin = this.formatDate(this.filterDateRange[1]);
-    }
-    if (this.filterStatut) {
-      filters.statut = this.filterStatut;
-    }
+    const filters: Record<string, string> = {};
+    const statut = this.selectedStatut();
+    if (statut !== 'all') filters['statut'] = statut;
+    if (this.filterDateRange?.[0]) filters['date_debut'] = this.formatDate(this.filterDateRange[0]);
+    if (this.filterDateRange?.[1]) filters['date_fin'] = this.formatDate(this.filterDateRange[1]);
+
     this.packingService.getPackings(Object.keys(filters).length ? filters : undefined).subscribe({
       next: (response) => {
         const data = 'data' in response && Array.isArray(response.data)
           ? response.data
-          : (response as any).data?.data || [];
+          : (response as any).data?.data ?? [];
         this.packings.set(data);
-        this.mobileVisibleCount = this.mobilePageSize;
         this.loading = false;
       },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger les packings',
-          life: 3000
-        });
+      error: () => {
         this.loading = false;
-      }
-    });
-  }
-
-  loadPrixRouleauDefaut() {
-    this.parametresService.getPrixRouleauDefaut().subscribe({
-      next: (prix) => {
-        this.prixRouleauDefaut = prix;
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les packings.', life: 5000 });
       },
-      error: () => {
-        this.prixRouleauDefaut = 0;
-      }
     });
   }
 
-  loadPrestataires() {
-    this.prestataireService.getActivePrestataires().subscribe({
-      next: (response) => {
-        // Filtrer uniquement les machinistes
-        this.prestataires = response.data.filter(p => p.type === 'machiniste');
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger les prestataires',
-          life: 3000
-        });
-      }
-    });
+  goNew(): void { this.router.navigate(['/packings/packings-new']); }
+  goEdit(p: Packing): void { this.router.navigate(['/packings/packings-edit', p.id]); }
+
+  setStatutFilter(value: string): void {
+    this.selectedStatut.set(value as PackingStatut | 'all');
+    this.load();
   }
 
-  filterPrestataire(event: { query: string }) {
-    const query = event.query.toLowerCase();
-    this.filteredPrestataires = this.prestataires.filter(p =>
-      p.nom.toLowerCase().includes(query) ||
-      p.prenom.toLowerCase().includes(query) ||
-      p.phone.includes(query)
-    );
+  onDateRangeSelect(): void {
+    if (this.filterDateRange?.[1]) this.load();
   }
 
-  exportCSV() {
-    this.dt.exportCSV();
+  clearFilters(): void {
+    this.selectedStatut.set('all');
+    this.filterDateRange = null;
+    this.load();
   }
 
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
-  openNew() {
-    this.selectedPrestataire = null;
-    this.submitted = false;
-    this.dialogLoading = true;
-
-    if (this.isMobile) {
-      this.mobileFormVisible = true;
-    } else {
-      this.packingDialog = true;
-    }
-
-    forkJoin({
-      prixRouleauDefaut: this.parametresService.getPrixRouleauDefaut(),
-      prestataires: this.prestataireService.getActivePrestataires()
-    }).subscribe({
-      next: ({ prixRouleauDefaut, prestataires }) => {
-        this.prixRouleauDefaut = prixRouleauDefaut;
-        this.prestataires = prestataires.data.filter(p => p.type === 'machiniste');
-        this.packing = {
-          statut: 'valide',
-          date: new Date(),
-          nb_rouleaux: 0,
-          prix_par_rouleau: this.prixRouleauDefaut,
-          montant: 0
-        };
-        this.dialogLoading = false;
-      },
-      error: () => {
-        this.packing = {
-          statut: 'valide',
-          date: new Date(),
-          nb_rouleaux: 0,
-          prix_par_rouleau: this.prixRouleauDefaut,
-          montant: 0
-        };
-        this.dialogLoading = false;
-      }
-    });
-  }
-
-  editPacking(packing: Packing) {
-    this.packing = {
-      ...packing,
-      date: packing.date ? new Date(packing.date) : undefined
-    };
-    this.selectedPrestataire = packing.prestataire || null;
-
-    if (this.isMobile) {
-      this.mobileFormVisible = true;
-    } else {
-      this.packingDialog = true;
-    }
-  }
-
-  deletePacking(packing: Packing) {
+  deletePacking(p: Packing): void {
     this.confirmationService.confirm({
-      message: `Êtes-vous sûr de vouloir supprimer le packing ${packing.reference} ?`,
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
+      message: `Supprimer définitivement le packing <strong>${p.reference}</strong> ?`,
+      header: 'Supprimer le packing',
+      icon: 'pi pi-trash',
+      rejectButtonProps: { label: 'Annuler', severity: 'secondary', outlined: true },
+      acceptButtonProps: { label: 'Supprimer', severity: 'danger' },
       accept: () => {
-        this.packingService.deletePacking(packing.id).subscribe({
+        this.packingService.deletePacking(p.id).subscribe({
           next: () => {
-            this.packings.set(this.packings().filter((p) => p.id !== packing.id));
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Packing supprimé',
-              life: 3000
-            });
+            this.messageService.add({ severity: 'success', summary: 'Supprimé', detail: `Packing ${p.reference} supprimé.`, life: 3000 });
+            this.packings.update(list => list.filter(x => x.id !== p.id));
           },
-          error: () => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: 'Impossible de supprimer le packing',
-              life: 3000
-            });
-          }
+          error: (err) => this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message || 'Impossible de supprimer.', life: 5000 }),
         });
-      }
+      },
     });
-  }
-
-  deleteSelectedPackings() {
-    this.confirmationService.confirm({
-      message: 'Êtes-vous sûr de vouloir supprimer les packings sélectionnés ?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        // Supprimer chaque packing sélectionné
-        this.selectedPackings?.forEach(packing => {
-          this.packingService.deletePacking(packing.id).subscribe();
-        });
-        this.packings.set(this.packings().filter((p) => !this.selectedPackings?.includes(p)));
-        this.selectedPackings = null;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: 'Packings supprimés',
-          life: 3000
-        });
-      }
-    });
-  }
-
-  hideDialog() {
-    this.packingDialog = false;
-    this.submitted = false;
-  }
-
-  closeMobileForm() {
-    this.mobileFormVisible = false;
-    this.submitted = false;
-  }
-
-  onMobileFormSave(event: { packing: Partial<Packing>; prestataire: Prestataire }) {
-    this.packing = event.packing;
-    this.selectedPrestataire = event.prestataire;
-    this.savePacking();
-  }
-
-  savePacking() {
-    this.submitted = true;
-
-    if (!this.selectedPrestataire || this.saving) {
-      return;
-    }
-
-    this.saving = true;
-
-    const packingData: CreatePackingDto | UpdatePackingDto = {
-      prestataire_id: this.selectedPrestataire.id,
-      date: this.formatDate(this.packing.date),
-      nb_rouleaux: this.packing.nb_rouleaux || 0,
-      prix_par_rouleau: this.packing.prix_par_rouleau || 0,
-      statut: this.packing.statut,
-      notes: this.packing.notes ?? undefined
-    };
-
-    if (this.packing.id) {
-      // Mise à jour
-      this.packingService.updatePacking(this.packing.id, packingData).subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Packing mis à jour',
-            life: 3000
-          });
-          this.packingDialog = false;
-          this.mobileFormVisible = false;
-          this.packing = {};
-          this.saving = false;
-          this.loadPackings();
-        },
-        error: (err) => {
-          this.showApiError(err, 'Impossible de mettre à jour le packing');
-          this.saving = false;
-        }
-      });
-    } else {
-      // Création
-      this.packingService.createPacking(packingData as CreatePackingDto).subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Packing créé',
-            life: 3000
-          });
-          this.packingDialog = false;
-          this.mobileFormVisible = false;
-          this.packing = {};
-          this.saving = false;
-          this.loadPackings();
-        },
-        error: (err) => {
-          this.showApiError(err, 'Impossible de créer le packing');
-          this.saving = false;
-        }
-      });
-    }
-  }
-
-  calculateMontant() {
-    if (this.packing.nb_rouleaux && this.packing.prix_par_rouleau) {
-      this.packing.montant = this.packing.nb_rouleaux * this.packing.prix_par_rouleau;
-    }
-  }
-
-  formatDate(date: any): string {
-    if (!date) return '';
-    if (typeof date === 'string') return date;
-    const d = new Date(date);
-    return d.toISOString().split('T')[0];
   }
 
   getStatutLabel(statut: PackingStatut): string {
@@ -551,38 +164,18 @@ export class PackingListe implements OnInit, OnDestroy {
   }
 
   formatCurrency(value: number): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0
-    }).format(value) + ' GNF';
+    return new Intl.NumberFormat('fr-FR', { style: 'decimal', minimumFractionDigits: 0 }).format(value) + ' GNF';
   }
 
   formatDateDisplay(dateStr: string | Date): string {
-    if (dateStr == null) return '';
+    if (dateStr == null) return '-';
     const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
     return date.toLocaleDateString('fr-FR');
   }
 
-  private showApiError(err: any, fallback: string): void {
-    const summary = err.error?.message || fallback;
-
-    if (err.status === 422 && err.error?.errors) {
-      const messages = Object.values(err.error.errors).flat() as string[];
-      messages.forEach(msg => {
-        this.messageService.add({
-          severity: 'error',
-          summary,
-          detail: msg,
-          life: 5000
-        });
-      });
-    } else {
-      this.messageService.add({
-        severity: 'error',
-        summary,
-        detail: '',
-        life: 5000
-      });
-    }
+  private formatDate(date: Date | string): string {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    return date.toISOString().split('T')[0];
   }
 }
