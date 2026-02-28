@@ -6,6 +6,7 @@ import { ToastModule } from 'primeng/toast';
 
 import { ProduitsForm } from '../produits-form/produits-form';
 import { CreateProduitDto, Produit } from '@/models/produit.model';
+import { AuthService } from '@/services/auth/auth.service';
 import { ProduitService } from '@/services/produits/produits.service';
 
 @Component({
@@ -20,6 +21,7 @@ export class ProduitsEdit implements OnInit, OnDestroy {
   loading = false;
   produitId: number | null = null;
   initialData: Produit | null = null;
+  canManageSystemDefinition = false;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'produits-mobile-pwa';
 
@@ -27,11 +29,13 @@ export class ProduitsEdit implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private produitService: ProduitService,
+    private authService: AuthService,
     private messageService: MessageService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
+    this.canManageSystemDefinition = this.hasSystemDefinitionAccess();
     this.updateMobilePwaMode();
     const idParam = this.route.snapshot.paramMap.get('id');
     const parsedId = idParam ? Number(idParam) : NaN;
@@ -69,6 +73,32 @@ export class ProduitsEdit implements OnInit, OnDestroy {
       error: (error) => {
         this.loading = false;
         this.showApiError(error, 'Erreur lors de la modification du produit');
+      },
+    });
+  }
+
+  onGlobalToggled(isGlobal: boolean): void {
+    if (!this.produitId) return;
+    this.loading = true;
+
+    this.produitService.toggleGlobal(this.produitId, isGlobal).subscribe({
+      next: (updatedProduit) => {
+        this.initialData = updatedProduit;
+        this.loading = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: isGlobal
+            ? 'Produit marqué comme global — visible par toutes les usines.'
+            : 'Produit retiré du catalogue global.',
+          life: 3000,
+        });
+      },
+      error: (error) => {
+        // Revenir à l'état précédent (reload du produit)
+        if (this.produitId) this.loadProduit(this.produitId);
+        this.loading = false;
+        this.showApiError(error, 'Impossible de modifier le statut global');
       },
     });
   }
@@ -166,6 +196,17 @@ export class ProduitsEdit implements OnInit, OnDestroy {
       detail,
       life: 5000,
     });
+  }
+
+  private hasSystemDefinitionAccess(): boolean {
+    const user = this.authService.currentUser();
+    if (!user) return false;
+
+    const roles = [...(user.roles ?? []), ...(user.role_names ?? [])]
+      .map((role) => String(role).trim().toLowerCase())
+      .filter((role) => role.length > 0);
+
+    return roles.includes('admin') || roles.includes('manager') || roles.includes('super-admin');
   }
 
 }

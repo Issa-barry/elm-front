@@ -62,6 +62,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   saving = false;
   submitted = false;
   formError: string | null = null;
+  formErrors: string[] = [];
   phonePrefixError: string | null = null;
   loadedUser: User | null = null;
 
@@ -127,6 +128,13 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.visibleChange.emit(nextVisible);
   }
 
+  onDialogShow(): void {
+    if (this.mode !== 'create') return;
+
+    this.clearCreateSensitiveFields();
+    setTimeout(() => this.clearCreateSensitiveFields(), 0);
+  }
+
   onTypeChange(): void {
     if (this.model.type !== 'staff') {
       this.model.role = this.model.type;
@@ -158,7 +166,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
   save(): void {
     this.submitted = true;
-    this.formError = null;
+    this.setFormError(null);
 
     if (!this.isFormValid()) {
       return;
@@ -179,7 +187,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
   private openDialog(): void {
     this.submitted = false;
-    this.formError = null;
+    this.setFormError(null);
     this.model = this.getDefaultModel();
     this.loadedUser = null;
 
@@ -249,12 +257,12 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
           };
           this.onTypeChange();
         } else {
-          this.formError = 'Impossible de charger cet utilisateur.';
+          this.setFormError('Impossible de charger cet utilisateur.');
         }
         this.loading = false;
       },
       error: (error) => {
-        this.formError = this.extractErrorMessage(error, 'Erreur lors du chargement de l utilisateur.');
+        this.setApiError(error, 'Erreur lors du chargement de l utilisateur.');
         this.loading = false;
       },
     });
@@ -263,7 +271,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   private createUser(): void {
     const currentUsineId = this.usineContext.currentUsineId();
     if (currentUsineId === null) {
-      this.formError = 'Veuillez selectionner une usine avant de creer un utilisateur.';
+      this.setFormError('Veuillez selectionner une usine avant de creer un utilisateur.');
       return;
     }
 
@@ -290,7 +298,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.userService.createUserViaApi(payload).subscribe({
       next: (response) => {
         if (!response.success || !response.data?.id) {
-          this.formError = response.message || 'Creation impossible.';
+          this.setFormError(response.message || 'Creation impossible.');
           this.saving = false;
           return;
         }
@@ -303,13 +311,13 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
             this.close();
           },
           error: (error) => {
-            this.formError = this.extractErrorMessage(error, "Utilisateur cree mais assignation d usine impossible.");
+            this.setApiError(error, "Utilisateur cree mais assignation d usine impossible.");
             this.saving = false;
           },
         });
       },
       error: (error) => {
-        this.formError = this.extractErrorMessage(error, 'Erreur lors de la creation de l utilisateur.');
+        this.setApiError(error, 'Erreur lors de la creation de l utilisateur.');
         this.saving = false;
       },
     });
@@ -317,7 +325,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
   private updateUser(): void {
     if (!this.userId) {
-      this.formError = 'Utilisateur introuvable.';
+      this.setFormError('Utilisateur introuvable.');
       return;
     }
 
@@ -346,11 +354,11 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
           this.close();
           return;
         }
-        this.formError = response.message || 'Modification impossible.';
+        this.setFormError(response.message || 'Modification impossible.');
         this.saving = false;
       },
       error: (error) => {
-        this.formError = this.extractErrorMessage(error, 'Erreur lors de la modification de l utilisateur.');
+        this.setApiError(error, 'Erreur lors de la modification de l utilisateur.');
         this.saving = false;
       },
     });
@@ -379,17 +387,17 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
     if (this.mode === 'create') {
       if (!this.model.password.trim() || !this.model.password_confirmation.trim()) {
-        this.formError = 'Le mot de passe et sa confirmation sont obligatoires.';
+        this.setFormError('Le mot de passe et sa confirmation sont obligatoires.');
         return false;
       }
 
       if (this.model.password.length < 8) {
-        this.formError = 'Le mot de passe doit contenir au moins 8 caracteres.';
+        this.setFormError('Le mot de passe doit contenir au moins 8 caracteres.');
         return false;
       }
 
       if (this.model.password !== this.model.password_confirmation) {
-        this.formError = 'La confirmation du mot de passe est invalide.';
+        this.setFormError('La confirmation du mot de passe est invalide.');
         return false;
       }
     }
@@ -411,18 +419,12 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     return (phone || '').replace(/[^\d+]/g, '');
   }
 
-  private extractErrorMessage(error: any, fallback: string): string {
-    const apiMessage = error?.error?.message;
-    if (apiMessage && typeof apiMessage === 'string') {
-      return apiMessage;
+  get additionalFormErrors(): string[] {
+    if (this.formErrors.length === 0) return [];
+    if (this.formError && this.formErrors[0] === this.formError) {
+      return this.formErrors.slice(1);
     }
-
-    const firstValidationError = Object.values(error?.error?.errors || {})[0];
-    if (Array.isArray(firstValidationError) && firstValidationError[0]) {
-      return String(firstValidationError[0]);
-    }
-
-    return fallback;
+    return this.formErrors;
   }
 
   private capitalize(value: string): string {
@@ -468,6 +470,12 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     }
   }
 
+  private clearCreateSensitiveFields(): void {
+    this.model.email = '';
+    this.model.password = '';
+    this.model.password_confirmation = '';
+  }
+
   private getFirstStaffRoleValue(): string {
     const firstStaffRole = this.availableRoles.find((role) => this.staffRoles.includes(role.value));
     if (firstStaffRole) return firstStaffRole.value;
@@ -478,10 +486,41 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.loading = false;
     this.saving = false;
     this.submitted = false;
-    this.formError = null;
+    this.setFormError(null);
     this.phonePrefixError = null;
     this.loadedUser = null;
     this.model = this.getDefaultModel();
+  }
+
+  private setFormError(message: string | null, details: string[] = []): void {
+    this.formError = message;
+    this.formErrors = details;
+  }
+
+  private setApiError(error: any, fallback: string): void {
+    const validationMessages = this.extractValidationMessages(error);
+    if (validationMessages.length > 0) {
+      this.setFormError(validationMessages[0], validationMessages);
+      return;
+    }
+
+    const apiMessage = error?.error?.message;
+    if (typeof apiMessage === 'string' && apiMessage.trim()) {
+      this.setFormError(apiMessage.trim());
+      return;
+    }
+
+    this.setFormError(fallback);
+  }
+
+  private extractValidationMessages(error: any): string[] {
+    const errors = error?.error?.errors;
+    if (!errors || typeof errors !== 'object') return [];
+
+    return Object.values(errors)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((message) => String(message).trim())
+      .filter((message) => message.length > 0);
   }
 
   private validatePhonePrefixAndNormalize(): boolean {

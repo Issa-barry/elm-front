@@ -6,7 +6,10 @@
   [draggable]="false"
   [resizable]="false"
   [closable]="!saving"
+  styleClass="utilisateurs-mobile-first-dialog"
+  maskStyleClass="utilisateurs-mobile-first-mask"
   appendTo="body"
+  (onShow)="onDialogShow()"
 >
   <ng-template #header>
     <div class="dialog-header">
@@ -20,7 +23,7 @@
     <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
   </div>
 
-  <form *ngIf="!loading" (ngSubmit)="save()" class="dialog-form">
+  <form *ngIf="!loading" (ngSubmit)="save()" class="dialog-form" autocomplete="off" novalidate>
     <div class="grid grid-cols-12 gap-4">
       <div class="col-span-12 md:col-span-6">
         <label for="type" class="field-label">Type de compte <span class="required-star">*</span></label>
@@ -103,8 +106,9 @@
         <label for="email" class="field-label">Email <span class="optional-hint">(facultatif)</span></label>
         <input
           id="email"
-          name="email"
+          name="contact_email"
           type="email"
+          autocomplete="off"
           pInputText
           class="w-full"
           [(ngModel)]="model.email"
@@ -208,7 +212,8 @@
         <label for="password" class="field-label">Mot de passe <span class="required-star">*</span></label>
         <p-password
           id="password"
-          name="password"
+          name="new_user_password"
+          autocomplete="new-password"
           [(ngModel)]="model.password"
           [toggleMask]="true"
           [feedback]="false"
@@ -222,7 +227,8 @@
         <label for="password_confirmation" class="field-label">Confirmer mot de passe <span class="required-star">*</span></label>
         <p-password
           id="password_confirmation"
-          name="password_confirmation"
+          name="new_user_password_confirmation"
+          autocomplete="new-password"
           [(ngModel)]="model.password_confirmation"
           [toggleMask]="true"
           [feedback]="false"
@@ -234,12 +240,15 @@
     </div>
 
     <div *ngIf="formError" class="form-error-box">
-      {{ formError }}
+      <div>{{ formError }}</div>
+      <ul *ngIf="additionalFormErrors.length" class="form-error-list">
+        <li *ngFor="let errorItem of additionalFormErrors">{{ errorItem }}</li>
+      </ul>
     </div>
   </form>
 
   <ng-template #footer>
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-end gap-2 dialog-footer-actions">
       <button
         pButton
         type="button"
