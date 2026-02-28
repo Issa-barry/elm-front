@@ -53,6 +53,7 @@ export class UtilisateursListe implements OnInit, OnDestroy {
 
   viewDialogVisible = false;
   viewUserId: number | null = null;
+  viewDialogMode: 'create' | 'edit' = 'edit';
 
   mobileSearchTerm = '';
   readonly mobilePageSize = 10;
@@ -189,27 +190,43 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     this.loadUsers();
   }
 
-  navigateToCreate() {
-    this.router.navigate(['contacts/utilisateurs/new']);
-  }
-
   onRowSelect(event: any) {
-    this.router.navigate(['contacts/utilisateurs/edit', event.data.id]);
+    if (!this.canUpdate) return;
+    this.openEditDialog(event.data.id);
   }
 
   openViewDialog(event: Event, userId: number) {
     event.stopPropagation();
+    this.openEditDialog(userId);
+  }
+
+  openCreateDialog() {
+    if (!this.canCreate) return;
+    this.viewDialogMode = 'create';
+    this.viewUserId = null;
+    this.viewDialogVisible = true;
+  }
+
+  openEditDialog(userId: number) {
+    if (!this.canUpdate) return;
+    this.viewDialogMode = 'edit';
     this.viewUserId = userId;
     this.viewDialogVisible = true;
   }
 
-  navigateToEdit(userId: number) {
-    this.router.navigate(['contacts/utilisateurs/edit/', userId]);
+  onDialogUserSaved(event: { user: User; mode: 'create' | 'edit' }) {
+    this.loadUsers();
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Succes',
+      detail: event.mode === 'create' ? 'Utilisateur cree avec succes' : 'Utilisateur modifie avec succes',
+    });
   }
 
   goToEdit(event: Event, userId: number) {
     event.stopPropagation();
-    this.navigateToEdit(userId);
+    this.openEditDialog(userId);
   }
 
   toggleStatus(event: Event, userId: number) {

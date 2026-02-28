@@ -1,200 +1,246 @@
 <p-dialog
   [visible]="visible"
-  (visibleChange)="visibleChange.emit($event)"
+  (visibleChange)="onVisibleChange($event)"
   [modal]="true"
-  [style]="{ width: '680px', 'max-width': '95vw' }"
+  [style]="{ width: '760px', 'max-width': '96vw' }"
   [draggable]="false"
   [resizable]="false"
-  styleClass="utilisateur-view-dialog"
+  [closable]="!saving"
   appendTo="body"
 >
-  <!-- Header personnalisé -->
   <ng-template #header>
-    <div class="flex items-center gap-3 w-full" *ngIf="!loading && user; else loadingHeader">
-      <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary-100 text-primary-700 font-bold text-lg flex-shrink-0">
-        {{ getInitials(user.nom_complet) }}
-      </div>
-      <div>
-        <div class="text-lg font-bold text-surface-900 leading-tight">{{ user.nom_complet }}</div>
-        <div class="text-xs text-surface-400">{{ user.reference }}</div>
-      </div>
-      <div class="ml-auto flex items-center gap-2 pr-6">
-        <p-tag
-          [value]="user.is_active ? 'Actif' : 'Inactif'"
-          [severity]="user.is_active ? 'success' : 'danger'"
-        ></p-tag>
-        <span class="text-xs text-surface-500 bg-surface-100 px-2 py-1 rounded">
-          {{ getTypeLabel(user.type) }}
-        </span>
-      </div>
+    <div class="dialog-header">
+      <h3 class="dialog-title">{{ dialogHeader }}</h3>
+      <p class="dialog-subtitle" *ngIf="mode === 'create'">Creation rapide sans etapes.</p>
+      <p class="dialog-subtitle" *ngIf="mode === 'edit' && loadedUser">{{ loadedUser.nom_complet }}</p>
     </div>
-    <ng-template #loadingHeader>
-      <span class="font-semibold text-surface-700">Chargement...</span>
-    </ng-template>
   </ng-template>
 
-  <!-- Chargement -->
-  <div *ngIf="loading" class="flex justify-center items-center h-48">
-    <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+  <div *ngIf="loading" class="dialog-loading">
+    <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
   </div>
 
-  <!-- Contenu principal -->
-  <div *ngIf="!loading && user" class="flex flex-col gap-5 pt-2">
-
-    <!-- Informations personnelles -->
-    <section>
-      <h4 class="section-title">Informations personnelles</h4>
-      <div class="info-grid">
-        <div class="info-item" *ngIf="user.civilite">
-          <span class="info-label">Civilité</span>
-          <span class="info-value">{{ CIVILITE_LABELS[user.civilite] }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Prénom</span>
-          <span class="info-value">{{ user.prenom }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Nom</span>
-          <span class="info-value">{{ user.nom }}</span>
-        </div>
-        <div class="info-item" *ngIf="user.date_naissance">
-          <span class="info-label">Date de naissance</span>
-          <span class="info-value">{{ user.date_naissance | date:'dd/MM/yyyy' }}</span>
-        </div>
+  <form *ngIf="!loading" (ngSubmit)="save()" class="dialog-form">
+    <div class="grid grid-cols-12 gap-4">
+      <div class="col-span-12 md:col-span-6">
+        <label for="type" class="field-label">Type de compte *</label>
+        <p-select
+          id="type"
+          name="type"
+          [options]="userTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.type"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          (onChange)="onTypeChange()"
+          styleClass="w-full"
+        ></p-select>
       </div>
-    </section>
 
-    <p-divider styleClass="my-0"></p-divider>
-
-    <!-- Contact -->
-    <section>
-      <h4 class="section-title">Contact</h4>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Téléphone</span>
-          <span class="info-value font-mono">{{ user.phone | phoneFormat:'INT' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Email</span>
-          <span class="info-value">{{ user.email || '—' }}</span>
-        </div>
+      <div class="col-span-12 md:col-span-6">
+        <label for="role" class="field-label">Role *</label>
+        <p-select
+          id="role"
+          name="role"
+          [options]="roleOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.role"
+          [appendTo]="'body'"
+          [disabled]="saving || !isStaffType"
+          styleClass="w-full"
+        ></p-select>
+        <small *ngIf="submitted && !model.role" class="field-error">Role obligatoire.</small>
       </div>
-    </section>
 
-    <p-divider styleClass="my-0"></p-divider>
-
-    <!-- Adresse -->
-    <section>
-      <h4 class="section-title">Adresse</h4>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Pays</span>
-          <span class="info-value flex items-center gap-2">
-            <span class="fi fi-{{ user.code_pays?.toLowerCase() }}"></span>
-            {{ user.pays }}
-          </span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Ville</span>
-          <span class="info-value">{{ user.ville || '—' }}</span>
-        </div>
-        <div class="info-item" *ngIf="user.quartier">
-          <span class="info-label">Quartier</span>
-          <span class="info-value">{{ user.quartier }}</span>
-        </div>
-        <div class="info-item" *ngIf="user.adresse">
-          <span class="info-label">Adresse</span>
-          <span class="info-value">{{ user.adresse }}</span>
-        </div>
+      <div class="col-span-12 md:col-span-6">
+        <label for="nom" class="field-label">Nom *</label>
+        <input
+          id="nom"
+          name="nom"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.nom"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.nom.trim()" class="field-error">Nom obligatoire.</small>
       </div>
-    </section>
 
-    <!-- Rôles -->
-    <ng-container *ngIf="(user.role_names || user.roles)?.length">
-      <p-divider styleClass="my-0"></p-divider>
-      <section>
-        <h4 class="section-title">Rôles</h4>
-        <div class="flex flex-wrap gap-2">
-          <p-tag
-            *ngFor="let r of (user.role_names || user.roles)"
-            [value]="r"
-            severity="info"
-          ></p-tag>
-        </div>
-      </section>
-    </ng-container>
-
-    <!-- Pièce d'identité -->
-    <ng-container *ngIf="user.piece_type">
-      <p-divider styleClass="my-0"></p-divider>
-      <section>
-        <h4 class="section-title">Pièce d'identité</h4>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Type</span>
-            <span class="info-value">{{ PIECE_TYPE_LABELS[user.piece_type] }}</span>
-          </div>
-          <div class="info-item" *ngIf="user.piece_numero">
-            <span class="info-label">Numéro</span>
-            <span class="info-value font-mono">{{ user.piece_numero }}</span>
-          </div>
-          <div class="info-item" *ngIf="user.piece_delivree_le">
-            <span class="info-label">Délivrée le</span>
-            <span class="info-value">{{ user.piece_delivree_le | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="info-item" *ngIf="user.piece_expire_le">
-            <span class="info-label">Expire le</span>
-            <span class="info-value">{{ user.piece_expire_le | date:'dd/MM/yyyy' }}</span>
-          </div>
-        </div>
-      </section>
-    </ng-container>
-
-    <p-divider styleClass="my-0"></p-divider>
-
-    <!-- Informations système -->
-    <section>
-      <h4 class="section-title">Informations système</h4>
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Créé le</span>
-          <span class="info-value">{{ user.created_at | date:'dd/MM/yyyy à HH:mm' }}</span>
-        </div>
-        <div class="info-item" *ngIf="user.last_login_at">
-          <span class="info-label">Dernière connexion</span>
-          <span class="info-value">{{ user.last_login_at | date:'dd/MM/yyyy à HH:mm' }}</span>
-        </div>
-        <div class="info-item" *ngIf="user.last_login_ip">
-          <span class="info-label">Dernière IP</span>
-          <span class="info-value font-mono text-xs">{{ user.last_login_ip }}</span>
-        </div>
-        <div class="info-item" *ngIf="user.language">
-          <span class="info-label">Langue</span>
-          <span class="info-value">{{ user.language }}</span>
-        </div>
+      <div class="col-span-12 md:col-span-6">
+        <label for="prenom" class="field-label">Prenom *</label>
+        <input
+          id="prenom"
+          name="prenom"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.prenom"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.prenom.trim()" class="field-error">Prenom obligatoire.</small>
       </div>
-    </section>
 
-  </div>
+      <div class="col-span-12 md:col-span-6">
+        <label for="phone" class="field-label">Telephone *</label>
+        <input
+          id="phone"
+          name="phone"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.phone"
+          [disabled]="saving"
+          placeholder="622000000"
+        />
+        <small *ngIf="submitted && !model.phone.trim()" class="field-error">Telephone obligatoire.</small>
+      </div>
 
-  <!-- Footer -->
+      <div class="col-span-12 md:col-span-6">
+        <label for="email" class="field-label">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.email"
+          [disabled]="saving"
+          placeholder="exemple@email.com"
+        />
+      </div>
+
+      <div class="col-span-12 md:col-span-12">
+        <label for="code_pays" class="field-label">Pays *</label>
+        <p-select
+          id="code_pays"
+          name="code_pays"
+          [options]="countries"
+          optionLabel="name"
+          optionValue="code"
+          [(ngModel)]="model.code_pays"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          (onChange)="onCountryChange()"
+          styleClass="w-full"
+        ></p-select>
+        <small *ngIf="submitted && !model.code_pays" class="field-error">Pays obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="ville" class="field-label">Ville *</label>
+        <input
+          id="ville"
+          name="ville"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.ville"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.ville.trim()" class="field-error">Ville obligatoire.</small>
+      </div>
+
+      <div class="col-span-12 md:col-span-6">
+        <label for="quartier" class="field-label">Quartier *</label>
+        <input
+          id="quartier"
+          name="quartier"
+          type="text"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.quartier"
+          [disabled]="saving"
+        />
+        <small *ngIf="submitted && !model.quartier.trim()" class="field-error">Quartier obligatoire.</small>
+      </div>
+
+      
+
+      <div *ngIf="mode === 'edit'" class="col-span-12 md:col-span-6">
+        <label for="civilite" class="field-label">Civilite</label>
+        <p-select
+          id="civilite"
+          name="civilite"
+          [options]="civiliteOptions"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="model.civilite"
+          [appendTo]="'body'"
+          [disabled]="saving"
+          [showClear]="true"
+          styleClass="w-full"
+        ></p-select>
+      </div>
+
+      <div *ngIf="mode === 'edit'" class="col-span-12 md:col-span-6">
+        <label for="date_naissance" class="field-label">Date de naissance</label>
+        <input
+          id="date_naissance"
+          name="date_naissance"
+          type="date"
+          pInputText
+          class="w-full"
+          [(ngModel)]="model.date_naissance"
+          [disabled]="saving"
+        />
+      </div>
+
+      <div *ngIf="mode === 'create'" class="col-span-12 md:col-span-6">
+        <label for="password" class="field-label">Mot de passe *</label>
+        <p-password
+          id="password"
+          name="password"
+          [(ngModel)]="model.password"
+          [toggleMask]="true"
+          [feedback]="false"
+          [disabled]="saving"
+          inputStyleClass="w-full"
+          styleClass="w-full"
+        ></p-password>
+      </div>
+
+      <div *ngIf="mode === 'create'" class="col-span-12 md:col-span-6">
+        <label for="password_confirmation" class="field-label">Confirmer mot de passe *</label>
+        <p-password
+          id="password_confirmation"
+          name="password_confirmation"
+          [(ngModel)]="model.password_confirmation"
+          [toggleMask]="true"
+          [feedback]="false"
+          [disabled]="saving"
+          inputStyleClass="w-full"
+          styleClass="w-full"
+        ></p-password>
+      </div>
+    </div>
+
+    <div *ngIf="formError" class="form-error-box">
+      {{ formError }}
+    </div>
+  </form>
+
   <ng-template #footer>
     <div class="flex justify-end gap-2">
       <button
         pButton
-        label="Fermer"
-        icon="pi pi-times"
+        type="button"
+        label="Annuler"
         class="p-button-text"
+        icon="pi pi-times"
+        [disabled]="saving"
         (click)="close()"
       ></button>
       <button
-        *ngIf="canUpdate"
         pButton
-        label="Modifier"
-        icon="pi pi-pencil"
-        (click)="onEdit()"
+        type="button"
+        [label]="mode === 'create' ? 'Creer' : 'Enregistrer'"
+        icon="pi pi-check"
+        [loading]="saving"
+        [disabled]="loading || saving"
+        (click)="save()"
       ></button>
     </div>
   </ng-template>
-
 </p-dialog>

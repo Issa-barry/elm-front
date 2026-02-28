@@ -2,9 +2,9 @@
 
 <app-utilisateurs-view-dialog
   [(visible)]="viewDialogVisible"
+  [mode]="viewDialogMode"
   [userId]="viewUserId"
-  [canUpdate]="canUpdate"
-  (editRequested)="navigateToEdit($event)"
+  (userSaved)="onDialogUserSaved($event)"
 ></app-utilisateurs-view-dialog>
 
 <!-- Mobile: app-like list (≤768px) -->
@@ -76,9 +76,9 @@
               <button
                 pButton
                 pRipple
-                icon="pi pi-eye"
+                icon="pi pi-pencil"
                 class="p-button-rounded p-button-text p-button-sm"
-                [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                [pTooltip]="'Modifier'"
                 tooltipPosition="top"
                 (click)="goToEdit($event, user.id)"
                 [disabled]="!canUpdate"
@@ -104,7 +104,7 @@
     type="button"
     class="mobile-fab"
     aria-label="Nouveau utilisateur"
-    (click)="navigateToCreate()"
+    (click)="openCreateDialog()"
   >
     <i class="pi pi-user-plus"></i>
   </button>
@@ -157,7 +157,7 @@
           <!-- Bouton Nouveau -->
           <button
             *ngIf="canCreate"
-            (click)="navigateToCreate()"
+            (click)="openCreateDialog()"
             pButton
             outlined
             class="flex-shrink-0"
@@ -243,11 +243,12 @@
         <td>
           <div class="flex gap-2">
             <button
+              *ngIf="canUpdate"
               pButton
               pRipple
-              icon="pi pi-eye"
+              icon="pi pi-pencil"
               class="p-button-rounded p-button-text p-button-sm"
-              pTooltip="Voir les détails"
+              pTooltip="Modifier"
               tooltipPosition="top"
               (click)="openViewDialog($event, user.id)"
             ></button>
