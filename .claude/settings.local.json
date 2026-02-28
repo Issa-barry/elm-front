@@ -19,7 +19,8 @@
       "Bash(npx ng lint:*)",
       "Bash(npx ng test:*)",
       "Bash(xargs cat:*)",
-      "Bash(ng test:*)"
+      "Bash(ng test:*)",
+      "Bash(xargs grep -l \"MessageService\\\\|HttpTestingController\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"

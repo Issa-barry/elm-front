@@ -85,7 +85,7 @@
                                 [severity]="getStatutSeverity(produit.statut)"
                             />
                             <p-tag
-                                *ngIf="produit.is_critique"
+                                *ngIf="shouldShowCritiqueAlert(produit)"
                                 value="Critique"
                                 severity="warn"
                                 icon="pi pi-exclamation-triangle"
@@ -306,7 +306,7 @@
                 <td style="min-width: 16rem">
                     <span>{{ produit.nom }}</span>
                     <p-tag
-                        *ngIf="produit.is_critique"
+                        *ngIf="shouldShowCritiqueAlert(produit)"
                         value="Critique"
                         severity="warn"
                         icon="pi pi-exclamation-triangle"

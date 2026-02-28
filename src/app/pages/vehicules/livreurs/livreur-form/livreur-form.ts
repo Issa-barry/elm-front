@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { RippleModule } from 'primeng/ripple';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 
 import { LivreurService } from '@/services/livreurs/livreur.service';
@@ -26,15 +27,18 @@ import { COUNTRIES, Country } from '@/models/country.model';
     SelectModule,
     ToastModule,
     ToggleSwitchModule,
+    RippleModule,
   ],
   providers: [MessageService],
   templateUrl: './livreur-form.html',
+  styleUrl: './livreur-form.scss',
 })
 export class LivreurForm implements OnInit {
-  /** Si défini → mode édition */
   @Input() livreur?: Livreur;
 
-  get isEditMode(): boolean { return !!this.livreur; }
+  get isEditMode(): boolean {
+    return !!this.livreur;
+  }
 
   form!: FormGroup;
   loading = false;
@@ -54,65 +58,67 @@ export class LivreurForm implements OnInit {
 
   ngOnInit(): void {
     if (this.livreur) {
-      const phone = this.livreur.phone ?? '';
-      if (phone.startsWith('+')) {
-        try {
-          const parsed = parsePhoneNumber(phone);
-          if (parsed?.country) this.phoneCountry = parsed.country;
-        } catch { /* keep GN */ }
-      }
-      this.form.patchValue({
-        prenom:    this.livreur.prenom,
-        nom:       this.livreur.nom,
-        phone:     this.livreur.phone,
-        is_active: this.livreur.is_active,
-      });
+      this.applyLivreurToForm(this.livreur);
     }
   }
 
   private buildForm(): void {
     this.form = this.fb.group({
-      prenom:    ['', [Validators.required, Validators.maxLength(100)]],
-      nom:       ['', [Validators.required, Validators.maxLength(100)]],
-      phone:     ['', [Validators.required, Validators.maxLength(20)]],
+      prenom: ['', [Validators.required, Validators.maxLength(100)]],
+      nom: ['', [Validators.required, Validators.maxLength(100)]],
+      phone: ['', [Validators.required, Validators.maxLength(20)]],
       is_active: [true],
     });
   }
 
-  // ── Téléphone ──────────────────────────────────────────────────────────
-
   validatePhone(): boolean {
     const phone = this.form.get('phone')?.value?.trim();
-    if (!phone) { this.phoneError = 'Téléphone obligatoire.'; return false; }
+    if (!phone) {
+      this.phoneError = 'Telephone obligatoire.';
+      return false;
+    }
+
     try {
       if (!isValidPhoneNumber(phone, this.phoneCountry as CountryCode)) {
-        this.phoneError = `Numéro invalide pour ${this.getCountryName(this.phoneCountry)}.`;
+        this.phoneError = `Numero invalide pour ${this.getCountryName(this.phoneCountry)}.`;
         return false;
       }
+
       const parsed = parsePhoneNumber(phone, this.phoneCountry as CountryCode);
       if (parsed) {
         this.form.get('phone')?.setValue(parsed.formatInternational(), { emitEvent: false });
         this.phoneError = null;
         return true;
       }
-      this.phoneError = 'Format invalide.'; return false;
-    } catch { this.phoneError = 'Format invalide.'; return false; }
+
+      this.phoneError = 'Format invalide.';
+      return false;
+    } catch {
+      this.phoneError = 'Format invalide.';
+      return false;
+    }
   }
 
-  onPhoneInput(): void  { if (this.submitted) this.validatePhone(); }
-  onPhoneBlur(): void   { if (this.form.get('phone')?.value?.trim()) this.validatePhone(); }
-  onCountryChange(): void { if (this.form.get('phone')?.value?.trim()) this.validatePhone(); }
+  onPhoneInput(): void {
+    if (this.submitted) this.validatePhone();
+  }
+
+  onPhoneBlur(): void {
+    if (this.form.get('phone')?.value?.trim()) this.validatePhone();
+  }
+
+  onCountryChange(): void {
+    if (this.form.get('phone')?.value?.trim()) this.validatePhone();
+  }
 
   getCountryName(code: string): string {
-    return this.countries.find(c => c.code === code)?.name ?? code;
+    return this.countries.find((c) => c.code === code)?.name ?? code;
   }
 
   isInvalid(name: string): boolean {
     const c = this.form.get(name)!;
     return c.invalid && (c.dirty || c.touched);
   }
-
-  // ── Soumission ─────────────────────────────────────────────────────────
 
   onSubmit(): void {
     this.submitted = true;
@@ -125,16 +131,29 @@ export class LivreurForm implements OnInit {
 
     const req$ = this.isEditMode
       ? this.livreurService.update(this.livreur!.id, {
-          prenom: v.prenom, nom: v.nom, phone: v.phone, is_active: v.is_active,
+          prenom: v.prenom,
+          nom: v.nom,
+          phone: v.phone,
+          is_active: v.is_active,
         })
-      : this.livreurService.create({ prenom: v.prenom, nom: v.nom, phone: v.phone });
+      : this.livreurService.create({
+          prenom: v.prenom,
+          nom: v.nom,
+          phone: v.phone,
+        });
 
     req$.subscribe({
       next: () => {
+        if (this.isEditMode && this.livreur) {
+          this.reloadEditedLivreur(this.livreur.id);
+          return;
+        }
+
         this.loading = false;
         this.messageService.add({
-          severity: 'success', summary: 'Succès',
-          detail: this.isEditMode ? 'Livreur mis à jour.' : 'Livreur créé.',
+          severity: 'success',
+          summary: 'Succes',
+          detail: 'Livreur cree.',
           life: 3000,
         });
         setTimeout(() => this.router.navigate(['/vehicules/livreurs']), 1500);
@@ -142,17 +161,74 @@ export class LivreurForm implements OnInit {
       error: (err) => {
         this.loading = false;
         if (err.status === 422 && err.error?.errors) {
-          (Object.values(err.error.errors).flat() as string[]).forEach(m =>
-            this.messageService.add({ severity: 'error', summary: 'Validation', detail: m, life: 5000 })
+          (Object.values(err.error.errors).flat() as string[]).forEach((m) =>
+            this.messageService.add({ severity: 'error', summary: 'Validation', detail: m, life: 5000 }),
           );
           return;
         }
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message || 'Erreur inattendue.', life: 5000 });
+
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err.error?.message || 'Erreur inattendue.',
+          life: 5000,
+        });
       },
     });
   }
 
   onCancel(): void {
     this.router.navigate(['/vehicules/livreurs']);
+  }
+
+  private reloadEditedLivreur(id: number): void {
+    this.livreurService.getOne(id).subscribe({
+      next: (resp) => {
+        this.livreur = resp.data;
+        this.applyLivreurToForm(resp.data);
+        this.form.markAsPristine();
+        this.form.markAsUntouched();
+        this.loading = false;
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: 'Livreur mis a jour.',
+          life: 3000,
+        });
+      },
+      error: () => {
+        this.loading = false;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Mise a jour enregistree',
+          detail: 'Le livreur est modifie mais le rechargement a echoue.',
+          life: 5000,
+        });
+      },
+    });
+  }
+
+  private applyLivreurToForm(livreur: Livreur): void {
+    this.detectPhoneCountry(livreur.phone);
+    this.form.patchValue({
+      prenom: livreur.prenom,
+      nom: livreur.nom,
+      phone: livreur.phone,
+      is_active: livreur.is_active,
+    });
+  }
+
+  private detectPhoneCountry(phone?: string | null): void {
+    this.phoneCountry = 'GN';
+    const safePhone = phone ?? '';
+    if (!safePhone.startsWith('+')) return;
+
+    try {
+      const parsed = parsePhoneNumber(safePhone);
+      if (parsed?.country) this.phoneCountry = parsed.country;
+    } catch {
+      // Keep default country
+    }
   }
 }

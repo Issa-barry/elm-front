@@ -1,222 +1,312 @@
-<div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
-    <div class="flex flex-col lg:flex-row md:justify-between items-start lg:items-end gap-4 mb-8">
-        <div class="flex flex-col gap-2 flex-1">
-            <h1 class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight">Facture vente</h1>
-            <p class="text-surface-500 dark:text-surface-400 text-xl leading-tight">Tota = 10 000 FG | Encaissé = 7 000 FG | Restant = 3 000 FG</p>
+<p-toast />
+
+<!-- ══ SKELETON ══════════════════════════════════════════════════════════════ -->
+@if (loading) {
+    <div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
+        <div class="flex flex-col gap-2 mb-8">
+            <p-skeleton width="12rem" height="1.75rem" />
+            <p-skeleton width="22rem" height="1.25rem" />
         </div>
-
-        <div class="flex flex-col md:flex-row items-start md:items-end gap-4">
-            <div class="w-full md:w-54">
-                <p-iconfield iconPosition="left">
-                    <p-inputicon class="pi pi-search text-surface-400"></p-inputicon>
-                    <input
-                        pInputText
-                        [(ngModel)]="searchQuery"
-                        placeholder="Search"
-                        class="w-full px-3 py-2 bg-surface-0 dark:bg-surface-900 border border-surface-300 dark:border-surface-600 rounded-md text-surface-900 dark:text-surface-0"
-                    />
-                </p-iconfield>
+        <div class="border border-surface-200 dark:border-surface-700 rounded-lg p-6 flex gap-6">
+            <p-skeleton shape="circle" size="3rem" />
+            <div class="flex-1 flex flex-col gap-3">
+                <p-skeleton width="10rem" height="1.25rem" />
+                <p-skeleton width="7rem" height="1rem" />
             </div>
-
-            <div class="w-full md:w-auto">
-                <p-select
-                    [(ngModel)]="selectedFilter"
-                    [options]="filterOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Filter"
-                    styleClass="w-full md:w-40 bg-surface-0 dark:bg-surface-900 border border-surface-300 dark:border-surface-600"
-                    [appendTo]="'body'"
-                >
-                    <ng-template pTemplate="dropdownicon">
-                        <i class="pi pi-chevron-down text-surface-400"></i>
-                    </ng-template>
-                </p-select>
-            </div>
+            <p-skeleton width="6rem" height="1.5rem" />
+            <p-skeleton width="8rem" height="1.5rem" />
+            <p-skeleton width="5rem" height="1.5rem" />
         </div>
     </div>
+}
 
-    <div class="flex flex-col gap-6">
-        @for (order of filteredOrders(); track order.id; let index = $index) {
-            <div class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden transition-all duration-300">
-                <div
-                    class="p-6 flex flex-col lg:flex-row justify-start lg:items-center gap-6 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors"
-                    pStyleClass=".order-content-{{ order.id }}"
-                    enterFromClass="hidden"
-                    enterActiveClass="animate-slidedown"
-                    leaveToClass="hidden"
-                    leaveActiveClass="animate-slideup"
-                    (click)="toggleChevron(order.id)"
-                >
-                    <div class="flex items-center gap-4 flex-1">
-                        <img class="w-12 h-12 rounded" [src]="order.image" [alt]="order.product" />
-                        <div class="flex flex-col gap-2">
-                            <div class="text-surface-900 dark:text-surface-0 text-lg font-medium leading-tight">FVT-00000001</div>
-                            <div class="text-surface-500 dark:text-surface-400 text-base leading-tight">Alpha BALDE</div>
-                        </div>
-                    </div>
+<!-- ══ CONTENU ═══════════════════════════════════════════════════════════════ -->
+@if (!loading && facture) {
+    <div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
 
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
-                        <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">ffff</div>
-                            <div class="px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-md">
-                                <span class="text-surface-600 dark:text-surface-300 text-sm font-bold">{{ order.orderNumber }}</span>
-                            </div>
-                        </div>
+        <!-- ── Header ──────────────────────────────────────────────────────── -->
+        <div class="flex flex-col lg:flex-row md:justify-between items-start lg:items-end gap-4 mb-8">
+            <div class="flex items-start gap-3 flex-1">
+                <button pButton [text]="true" [rounded]="true" class="w-10 h-10 flex-shrink-0" (click)="goBack()">
+                    <i pButtonIcon class="pi pi-arrow-left"></i>
+                </button>
+                <div class="flex flex-col gap-1">
+                    <h1 class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight">Facture Vente</h1>
+                    <p class="text-surface-500 dark:text-surface-400 text-base leading-tight">
+                        Total = {{ formatMontant(facture.montant_brut) }} &nbsp;|&nbsp;
+                        Encaissé = {{ formatMontant(facture.montant_encaisse) }} &nbsp;|&nbsp;
+                        Restant = {{ formatMontant(facture.montant_restant) }}
+                    </p>
+                </div>
+            </div>
 
-                        <div class="flex flex-col items-start sm:items-center flex-1">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Date</div>
-                            <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">{{ order.date }}</span>
-                        </div>
+            @if (canAddEncaissement) {
+                <div>
+                    <button pButton severity="primary" (click)="openEncaissementDialog()">
+                        <i pButtonIcon class="pi pi-plus"></i>
+                        <span pButtonLabel>Encaisser</span>
+                    </button>
+                </div>
+            }
+        </div>
 
-                        <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Status</div>
-                            <div
-                                [ngClass]="{
-                                    'px-2 py-1 rounded-md flex items-center gap-1': true,
-                                    'bg-surface-100 dark:bg-surface-800': order.statusColor === 'surface',
-                                    'bg-orange-100 dark:bg-orange-900': order.statusColor === 'orange',
-                                    'bg-green-100 dark:bg-green-900': order.statusColor === 'green'
-                                }"
-                            >
-                                <i
-                                    [class]="
-                                        'text-xs pi ' +
-                                        order.statusIcon +
-                                        ' ' +
-                                        (order.statusColor === 'surface'
-                                            ? 'text-surface-600 dark:text-surface-300'
-                                            : order.statusColor === 'orange'
-                                              ? 'text-orange-700 dark:text-orange-300'
-                                              : 'text-green-700 dark:text-green-300')
-                                    "
-                                ></i>
-                                <span
-                                    [ngClass]="{
-                                        'text-sm font-bold': true,
-                                        'text-surface-600 dark:text-surface-300': order.statusColor === 'surface',
-                                        'text-orange-700 dark:text-orange-300': order.statusColor === 'orange',
-                                        'text-green-700 dark:text-green-300': order.statusColor === 'green'
-                                    }"
-                                    >{{ order.statusLabel }}</span
-                                >
-                            </div>
-                        </div>
+        <!-- ── Carte facture (expansible) ──────────────────────────────────── -->
+        <div class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden transition-all duration-300">
 
-                        <div class="flex flex-col items-start sm:items-center flex-1">
-                            <div class="text-surface-500 dark:text-surface-400 text-sm mb-1 sm:hidden">Total</div>
-                            <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">3 500 FG</span>
+            <!-- Row résumé -->
+            <div class="p-6 flex flex-col lg:flex-row justify-start lg:items-center gap-6">
+                <!-- Véhicule + référence -->
+                <div class="flex items-center gap-4 flex-1">
+                    @if (facture.vehicule?.photo_url) {
+                        <img class="w-12 h-12 rounded object-cover flex-shrink-0" [src]="facture.vehicule!.photo_url" [alt]="facture.vehicule!.nom_vehicule" />
+                    } @else {
+                        <div class="w-12 h-12 rounded bg-surface-100 dark:bg-surface-800 flex items-center justify-center flex-shrink-0">
+                            <i class="pi pi-car text-surface-400 text-xl"></i>
                         </div>
-
-                        <div class="flex items-center justify-start sm:justify-center flex-1">
-                            <button
-                                pButton
-                                severity="secondary"
-                                [text]="true"
-                                [rounded]="true"
-                                class="w-10 h-10"
-                                pStyleClass=".order-content-{{ order.id }}"
-                                enterFromClass="hidden"
-                                enterActiveClass="animate-slidedown"
-                                leaveToClass="hidden"
-                                leaveActiveClass="animate-slideup"
-                                (click)="toggleChevron(order.id); $event.stopPropagation()"
-                            >
-                                <i [class]="'pi pi-chevron-down chevron-icon-' + order.id + ' transition-transform duration-300'" pButtonIcon></i>
-                            </button>
-                        </div>
+                    }
+                    <div class="flex flex-col gap-1">
+                        <div class="text-surface-900 dark:text-surface-0 text-lg font-medium leading-tight">{{ facture.reference }}</div>
+                        <div class="text-surface-500 dark:text-surface-400 text-base leading-tight">{{ facture.vehicule?.nom_vehicule ?? '—' }}</div>
                     </div>
                 </div>
 
-                <div [class]="'order-content-' + order.id + ' hidden overflow-hidden'">
-                    <div class="flex flex-col gap-6 p-6 border-t border-surface-200 dark:border-surface-700">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
-                                <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
-                                    <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Détaille de la facture</h3>
-                                </div>
-                                <div class="p-6 flex flex-col gap-5">
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Montant brut</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">3 500 FG</span>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Encaissé</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">7000 FG</span>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Restant</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">3 000 FG</span>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Date de création</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">23/02/2026</span>
-                                    </div> 
-                                </div>
-                            </div>
+                <!-- N° commande, date, statut, montant, chevron -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
 
-                            <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
-                                <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
-                                    <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Véhicules</h3>
+                    <!-- N° commande -->
+                    <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
+                        <div class="px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-md">
+                            <span class="text-surface-600 dark:text-surface-300 text-sm font-bold">#{{ facture.commande_vente_id }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="flex flex-col items-start sm:items-center flex-1">
+                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">{{ formatDate(facture.created_at) }}</span>
+                    </div>
+
+                    <!-- Statut -->
+                    <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
+                        <div
+                            [ngClass]="{
+                                'px-2 py-1 rounded-md flex items-center gap-1': true,
+                                'bg-surface-100 dark:bg-surface-800': getStatutColor(facture.statut_facture) === 'surface',
+                                'bg-orange-100 dark:bg-orange-900': getStatutColor(facture.statut_facture) === 'orange',
+                                'bg-green-100 dark:bg-green-900': getStatutColor(facture.statut_facture) === 'green',
+                                'bg-red-100 dark:bg-red-900': getStatutColor(facture.statut_facture) === 'red'
+                            }"
+                        >
+                            <i
+                                [class]="
+                                    'text-xs pi ' +
+                                    getStatutIcon(facture.statut_facture) + ' ' +
+                                    (getStatutColor(facture.statut_facture) === 'surface'
+                                        ? 'text-surface-600 dark:text-surface-300'
+                                        : getStatutColor(facture.statut_facture) === 'orange'
+                                          ? 'text-orange-700 dark:text-orange-300'
+                                          : getStatutColor(facture.statut_facture) === 'green'
+                                            ? 'text-green-700 dark:text-green-300'
+                                            : 'text-red-700 dark:text-red-300')
+                                "
+                            ></i>
+                            <span
+                                [ngClass]="{
+                                    'text-sm font-bold': true,
+                                    'text-surface-600 dark:text-surface-300': getStatutColor(facture.statut_facture) === 'surface',
+                                    'text-orange-700 dark:text-orange-300': getStatutColor(facture.statut_facture) === 'orange',
+                                    'text-green-700 dark:text-green-300': getStatutColor(facture.statut_facture) === 'green',
+                                    'text-red-700 dark:text-red-300': getStatutColor(facture.statut_facture) === 'red'
+                                }"
+                            >{{ getStatutLabel(facture.statut_facture) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Montant total -->
+                    <div class="flex flex-col items-start sm:items-center flex-1">
+                        <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">{{ formatMontant(facture.montant_brut) }}</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ── Détail ──────────────────────────────────────────────────── -->
+            <div class="overflow-hidden">
+                <div class="flex flex-col gap-6 p-6 border-t border-surface-200 dark:border-surface-700">
+
+                    <!-- Détaille facture + Véhicule -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        <!-- Détaille de la facture -->
+                        <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Détaille de la facture</h3>
+                            </div>
+                            <div class="p-6 flex flex-col gap-5">
+                                <div class="flex gap-2">
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Montant brut</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(facture.montant_brut) }}</span>
                                 </div>
-                                <div class="p-6 flex flex-col gap-5">
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Nom du véhicule</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Nen dow</span>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Immatriculation</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">RC-802-WK</span>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Propriétaire</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Abdoulaye DIALLO</span>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Livreur principal</span>
-                                        <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Hassane DIALLO</span>
-                                    </div>
-                                     
+                                <div class="flex gap-2">
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Encaissé</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(facture.montant_encaisse) }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Restant</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(facture.montant_restant) }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Date de création</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatDate(facture.created_at) }}</span>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Véhicule -->
                         <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
-                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
-                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Encaissements</h3>
-                                <div class="flex items-center gap-4">
-                                     <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight"><i class="pi pi-plus"></i></span>
-                                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Ajouter</span>
-                                </div>
+                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Véhicules</h3>
                             </div>
                             <div class="p-6 flex flex-col gap-5">
+                                <div class="flex gap-2">
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Nom du véhicule</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ facture.vehicule?.nom_vehicule ?? '—' }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Immatriculation</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium font-mono leading-tight">{{ facture.vehicule?.immatriculation ?? '—' }}</span>
+                                </div>
+                                @let prop = facture.vehicule?.proprietaire;
+                                @if (prop) {
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Propriétaire</span>
+                                        <div class="flex-1">
+                                            <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ prop.prenom }} {{ prop.nom }}</div>
+                                            @if (prop.phone) {
+                                                <div class="text-surface-500 dark:text-surface-400 text-sm mt-0.5">{{ prop.phone | phoneFormat }}</div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                @let lv = facture.vehicule?.livreurPrincipal ?? facture.vehicule?.livreur_principal;
+                                @if (lv) {
+                                    <div class="flex gap-2">
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Livreur principal</span>
+                                        <div class="flex-1">
+                                            <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ lv.prenom }} {{ lv.nom }}</div>
+                                            @if (lv.phone) {
+                                                <div class="text-surface-500 dark:text-surface-400 text-sm mt-0.5">{{ lv.phone | phoneFormat }}</div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Encaissements -->
+                    <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                        <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
+                            <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Encaissements</h3>
+                            @if (canAddEncaissement) {
+                                <button pButton [text]="true" [rounded]="true" severity="primary" class="h-9" (click)="openEncaissementDialog()">
+                                    <i pButtonIcon class="pi pi-plus"></i>
+                                    <span pButtonLabel>Encaisser</span>
+                                </button>
+                            }
+                        </div>
+                        <div class="p-6 flex flex-col gap-5">
+                            @if (facture.encaissements && facture.encaissements.length > 0) {
                                 <div class="flex flex-col gap-4">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Espèces</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">7000 FG</span>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Espèces</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">7000 FG</span>
-                                    </div>
+                                    @for (enc of facture.encaissements; track enc.id) {
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center gap-2">
+                                                <i [class]="'pi ' + getModePaiementIcon(enc.mode_paiement) + ' text-surface-400'"></i>
+                                                <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">{{ getModePaiementLabel(enc.mode_paiement) }}</span>
+                                                <span class="text-surface-400 dark:text-surface-500 text-sm">· {{ formatDate(enc.date_encaissement) }}</span>
+                                            </div>
+                                            <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(enc.montant) }}</span>
+                                        </div>
+                                    }
                                     <div class="h-px bg-surface-200 dark:bg-surface-700"></div>
                                     <div class="flex justify-between items-center">
                                         <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Total</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">14 000 FG</span>
+                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(facture.montant_encaisse) }}</span>
                                     </div>
                                 </div>
-                            </div>
+                            } @else {
+                                <div class="text-center py-6 text-surface-400 dark:text-surface-500">
+                                    <i class="pi pi-inbox text-3xl mb-2 block"></i>
+                                    Aucun encaissement enregistré
+                                </div>
+                            }
                         </div>
                     </div>
+
                 </div>
             </div>
-        }
+        </div>
 
-        @if (filteredOrders().length === 0) {
-            <div class="text-center py-12">
-                <div class="text-surface-500 dark:text-surface-400 text-lg mb-2">No orders found</div>
-                <div class="text-surface-400 dark:text-surface-500 text-base">Try adjusting your search or filter criteria</div>
-            </div>
-        }
     </div>
-</div>
+}
+
+<!-- ══ DIALOG ENCAISSEMENT ═══════════════════════════════════════════════════ -->
+<p-dialog
+    [(visible)]="encaissementDialogVisible"
+    [modal]="true"
+    header="Ajouter un encaissement"
+    [style]="{ width: '26rem' }"
+    [dismissableMask]="true"
+>
+    <form [formGroup]="encaissementForm" class="flex flex-col gap-5 pt-2">
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Montant *</label>
+            <p-inputnumber
+                formControlName="montant"
+                [min]="1"
+                [max]="facture?.montant_restant"
+                suffix=" GNF"
+                [useGrouping]="true"
+                locale="fr-FR"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+            ></p-inputnumber>
+            @if (isEncaissementInvalid('montant')) {
+                <small class="text-red-500">Montant obligatoire</small>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Mode de paiement *</label>
+            <p-select
+                formControlName="mode_paiement"
+                [options]="modePaiementOptions"
+                optionLabel="label"
+                optionValue="value"
+                styleClass="w-full"
+                appendTo="body"
+            ></p-select>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Date *</label>
+            <p-datepicker
+                formControlName="date_encaissement"
+                dateFormat="dd/mm/yy"
+                [showIcon]="true"
+                styleClass="w-full"
+                appendTo="body"
+                [readonlyInput]="true"
+            ></p-datepicker>
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Note</label>
+            <input pInputText formControlName="note" placeholder="Optionnel" class="w-full" />
+        </div>
+    </form>
+
+    <ng-template #footer>
+        <button pButton severity="secondary" [text]="true" label="Annuler" (click)="encaissementDialogVisible = false"></button>
+        <button pButton label="Enregistrer" icon="pi pi-check" (click)="onSaveEncaissement()" [loading]="encaissementSaving"></button>
+    </ng-template>
+</p-dialog>

@@ -33,7 +33,10 @@ export class LivreurService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<ApiResponse<PaginatedData<Livreur>>> {
+  getAll(statut?: 'actif' | 'inactif'): Observable<ApiResponse<PaginatedData<Livreur>>> {
+    if (statut) {
+      return this.http.get<ApiResponse<PaginatedData<Livreur>>>(this.baseUrl, { params: { statut } });
+    }
     return this.http.get<ApiResponse<PaginatedData<Livreur>>>(this.baseUrl);
   }
 

@@ -149,8 +149,8 @@ export class FacturePacking {
     this.montant_verse = data.montant_verse ?? 0;
     this.montant_restant = data.montant_restant ?? 0;
     this.mode_paiement_label = data.mode_paiement_label ?? '';
-    this.total_rouleaux = data.total_rouleaux ?? 0;
-    this.prix_par_rouleau = data.prix_par_rouleau ?? 0;
+    this.total_rouleaux = data.total_rouleaux ?? (data.packings?.reduce((s, p) => s + (p.nb_rouleaux ?? 0), 0) ?? 0);
+    this.prix_par_rouleau = data.prix_par_rouleau ?? (data.packings?.[0]?.prix_par_rouleau ?? 0);
 
     this.prestataire = data.prestataire;
     this.packings = data.packings;

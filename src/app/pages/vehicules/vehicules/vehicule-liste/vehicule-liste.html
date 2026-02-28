@@ -116,13 +116,12 @@
   <div class="card">
     <p-table
       #dt
-      [value]="vehicules()"
+      [value]="filteredVehicules()"
       [loading]="loading"
       [paginator]="true"
       paginatorDropdownAppendTo="body"
       [rows]="10"
       [rowsPerPageOptions]="[10, 25, 50]"
-      [globalFilterFields]="['nom_vehicule', 'immatriculation', 'type_vehicule', 'proprietaire.nom', 'livreur_principal.nom']"
       responsiveLayout="scroll"
       currentPageReportTemplate="  {first} / {last} de {totalRecords} véhicules"
       [showCurrentPageReport]="true"
@@ -136,7 +135,8 @@
               pInputText
               type="text"
               placeholder="Rechercher un véhicule..."
-              (input)="onGlobalFilter(dt, $event)"
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
               class="w-full"
             />
           </p-iconfield>

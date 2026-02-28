@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+// Skeleton de chargement
+.packing-edit-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pes-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pes-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+  .packing-edit-skeleton {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #f8fafc !important;
+    padding: 1rem 0.875rem !important;
+    margin: calc(-0.25rem - env(safe-area-inset-top)) -0.875rem calc(-0.875rem - env(safe-area-inset-bottom));
+    margin-left: calc(-0.875rem - env(safe-area-inset-left));
+    margin-right: calc(-0.875rem - env(safe-area-inset-right));
+    min-height: 100dvh;
+  }
+
+  :host-context(.app-dark) {
+    .packing-edit-skeleton {
+      background: var(--p-surface-950) !important;
+    }
+  }
+}

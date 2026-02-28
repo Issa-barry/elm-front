@@ -27,6 +27,11 @@ export default [
     loadComponent: () => import('./facture-vente-detail2/facture-vente-detail2').then(c => c.FactureVenteDetail2),
       data: { breadcrumb: 'factures-vente-detail2' },
 },
+{
+  path: 'factures-vente-detail3/:id',
+  loadComponent: () => import('./facture-vente-detail3/facture-vente-detail3').then(c => c.FactureVenteDetail3),
+    data: { breadcrumb: 'factures-vente-detail2' },
+},
   {
     path: 'factures-vente',
     loadComponent: () => import('./facture-vente-liste/facture-vente-liste').then(c => c.FactureVenteListe),

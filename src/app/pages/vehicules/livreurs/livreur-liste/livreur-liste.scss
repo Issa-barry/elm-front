@@ -1,0 +1,244 @@
+:host {
+  display: block;
+}
+
+.livreur-mobile-app {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  :host {
+    --mobile-primary: #5f6bff;
+    --mobile-text: #334155;
+    --mobile-muted: #7f8ca3;
+    --mobile-card: #ffffff;
+    --mobile-border: #e2e8f0;
+  }
+
+  .livreur-desktop { display: none; }
+
+  .livreur-mobile-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+    background: #f8fafc;
+    animation: mobileFade 0.24s ease-out;
+  }
+
+  // ─── Header sticky ─────────────────────────────────────────────────────────
+  .mobile-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: calc(0.5rem + env(safe-area-inset-top))
+             calc(0.875rem + env(safe-area-inset-right))
+             0.6rem
+             calc(0.875rem + env(safe-area-inset-left));
+    background: var(--mobile-card);
+    border-bottom: 1px solid var(--mobile-border);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  }
+
+  .mobile-back,
+  .mobile-add {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: var(--mobile-primary) !important;
+    background: rgba(95, 107, 255, 0.1) !important;
+  }
+
+  .mobile-title-wrap {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .mobile-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--mobile-text);
+  }
+
+  .mobile-subtitle {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--mobile-muted);
+  }
+
+  // ─── Zone de scroll ────────────────────────────────────────────────────────
+  .mobile-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.75rem calc(0.875rem + env(safe-area-inset-right))
+             calc(4rem + env(safe-area-inset-bottom))
+             calc(0.875rem + env(safe-area-inset-left));
+  }
+
+  // ─── Barre de recherche ────────────────────────────────────────────────────
+  .mobile-search {
+    background: var(--mobile-card);
+    border: 1px solid var(--mobile-border);
+    border-radius: 0.75rem;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 1rem;
+
+    .p-iconfield,
+    .p-inputtext { width: 100%; }
+
+    .p-inputtext {
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      font-size: 0.95rem;
+    }
+  }
+
+  // ─── Liste de cards ────────────────────────────────────────────────────────
+  .mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .mobile-livreur-card {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    background: var(--mobile-card);
+    border: 1px solid var(--mobile-border);
+    border-radius: 0.875rem;
+    padding: 0.875rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+
+    &:active { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+  }
+
+  .mobile-card-avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--mobile-primary) 0%, #7c8aff 100%);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .mobile-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mobile-text);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-card-meta {
+    font-size: 0.85rem;
+    color: var(--mobile-muted);
+    margin-top: 0.2rem;
+  }
+
+  .mobile-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  :host ::ng-deep .mobile-status-tag {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+  }
+
+  // ─── État vide / chargement ────────────────────────────────────────────────
+  .mobile-state {
+    margin-top: 1rem;
+    background: var(--mobile-card);
+    border: 1px dashed var(--mobile-border);
+    border-radius: 0.875rem;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--mobile-muted);
+    font-size: 0.9rem;
+  }
+
+  // ─── FAB ───────────────────────────────────────────────────────────────────
+  .mobile-fab {
+    position: fixed;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    right: calc(1.25rem + env(safe-area-inset-right));
+    z-index: 50;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: var(--mobile-primary);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 16px rgba(95, 107, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:active {
+      transform: scale(0.93);
+      box-shadow: 0 2px 8px rgba(95, 107, 255, 0.3);
+    }
+  }
+
+  // ─── Dark mode ─────────────────────────────────────────────────────────────
+  :host-context(.app-dark) {
+    :host {
+      --mobile-primary: var(--p-primary-400);
+      --mobile-text: var(--p-surface-100);
+      --mobile-muted: var(--p-surface-400);
+      --mobile-card: var(--p-surface-800);
+      --mobile-border: var(--p-surface-600);
+    }
+
+    .livreur-mobile-app { background: var(--p-surface-950); }
+    .mobile-header { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+    .mobile-livreur-card:active { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
+    .mobile-state {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-600);
+      color: var(--p-surface-400);
+    }
+    .mobile-fab {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      &:active { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+    }
+  }
+}
+
+@keyframes mobileFade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

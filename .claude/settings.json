@@ -4,6 +4,10 @@
       "Bash(git checkout:*)",
       "Bash(ng build:*)",
       "Bash(xargs grep -l \"redirectTo\")"
+    ],
+    "additionalDirectories": [
+      "c:\\laragon\\www\\elm-api\\app\\Http\\Controllers\\Proprietaires",
+      "c:\\laragon\\www\\elm-api\\app\\Http\\Controllers\\Livreurs"
     ]
   }
 }

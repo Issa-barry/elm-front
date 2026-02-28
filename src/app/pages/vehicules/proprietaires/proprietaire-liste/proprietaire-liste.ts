@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MessageService, ConfirmationService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
@@ -12,6 +13,9 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { SelectModule } from 'primeng/select';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 
 import { ProprietaireService } from '@/services/proprietaires/proprietaire.service';
 import { Proprietaire } from '@/models/vehicule.model';
@@ -23,6 +27,7 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     TableModule,
     ButtonModule,
     ToastModule,
@@ -31,19 +36,39 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TagModule,
     InputIconModule,
     IconFieldModule,
+    SelectModule,
     TooltipModule,
     ConfirmDialogModule,
+    MenuModule,
+    RippleModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './proprietaire-liste.html',
+  styleUrl: './proprietaire-liste.scss',
 })
 export class ProprietaireListe implements OnInit {
   proprietaires = signal<Proprietaire[]>([]);
+  searchQuery = signal<string>('');
+  selectedFilter = signal<'all' | 'actif' | 'inactif'>('all');
+  filterOptions = [
+    { label: 'Tous', value: 'all' },
+    { label: 'Actifs', value: 'actif' },
+    { label: 'Inactifs', value: 'inactif' },
+  ];
   loading = false;
   canCreate = false;
   canUpdate = false;
   canDelete = false;
+
+  mobileFilterMenuItems: MenuItem[] = [];
+
+  filteredProprietaires = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const list = this.proprietaires();
+    if (!query) return list;
+    return list.filter((proprietaire) => this.matchesSearch(proprietaire, query));
+  });
 
   constructor(
     private proprietaireService: ProprietaireService,
@@ -57,11 +82,22 @@ export class ProprietaireListe implements OnInit {
     this.canDelete = this.authService.hasPermission('proprietaires.delete');
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',     icon: 'pi pi-list',         command: () => this.setSelectedFilter('all') },
+      { label: 'Actifs',   icon: 'pi pi-check-circle', command: () => this.setSelectedFilter('actif') },
+      { label: 'Inactifs', icon: 'pi pi-times-circle', command: () => this.setSelectedFilter('inactif') },
+    ];
+  }
+
+  goBack(): void { this.router.navigate(['/']); }
 
   load(): void {
     this.loading = true;
-    this.proprietaireService.getAll().subscribe({
+    const filter = this.selectedFilter();
+    const statut = filter === 'all' ? undefined : filter as 'actif' | 'inactif';
+    this.proprietaireService.getAll(statut).subscribe({
       next: (resp) => {
         this.proprietaires.set(resp.data?.data ?? []);
         this.loading = false;
@@ -75,6 +111,15 @@ export class ProprietaireListe implements OnInit {
 
   goNew(): void { this.router.navigate(['/vehicules/proprietaires/nouveau']); }
   goEdit(p: Proprietaire): void { this.router.navigate(['/vehicules/proprietaires', p.id, 'edit']); }
+
+  setSelectedFilter(value: string): void {
+    if (value === 'all' || value === 'actif' || value === 'inactif') {
+      this.selectedFilter.set(value);
+    } else {
+      this.selectedFilter.set('all');
+    }
+    this.load();
+  }
 
   deleteProprietaire(p: Proprietaire): void {
     this.confirmationService.confirm({
@@ -95,9 +140,29 @@ export class ProprietaireListe implements OnInit {
     });
   }
 
-  onGlobalFilter(table: Table, event: Event): void {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  fullName(p: Proprietaire): string { return `${p.prenom} ${p.nom}`; }
+
+  private matchesSearch(p: Proprietaire, query: string): boolean {
+    const searchable = [
+      p.prenom,
+      p.nom,
+      p.phone,
+      p.email,
+      p.ville,
+      p.quartier,
+      p.pays,
+      this.fullName(p),
+      this.isProprietaireActive(p) ? 'actif' : 'inactif',
+    ]
+      .filter((value) => !!value)
+      .join(' ')
+      .toLowerCase();
+
+    return searchable.includes(query);
   }
 
-  fullName(p: Proprietaire): string { return `${p.prenom} ${p.nom}`; }
+  private isProprietaireActive(p: Proprietaire): boolean {
+    const status = (p as { is_active: unknown }).is_active;
+    return status === true || status === 1 || status === '1';
+  }
 }

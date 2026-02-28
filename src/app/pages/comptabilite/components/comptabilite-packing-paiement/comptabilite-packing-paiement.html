@@ -47,8 +47,18 @@
             ></p-inputnumber>
         </div>
 
+    </div>
+
+    <!-- Footer (toujours visible sur mobile) -->
+    <div class="paiement-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-4 flex-shrink-0">
+        <!-- Montant à payer -->
+        <div class="w-full flex justify-start items-center gap-4">
+            <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant à payer</div>
+            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? formatCurrency(montant) : '0 GNF' }}</div>
+        </div>
+
         <!-- Mode de paiement -->
-        <div class="w-full flex flex-col gap-3">
+        <div class="w-full flex flex-col gap-2">
             <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Mode de paiement</div>
             <div class="w-full flex gap-3 paiement-modes">
                 <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'especes'" (click)="selectMode('especes')">
@@ -65,18 +75,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer (toujours visible sur mobile) -->
-    <div class="paiement-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-5 flex-shrink-0">
-        <div class="w-full flex justify-start items-start gap-4">
-            <div class="flex justify-start items-end gap-2">
-                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant à payer</div>
-            </div>
-            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? formatCurrency(montant) : '0 GNF' }}</div>
-        </div>
-
-        <button pButton class="w-full py-3" severity="contrast" (click)="confirmer()" [disabled]="saving || !montant" [loading]="saving">
+        <button pButton class="w-full py-3" severity="primary" (click)="confirmer()" [disabled]="saving || !montant" [loading]="saving">
             <i pButtonIcon class="pi pi-check mr-2"></i>
             <span pButtonLabel>Confirmer le paiement</span>
         </button>

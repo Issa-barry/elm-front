@@ -44,6 +44,8 @@ export interface Livreur {
   prenom: string;
   phone: string;
   is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Vehicule {
@@ -72,5 +74,5 @@ export interface Vehicule {
 export interface VehiculeFilters {
   search?: string;
   per_page?: number;
-  inactifs?: boolean;
+  statut?: 'actif' | 'inactif';
 }

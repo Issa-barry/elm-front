@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { ConfirmationService, MessageService, MenuItem } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
@@ -12,6 +13,9 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { SelectModule } from 'primeng/select';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 
 import { LivreurService } from '@/services/livreurs/livreur.service';
 import { Livreur } from '@/models/vehicule.model';
@@ -23,6 +27,7 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     TableModule,
     ButtonModule,
     ToastModule,
@@ -31,19 +36,39 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TagModule,
     InputIconModule,
     IconFieldModule,
+    SelectModule,
     TooltipModule,
     ConfirmDialogModule,
+    MenuModule,
+    RippleModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './livreur-liste.html',
+  styleUrl: './livreur-liste.scss',
 })
 export class LivreurListe implements OnInit {
   livreurs = signal<Livreur[]>([]);
+  searchQuery = signal<string>('');
+  selectedFilter = signal<'all' | 'actif' | 'inactif'>('all');
+  filterOptions = [
+    { label: 'Tous', value: 'all' },
+    { label: 'Actifs', value: 'actif' },
+    { label: 'Inactifs', value: 'inactif' },
+  ];
   loading = false;
   canCreate = false;
   canUpdate = false;
   canDelete = false;
+
+  mobileFilterMenuItems: MenuItem[] = [];
+
+  filteredLivreurs = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const list = this.livreurs();
+    if (!query) return list;
+    return list.filter((livreur) => this.matchesSearch(livreur, query));
+  });
 
   constructor(
     private livreurService: LivreurService,
@@ -57,11 +82,22 @@ export class LivreurListe implements OnInit {
     this.canDelete = this.authService.hasPermission('livreurs.delete');
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',     icon: 'pi pi-list',         command: () => this.setSelectedFilter('all') },
+      { label: 'Actifs',   icon: 'pi pi-check-circle', command: () => this.setSelectedFilter('actif') },
+      { label: 'Inactifs', icon: 'pi pi-times-circle', command: () => this.setSelectedFilter('inactif') },
+    ];
+  }
+
+  goBack(): void { this.router.navigate(['/']); }
 
   load(): void {
     this.loading = true;
-    this.livreurService.getAll().subscribe({
+    const filter = this.selectedFilter();
+    const statut = filter === 'all' ? undefined : filter as 'actif' | 'inactif';
+    this.livreurService.getAll(statut).subscribe({
       next: (resp) => {
         this.livreurs.set(resp.data?.data ?? []);
         this.loading = false;
@@ -75,6 +111,15 @@ export class LivreurListe implements OnInit {
 
   goNew(): void { this.router.navigate(['/vehicules/livreurs/nouveau']); }
   goEdit(l: Livreur): void { this.router.navigate(['/vehicules/livreurs', l.id, 'edit']); }
+
+  setSelectedFilter(value: string): void {
+    if (value === 'all' || value === 'actif' || value === 'inactif') {
+      this.selectedFilter.set(value);
+    } else {
+      this.selectedFilter.set('all');
+    }
+    this.load();
+  }
 
   deleteLivreur(l: Livreur): void {
     this.confirmationService.confirm({
@@ -95,9 +140,25 @@ export class LivreurListe implements OnInit {
     });
   }
 
-  onGlobalFilter(table: Table, event: Event): void {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  fullName(l: Livreur): string { return `${l.prenom} ${l.nom}`; }
+
+  private matchesSearch(l: Livreur, query: string): boolean {
+    const searchable = [
+      l.prenom,
+      l.nom,
+      l.phone,
+      this.fullName(l),
+      this.isLivreurActive(l) ? 'actif' : 'inactif',
+    ]
+      .filter((value) => !!value)
+      .join(' ')
+      .toLowerCase();
+
+    return searchable.includes(query);
   }
 
-  fullName(l: Livreur): string { return `${l.prenom} ${l.nom}`; }
+  private isLivreurActive(l: Livreur): boolean {
+    const status = (l as { is_active: unknown }).is_active;
+    return status === true || status === 1 || status === '1';
+  }
 }

@@ -28,7 +28,11 @@ export class VehiculeService {
     let params = new HttpParams();
     if (filters?.search) params = params.set('search', filters.search);
     if (filters?.per_page) params = params.set('per_page', String(filters.per_page));
-    return this.http.get<ApiResponse<PaginatedData<Vehicule>>>(this.baseUrl, { params });
+    if (filters?.statut) params = params.set('statut', filters.statut);
+    if (params.keys().length > 0) {
+      return this.http.get<ApiResponse<PaginatedData<Vehicule>>>(this.baseUrl, { params });
+    }
+    return this.http.get<ApiResponse<PaginatedData<Vehicule>>>(this.baseUrl);
   }
 
   getOne(id: number): Observable<ApiResponse<Vehicule>> {
