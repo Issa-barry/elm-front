@@ -134,12 +134,13 @@ describe('PackingFrom — formulaire', () => {
 
   // ── submit en mode create ────────────────────────────────────────────────
 
-  it('onSubmit() en mode create émet le DTO sans statut si formulaire valide', () => {
+  it('onSubmit() en mode create émet le DTO avec le statut si formulaire valide', () => {
     component.mode = 'create';
     component.model.prestataire_id = 1;
     component.model.date = new Date('2026-02-05');
     component.model.nb_rouleaux = 100;
     component.model.prix_par_rouleau = 9;
+    component.model.statut = 'valide';
 
     let emitted: any;
     component.submitForm.subscribe(dto => (emitted = dto));
@@ -148,7 +149,7 @@ describe('PackingFrom — formulaire', () => {
     expect(emitted).toBeDefined();
     expect(emitted.prestataire_id).toBe(1);
     expect(emitted.nb_rouleaux).toBe(100);
-    expect(emitted.statut).toBeUndefined();
+    expect(emitted.statut).toBe('valide');
   });
 
   it('onSubmit() en mode create ne soumet pas si formulaire invalide', () => {

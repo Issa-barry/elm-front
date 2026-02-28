@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePicker } from 'primeng/datepicker';
@@ -60,7 +60,7 @@ class PackingFormModel {
   templateUrl: './packing-from.html',
   styleUrl: './packing-from.scss',
 })
-export class PackingFrom implements OnInit {
+export class PackingFrom implements OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialData: Packing | null = null;
   @Input() prestataires: Prestataire[] = [];
@@ -78,6 +78,14 @@ export class PackingFrom implements OnInit {
     value: k,
     label: PACKING_STATUT_LABELS[k],
   }));
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['defaultPrixRouleau'] && !changes['defaultPrixRouleau'].firstChange
+        && this.mode === 'create' && this.defaultPrixRouleau > 0
+        && this.model.prix_par_rouleau === 0) {
+      this.model.prix_par_rouleau = this.defaultPrixRouleau;
+    }
+  }
 
   ngOnInit(): void {
     this.model = this.initialData ? new PackingFormModel(this.initialData) : new PackingFormModel();
@@ -159,7 +167,7 @@ export class PackingFrom implements OnInit {
       date: this.formatDate(this.model.date),
       nb_rouleaux: this.model.nb_rouleaux,
       prix_par_rouleau: this.model.prix_par_rouleau,
-      statut: this.mode === 'edit' ? this.model.statut : undefined,
+      statut: this.model.statut,
       notes: this.model.notes ?? undefined,
     };
     this.submitForm.emit(packingData);
