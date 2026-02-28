@@ -8,7 +8,7 @@
       pRipple
       icon="pi pi-arrow-left"
       class="p-button-rounded p-button-text mobile-back"
-      aria-label="Retour ÃƒÆ’Ã‚Â  l'accueil"
+      aria-label="Retour à l'accueil"
       (click)="goHome()"
     ></button>
     <div class="mobile-title-wrap">
@@ -41,7 +41,7 @@
           type="text"
           [(ngModel)]="mobileSearchTerm"
           (ngModelChange)="onMobileSearchChange()"
-          placeholder="Nom, email, tÃƒÆ’Ã‚Â©lÃƒÆ’Ã‚Â©phone..."
+          placeholder="Nom, email, téléphone..."
           class="w-full"
         />
       </p-icon-field>
@@ -114,7 +114,7 @@
     [showCurrentPageReport]="true"
     [loading]="loading"
     responsiveLayout="scroll"
-    currentPageReportTemplate="  {first} / {last} de {totalRecords} entrÃƒÆ’Ã‚Â©es"
+    currentPageReportTemplate="  {first} / {last} de {totalRecords} entrées"
     [rowsPerPageOptions]="[10, 25, 50]"
     [globalFilterFields]="['nom_complet', 'email', 'phone', 'reference', 'pays', 'ville', 'specialite', 'type', 'type_label']"
     selectionMode="single"
@@ -171,7 +171,7 @@
         
         <th pSortableColumn="phone" class="white-space-nowrap" style="width:15%">
           <span class="flex items-center gap-2">
-            TÃƒÆ’Ã‚Â©lÃƒÆ’Ã‚Â©phone <p-sortIcon field="phone"></p-sortIcon>
+            Téléphone <p-sortIcon field="phone"></p-sortIcon>
           </span>
         </th>
         <th pSortableColumn="type" class="white-space-nowrap" style="width:12%">
@@ -257,7 +257,7 @@
               class="p-button-rounded p-button-text p-button-sm"
               [class.p-button-success]="prestataire.is_active"
               [class.p-button-danger]="!prestataire.is_active"
-              [pTooltip]="prestataire.is_active ? 'DÃƒÆ’Ã‚Â©sactiver' : 'Activer'"
+              [pTooltip]="prestataire.is_active ? 'Désactiver' : 'Activer'"
               tooltipPosition="top"
               (click)="toggleStatus($event, prestataire.id)"
             ></button>
@@ -281,7 +281,7 @@
         <td colspan="6" class="text-center py-8">
           <div class="flex flex-col items-center gap-3 text-surface-500">
             <i class="pi pi-users text-4xl"></i>
-            <span>Aucun prestataire trouvÃƒÆ’Ã‚Â©</span>
+            <span>Aucun prestataire trouvé</span>
           </div>
         </td>
       </tr>

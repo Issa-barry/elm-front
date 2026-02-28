@@ -19,6 +19,7 @@ import { User } from '@/models/user.model';
 import { UserService } from '@/services/users/users.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { UtilisateursViewDialog } from '../utilisateurs-view-dialog/utilisateurs-view-dialog';
 
 @Component({
   selector: 'app-utilisateurs-liste',
@@ -39,7 +40,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    UtilisateursViewDialog,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -48,6 +50,9 @@ export class UtilisateursListe implements OnInit, OnDestroy {
   selectedUser: User | null = null;
   loading = false;
   selectedStatus: boolean | null = null;
+
+  viewDialogVisible = false;
+  viewUserId: number | null = null;
 
   mobileSearchTerm = '';
   readonly mobilePageSize = 10;
@@ -192,9 +197,19 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     this.router.navigate(['contacts/utilisateurs/edit', event.data.id]);
   }
 
+  openViewDialog(event: Event, userId: number) {
+    event.stopPropagation();
+    this.viewUserId = userId;
+    this.viewDialogVisible = true;
+  }
+
+  navigateToEdit(userId: number) {
+    this.router.navigate(['contacts/utilisateurs/edit/', userId]);
+  }
+
   goToEdit(event: Event, userId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/utilisateurs/edit/', userId]);
+    this.navigateToEdit(userId);
   }
 
   toggleStatus(event: Event, userId: number) {

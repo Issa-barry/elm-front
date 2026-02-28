@@ -1,5 +1,12 @@
 <p-confirmDialog></p-confirmDialog>
 
+<app-utilisateurs-view-dialog
+  [(visible)]="viewDialogVisible"
+  [userId]="viewUserId"
+  [canUpdate]="canUpdate"
+  (editRequested)="navigateToEdit($event)"
+></app-utilisateurs-view-dialog>
+
 <!-- Mobile: app-like list (≤768px) -->
 <div class="utilisateurs-mobile-app">
   <header class="mobile-header">
@@ -240,10 +247,9 @@
               pRipple
               icon="pi pi-eye"
               class="p-button-rounded p-button-text p-button-sm"
-              [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+              pTooltip="Voir les détails"
               tooltipPosition="top"
-              (click)="goToEdit($event, user.id)"
-              [disabled]="!canUpdate"
+              (click)="openViewDialog($event, user.id)"
             ></button>
             <button
               *ngIf="canUpdate"

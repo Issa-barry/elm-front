@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { PackingFrom } from '../packing-from/packing-from';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { PackingService } from '@/services/packing/packing.service';
 import { ParametresService } from '@/services/parametres/parametres.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { Prestataire } from '@/models/prestataire.model';
 import { CreatePackingDto } from '@/models/packing.model';
 import { MessageService } from 'primeng/api';
@@ -27,11 +28,17 @@ export class PackingNew implements OnInit {
     private packingService: PackingService,
     private parametresService: ParametresService,
     private messageService: MessageService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private usineContext: UsineContextService
+  ) {
+    // Rechargement automatique quand l'usine change
+    effect(() => {
+      this.usineContext.currentUsineId(); // déclare la dépendance au signal
+      this.loadPrestataires();
+    });
+  }
 
   ngOnInit(): void {
-    this.loadPrestataires();
     this.parametresService.getPrixRouleauDefaut().subscribe({
       next: (prix) => { this.defaultPrixRouleau = prix; },
       error: () => {}

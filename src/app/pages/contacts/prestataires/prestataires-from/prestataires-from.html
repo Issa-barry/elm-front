@@ -28,7 +28,7 @@
             [options]="prestataireTypes"
             optionLabel="label"
             optionValue="value"
-            placeholder="SÃƒÂ©lectionner un type"
+            placeholder="Sélectionner un type"
             [disabled]="fieldsDisabled"
             [invalid]="submitted && !model.type"
             fluid
@@ -57,7 +57,7 @@
           </small>
         </div>
 
-        <!-- Nom (masquÃƒÂ© pour fournisseur) -->
+        <!-- Nom (masqué pour fournisseur) -->
         <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
           <label for="nom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Nom <span class="text-red-500" *ngIf="isEditing">*</span>
@@ -76,10 +76,10 @@
           </small>
         </div>
 
-        <!-- PrÃƒÂ©nom (masquÃƒÂ© pour fournisseur) -->
+        <!-- Prénom (masqué pour fournisseur) -->
         <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
           <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            PrÃƒÂ©nom <span class="text-red-500" *ngIf="isEditing">*</span>
+            Prnom <span class="text-red-500" *ngIf="isEditing">*</span>
           </label>
           <input
             id="prenom"
@@ -91,18 +91,18 @@
             [disabled]="fieldsDisabled"
           />
           <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
-            PrÃƒÂ©nom obligatoire.
+            Prénom obligatoire.
           </small>
         </div>
 
-        <!-- TÃƒÂ©lÃƒÂ©phone avec sÃƒÂ©lecteur de pays -->
+        <!-- Téléphone avec sélecteur de pays -->
         <div class="mb-6 col-span-12">
           <!-- <label class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
-            TÃƒÂ©lÃƒÂ©phone <span class="text-red-500" *ngIf="isEditing">*</span>
+            Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
           </label> -->
           
           <div class="grid grid-cols-12 gap-3">
-            <!-- SÃƒÂ©lecteur de pays -->
+            <!-- Sélecteur de pays -->
             <div class="col-span-12 md:col-span-4">
               <label for="codePays" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
                 Pays <span class="text-red-500" *ngIf="isEditing">*</span>
@@ -113,7 +113,7 @@
                 [options]="countries"
                 optionLabel="name"
                 optionValue="code"
-                placeholder="SÃƒÂ©lectionner un pays"
+                placeholder="Sélectionner un pays"
                 [disabled]="fieldsDisabled"
                 (onChange)="onCountryChange()"
                 fluid
@@ -135,10 +135,10 @@
               </p-select>
             </div>
 
-            <!-- Champ tÃƒÂ©lÃƒÂ©phone -->
+            <!-- Champ téléphone -->
             <div class="col-span-12 md:col-span-8">
               <label for="phone" class="font-medium text-surface-900 dark:text-surface-0 mb-3 block">
-                TÃƒÂ©lÃƒÂ©phone <span class="text-red-500" *ngIf="isEditing">*</span>
+                Téléphone <span class="text-red-500" *ngIf="isEditing">*</span>
               </label>
               <input
                 id="phone"
@@ -155,9 +155,9 @@
             </div>
           </div>
 
-          <!-- Messages d'erreur pour le tÃƒÂ©lÃƒÂ©phone -->
+          <!-- Messages d'erreur pour le téléphone -->
           <small class="text-red-500 block mt-2" *ngIf="submitted && !model.phone?.trim() && isEditing">
-            TÃƒÂ©lÃƒÂ©phone obligatoire.
+            Téléphone obligatoire.
           </small>
           <small class="text-red-500 block mt-2" *ngIf="phoneError && model.phone?.trim() && isEditing">
             {{ phoneError }}

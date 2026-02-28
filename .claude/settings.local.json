@@ -20,7 +20,11 @@
       "Bash(npx ng test:*)",
       "Bash(xargs cat:*)",
       "Bash(ng test:*)",
-      "Bash(xargs grep -l \"MessageService\\\\|HttpTestingController\")"
+      "Bash(xargs grep -l \"MessageService\\\\|HttpTestingController\")",
+      "Bash(python -c \":*)",
+      "Bash(where python)",
+      "Bash(where python3)",
+      "Bash(where py)"
     ],
     "additionalDirectories": [
       "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"
