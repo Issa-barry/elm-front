@@ -1,1 +1,26 @@
-<p>packing-edit works!</p>
+<p-toast />
+
+@if (packingLoading) {
+  <!-- Skeleton plein écran pendant le chargement initial -->
+  <div class="card packing-edit-skeleton">
+    <div class="pes-header">
+      <p-skeleton shape="circle" size="2.25rem" />
+      <p-skeleton width="10rem" height="1.25rem" />
+    </div>
+    <div class="pes-body">
+      <p-skeleton width="100%" height="2.5rem" />
+      <p-skeleton width="100%" height="2.5rem" />
+      <p-skeleton width="100%" height="2.5rem" />
+      <p-skeleton width="100%" height="2.5rem" />
+    </div>
+  </div>
+} @else {
+  <app-packing-from
+    [mode]="'edit'"
+    [initialData]="packing"
+    [prestataires]="prestataires"
+    [loading]="loading"
+    (submitForm)="onSubmit($event)"
+    (cancel)="onCancel()">
+  </app-packing-from>
+}

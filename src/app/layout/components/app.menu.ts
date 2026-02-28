@@ -41,7 +41,7 @@ export class AppMenu {
                 label: 'Modules',
                 icon: 'pi pi-th-large',
                 items: [
-                    // ── Ventes ─────────────────────────────────────────────────────
+                    // Ventes
                     {
                         label: 'Ventes',
                         icon: 'pi pi-fw pi-shopping-cart',
@@ -49,9 +49,9 @@ export class AppMenu {
                         visible: this.hasAnyPermission(permissions, ['commandes.read']),
                     },
 
-                    // ── Comptabilité ───────────────────────────────────────────────
+                    // Comptabilite
                     {
-                        label: 'Comptabilité',
+                        label: 'Comptabilite',
                         icon: 'pi pi-fw pi-calculator',
                         visible: this.hasAnyPermission(permissions, [
                             'commissions.read',
@@ -106,7 +106,7 @@ export class AppMenu {
                         ],
                     },
 
-                    // ── Packing ────────────────────────────────────────────────────
+                    // Packing
                     {
                         label: 'Packing',
                         icon: 'pi pi-fw pi-box',
@@ -117,24 +117,24 @@ export class AppMenu {
                         ]),
                     },
 
-                    // ── Véhicules ──────────────────────────────────────────────────
+                    // Vehicules
                     {
-                        label: 'Véhicules',
+                        label: 'Vehicules',
                         icon: 'pi pi-fw pi-car',
                         visible: true,
                         items: [
                             // {
-                            //     label: 'Liste des véhicules',
+                            //     label: 'Liste des vehicules',
                             //     icon: 'pi pi-fw pi-list',
                             //     routerLink: ['/vehicules'],
                             // },
                             {
-                                label: 'Liste des véhicules ',
+                                label: 'Liste des vehicules ',
                                 icon: 'pi pi-fw pi-list',
                                 routerLink: ['/vehicules/vehicules-liste2'],
                             },
                             {
-                                label: 'Propriétaires',
+                                label: 'Proprietaires',
                                 icon: 'pi pi-fw pi-user',
                                 routerLink: ['/vehicules/proprietaires'],
                             },
@@ -146,26 +146,22 @@ export class AppMenu {
                         ],
                     },
 
-                    // ── Contacts ───────────────────────────────────────────────────
+                    // Contacts
                     {
                         label: 'Contacts',
                         icon: 'pi pi-fw pi-address-book',
                         visible: this.hasAnyPermission(permissions, [
                             'prestataires.read',
                             'prestataire.read',
-                            'prestateurs.read',
-                            'prestateur.read',
                         ]),
                         items: [
                             {
-                                label: 'Prestateurs-externes',
+                                label: 'Prestataires externes',
                                 icon: 'pi pi-fw pi-users',
-                                routerLink: ['contacts/prestateurs'],
+                                routerLink: ['contacts/prestataires'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'prestataires.read',
                                     'prestataire.read',
-                                    'prestateurs.read',
-                                    'prestateur.read',
                                 ]),
                             },
                             {
@@ -182,7 +178,7 @@ export class AppMenu {
                         ],
                     },
 
-                    // ── Produits ───────────────────────────────────────────────────
+                    // Produits
                     {
                         label: 'Produits',
                         icon: 'pi pi-fw pi-barcode',
@@ -199,22 +195,22 @@ export class AppMenu {
                 ],
                 
             }, //fin module
-            {
-                label: 'Autres',
-                icon: 'pi pi-fw pi-download',
-                items: [
-                    {
-                        label: 'Aide',
-                        icon: 'pi pi-fw pi-question-circle',
-                        routerLink: ['/pages/help'],
-                    },
-                    {
-                        label: 'Paramètres',
-                        icon: 'pi pi-fw pi-cog',
-                        routerLink: ['/parametres'],
-                    },
-                ],
-            }, //fin module
+            // {
+            //     label: 'Autres',
+            //     icon: 'pi pi-fw pi-download',
+            //     items: [
+            //         {
+            //             label: 'Aide',
+            //             icon: 'pi pi-fw pi-question-circle',
+            //             routerLink: ['/pages/help'],
+            //         },
+            //         {
+            //             label: 'Parametres',
+            //             icon: 'pi pi-fw pi-cog',
+            //             routerLink: ['/parametres'],
+            //         },
+            //     ],
+            // }, //fin module
         ];
     }
 

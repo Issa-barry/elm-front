@@ -12,8 +12,6 @@ const MODULE_ALIASES: Record<string, string> = {
   packings: 'packing',
   prestataire: 'prestataire',
   prestataires: 'prestataire',
-  prestateur: 'prestataire',
-  prestateurs: 'prestataire',
   utilisateur: 'utilisateur',
   utilisateurs: 'utilisateur',
   user: 'utilisateur',

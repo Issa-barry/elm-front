@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { PackingFrom } from '../packing-from/packing-from';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { PackingService } from '@/services/packing/packing.service';
+import { ParametresService } from '@/services/parametres/parametres.service';
 import { Prestataire } from '@/models/prestataire.model';
 import { CreatePackingDto } from '@/models/packing.model';
 import { MessageService } from 'primeng/api';
@@ -19,16 +20,22 @@ import { ToastModule } from 'primeng/toast';
 export class PackingNew implements OnInit {
   prestataires: Prestataire[] = [];
   loading = false;
+  defaultPrixRouleau = 0;
 
   constructor(
     private prestataireService: PrestataireService,
     private packingService: PackingService,
+    private parametresService: ParametresService,
     private messageService: MessageService,
     private router: Router
-  ) {} 
+  ) {}
 
   ngOnInit(): void {
     this.loadPrestataires();
+    this.parametresService.getPrixRouleauDefaut().subscribe({
+      next: (prix) => { this.defaultPrixRouleau = prix; },
+      error: () => {}
+    });
   }
 
   private loadPrestataires(): void {
@@ -74,7 +81,7 @@ export class PackingNew implements OnInit {
         this.loading = false;
         // Redirection vers la liste après création
         setTimeout(() => {
-          this.router.navigate(['/packings/packings-liste']);
+          this.router.navigate(['/packings']);
         }, 1000);
       },
       error: (err) => {
@@ -91,6 +98,6 @@ export class PackingNew implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/packings/packings-liste']);
+    this.router.navigate(['/packings']);
   }
 }

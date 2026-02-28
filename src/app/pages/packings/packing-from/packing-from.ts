@@ -4,28 +4,25 @@ import { FormsModule } from '@angular/forms';
 import { DatePicker } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
 import { InputNumber } from 'primeng/inputnumber';
-import { Button } from 'primeng/button';
-import { InputGroup } from 'primeng/inputgroup';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
-import { Ripple } from 'primeng/ripple';
+import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
 import { Prestataire } from '@/models/prestataire.model';
-import { Packing, CreatePackingDto, PackingStatut } from '@/models/packing.model';
+import { Packing, CreatePackingDto, PackingStatut, PACKING_STATUT_LABELS } from '@/models/packing.model';
 import { MoneyPipe } from '@/pipes/money.pipe';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
-// Classe locale pour le formulaire avec méthodes de calcul
 class PackingFormModel {
   id?: number;
   prestataire_id?: number;
   prestataire?: Prestataire;
   reference?: string;
-  date?: Date | string | null;  
+  date?: Date | string | null;
   nb_rouleaux: number = 0;
   prix_par_rouleau: number = 0;
-  montant: number = 0; 
+  montant: number = 0;
   statut: PackingStatut = 'valide';
   notes?: string | null;
-  
+
   constructor(data?: Partial<Packing>) {
     if (data) {
       this.id = data.id;
@@ -55,10 +52,8 @@ class PackingFormModel {
     DatePicker,
     Select,
     InputNumber,
-    Button,
-    InputGroup,
-    InputGroupAddon,
-    Ripple,
+    ButtonModule,
+    RippleModule,
     MoneyPipe,
     PhoneFormatPipe,
   ],
@@ -70,169 +65,111 @@ export class PackingFrom implements OnInit {
   @Input() initialData: Packing | null = null;
   @Input() prestataires: Prestataire[] = [];
   @Input() loading = false;
+  @Input() defaultPrixRouleau: number = 0;
 
   @Output() submitForm = new EventEmitter<CreatePackingDto>();
   @Output() cancel = new EventEmitter<void>();
 
   submitted = false;
-  isEditing = false;
   model: PackingFormModel = new PackingFormModel();
-
-  minDate: Date = new Date();
   dateError: string | null = null;
+
+  readonly statutOptions = (Object.keys(PACKING_STATUT_LABELS) as PackingStatut[]).map(k => ({
+    value: k,
+    label: PACKING_STATUT_LABELS[k],
+  }));
 
   ngOnInit(): void {
     this.model = this.initialData ? new PackingFormModel(this.initialData) : new PackingFormModel();
-
-    if (this.mode === 'create') {
-      this.isEditing = true;
-      if (!this.model.date) {
-        this.model.date = new Date();
-      }
+    if (!this.model.date) {
+      this.model.date = new Date();
+    }
+    if (this.mode === 'create' && this.defaultPrixRouleau > 0) {
+      this.model.prix_par_rouleau = this.defaultPrixRouleau;
     }
   }
 
-  // Calculer automatiquement le montant
   onPrixOrQuantityChange(): void {
     if (this.model.nb_rouleaux && this.model.prix_par_rouleau) {
       this.model.calculateMontant();
     }
   }
 
-  // Validation de la date
   validateDate(): boolean {
     if (!this.model.date) {
       this.dateError = 'Date obligatoire.';
       return false;
     }
-
     this.dateError = null;
     return true;
   }
 
-  // Événement déclenché lors du changement de date
   onDateChange(): void {
-    if (this.submitted) {
-      this.validateDate();
-    }
+    if (this.submitted) this.validateDate();
   }
 
-  // Événement déclenché lors de la perte de focus de la date
   onDateBlur(): void {
-    if (this.model.date) {
-      this.validateDate();
-    }
+    if (this.model.date) this.validateDate();
   }
 
-  // Obtenir le nom complet du prestataire
-  getPrestataireLabel(prestataire: Prestataire): string {
-    return `${prestataire.prenom} ${prestataire.nom} - ${prestataire.phone}`;
-  }
-
-  // Obtenir le prestataire sélectionné
   getSelectedPrestataire(): Prestataire | undefined {
     return this.filteredPrestataires.find(p => p.id === this.model.prestataire_id);
   }
 
-  // Filtrer les prestataires de type machiniste
   get filteredPrestataires(): Prestataire[] {
     const selectedId = this.model.prestataire_id;
-    return (this.prestataires ?? []).filter((prestataire) => {
-      if (selectedId && prestataire.id === selectedId) return true;
-      return prestataire.type === 'machiniste';
+    return (this.prestataires ?? []).filter((p) => {
+      if (selectedId && p.id === selectedId) return true;
+      return p.type === 'machiniste';
     });
   }
 
-  // Validation complète
   isValid(): boolean {
-    const basicValidation = !!(
+    return !!(
       this.model.prestataire_id &&
       this.model.date &&
-      this.model.nb_rouleaux &&
-      this.model.nb_rouleaux > 0 &&
-      this.model.prix_par_rouleau &&
-      this.model.prix_par_rouleau > 0
-    );
-
-    if (!basicValidation) {
-      return false;
-    }
-
-    return this.validateDate();
+      this.model.nb_rouleaux && this.model.nb_rouleaux > 0 &&
+      this.model.prix_par_rouleau && this.model.prix_par_rouleau > 0
+    ) && this.validateDate();
   }
 
-  // Activer l'édition
-  enableEditing(): void {
-    this.isEditing = true;
-  }
-
-  // Annuler l'édition
-  cancelEditing(): void {
-    this.isEditing = false;
-    this.submitted = false;
-    this.dateError = null;
-
-    this.model = this.initialData ? new PackingFormModel(this.initialData) : new PackingFormModel();
-  }
-
-  // Réinitialiser le formulaire (méthode publique)
   public resetForm(): void {
     this.submitted = false;
     this.dateError = null;
     this.model = new PackingFormModel();
   }
 
-  // Formater la date pour l'API
   private formatDate(date: Date | string | null | undefined): string {
     if (!date) return '';
     const d = typeof date === 'string' ? new Date(date) : date;
     return d.toISOString().split('T')[0];
   }
 
-  // Soumettre au clavier Entrée (uniquement en mode édition)
   onEnterKey(event: Event): void {
-    if (this.isEditing) {
-      event.preventDefault();
-      this.onSubmit();
-    }
+    event.preventDefault();
+    this.onSubmit();
   }
 
-  // Soumettre le formulaire
   onSubmit(): void {
     this.submitted = true;
-
-    if (!this.isValid()) {
-      return;
-    }
-
-    // Calculer le montant avant soumission
+    if (!this.isValid()) return;
     this.model.calculateMontant();
-
-    // Créer le DTO pour l'API
     const packingData: CreatePackingDto = {
       prestataire_id: this.model.prestataire_id!,
       date: this.formatDate(this.model.date),
       nb_rouleaux: this.model.nb_rouleaux,
       prix_par_rouleau: this.model.prix_par_rouleau,
-      statut: this.model.statut,
-      notes: this.model.notes ?? undefined
+      statut: this.mode === 'edit' ? this.model.statut : undefined,
+      notes: this.model.notes ?? undefined,
     };
-
     this.submitForm.emit(packingData);
   }
 
-  // Annuler
   onCancel(): void {
     this.cancel.emit();
   }
 
-  // Désactiver les champs en mode lecture
   get fieldsDisabled(): boolean {
-    return (this.mode === 'edit' && !this.isEditing) || this.loading;
-  }
-
-  // Vérifier si le formulaire a des erreurs
-  hasErrors(): boolean {
-    return !!this.dateError;
+    return this.loading;
   }
 }

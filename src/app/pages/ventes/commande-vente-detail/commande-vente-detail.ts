@@ -226,6 +226,26 @@ export class CommandeVenteDetail implements OnInit {
     return new Date(d).toLocaleDateString('fr-FR');
   }
 
+  getStatutColor(s: StatutFacture): 'surface' | 'orange' | 'green' | 'red' {
+    const map: Record<StatutFacture, 'surface' | 'orange' | 'green' | 'red'> = {
+      impayee: 'red',
+      partiel: 'orange',
+      payee: 'green',
+      annulee: 'surface',
+    };
+    return map[s] ?? 'surface';
+  }
+
+  getStatutIcon(s: StatutFacture): string {
+    const map: Record<StatutFacture, string> = {
+      impayee: 'pi-clock',
+      partiel: 'pi-chart-pie',
+      payee: 'pi-check',
+      annulee: 'pi-times',
+    };
+    return map[s] ?? 'pi-circle';
+  }
+
   getModeLabel(mode: string): string {
     const labels: Record<string, string> = {
       especes: 'Espèces',
@@ -234,6 +254,16 @@ export class CommandeVenteDetail implements OnInit {
       cheque: 'Chèque',
     };
     return labels[mode] ?? mode;
+  }
+
+  getModeIcon(mode: string): string {
+    const map: Record<string, string> = {
+      especes: 'pi-money-bill',
+      mobile_money: 'pi-mobile',
+      virement: 'pi-building',
+      cheque: 'pi-file',
+    };
+    return map[mode] ?? 'pi-credit-card';
   }
 
   totalLignes(): number {

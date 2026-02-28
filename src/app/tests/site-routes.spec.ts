@@ -4,7 +4,7 @@ import { appRoutes } from '../../app.routes';
 import ventesRoutes from '@/pages/ventes/ventes.routes';
 import comptabiliteRoutes from '@/pages/comptabilite/comptabilite.routes';
 import contactsRoutes from '@/pages/contacts/contacts.routes';
-import prestateursRoutes from '@/pages/contacts/prestateurs/prestateurs.routes';
+import prestatairesRoutes from '@/pages/contacts/prestataires/prestataires.routes';
 import utilisateursRoutes from '@/pages/contacts/utilisateurs/utilisateurs.routes';
 import packingsRoutes from '@/pages/packings/packings.routes';
 import produitsRoutes from '@/pages/produits/produits.routes';
@@ -44,7 +44,7 @@ describe('Site Routes (hors templates PrimeNG)', () => {
         { name: 'ventes', routes: ventesRoutes },
         { name: 'comptabilite', routes: comptabiliteRoutes },
         { name: 'contacts', routes: contactsRoutes },
-        { name: 'contacts/prestateurs', routes: prestateursRoutes },
+        { name: 'contacts/prestataires', routes: prestatairesRoutes },
         { name: 'contacts/utilisateurs', routes: utilisateursRoutes },
         { name: 'packings', routes: packingsRoutes },
         { name: 'produits', routes: produitsRoutes },

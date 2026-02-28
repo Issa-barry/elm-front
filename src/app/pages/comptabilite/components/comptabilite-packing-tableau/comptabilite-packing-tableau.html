@@ -115,53 +115,61 @@
             class="w-full"
           />
         </p-iconfield>
-        <div class="flex flex-wrap gap-3 w-full sm:w-auto">
-          <p-datepicker
-            [(ngModel)]="filtrePeriodeDebut"
-            dateFormat="dd/mm/yy"
-            placeholder="Date début"
-            [showIcon]="true"
-            styleClass="w-44"
-            [readonlyInput]="true"
-          />
-          <p-datepicker
-            [(ngModel)]="filtrePeriodeFin"
-            dateFormat="dd/mm/yy"
-            placeholder="Date fin"
-            [showIcon]="true"
-            styleClass="w-44"
-            [readonlyInput]="true"
-          />
-          <p-select
-            [options]="statutOptions"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="filtreStatut()"
-            (ngModelChange)="setStatutFilter($event)"
-            placeholder="Tous les statuts"
-            class="w-full sm:w-44"
-          />
-          <button
-            pButton
-            type="button"
-            icon="pi pi-filter"
-            pTooltip="Appliquer la période"
-            tooltipPosition="top"
-            (click)="loadComptabilite()"
-          ></button>
-          @if (filtrePeriodeDebut || filtrePeriodeFin || filtreStatut() !== null) {
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto items-center">
+          <div class="shrink-0">
+            <p-datepicker
+              [(ngModel)]="filtrePeriodeDebut"
+              dateFormat="dd/mm/yy"
+              placeholder="Date début"
+              [showIcon]="true"
+              styleClass="w-44"
+              [readonlyInput]="true"
+            />
+          </div>
+          <div class="shrink-0">
+            <p-datepicker
+              [(ngModel)]="filtrePeriodeFin"
+              dateFormat="dd/mm/yy"
+              placeholder="Date fin"
+              [showIcon]="true"
+              styleClass="w-44"
+              [readonlyInput]="true"
+            />
+          </div>
+          <div class="w-full sm:w-44 shrink-0">
+            <p-select
+              [options]="statutOptions"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="filtreStatut()"
+              (ngModelChange)="setStatutFilter($event)"
+              placeholder="Tous"
+              styleClass="w-full"
+            />
+          </div>
+          <div class="flex gap-1">
             <button
               pButton
               type="button"
-              icon="pi pi-filter-slash"
-              severity="secondary"
-              outlined
-              rounded
-              pTooltip="Effacer les filtres"
+              icon="pi pi-filter"
+              pTooltip="Appliquer la période"
               tooltipPosition="top"
-              (click)="clearFilters()"
+              (click)="loadComptabilite()"
             ></button>
-          }
+            @if (filtrePeriodeDebut || filtrePeriodeFin || filtreStatut() !== null) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-filter-slash"
+                severity="secondary"
+                outlined
+                rounded
+                pTooltip="Effacer les filtres"
+                tooltipPosition="top"
+                (click)="clearFilters()"
+              ></button>
+            }
+          </div>
         </div>
       </div>
     </ng-template>

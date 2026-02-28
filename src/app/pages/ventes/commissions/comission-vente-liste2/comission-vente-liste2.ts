@@ -23,7 +23,7 @@ import {
   STATUT_COMMISSION_LABELS,
   STATUT_COMMISSION_SEVERITY,
 } from '@/models/vente.model';
-
+ 
 interface CommissionStats {
   eligibleCount: number;
   eligibleMontant: number;
