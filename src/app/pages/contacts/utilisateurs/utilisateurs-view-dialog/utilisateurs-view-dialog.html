@@ -23,7 +23,7 @@
   <form *ngIf="!loading" (ngSubmit)="save()" class="dialog-form">
     <div class="grid grid-cols-12 gap-4">
       <div class="col-span-12 md:col-span-6">
-        <label for="type" class="field-label">Type de compte *</label>
+        <label for="type" class="field-label">Type de compte <span class="required-star">*</span></label>
         <p-select
           id="type"
           name="type"
@@ -39,7 +39,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="role" class="field-label">Role *</label>
+        <label for="role" class="field-label">Role <span class="required-star">*</span></label>
         <p-select
           id="role"
           name="role"
@@ -55,7 +55,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="nom" class="field-label">Nom *</label>
+        <label for="nom" class="field-label">Nom <span class="required-star">*</span></label>
         <input
           id="nom"
           name="nom"
@@ -69,7 +69,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="prenom" class="field-label">Prenom *</label>
+        <label for="prenom" class="field-label">Prenom <span class="required-star">*</span></label>
         <input
           id="prenom"
           name="prenom"
@@ -83,7 +83,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="phone" class="field-label">Telephone *</label>
+        <label for="phone" class="field-label">Telephone <span class="required-star">*</span></label>
         <input
           id="phone"
           name="phone"
@@ -93,12 +93,14 @@
           [(ngModel)]="model.phone"
           [disabled]="saving"
           placeholder="622000000"
+          (blur)="onPhoneBlur()"
         />
         <small *ngIf="submitted && !model.phone.trim()" class="field-error">Telephone obligatoire.</small>
+        <small *ngIf="phonePrefixError" class="field-error">{{ phonePrefixError }}</small>
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="email" class="field-label">Email</label>
+        <label for="email" class="field-label">Email <span class="optional-hint">(facultatif)</span></label>
         <input
           id="email"
           name="email"
@@ -112,7 +114,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-12">
-        <label for="code_pays" class="field-label">Pays *</label>
+        <label for="code_pays" class="field-label">Pays <span class="required-star">*</span></label>
         <p-select
           id="code_pays"
           name="code_pays"
@@ -124,12 +126,27 @@
           [disabled]="saving"
           (onChange)="onCountryChange()"
           styleClass="w-full"
-        ></p-select>
+        >
+          <ng-template let-country pTemplate="item">
+            <div class="country-option">
+              <img [src]="country.flag" [alt]="country.code" class="country-flag" />
+              <span class="country-name">{{ country.name }}</span>
+              <span class="country-code">{{ country.dialCode }}</span>
+            </div>
+          </ng-template>
+          <ng-template let-country pTemplate="selectedItem">
+            <div class="country-option" *ngIf="country">
+              <img [src]="country.flag" [alt]="country.code" class="country-flag" />
+              <span class="country-name">{{ country.name }}</span>
+              <span class="country-code">{{ country.dialCode }}</span>
+            </div>
+          </ng-template>
+        </p-select>
         <small *ngIf="submitted && !model.code_pays" class="field-error">Pays obligatoire.</small>
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="ville" class="field-label">Ville *</label>
+        <label for="ville" class="field-label">Ville <span class="required-star">*</span></label>
         <input
           id="ville"
           name="ville"
@@ -143,7 +160,7 @@
       </div>
 
       <div class="col-span-12 md:col-span-6">
-        <label for="quartier" class="field-label">Quartier *</label>
+        <label for="quartier" class="field-label">Quartier <span class="required-star">*</span></label>
         <input
           id="quartier"
           name="quartier"
@@ -159,7 +176,7 @@
       
 
       <div *ngIf="mode === 'edit'" class="col-span-12 md:col-span-6">
-        <label for="civilite" class="field-label">Civilite</label>
+        <label for="civilite" class="field-label">Civilite <span class="optional-hint">(facultatif)</span></label>
         <p-select
           id="civilite"
           name="civilite"
@@ -175,7 +192,7 @@
       </div>
 
       <div *ngIf="mode === 'edit'" class="col-span-12 md:col-span-6">
-        <label for="date_naissance" class="field-label">Date de naissance</label>
+        <label for="date_naissance" class="field-label">Date de naissance <span class="optional-hint">(facultatif)</span></label>
         <input
           id="date_naissance"
           name="date_naissance"
@@ -188,7 +205,7 @@
       </div>
 
       <div *ngIf="mode === 'create'" class="col-span-12 md:col-span-6">
-        <label for="password" class="field-label">Mot de passe *</label>
+        <label for="password" class="field-label">Mot de passe <span class="required-star">*</span></label>
         <p-password
           id="password"
           name="password"
@@ -202,7 +219,7 @@
       </div>
 
       <div *ngIf="mode === 'create'" class="col-span-12 md:col-span-6">
-        <label for="password_confirmation" class="field-label">Confirmer mot de passe *</label>
+        <label for="password_confirmation" class="field-label">Confirmer mot de passe <span class="required-star">*</span></label>
         <p-password
           id="password_confirmation"
           name="password_confirmation"

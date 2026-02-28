@@ -62,6 +62,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   saving = false;
   submitted = false;
   formError: string | null = null;
+  phonePrefixError: string | null = null;
   loadedUser: User | null = null;
 
   readonly countries = COUNTRIES;
@@ -141,6 +142,18 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
   onCountryChange(): void {
     this.model.pays = this.getCountryName(this.model.code_pays);
+    if (this.model.phone.trim()) {
+      this.validatePhonePrefixAndNormalize();
+    }
+  }
+
+  onPhoneBlur(): void {
+    if (!this.model.phone.trim()) {
+      this.phonePrefixError = null;
+      return;
+    }
+
+    this.validatePhonePrefixAndNormalize();
   }
 
   save(): void {
@@ -344,6 +357,8 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   }
 
   private isFormValid(): boolean {
+    this.phonePrefixError = null;
+
     const requiredMissing =
       !this.model.nom.trim() ||
       !this.model.prenom.trim() ||
@@ -355,6 +370,10 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       !this.model.role;
 
     if (requiredMissing) {
+      return false;
+    }
+
+    if (!this.validatePhonePrefixAndNormalize()) {
       return false;
     }
 
@@ -389,7 +408,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   }
 
   private normalizePhone(phone: string): string {
-    return (phone || '').replace(/\s+/g, '');
+    return (phone || '').replace(/[^\d+]/g, '');
   }
 
   private extractErrorMessage(error: any, fallback: string): string {
@@ -460,7 +479,64 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.saving = false;
     this.submitted = false;
     this.formError = null;
+    this.phonePrefixError = null;
     this.loadedUser = null;
     this.model = this.getDefaultModel();
+  }
+
+  private validatePhonePrefixAndNormalize(): boolean {
+    const rawPhone = this.model.phone || '';
+    const selectedDialCode = this.getCodePhonePays(this.model.code_pays);
+    const selectedCountry = this.getCountryName(this.model.code_pays);
+    const selectedDialDigits = selectedDialCode.replace('+', '');
+
+    let sanitized = rawPhone.trim().replace(/[^\d+]/g, '');
+
+    if (sanitized.startsWith('00')) {
+      sanitized = `+${sanitized.slice(2)}`;
+    }
+
+    if (!sanitized) {
+      this.phonePrefixError = 'Telephone obligatoire.';
+      return false;
+    }
+
+    if (sanitized.startsWith('+')) {
+      if (!sanitized.startsWith(selectedDialCode)) {
+        const detectedCountry = COUNTRIES.find(
+          (country) => country.code !== this.model.code_pays && sanitized.startsWith(country.dialCode)
+        );
+
+        this.phonePrefixError = detectedCountry
+          ? `Le numero commence par ${detectedCountry.dialCode} (${detectedCountry.name}) mais le pays selectionne est ${selectedCountry} (${selectedDialCode}).`
+          : `Le numero doit commencer par ${selectedDialCode} pour le pays selectionne (${selectedCountry}).`;
+        return false;
+      }
+
+      this.model.phone = sanitized;
+      this.phonePrefixError = null;
+      return true;
+    }
+
+    if (sanitized.startsWith(selectedDialDigits)) {
+      this.model.phone = `+${sanitized}`;
+      this.phonePrefixError = null;
+      return true;
+    }
+
+    const detectedWithoutPlus = COUNTRIES.find((country) => {
+      if (country.code === this.model.code_pays) return false;
+      const dialDigits = country.dialCode.replace('+', '');
+      return sanitized.startsWith(dialDigits);
+    });
+
+    if (detectedWithoutPlus) {
+      this.phonePrefixError = `Le numero commence par ${detectedWithoutPlus.dialCode} (${detectedWithoutPlus.name}). Selectionnez ce pays ou corrigez le prefixe.`;
+      return false;
+    }
+
+    this.model.phone = `${selectedDialCode}${sanitized}`;
+    this.phonePrefixError = null;
+    return true;
   }
 }
