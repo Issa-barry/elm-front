@@ -35,7 +35,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class="card h-full">
-                <span class="font-semibold text-lg">Employes CICD</span>
+                <span class="font-semibold text-lg">Utilisateurs</span>
                 <div class="flex justify-between items-start mt-4">
                     <div class="w-6/12">
                         <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">45</span>
@@ -60,7 +60,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="col-span-12 md:col-span-6 xl:col-span-3">
             <div class="card h-full">
-                <span class="font-semibold text-lg">VÃ©hicules</span>
+                <span class="font-semibold text-lg">Véhicules</span>
                 <div class="flex justify-between items-start mt-4">
                     <div class="w-6/12">
                         <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">360</span>
