@@ -3792,7 +3792,7 @@ var appRoutes = [
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-HJ7WA4BL.js"),
+        loadChildren: () => import("./chunk-P2XHDO36.js"),
         data: { breadcrumb: "packings" }
       },
       {

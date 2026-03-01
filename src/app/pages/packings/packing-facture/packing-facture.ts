@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 
-import { MODE_PAIEMENT_LABELS, Packing, Versement } from '@/models/packing.model';
+import { MODE_PAIEMENT_LABELS, ModePaiement, Packing, StoreVersementDto, Versement } from '@/models/packing.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { PackingService } from '@/services/packing/packing.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
@@ -12,15 +16,32 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
 @Component({
   selector: 'app-packing-facture',
   standalone: true,
-  imports: [CommonModule, ToastModule, PhoneFormatPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ToastModule,
+    ButtonModule,
+    InputNumberModule,
+    SelectModule,
+    PhoneFormatPipe,
+  ],
   providers: [MessageService],
   templateUrl: './packing-facture.html',
   styleUrl: './packing-facture.scss',
 })
 export class PackingFacture implements OnInit {
   loading = false;
+  encaissementSaving = false;
   packing: Packing | null = null;
   versements: Versement[] = [];
+  encaissementMontant: number | null = null;
+  encaissementMode: ModePaiement = 'especes';
+  readonly modesPaiement: Array<{ label: string; value: ModePaiement }> = [
+    { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
+    { label: MODE_PAIEMENT_LABELS.mobile_money, value: 'mobile_money' },
+    { label: MODE_PAIEMENT_LABELS.virement, value: 'virement' },
+    { label: MODE_PAIEMENT_LABELS.cheque, value: 'cheque' },
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -122,6 +143,26 @@ export class PackingFacture implements OnInit {
     return this.packing?.notes?.trim() || '-';
   }
 
+  get totalEspeces(): number {
+    return this.sumVersementsByMode('especes');
+  }
+
+  get totalMobile(): number {
+    return this.sumVersementsByMode('mobile_money');
+  }
+
+  get totalBanque(): number {
+    return this.sumVersementsByMode('virement') + this.sumVersementsByMode('cheque');
+  }
+
+  get totalEncaisse(): number {
+    return this.versements.reduce((sum, versement) => sum + (versement.montant || 0), 0);
+  }
+
+  get canPay(): boolean {
+    return !this.loading && !this.encaissementSaving && this.resteAPayer > 0;
+  }
+
   formatAmount(value: number): string {
     return `${new Intl.NumberFormat('fr-FR', {
       style: 'decimal',
@@ -130,11 +171,63 @@ export class PackingFacture implements OnInit {
     }).format(value)} FG`;
   }
 
+  payer(): void {
+    if (!this.packing || !this.canPay) return;
+    if (!this.encaissementMontant || this.encaissementMontant <= 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Montant requis',
+        detail: 'Saisissez un montant valide.',
+        life: 3000,
+      });
+      return;
+    }
+
+    if (this.encaissementMontant > this.resteAPayer) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Montant invalide',
+        detail: 'Le montant depasse le reste a payer.',
+        life: 3000,
+      });
+      return;
+    }
+
+    const dto: StoreVersementDto = {
+      montant: this.encaissementMontant,
+      date_versement: this.formatApiDate(new Date()),
+      mode_paiement: this.encaissementMode,
+    };
+
+    this.encaissementSaving = true;
+    this.packingService.createVersement(this.packing.id, dto).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: `Versement de ${this.formatAmount(dto.montant)} enregistre.`,
+          life: 3000,
+        });
+        this.loadPacking(this.packing!.id);
+      },
+      error: (error) => {
+        this.encaissementSaving = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: error?.error?.message || "Impossible d'enregistrer le versement.",
+          life: 4000,
+        });
+      },
+    });
+  }
+
   private loadPacking(id: number): void {
     this.loading = true;
     this.packingService.getPacking(id).subscribe({
       next: (response) => {
         this.packing = response.data;
+        this.syncEncaissementDefaults();
         this.loadVersements(id);
       },
       error: () => {
@@ -154,12 +247,35 @@ export class PackingFacture implements OnInit {
       next: (response) => {
         this.versements = response.data?.versements || [];
         this.loading = false;
+        this.encaissementSaving = false;
+        this.syncEncaissementDefaults();
       },
       error: () => {
         this.versements = [];
         this.loading = false;
+        this.encaissementSaving = false;
+        this.syncEncaissementDefaults();
       },
     });
+  }
+
+  private syncEncaissementDefaults(): void {
+    const restant = this.resteAPayer;
+
+    if (restant <= 0) {
+      this.encaissementMontant = null;
+      return;
+    }
+
+    if (this.encaissementMontant == null || this.encaissementMontant <= 0 || this.encaissementMontant > restant) {
+      this.encaissementMontant = restant;
+    }
+  }
+
+  private sumVersementsByMode(mode: ModePaiement): number {
+    return this.versements
+      .filter((versement) => versement.mode_paiement === mode)
+      .reduce((sum, versement) => sum + (versement.montant || 0), 0);
   }
 
   private formatDateDisplay(dateValue: string | Date | null | undefined): string {
@@ -174,6 +290,13 @@ export class PackingFacture implements OnInit {
     if (Number.isNaN(date.getTime())) return '-';
 
     return date.toLocaleDateString('fr-FR');
+  }
+
+  private formatApiDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
 }
