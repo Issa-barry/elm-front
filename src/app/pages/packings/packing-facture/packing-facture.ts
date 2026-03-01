@@ -226,6 +226,10 @@ export class PackingFacture implements OnInit {
     const pdf = await this.buildInvoicePdf();
     if (!pdf) return;
 
+    if (typeof pdf.autoPrint === 'function') {
+      pdf.autoPrint();
+    }
+
     const blob = pdf.output('blob');
     const url = URL.createObjectURL(blob);
     const printWindow = window.open(url, '_blank');
@@ -240,6 +244,19 @@ export class PackingFacture implements OnInit {
       });
       return;
     }
+
+    const triggerPrint = () => {
+      try {
+        printWindow.focus();
+        printWindow.print();
+      } catch {
+        // Certains navigateurs bloquent l'appel direct: le PDF reste ouvert pour impression manuelle.
+      }
+    };
+
+    // Tente de declencher automatiquement le dialogue d'impression.
+    setTimeout(triggerPrint, 250);
+    setTimeout(triggerPrint, 1200);
 
     // Nettoyage du blob URL apres ouverture de l'aperçu PDF.
     setTimeout(() => URL.revokeObjectURL(url), 60_000);

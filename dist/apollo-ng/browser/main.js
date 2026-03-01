@@ -3805,7 +3805,7 @@ var appRoutes = [
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-YQSCQ4RC.js"),
+        loadChildren: () => import("./chunk-6L6EDQDX.js"),
         data: { breadcrumb: "packings" }
       },
       {

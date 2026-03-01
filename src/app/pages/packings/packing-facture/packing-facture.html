@@ -6,7 +6,7 @@
             pButton
             type="button"
             icon="pi pi-arrows-h"
-            severity="success"
+            severity="primary"
             [outlined]="true"
             [rounded]="true"
             pTooltip="Fermer/Ouvrir menu"
@@ -17,7 +17,7 @@
             pButton
             type="button"
             icon="pi pi-download"
-            severity="success"
+            severity="primary"
             [outlined]="true"
             [rounded]="true"
             pTooltip="Telecharger la facture"
@@ -28,7 +28,7 @@
             pButton
             type="button"
             icon="pi pi-print"
-            severity="success"
+            severity="primary"
             [rounded]="true"
             pTooltip="Imprimer la facture"
             tooltipPosition="top"
@@ -279,7 +279,7 @@
             </div>
         </div>
 
-        <button pButton class="w-full" severity="contrast" [disabled]="!canPay" [loading]="encaissementSaving" (click)="payer()">
+        <button pButton class="w-full" severity="primary" [disabled]="!canPay" [loading]="encaissementSaving" (click)="payer()">
             <span pButtonLabel>Payer</span>
         </button>
     </div>
