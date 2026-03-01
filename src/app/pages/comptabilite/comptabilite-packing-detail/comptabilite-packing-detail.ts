@@ -138,7 +138,7 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
   ) {
     this.canReadVersement = this.authService.hasPermission('versements.read');
     this.canCreateVersement = this.authService.hasPermission('versements.create');
-    this.canDeleteVersement = this.authService.hasPermission('versements.delete');
+    this.canDeleteVersement = false;
 
     effect(() => {
       this.usineContext.currentUsineId();
@@ -329,6 +329,7 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
   }
 
   confirmDeleteVersement(packingId: number, versement: Versement) {
+    if (!this.canDeleteVersement) return;
     this.confirmationService.confirm({
       message: `Supprimer le versement de ${this.formatCurrency(versement.montant)} ?`,
       header: 'Confirmation',

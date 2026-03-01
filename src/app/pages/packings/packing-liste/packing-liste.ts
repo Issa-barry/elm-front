@@ -38,6 +38,7 @@ import { AuthService } from '@/services/auth/auth.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { ComptabilitePackingPaiement, PaiementPayload } from '@/pages/comptabilite/components/comptabilite-packing-paiement/comptabilite-packing-paiement';
+import { ComptabiliteHistoriqueVersements } from '@/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements';
 
 interface ModePaiementOption {
   label: string;
@@ -71,6 +72,7 @@ interface ModePaiementOption {
     InputNumberModule,
     TextareaModule,
     ComptabilitePackingPaiement,
+    ComptabiliteHistoriqueVersements,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -119,6 +121,7 @@ export class PackingListe implements OnInit {
   historiqueDialog = false;
   historiqueData: VersementIndexResponse | null = null;
   historiqueLoading = false;
+  mobileHistoriqueVisible = false;
 
   // Slide-over paiement mobile
   mobilePaiementVisible = false;
@@ -169,7 +172,7 @@ export class PackingListe implements OnInit {
     this.canDelete = this.authService.hasPermission('packings.delete');
     this.canReadVersement = this.authService.hasPermission('versements.read');
     this.canCreateVersement = this.authService.hasPermission('versements.create');
-    this.canDeleteVersement = this.authService.hasPermission('versements.delete');
+    this.canDeleteVersement = false;
     this.skeletonCols = this.hasActionsColumn
       ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
       : [1, 2, 3, 4, 5, 6, 7, 8];
@@ -230,6 +233,7 @@ export class PackingListe implements OnInit {
   }
 
   goEdit(packing: Packing): void {
+    if (!this.canEditPacking(packing)) return;
     this.router.navigate(['/packings/packings-edit', packing.id]);
   }
 
@@ -355,6 +359,10 @@ export class PackingListe implements OnInit {
     return packing.statut !== 'annulee' && (packing.montant_restant ?? 0) > 0;
   }
 
+  canEditPacking(packing: Packing): boolean {
+    return this.canUpdate && packing.statut === 'impayee';
+  }
+
   openVersement(packing: Packing): void {
     this.selectedPacking = packing;
     this.versementDialog = true;
@@ -419,7 +427,11 @@ export class PackingListe implements OnInit {
   }
 
   openHistorique(packing: Packing): void {
-    this.historiqueDialog = true;
+    if (this.isMobile) {
+      this.mobileHistoriqueVisible = true;
+    } else {
+      this.historiqueDialog = true;
+    }
     this.historiqueLoading = true;
     this.historiqueData = null;
 
@@ -437,11 +449,23 @@ export class PackingListe implements OnInit {
         });
         this.historiqueLoading = false;
         this.historiqueDialog = false;
+        this.mobileHistoriqueVisible = false;
       },
     });
   }
 
+  closeMobileHistorique(): void {
+    this.mobileHistoriqueVisible = false;
+    this.historiqueLoading = false;
+    this.historiqueData = null;
+  }
+
+  onMobileHistoriqueDeleteVersement(versement: Versement): void {
+    this.confirmDeleteVersement(versement);
+  }
+
   confirmDeleteVersement(versement: Versement): void {
+    if (!this.canDeleteVersement) return;
     if (!this.historiqueData) return;
     const packingId = this.historiqueData.packing.id;
     this.confirmationService.confirm({
