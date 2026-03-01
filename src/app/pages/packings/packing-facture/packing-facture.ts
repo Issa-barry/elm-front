@@ -245,6 +245,10 @@ export class PackingFacture implements OnInit {
     this.layoutService.onMenuToggle();
   }
 
+  goBack(): void {
+    this.router.navigate(['/packings']);
+  }
+
   async downloadInvoice(): Promise<void> {
     const pdf = await this.buildInvoicePdf();
     if (!pdf) return;

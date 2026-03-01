@@ -1,7 +1,23 @@
 <p-toast position="top-right" appendTo="body" [baseZIndex]="1100" [preventOpenDuplicates]="true" />
 
-<div class="packing-facture-actions w-full flex justify-end mb-4">
-    <div class="flex items-center gap-3">
+<div class="packing-facture-topbar">
+    <header class="packing-facture-mobile-header">
+        <button
+            pButton
+            pRipple
+            type="button"
+            icon="pi pi-arrow-left"
+            class="p-button-rounded p-button-text packing-facture-mobile-back"
+            aria-label="Retour aux packings"
+            (click)="goBack()"
+        ></button>
+        <div class="packing-facture-mobile-title-wrap">
+            <h1 class="packing-facture-mobile-title">Facture packing</h1>
+            <p class="packing-facture-mobile-subtitle">{{ factureNumero }}</p>
+        </div>
+    </header>
+
+    <div class="packing-facture-actions">
         <button
             pButton
             type="button"
@@ -9,6 +25,7 @@
             severity="primary"
             [outlined]="true"
             [rounded]="true"
+            class="packing-facture-desktop-only"
             pTooltip="Fermer/Ouvrir menu"
             tooltipPosition="top"
             (click)="toggleSidebar()"
