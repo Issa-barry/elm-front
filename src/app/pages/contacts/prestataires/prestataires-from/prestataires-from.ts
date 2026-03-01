@@ -1,33 +1,22 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { Select } from 'primeng/select';
-import { InputText } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { FileUploadModule } from 'primeng/fileupload';
-import { InputGroupAddon } from 'primeng/inputgroupaddon';
-import { ButtonModule } from 'primeng/button';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { RippleModule } from 'primeng/ripple';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
-import { Prestataire, PRESTATAIRE_TYPES } from '@/models/prestataire.model';
+import { ButtonModule } from 'primeng/button';
+import { FileUploadModule } from 'primeng/fileupload';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputText } from 'primeng/inputtext';
+import { RippleModule } from 'primeng/ripple';
+import { Select } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+
 import { COUNTRIES } from '@/models/country.model';
+import { Prestataire, PRESTATAIRE_TYPES } from '@/models/prestataire.model';
 
 @Component({
   selector: 'app-prestataires-from',
   standalone: true,
-  imports: [
-    CommonModule,
-    Select,
-    InputText,
-    TextareaModule,
-    FileUploadModule,
-    InputGroupAddon,
-    ButtonModule,
-    InputGroupModule,
-    RippleModule,
-    FormsModule
-  ],
+  imports: [CommonModule, Select, InputText, TextareaModule, FileUploadModule, ButtonModule, InputGroupModule, RippleModule, FormsModule],
   templateUrl: './prestataires-from.html',
   styleUrl: './prestataires-from.scss',
 })
@@ -42,151 +31,206 @@ export class PrestatairesFrom implements OnInit, OnChanges {
   submitted = false;
   isEditing = false;
   model: Partial<Prestataire> = {};
-  type_piece_identite: any[] = [];
+  type_piece_identite: Array<{ name: string; code: string }> = [];
   prestataireTypes = PRESTATAIRE_TYPES;
-  
-  // Validation du tÃƒÂ©lÃƒÂ©phone
   phoneError: string | null = null;
-  phoneCountry: string = 'GN'; // GuinÃƒÂ©e par dÃƒÂ©faut
-
-  // Liste des pays pour le sÃƒÂ©lecteur
+  phoneCountry = 'GN';
   countries = COUNTRIES;
 
   ngOnInit() {
     this.type_piece_identite = [
-      { name: "Carte d'identitÃƒÂ©", code: 'CI' },
-      { name: 'Passport', code: 'PASSPORT' },
-      { name: 'Permis de conduire', code: 'PERMIS' }
+      { name: "Carte d'identite", code: 'CI' },
+      { name: 'Passeport', code: 'PASSPORT' },
+      { name: 'Permis de conduire', code: 'PERMIS' },
     ];
-
     this.initializeModel();
   }
 
-   ngOnChanges(changes: SimpleChanges) {
-  // VÃƒÂ©rifier si initialData a changÃƒÂ© et n'est pas la premiÃƒÂ¨re initialisation vide
-  if (changes['initialData']) {
-    const change = changes['initialData'];
-    
-    // Si on a des donnÃƒÂ©es (et que ce n'est pas undefined/null)
-    if (change.currentValue && Object.keys(change.currentValue).length > 0) {
-      console.log("NgOnChanges - Nouvelles donnÃƒÂ©es:", change.currentValue);
-      this.initializeModel();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['initialData']) {
+      const nextValue = changes['initialData'].currentValue;
+      if (nextValue && Object.keys(nextValue).length > 0) {
+        this.initializeModel();
+      }
     }
   }
-}
 
-private initializeModel() {
-  console.log("InitializeModel appelÃƒÂ© avec:", this.initialData);
-  
-  // CrÃƒÂ©er une copie profonde des donnÃƒÂ©es
-  this.model = this.initialData ? { ...this.initialData } : {};
+  private initializeModel() {
+    this.model = this.initialData ? { ...this.initialData } : {};
 
-  if (this.mode === 'create' && !this.model.ville?.trim()) {
-    this.model.ville = 'Conakry';
+    if (this.mode === 'create' && !this.model.ville?.trim()) {
+      this.model.ville = 'Conakry';
+    }
+
+    this.isEditing = this.mode === 'create' || (this.mode === 'edit' && !!this.initialData);
+
+    if (this.model.code_pays) {
+      this.phoneCountry = this.model.code_pays;
+    } else if (this.model.phone) {
+      this.detectPhoneCountry(this.model.phone);
+    }
+
+    this.model.phone = this.extractLocalPhone(this.model.phone, this.phoneCountry);
+    this.model.code_pays = this.phoneCountry;
+    this.model.pays = this.getCountryName(this.phoneCountry);
+    this.submitted = false;
+    this.phoneError = null;
   }
-  
-  console.log("Model aprÃƒÂ¨s initialisation:", this.model);
 
-  // En mode crÃƒÂ©ation ou ÃƒÂ©dition avec donnÃƒÂ©es, activer l'ÃƒÂ©dition
-  if (this.mode === 'create') {
-    this.isEditing = true;
-  } else if (this.mode === 'edit' && this.initialData) {
-    this.isEditing = true;
-  }
-
-  // DÃƒÂ©tecter le pays du numÃƒÂ©ro existant ou utiliser celui sauvegardÃƒÂ©
-  if (this.model.code_pays) {
-    this.phoneCountry = this.model.code_pays;
-    console.log("Pays dÃƒÂ©tectÃƒÂ© depuis code_pays:", this.phoneCountry);
-  } else if (this.model.phone) {
-    this.detectPhoneCountry(this.model.phone);
-    console.log("Pays dÃƒÂ©tectÃƒÂ© depuis phone:", this.phoneCountry);
-  }
-  
-  // RÃƒÂ©initialiser l'ÃƒÂ©tat de validation
-  this.submitted = false;
-  this.phoneError = null;
-}
-
-  // DÃƒÂ©tecter le pays depuis le numÃƒÂ©ro de tÃƒÂ©lÃƒÂ©phone
-  detectPhoneCountry(phone: string) {
+  private detectPhoneCountry(phone: string) {
     try {
-      const phoneNumber = parsePhoneNumber(phone);
-      if (phoneNumber && phoneNumber.country) {
-        this.phoneCountry = phoneNumber.country;
+      const parsed = parsePhoneNumber(phone);
+      if (parsed?.country) {
+        this.phoneCountry = parsed.country;
       }
-    } catch (error) {
-      // Si le parsing ÃƒÂ©choue, on garde le pays par dÃƒÂ©faut
+    } catch {
+      // keep selected default country
     }
   }
 
-  // Valider le numÃƒÂ©ro de tÃƒÂ©lÃƒÂ©phone
-  validatePhone(): boolean {
-    if (!this.model.phone?.trim()) {
-      this.phoneError = 'TÃƒÂ©lÃƒÂ©phone obligatoire.';
-      return false;
-    }
-
-    try {
-      // VÃƒÂ©rifier si le numÃƒÂ©ro est valide pour le pays sÃƒÂ©lectionnÃƒÂ©
-      const isValid = isValidPhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
-      
-      if (!isValid) {
-        this.phoneError = `NumÃƒÂ©ro invalide pour ${this.getCountryName(this.phoneCountry)}.`;
-        return false;
-      }
-
-      // Formater le numÃƒÂ©ro en format international
-      const phoneNumber = parsePhoneNumber(this.model.phone, this.phoneCountry as CountryCode);
-      if (phoneNumber) {
-        this.model.phone = phoneNumber.formatInternational();
-        this.model.code_pays = this.phoneCountry;
-        this.model.pays = this.getCountryName(this.phoneCountry);
-        this.phoneError = null;
-        return true;
-      }
-
-      this.phoneError = 'Format de numÃƒÂ©ro invalide.';
-      return false;
-    } catch (error) {
-      this.phoneError = 'Format de numÃƒÂ©ro invalide.';
-      return false;
-    }
+  private sanitizePhoneDigits(value: string | null | undefined): string {
+    return (value || '').replace(/\D/g, '');
   }
 
-  // Obtenir le nom du pays
-  getCountryName(code: string): string {
-    const country = this.countries.find(c => c.code === code);
-    return country ? country.name : code;
-  }
-
-  // Obtenir l'indicatif du pays sÃƒÂ©lectionnÃƒÂ©
-  getSelectedCountryDialCode(): string {
-    const country = this.countries.find(c => c.code === this.phoneCountry);
+  private getDialCode(code: string): string {
+    const country = this.countries.find((c) => c.code === code);
     return country ? country.dialCode : '';
   }
 
-  // Obtenir le drapeau du pays
+  private getDialDigits(code: string): string {
+    return this.getDialCode(code).replace('+', '');
+  }
+
+  private extractLocalPhone(phone: string | null | undefined, countryCode: string): string {
+    if (!phone) {
+      return '';
+    }
+
+    const raw = String(phone).trim();
+    if (!raw) {
+      return '';
+    }
+
+    try {
+      const parsed = parsePhoneNumber(raw);
+      if (parsed?.nationalNumber) {
+        return this.sanitizePhoneDigits(parsed.nationalNumber);
+      }
+    } catch {
+      // fallback below
+    }
+
+    const digits = this.sanitizePhoneDigits(raw);
+    const dialDigits = this.getDialDigits(countryCode);
+    if (dialDigits && digits.startsWith(dialDigits)) {
+      return digits.slice(dialDigits.length);
+    }
+    return digits;
+  }
+
+  private toInternationalPhone(localDigits: string): string {
+    return `${this.getSelectedCountryDialCode()}${localDigits}`;
+  }
+
+  // Phone input is local-only digits (without dial code shown in country selector)
+  validatePhone(): boolean {
+    const localDigits = this.sanitizePhoneDigits(this.model.phone);
+    this.model.phone = localDigits;
+
+    if (!localDigits) {
+      this.phoneError = 'Telephone obligatoire.';
+      return false;
+    }
+
+    const selectedDialCode = this.getSelectedCountryDialCode();
+    const selectedCountry = this.getCountryName(this.phoneCountry);
+    if (!selectedDialCode) {
+      this.phoneError = 'Veuillez selectionner un pays.';
+      return false;
+    }
+
+    const internationalPhone = this.toInternationalPhone(localDigits);
+    const isValid = isValidPhoneNumber(internationalPhone, this.phoneCountry as CountryCode);
+    if (!isValid) {
+      this.phoneError = `Numero invalide pour ${selectedCountry}.`;
+      return false;
+    }
+
+    this.phoneError = null;
+    this.model.code_pays = this.phoneCountry;
+    this.model.pays = selectedCountry;
+    return true;
+  }
+
+  getCountryName(code: string): string {
+    const country = this.countries.find((c) => c.code === code);
+    return country ? country.name : code;
+  }
+
+  getSelectedCountryDialCode(): string {
+    return this.getDialCode(this.phoneCountry);
+  }
+
   getCountryFlag(code: string): string {
-    const country = this.countries.find(c => c.code === code);
+    const country = this.countries.find((c) => c.code === code);
     return country ? country.flag : '';
   }
 
-  // Ãƒâ€°vÃƒÂ©nement dÃƒÂ©clenchÃƒÂ© lors du changement de pays
   onCountryChange() {
+    this.model.code_pays = this.phoneCountry;
+    this.model.pays = this.getCountryName(this.phoneCountry);
+
     if (this.model.phone) {
       this.validatePhone();
+      return;
     }
+
+    this.phoneError = null;
   }
 
-  // Ãƒâ€°vÃƒÂ©nement dÃƒÂ©clenchÃƒÂ© lors de la saisie du tÃƒÂ©lÃƒÂ©phone
-  onPhoneInput() {
+  onPhoneInput(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const rawValue = input ? input.value : String(this.model.phone || '');
+    const normalized = this.sanitizePhoneDigits(rawValue);
+
+    if (input && input.value !== normalized) {
+      input.value = normalized;
+    }
+
+    this.model.phone = normalized;
+
     if (this.submitted) {
       this.validatePhone();
+    } else if (!normalized) {
+      this.phoneError = null;
     }
   }
 
-  // Ãƒâ€°vÃƒÂ©nement dÃƒÂ©clenchÃƒÂ© lors de la perte de focus du champ tÃƒÂ©lÃƒÂ©phone
+  onPhoneBeforeInput(event: InputEvent) {
+    if (!event.data) {
+      return;
+    }
+
+    if (/\D/.test(event.data)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhoneKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'];
+    if (allowedKeys.includes(event.key)) {
+      return;
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   onPhoneBlur() {
     if (this.model.phone?.trim()) {
       this.validatePhone();
@@ -194,12 +238,10 @@ private initializeModel() {
   }
 
   isValid(): boolean {
-    // Type est toujours obligatoire
     if (!this.model.type) {
       return false;
     }
 
-    // Si fournisseur: raison_sociale obligatoire, nom/prÃƒÂ©nom non requis
     if (this.model.type === 'fournisseur') {
       const fournisseurValidation = !!(
         this.model.raison_sociale?.trim() &&
@@ -212,7 +254,6 @@ private initializeModel() {
         return false;
       }
     } else {
-      // Autres types: nom et prÃƒÂ©nom obligatoires
       const basicValidation = !!(
         this.model.nom?.trim() &&
         this.model.prenom?.trim() &&
@@ -243,16 +284,34 @@ private initializeModel() {
     } else if (this.model.phone) {
       this.detectPhoneCountry(this.model.phone);
     }
+    this.model.phone = this.extractLocalPhone(this.model.phone, this.phoneCountry);
   }
 
   onSubmit() {
     this.submitted = true;
-    
     if (!this.isValid()) {
       return;
     }
 
-    this.submitForm.emit({ ...this.model });
+    const localDigits = this.sanitizePhoneDigits(this.model.phone);
+    const internationalPhone = this.toInternationalPhone(localDigits);
+
+    let normalizedPhone = internationalPhone;
+    try {
+      const parsed = parsePhoneNumber(internationalPhone, this.phoneCountry as CountryCode);
+      if (parsed?.number) {
+        normalizedPhone = parsed.number;
+      }
+    } catch {
+      // keep built international phone
+    }
+
+    this.submitForm.emit({
+      ...this.model,
+      phone: normalizedPhone,
+      code_pays: this.phoneCountry,
+      pays: this.getCountryName(this.phoneCountry),
+    });
   }
 
   onCancel() {
@@ -267,15 +326,6 @@ private initializeModel() {
     if (this.mode === 'create') {
       return 'Ajout prestataire';
     }
-
-    const reference = this.model.reference?.trim();
-return reference
-      ? `Modification prestataire`
-      : 'Modification prestataire';
-    //pour afficher la reference
-    // return reference
-    //   ? `Modification prestataire : ${reference}`
-    //   : 'Modification prestataire';
+    return 'Modification prestataire';
   }
-
 }

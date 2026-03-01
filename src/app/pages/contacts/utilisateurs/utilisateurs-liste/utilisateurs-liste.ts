@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,7 +18,9 @@ import { MenuModule } from 'primeng/menu';
 import { User } from '@/models/user.model';
 import { UserService } from '@/services/users/users.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { UtilisateursViewDialog } from '../utilisateurs-view-dialog/utilisateurs-view-dialog';
 
 @Component({
   selector: 'app-utilisateurs-liste',
@@ -39,7 +41,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    UtilisateursViewDialog,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -49,11 +52,16 @@ export class UtilisateursListe implements OnInit, OnDestroy {
   loading = false;
   selectedStatus: boolean | null = null;
 
+  viewDialogVisible = false;
+  viewUserId: number | null = null;
+  viewDialogMode: 'create' | 'edit' = 'edit';
+
   mobileSearchTerm = '';
   readonly mobilePageSize = 10;
   mobileVisibleCount = this.mobilePageSize;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'utilisateurs-mobile-pwa';
+  private readyForUsineReload = false;
 
   statusOptions = [
     { label: 'Actif', value: true },
@@ -76,14 +84,22 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
+    private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('users.create');
     this.canUpdate = this.authService.hasPermission('users.update');
     this.canDelete = this.authService.hasPermission('users.delete');
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.loadUsers();
+    });
   }
 
   ngOnInit() {
+    this.readyForUsineReload = true;
     this.loadUsers();
     this.syncMobilePwaMode();
   }
@@ -184,17 +200,43 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     this.loadUsers();
   }
 
-  navigateToCreate() {
-    this.router.navigate(['contacts/utilisateurs/new']);
+  onRowSelect(event: any) {
+    if (!this.canUpdate) return;
+    this.openEditDialog(event.data.id);
   }
 
-  onRowSelect(event: any) {
-    this.router.navigate(['contacts/utilisateurs/edit', event.data.id]);
+  openViewDialog(event: Event, userId: number) {
+    event.stopPropagation();
+    this.openEditDialog(userId);
+  }
+
+  openCreateDialog() {
+    if (!this.canCreate) return;
+    this.viewDialogMode = 'create';
+    this.viewUserId = null;
+    this.viewDialogVisible = true;
+  }
+
+  openEditDialog(userId: number) {
+    if (!this.canUpdate) return;
+    this.viewDialogMode = 'edit';
+    this.viewUserId = userId;
+    this.viewDialogVisible = true;
+  }
+
+  onDialogUserSaved(event: { user: User; mode: 'create' | 'edit' }) {
+    this.loadUsers();
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Succes',
+      detail: event.mode === 'create' ? 'Utilisateur cree avec succes' : 'Utilisateur modifie avec succes',
+    });
   }
 
   goToEdit(event: Event, userId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/utilisateurs/edit/', userId]);
+    this.openEditDialog(userId);
   }
 
   toggleStatus(event: Event, userId: number) {

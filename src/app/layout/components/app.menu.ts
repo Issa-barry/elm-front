@@ -34,13 +34,27 @@ export class AppMenu {
 
     private buildMenuModel(permissions: string[]) {
         return [
-            {
-                items: [],
+           {
+                label: 'Dashboards',
+                icon: 'pi pi-home',
+                items: [
+                    {
+                        label: 'Statistiques',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/'],
+                    },
+                    // {
+                    //     label: 'Banking',
+                    //     icon: 'pi pi-fw pi-image',
+                    //     routerLink: ['/dashboard-banking'],
+                    // },
+                ],
             },
             {
                 label: 'Modules',
                 icon: 'pi pi-th-large',
                 items: [
+                    
                     // Ventes
                     // {
                     //     label: 'Ventes',
@@ -49,62 +63,62 @@ export class AppMenu {
                     //     visible: this.hasAnyPermission(permissions, ['commandes.read']),
                     // },
 
-                    // Comptabilite
-                    {
-                        label: 'Comptabilite',
-                        icon: 'pi pi-fw pi-calculator',
-                        visible: this.hasAnyPermission(permissions, [
-                            'commissions.read',
-                            'commandes.read',
-                            'facture-packings.read',
-                            'facture-packing.read',
-                            'facture_packings.read',
-                            'facture_packing.read',
-                            'facturepackings.read',
-                            'facturepacking.read',
-                            'factures-livraisons.read',
-                            'encaissements.read',
-                        ]),
-                        items: [
-                        //     {
-                        //         label: 'Commissions',
-                        //         icon: 'pi pi-fw pi-percentage',
-                        //         routerLink: ['/ventes/commissions'],
-                        //         visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
-                        //     },
-                        //     {
-                        //         label: 'Commissions 2',
-                        //         icon: 'pi pi-fw pi-percentage',
-                        //         routerLink: ['/ventes/commissions2'],
-                        //         visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
-                        //     },
-                        //     {
-                        //         label: 'Factures vente',
-                        //         icon: 'pi pi-fw pi-receipt',
-                        //         routerLink: ['/ventes/factures'],
-                        //         visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
-                        //     },
-                        //     {
-                        //         label: 'Factures vente liste 2',
-                        //         icon: 'pi pi-fw pi-receipt',
-                        //         routerLink: ['/ventes/factures-vente-liste2'],
-                        //         visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
-                        //     },
-                            {
-                                label: 'Facture packing',
-                                icon: 'pi pi-fw pi-box',
-                                routerLink: ['/comptabilite/comptabilite-packing-liste'],
-                                visible: this.hasAnyPermission(permissions, [
-                                    'facture-packings.read',
-                                    'facture-packing.read',
-                                    'facture_packings.read',
-                                    'facture_packing.read',
-                                    'facturepackings.read',
-                                    'facturepacking.read',
-                                ]),
-                            },
-                        ],
-                    },
+                    // // Comptabilite
+                    // {
+                    //     label: 'Comptabilite',
+                    //     icon: 'pi pi-fw pi-calculator',
+                    //     visible: this.hasAnyPermission(permissions, [
+                    //         'commissions.read',
+                    //         'commandes.read',
+                    //         'facture-packings.read',
+                    //         'facture-packing.read',
+                    //         'facture_packings.read',
+                    //         'facture_packing.read',
+                    //         'facturepackings.read',
+                    //         'facturepacking.read',
+                    //         'factures-livraisons.read',
+                    //         'encaissements.read',
+                    //     ]),
+                    //     items: [
+                    //     //     {
+                    //     //         label: 'Commissions',
+                    //     //         icon: 'pi pi-fw pi-percentage',
+                    //     //         routerLink: ['/ventes/commissions'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                    //     //     },
+                    //     //     {
+                    //     //         label: 'Commissions 2',
+                    //     //         icon: 'pi pi-fw pi-percentage',
+                    //     //         routerLink: ['/ventes/commissions2'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                    //     //     },
+                    //     //     {
+                    //     //         label: 'Factures vente',
+                    //     //         icon: 'pi pi-fw pi-receipt',
+                    //     //         routerLink: ['/ventes/factures'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                    //     //     },
+                    //     //     {
+                    //     //         label: 'Factures vente liste 2',
+                    //     //         icon: 'pi pi-fw pi-receipt',
+                    //     //         routerLink: ['/ventes/factures-vente-liste2'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                    //     //     },
+                    //         {
+                    //             label: 'Facture packing',
+                    //             icon: 'pi pi-fw pi-box',
+                    //             routerLink: ['/comptabilite/comptabilite-packing-liste'],
+                    //             visible: this.hasAnyPermission(permissions, [
+                    //                 'facture-packings.read',
+                    //                 'facture-packing.read',
+                    //                 'facture_packings.read',
+                    //                 'facture_packing.read',
+                    //                 'facturepackings.read',
+                    //                 'facturepacking.read',
+                    //             ]),
+                    //         },
+                    //     ],
+                    // },
 
                     // Packing
                     {

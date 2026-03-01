@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -17,11 +17,45 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
 
 import { PackingService } from '@/services/packing/packing.service';
-import { Packing, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
+import {
+  Packing,
+  PACKING_STATUT_LABELS,
+  PACKING_STATUT_SEVERITY,
+  PackingStatut,
+  PackingStatutSeverity,
+  ModePaiement,
+  MODE_PAIEMENT_LABELS,
+  StoreVersementDto,
+  VersementIndexResponse,
+  Versement,
+} from '@/models/packing.model';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { ComptabilitePackingPaiement, PaiementPayload } from '@/pages/comptabilite/components/comptabilite-packing-paiement/comptabilite-packing-paiement';
+import { ComptabiliteHistoriqueVersements } from '@/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements';
+
+interface ModePaiementOption {
+  label: string;
+  value: ModePaiement;
+}
+
+type QuickDateFilter =
+  | 'none'
+  | 'today'
+  | 'yesterday'
+  | 'this_week'
+  | 'last_week'
+  | 'this_month'
+  | 'last_month'
+  | 'this_year'
+  | 'last_year'
+  | 'last_n_days';
 
 @Component({
   selector: 'app-packing-liste',
@@ -46,6 +80,11 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     MenuModule,
     RippleModule,
     PhoneFormatPipe,
+    DialogModule,
+    InputNumberModule,
+    TextareaModule,
+    ComptabilitePackingPaiement,
+    ComptabiliteHistoriqueVersements,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -54,31 +93,88 @@ export class PackingListe implements OnInit {
   searchQuery = signal<string>('');
   selectedStatut = signal<PackingStatut | 'all'>('all');
   filterDateRange: Date[] | null = null;
+  selectedQuickDateFilter: QuickDateFilter = 'none';
+  lastNDaysValue: number | null = null;
   loading = false;
   canCreate = false;
+  canViewFacture = false;
   canUpdate = false;
   canDelete = false;
+  canReadVersement = false;
+  canCreateVersement = false;
+  canDeleteVersement = false;
+  private readonly mobileBreakpoint = 768;
 
   mobileFilterMenuItems: MenuItem[] = [];
+  skeletonCols: number[] = [];
+  private readyForUsineReload = false;
+
+  // Versement dialog
+  versementDialog = false;
+  selectedPacking: Packing | null = null;
+  versementData: {
+    montant: number | null;
+    date_versement: Date | null;
+    mode_paiement: ModePaiement;
+    notes: string;
+  } = {
+    montant: null,
+    date_versement: new Date(),
+    mode_paiement: 'especes',
+    notes: '',
+  };
+  versementSaving = false;
+  versementSubmitted = false;
+  modesPaiement: ModePaiementOption[] = [
+    { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
+    { label: MODE_PAIEMENT_LABELS.virement, value: 'virement' },
+    { label: MODE_PAIEMENT_LABELS.cheque, value: 'cheque' },
+    { label: MODE_PAIEMENT_LABELS.mobile_money, value: 'mobile_money' },
+  ];
+
+  // Historique dialog
+  historiqueDialog = false;
+  historiqueData: VersementIndexResponse | null = null;
+  historiqueLoading = false;
+  mobileHistoriqueVisible = false;
+
+  // Slide-over paiement mobile
+  mobilePaiementVisible = false;
+  mobilePaiementPacking: Packing | null = null;
+  mobilePaiementSaving = false;
 
   statutOptions = [
     { label: 'Tous les statuts', value: 'all' },
-    { label: 'À valider', value: 'a_valider' },
-    { label: 'Validé', value: 'valide' },
-    { label: 'Annulé', value: 'annule' },
+    { label: 'Impayee', value: 'impayee' },
+    { label: 'Partielle', value: 'partielle' },
+    { label: 'Payee', value: 'payee' },
+    { label: 'Annulee', value: 'annulee' },
+  ];
+
+  quickDateFilterOptions: Array<{ label: string; value: QuickDateFilter }> = [
+    { label: 'Aucun filtre date', value: 'none' },
+    { label: "Aujourd'hui", value: 'today' },
+    { label: 'Hier', value: 'yesterday' },
+    { label: 'Cette semaine', value: 'this_week' },
+    { label: 'Semaine derniere', value: 'last_week' },
+    { label: 'Mois en cours', value: 'this_month' },
+    { label: 'Mois dernier', value: 'last_month' },
+    { label: 'Annee en cours', value: 'this_year' },
+    { label: 'Annee derniere', value: 'last_year' },
+    { label: 'X derniers jours', value: 'last_n_days' },
   ];
 
   filteredPackings = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const list = this.packings();
     if (!query) return list;
-    return list.filter((p) => {
+    return list.filter((packing) => {
       const searchable = [
-        p.reference,
-        p.prestataire?.nom,
-        p.prestataire?.prenom,
-        p.prestataire?.phone,
-        this.getStatutLabel(p.statut),
+        packing.reference,
+        packing.prestataire?.nom,
+        packing.prestataire?.prenom,
+        packing.prestataire?.phone,
+        this.getStatutLabel(packing.statut),
       ]
         .filter(Boolean)
         .join(' ')
@@ -87,55 +183,172 @@ export class PackingListe implements OnInit {
     });
   });
 
+  get hasActionsColumn(): boolean {
+    return this.canViewFacture || this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
+  }
+
   constructor(
     private packingService: PackingService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
     private router: Router,
+    private usineContext: UsineContextService,
   ) {
     this.canCreate = this.authService.hasPermission('packings.create');
+    this.canViewFacture = this.authService.hasPermission('packings.read') || this.authService.hasPermission('packings.update');
     this.canUpdate = this.authService.hasPermission('packings.update');
     this.canDelete = this.authService.hasPermission('packings.delete');
+    this.canReadVersement = this.authService.hasPermission('versements.read');
+    this.canCreateVersement = this.authService.hasPermission('versements.create');
+    this.canDeleteVersement = false;
+    this.skeletonCols = this.hasActionsColumn
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      : [1, 2, 3, 4, 5, 6, 7, 8];
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.load();
+    });
   }
 
   ngOnInit(): void {
+    this.readyForUsineReload = true;
     this.load();
     this.mobileFilterMenuItems = [
-      { label: 'Tous',      icon: 'pi pi-list',         command: () => this.setStatutFilter('all') },
-      { label: 'À valider', icon: 'pi pi-clock',        command: () => this.setStatutFilter('a_valider') },
-      { label: 'Validé',    icon: 'pi pi-check-circle', command: () => this.setStatutFilter('valide') },
-      { label: 'Annulé',    icon: 'pi pi-times-circle', command: () => this.setStatutFilter('annule') },
+      { label: 'Tous', icon: 'pi pi-list', command: () => this.setStatutFilter('all') },
+      { label: 'Impayee', icon: 'pi pi-times-circle', command: () => this.setStatutFilter('impayee') },
+      { label: 'Partielle', icon: 'pi pi-clock', command: () => this.setStatutFilter('partielle') },
+      { label: 'Payee', icon: 'pi pi-check-circle', command: () => this.setStatutFilter('payee') },
+      { label: 'Annulee', icon: 'pi pi-ban', command: () => this.setStatutFilter('annulee') },
     ];
   }
 
-  goBack(): void { this.router.navigate(['/']); }
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
 
   load(): void {
     this.loading = true;
     const filters: Record<string, string> = {};
     const statut = this.selectedStatut();
     if (statut !== 'all') filters['statut'] = statut;
-    if (this.filterDateRange?.[0]) filters['date_debut'] = this.formatDate(this.filterDateRange[0]);
-    if (this.filterDateRange?.[1]) filters['date_fin'] = this.formatDate(this.filterDateRange[1]);
+    if (this.filterDateRange?.[0]) {
+      const startDate = this.filterDateRange[0];
+      const endDate = this.filterDateRange[1] ?? this.filterDateRange[0];
+      filters['date_debut'] = this.formatDate(startDate);
+      filters['date_fin'] = this.formatDate(endDate);
+    }
 
     this.packingService.getPackings(Object.keys(filters).length ? filters : undefined).subscribe({
       next: (response) => {
         const data = 'data' in response && Array.isArray(response.data)
           ? response.data
           : (response as any).data?.data ?? [];
-        this.packings.set(data);
+        this.packings.set(data as Packing[]);
         this.loading = false;
       },
       error: () => {
         this.loading = false;
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les packings.', life: 5000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les packings.',
+          life: 5000,
+        });
       },
     });
   }
 
-  goNew(): void { this.router.navigate(['/packings/packings-new']); }
-  goEdit(p: Packing): void { this.router.navigate(['/packings/packings-edit', p.id]); }
+  goNew(): void {
+    this.router.navigate(['/packings/packings-new']);
+  }
+
+  goEdit(packing: Packing): void {
+    if (!this.canEditPacking(packing)) return;
+    this.router.navigate(['/packings/packings-edit', packing.id]);
+  }
+
+  goFacture(packing: Packing): void {
+    if (!this.canViewFacture) return;
+    this.router.navigate(['/packings/packings-facture', packing.id]);
+  }
+
+  openVersementFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    if (this.isMobile) {
+      this.openMobilePaiement(packing);
+      return;
+    }
+    this.openVersement(packing);
+  }
+
+  openHistoriqueFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.openHistorique(packing);
+  }
+
+  goEditFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.goEdit(packing);
+  }
+
+  goFactureFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.goFacture(packing);
+  }
+
+  openMobilePaiement(packing: Packing): void {
+    this.mobilePaiementPacking = packing;
+    this.mobilePaiementVisible = true;
+  }
+
+  closeMobilePaiement(): void {
+    this.mobilePaiementVisible = false;
+    this.mobilePaiementPacking = null;
+    this.mobilePaiementSaving = false;
+  }
+
+  onMobilePay(payload: PaiementPayload): void {
+    if (!this.mobilePaiementPacking || this.mobilePaiementSaving) return;
+
+    this.mobilePaiementSaving = true;
+    const dto: StoreVersementDto = {
+      montant: payload.montant,
+      date_versement: this.formatDate(new Date()),
+      mode_paiement: payload.mode_paiement,
+    };
+
+    this.packingService.createVersement(this.mobilePaiementPacking.id, dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistre`,
+          life: 3000,
+        });
+        this.closeMobilePaiement();
+        if (response.data?.packing) {
+          this.packings.update((list) =>
+            list.map((p) => p.id === response.data.packing.id ? response.data.packing : p),
+          );
+        } else {
+          this.load();
+        }
+      },
+      error: (error) => {
+        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.mobilePaiementSaving = false;
+      },
+    });
+  }
 
   setStatutFilter(value: string): void {
     this.selectedStatut.set(value as PackingStatut | 'all');
@@ -143,37 +356,229 @@ export class PackingListe implements OnInit {
   }
 
   onDateRangeSelect(): void {
-    if (this.filterDateRange?.[1]) this.load();
+    this.selectedQuickDateFilter = 'none';
+    this.lastNDaysValue = null;
+    if (this.filterDateRange?.[0]) this.load();
+  }
+
+  onQuickDateFilterChange(value: QuickDateFilter): void {
+    this.selectedQuickDateFilter = value;
+
+    if (value === 'none') {
+      this.filterDateRange = null;
+      this.lastNDaysValue = null;
+      this.load();
+      return;
+    }
+
+    if (value === 'last_n_days') {
+      const nbDays = this.lastNDaysValue && this.lastNDaysValue > 0 ? this.lastNDaysValue : 7;
+      this.lastNDaysValue = nbDays;
+      this.applyLastNDaysFilter(nbDays);
+      return;
+    }
+
+    const [start, end] = this.getQuickDateRange(value);
+    this.filterDateRange = [start, end];
+    this.load();
+  }
+
+  onLastNDaysChange(value: number | null): void {
+    this.lastNDaysValue = value;
+    if (this.selectedQuickDateFilter !== 'last_n_days') return;
+    if (!value || value < 1) return;
+    this.applyLastNDaysFilter(value);
   }
 
   clearFilters(): void {
     this.selectedStatut.set('all');
     this.filterDateRange = null;
+    this.selectedQuickDateFilter = 'none';
+    this.lastNDaysValue = null;
     this.load();
   }
 
-  deletePacking(p: Packing): void {
+  hasActiveFilters(): boolean {
+    return !!this.filterDateRange || this.selectedStatut() !== 'all';
+  }
+
+  deletePacking(packing: Packing): void {
     this.confirmationService.confirm({
-      message: `Supprimer définitivement le packing <strong>${p.reference}</strong> ?`,
+      message: `Supprimer definitivement le packing <strong>${packing.reference}</strong> ?`,
       header: 'Supprimer le packing',
       icon: 'pi pi-trash',
       rejectButtonProps: { label: 'Annuler', severity: 'secondary', outlined: true },
       acceptButtonProps: { label: 'Supprimer', severity: 'danger' },
       accept: () => {
-        this.packingService.deletePacking(p.id).subscribe({
+        this.packingService.deletePacking(packing.id).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Supprimé', detail: `Packing ${p.reference} supprimé.`, life: 3000 });
-            this.packings.update(list => list.filter(x => x.id !== p.id));
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Supprime',
+              detail: `Packing ${packing.reference} supprime.`,
+              life: 3000,
+            });
+            this.packings.update((list) => list.filter((item) => item.id !== packing.id));
           },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message || 'Impossible de supprimer.', life: 5000 }),
+          error: (err) => this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err.error?.message || 'Impossible de supprimer.',
+            life: 5000,
+          }),
         });
       },
     });
   }
 
-  getInitials(p: Packing): string {
-    const prenom = p.prestataire?.prenom ?? '';
-    const nom = p.prestataire?.nom ?? '';
+  canPay(packing: Packing): boolean {
+    return packing.statut !== 'annulee' && (packing.montant_restant ?? 0) > 0;
+  }
+
+  canEditPacking(packing: Packing): boolean {
+    return this.canUpdate && packing.statut === 'impayee';
+  }
+
+  openVersement(packing: Packing): void {
+    this.selectedPacking = packing;
+    this.versementDialog = true;
+    this.versementSubmitted = false;
+    this.versementData = {
+      montant: packing.montant_restant,
+      date_versement: new Date(),
+      mode_paiement: 'especes',
+      notes: '',
+    };
+  }
+
+  hideVersementDialog(): void {
+    this.versementDialog = false;
+    this.selectedPacking = null;
+    this.versementSubmitted = false;
+  }
+
+  saveVersement(): void {
+    this.versementSubmitted = true;
+    if (!this.selectedPacking || !this.versementData.montant || !this.versementData.date_versement || this.versementSaving) {
+      return;
+    }
+    this.versementSaving = true;
+
+    const dto: StoreVersementDto = {
+      montant: this.versementData.montant,
+      date_versement: this.formatDate(this.versementData.date_versement),
+      mode_paiement: this.versementData.mode_paiement,
+      notes: this.versementData.notes || undefined,
+    };
+
+    this.packingService.createVersement(this.selectedPacking.id, dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistre`,
+          life: 3000,
+        });
+        this.versementSaving = false;
+        this.versementDialog = false;
+        if (response.data?.packing) {
+          this.packings.update((list) =>
+            list.map((p) => p.id === response.data.packing.id ? response.data.packing : p),
+          );
+        } else {
+          this.load();
+        }
+      },
+      error: (error) => {
+        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.versementSaving = false;
+      },
+    });
+  }
+
+  openHistorique(packing: Packing): void {
+    if (this.isMobile) {
+      this.mobileHistoriqueVisible = true;
+    } else {
+      this.historiqueDialog = true;
+    }
+    this.historiqueLoading = true;
+    this.historiqueData = null;
+
+    this.packingService.getVersements(packing.id).subscribe({
+      next: (response) => {
+        this.historiqueData = response.data;
+        this.historiqueLoading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les versements',
+          life: 3000,
+        });
+        this.historiqueLoading = false;
+        this.historiqueDialog = false;
+        this.mobileHistoriqueVisible = false;
+      },
+    });
+  }
+
+  closeMobileHistorique(): void {
+    this.mobileHistoriqueVisible = false;
+    this.historiqueLoading = false;
+    this.historiqueData = null;
+  }
+
+  onMobileHistoriqueDeleteVersement(versement: Versement): void {
+    this.confirmDeleteVersement(versement);
+  }
+
+  confirmDeleteVersement(versement: Versement): void {
+    if (!this.canDeleteVersement) return;
+    if (!this.historiqueData) return;
+    const packingId = this.historiqueData.packing.id;
+    this.confirmationService.confirm({
+      message: `Supprimer le versement de ${this.formatCurrency(versement.montant)} ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.packingService.deleteVersement(packingId, versement.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succes',
+              detail: 'Versement supprime',
+              life: 3000,
+            });
+            const packing = this.packings().find((p) => p.id === packingId);
+            if (packing) this.openHistorique(packing);
+            this.load();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de supprimer le versement',
+              life: 3000,
+            });
+          },
+        });
+      },
+    });
+  }
+
+  getInitials(packing: Packing): string {
+    const prenom = packing.prestataire?.prenom ?? '';
+    const nom = packing.prestataire?.nom ?? '';
     if (!prenom && !nom) return '--';
     return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
   }
@@ -182,8 +587,12 @@ export class PackingListe implements OnInit {
     return PACKING_STATUT_LABELS[statut] || statut;
   }
 
-  getStatutSeverity(statut: PackingStatut): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+  getStatutSeverity(statut: PackingStatut): PackingStatutSeverity {
     return PACKING_STATUT_SEVERITY[statut] || 'info';
+  }
+
+  getModeLabel(mode: string): string {
+    return (MODE_PAIEMENT_LABELS as any)[mode] ?? mode;
   }
 
   formatCurrency(value: number): string {
@@ -196,9 +605,90 @@ export class PackingListe implements OnInit {
     return date.toLocaleDateString('fr-FR');
   }
 
+  formatDateTime(dateStr: string): string {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  get isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
+  }
+
+  private applyLastNDaysFilter(days: number): void {
+    const today = this.toLocalDay(new Date());
+    const start = this.addDaysLocal(today, -(days - 1));
+    this.filterDateRange = [start, today];
+    this.load();
+  }
+
+  private getQuickDateRange(filter: Exclude<QuickDateFilter, 'none' | 'last_n_days'>): [Date, Date] {
+    const today = this.toLocalDay(new Date());
+
+    if (filter === 'today') return [today, today];
+    if (filter === 'yesterday') {
+      const yesterday = this.addDaysLocal(today, -1);
+      return [yesterday, yesterday];
+    }
+
+    if (filter === 'this_week') {
+      const start = this.startOfWeekMonday(today);
+      const end = this.addDaysLocal(start, 6);
+      return [start, end];
+    }
+
+    if (filter === 'last_week') {
+      const startCurrentWeek = this.startOfWeekMonday(today);
+      const startLastWeek = this.addDaysLocal(startCurrentWeek, -7);
+      const endLastWeek = this.addDaysLocal(startLastWeek, 6);
+      return [startLastWeek, endLastWeek];
+    }
+
+    if (filter === 'this_month') {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      return [start, end];
+    }
+
+    if (filter === 'last_month') {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return [start, end];
+    }
+
+    if (filter === 'this_year') {
+      const start = new Date(today.getFullYear(), 0, 1);
+      const end = new Date(today.getFullYear(), 11, 31);
+      return [start, end];
+    }
+
+    const start = new Date(today.getFullYear() - 1, 0, 1);
+    const end = new Date(today.getFullYear() - 1, 11, 31);
+    return [start, end];
+  }
+
+  private startOfWeekMonday(date: Date): Date {
+    const day = date.getDay(); // 0 = dimanche, 1 = lundi, ...
+    const delta = day === 0 ? -6 : 1 - day;
+    return this.addDaysLocal(date, delta);
+  }
+
+  private addDaysLocal(date: Date, nbDays: number): Date {
+    const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    next.setDate(next.getDate() + nbDays);
+    return next;
+  }
+
+  private toLocalDay(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
   private formatDate(date: Date | string): string {
     if (!date) return '';
     if (typeof date === 'string') return date;
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -6,6 +6,14 @@
   position: relative;
 }
 
+@media screen and (min-width: 769px) {
+  .packing-from-card {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 // ─── Desktop : montant row ────────────────────────────────────────────────────
 .pfr-montant-row {
   display: flex;
@@ -170,7 +178,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: 0.75rem 0.875rem calc(7.5rem + env(safe-area-inset-bottom));
+    padding: 0.75rem 0.875rem calc(10rem + env(safe-area-inset-bottom));
   }
 
   // ─── Sections : cards blanches ───────────────────────────────────────────
@@ -183,6 +191,10 @@
     display: flex;
     flex-direction: column;
     gap: 0.875rem;
+  }
+
+  .pfr-section:last-of-type {
+    margin-bottom: 0.75rem;
   }
 
   .pfr-section-title {

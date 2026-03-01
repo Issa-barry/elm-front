@@ -1,0 +1,70 @@
+#packing-facture-invoice {
+  position: relative;
+  overflow: hidden;
+}
+
+.packing-status-ribbon {
+  position: absolute;
+  top: 1rem;
+  right: -2.3rem;
+  z-index: 3;
+  width: 7.9rem;
+  padding: 0.22rem 0.45rem;
+  transform: rotate(40deg);
+  transform-origin: center;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ffffff;
+  pointer-events: none;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+}
+
+.packing-status-ribbon.status-payee {
+  background: #16a34a;
+}
+
+.packing-status-ribbon.status-partielle {
+  background: #f59e0b;
+}
+
+.packing-status-ribbon.status-impayee {
+  background: #ef4444;
+}
+
+.packing-status-ribbon.status-annulee {
+  background: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .packing-status-ribbon {
+    top: 0.15rem;
+    right: -2.85rem;
+    width: 7.2rem;
+    font-size: 0.56rem;
+    padding: 0.2rem 0.35rem;
+  }
+}
+
+@media print {
+  .packing-facture-actions,
+  .packing-facture-sidepanel {
+    display: none !important;
+  }
+
+  .packing-facture-layout {
+    display: block !important;
+  }
+
+  .packing-facture-main {
+    width: 100% !important;
+  }
+
+  #packing-facture-invoice {
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}

@@ -15,14 +15,20 @@
                 </h1>
             </div>
             <button
-                *ngIf="mode === 'edit' && !isEditing"
+                *ngIf="mode === 'edit' && !isEditing && canEditSystemDefinition()"
                 pButton
-                pRipple 
+                pRipple
                 icon="pi pi-pencil"
                 class="p-button-rounded p-button-text mobile-form-edit"
                 (click)="enableEditing()"
             ></button>
         </header>
+
+        <div *ngIf="product.is_global" class="mx-3 mt-2 mb-1 px-3 py-2 rounded flex items-center gap-2 text-sm bg-blue-50 text-blue-700 border border-blue-200">
+            <i class="pi pi-globe"></i>
+            <span *ngIf="canManageSystemDefinition">Produit global — vous pouvez modifier la définition (admin/manager).</span>
+            <span *ngIf="!canManageSystemDefinition">Produit global — définition en lecture seule pour ce rôle.</span>
+        </div>
 
         <!-- Image en premier -->
         <div class="mobile-image-card"> 
@@ -119,7 +125,7 @@
                         fluid
                     ></p-select>
                 </div>
-                <div class="mobile-meta-field">
+                <div class="mobile-meta-field" *ngIf="mode !== 'create'">
                     <label class="mobile-field-label">Stock</label>
                     <p-inputnumber
                         [(ngModel)]="product.qte_stock"
@@ -228,8 +234,8 @@
             </div>
         </div>
 
-        <!-- Status toggle -->
-        <div class="mobile-section-card mobile-status-row">
+        <!-- Status toggle (édition uniquement — à la création toujours brouillon) -->
+        <div class="mobile-section-card mobile-status-row" *ngIf="mode !== 'create'">
             <span class="mobile-status-label">Status</span>
             <span class="mobile-status-value" [class.active]="isActifSwitch">{{ isActifSwitch ? 'Actif' : 'Inactif' }}</span>
             <p-toggleswitch
@@ -239,6 +245,13 @@
                 class="ml-auto"
             ></p-toggleswitch>
         </div>
+        <!-- Bandeau info flux d'activation (création uniquement) -->
+        <div class="mobile-section-card" *ngIf="mode === 'create'">
+            <div class="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                <i class="pi pi-info-circle mt-0.5 shrink-0"></i>
+                <span>Ce produit sera créé en <strong>brouillon</strong>. L'activation (globale puis par usine) se fait dans une étape distincte.</span>
+            </div>
+        </div>
 
         <!-- Produit critique -->
         <div class="mobile-section-card mobile-status-row">
@@ -246,6 +259,19 @@
             <p-toggleswitch
                 [(ngModel)]="product.is_critique"
                 [disabled]="fieldsDisabled"
+                class="ml-auto"
+            ></p-toggleswitch>
+        </div>
+
+        <!-- Produit global (visible si admin/manager ou si déjà global) -->
+        <div class="mobile-section-card mobile-status-row" *ngIf="canManageSystemDefinition || product.is_global">
+            <div class="flex flex-col flex-1">
+                <span class="mobile-status-label">Produit global</span>
+                <small class="text-surface-400 text-xs">Disponible dans toutes les usines</small>
+            </div>
+            <p-toggleswitch
+                [(ngModel)]="product.is_global"
+                [disabled]="!canToggleGlobal()"
                 class="ml-auto"
             ></p-toggleswitch>
         </div>
@@ -309,8 +335,13 @@
                 </small>
             </div>
 
+            <div *ngIf="product.is_global" class="flex items-center gap-2 px-3 py-1.5 rounded text-sm bg-blue-50 text-blue-700 border border-blue-200">
+                <i class="pi pi-globe"></i>
+                <span *ngIf="canManageSystemDefinition">Produit global — édition autorisée (admin/manager)</span>
+                <span *ngIf="!canManageSystemDefinition">Produit global — lecture seule pour ce rôle</span>
+            </div>
             <button
-                *ngIf="mode === 'edit' && !isEditing"
+                *ngIf="mode === 'edit' && !isEditing && canEditSystemDefinition()"
                 pButton
                 pRipple
                 label="Modifier"
@@ -531,7 +562,8 @@
                 <div class="border border-surface-200 dark:border-surface-700 rounded">
                     <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Etat du produit</span>
                     <div class="p-4">
-                        <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded">
+                        <!-- Toggle statut (édition uniquement — à la création toujours brouillon) -->
+                        <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded" *ngIf="mode !== 'create'">
                             <span class="text-black/90 dark:text-surface-0! font-bold mr-4">Status:</span>
                             <span class="text-black/60 dark:text-surface-0! font-semibold">{{ isActifSwitch ? 'Actif' : 'Inactif' }}</span>
                             <p-toggleswitch
@@ -541,6 +573,11 @@
                                 class="ml-auto"
                             ></p-toggleswitch>
                         </div>
+                        <!-- Bandeau info flux d'activation (création uniquement) -->
+                        <div class="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2" *ngIf="mode === 'create'">
+                            <i class="pi pi-info-circle mt-0.5 shrink-0"></i>
+                            <span>Créé en <strong>brouillon</strong> — activation globale puis par usine dans une étape distincte.</span>
+                        </div>
                         <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded mt-2">
                             <div class="flex flex-col flex-1">
                                 <span class="text-black/90 dark:text-surface-0! font-bold">Produit critique</span>
@@ -549,6 +586,18 @@
                             <p-toggleswitch
                                 [(ngModel)]="product.is_critique"
                                 [disabled]="fieldsDisabled"
+                                class="ml-auto"
+                            ></p-toggleswitch>
+                        </div>
+                        <!-- Produit global (visible si admin/manager ou si déjà global) -->
+                        <div class="bg-surface-100 dark:bg-surface-700 py-2 px-4 flex items-center rounded mt-2" *ngIf="canManageSystemDefinition || product.is_global">
+                            <div class="flex flex-col flex-1">
+                                <span class="text-black/90 dark:text-surface-0! font-bold">Produit global</span>
+                                <small class="text-surface-500">Disponible dans toutes les usines</small>
+                            </div>
+                            <p-toggleswitch
+                                [(ngModel)]="product.is_global"
+                                [disabled]="!canToggleGlobal()"
                                 class="ml-auto"
                             ></p-toggleswitch>
                         </div>
@@ -596,7 +645,7 @@
                     </div>
                 </div>
 
-                <div class="border border-surface-200 dark:border-surface-700 rounded">
+                <div class="border border-surface-200 dark:border-surface-700 rounded" *ngIf="mode !== 'create'">
                     <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Quantité en stock</span>
                     <div class="p-4">
                         <p-inputnumber

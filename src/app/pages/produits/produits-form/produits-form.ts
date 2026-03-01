@@ -75,6 +75,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialData: Produit | null = null;
   @Input() loading = false;
+  @Input() canManageSystemDefinition = false;
 
   @Output() submitForm = new EventEmitter<CreateProduitDto>();
   @Output() cancel = new EventEmitter<void>();
@@ -91,12 +92,11 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     { label: PRODUIT_TYPE_LABELS.achat_vente, value: 'achat_vente' }
   ];
 
-  // Options de statut avec labels franÃ§ais
+  // Options de statut avec labels français
   statutOptions: { label: string; value: ProduitStatut }[] = [
     { label: PRODUIT_STATUT_LABELS.brouillon, value: 'brouillon' },
     { label: PRODUIT_STATUT_LABELS.actif, value: 'actif' },
     { label: PRODUIT_STATUT_LABELS.inactif, value: 'inactif' },
-    { label: PRODUIT_STATUT_LABELS.rupture_stock, value: 'rupture_stock' }
   ];
 
   // Produit est une class -> on instancie
@@ -108,11 +108,12 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     prix_vente: null,
     qte_stock: 0,
     cout: null,
-    statut: 'actif',
+    statut: 'brouillon',
     type: 'materiel',
     in_stock: true,
     is_archived: false,
     is_critique: false,
+    is_global: false,
     seuil_alerte_stock: null,
     description: null,
     image_url: null
@@ -250,6 +251,10 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     this.product.statut = value ? 'actif' : 'inactif';
   }
 
+  canToggleGlobal(): boolean {
+    return this.canManageSystemDefinition && !this.fieldsDisabled;
+  }
+
   // =========================
   // TYPE CHANGE
   // =========================
@@ -290,6 +295,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
   // EDIT MODE
   // =========================
   enableEditing(): void {
+    if (!this.canEditSystemDefinition()) return;
     this.isEditing = true;
   }
 
@@ -370,6 +376,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
   // SUBMIT
   // =========================
   onSubmit(): void {
+    if (!this.canEditSystemDefinition()) return;
     this.submitted = true;
 
     if (!this.isValid()) return;
@@ -377,13 +384,18 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     const dto: CreateProduitDto = {
       nom: this.product.nom.trim(),
       type: this.product.type,
-      qte_stock: this.product.qte_stock,
       description: this.product.description?.trim() || undefined,
       cout: this.product.cout ?? undefined
     };
-    // Statut piloté par le switch (actif/inactif)
-    dto.statut = this.product.statut;
+    // Statut et stock uniquement en édition (à la création le backend impose brouillon + stock 0)
+    if (this.mode === 'edit') {
+      dto.statut = this.product.statut;
+      dto.qte_stock = this.product.qte_stock;
+    }
     dto.is_critique = this.product.is_critique;
+    if (this.canManageSystemDefinition) {
+      dto.is_global = this.product.is_global;
+    }
 
     // Seuil alerte stock : vide => null, sinon entier
     const rawSeuil = this.product.seuil_alerte_stock;
@@ -419,6 +431,12 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     return (this.mode === 'edit' && !this.isEditing) || this.loading;
   }
 
+  canEditSystemDefinition(): boolean {
+    if (this.mode === 'create') return true;
+    if (!this.product?.is_global) return true;
+    return this.canManageSystemDefinition;
+  }
+
   getPrixHelperText(): string {
     switch (this.product.type) {
       case 'materiel':
@@ -452,11 +470,12 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
       prix_vente: null,
       qte_stock: 0,
       cout: null,
-      statut: 'actif',
+      statut: 'brouillon',
       type: 'materiel',
       in_stock: true,
       is_archived: false,
       is_critique: false,
+      is_global: false,
       seuil_alerte_stock: null,
       description: null,
       image_url: null

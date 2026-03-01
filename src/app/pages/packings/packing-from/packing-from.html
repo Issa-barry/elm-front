@@ -99,6 +99,7 @@
             (onBlur)="onDateBlur()"
             styleClass="w-full"
             inputStyleClass="w-full"
+            appendTo="body"
           />
           @if (submitted && dateError) {
             <small class="text-red-500 text-xs">{{ dateError }}</small>

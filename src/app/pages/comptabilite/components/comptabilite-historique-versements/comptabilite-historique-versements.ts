@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { Versement, VersementIndexResponse } from '@/models/facture-packing.model';
+import { Versement, VersementIndexResponse } from '@/models/packing.model';
 
 @Component({
   selector: 'app-comptabilite-historique-versements',

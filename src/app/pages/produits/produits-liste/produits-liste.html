@@ -59,7 +59,7 @@
             <article
                 class="mobile-produit-card"
                 *ngFor="let produit of mobileVisibleProduits; trackBy: trackByProduitId"
-                (click)="goToEditProduit($event, produit.id)"
+                (click)="onProduitPrimaryAction($event, produit)"
             >
                 <div class="mobile-card-media">
                     <img
@@ -85,6 +85,13 @@
                                 [severity]="getStatutSeverity(produit.statut)"
                             />
                             <p-tag
+                                *ngIf="produit.is_global"
+                                value="Global"
+                                severity="info"
+                                icon="pi pi-globe"
+                                [rounded]="true"
+                            />
+                            <p-tag
                                 *ngIf="shouldShowCritiqueAlert(produit)"
                                 value="Critique"
                                 severity="warn"
@@ -100,10 +107,12 @@
                             <button
                                 pButton
                                 pRipple
-                                icon="pi pi-chevron-right"
+                                [icon]="needsStockOnlyAction(produit) ? 'pi pi-box' : 'pi pi-chevron-right'"
                                 class="p-button-rounded p-button-text p-button-sm mobile-chevron-action"
-                                (click)="goToEditProduit($event, produit.id)"
-                                [disabled]="!canUpdate"
+                                [pTooltip]="getPrimaryActionTooltip(produit)"
+                                tooltipPosition="top"
+                                (click)="onProduitPrimaryAction($event, produit)"
+                                [disabled]="!canEditDefinition(produit) && !needsStockOnlyAction(produit)"
                             ></button>
                         </div>
                     </div>
@@ -271,7 +280,7 @@
         </ng-template>
         <ng-template #header>
             <tr>
-                <th style="width: 5rem">Image</th>
+                <th style="width: 6.5rem">Image</th>
                 <th style="min-width: 16rem" pSortableColumn="code">
                     <span class="flex items-center gap-2">Code <p-sortIcon field="code" /></span>
                 </th>
@@ -291,13 +300,13 @@
             </tr>
         </ng-template>
         <ng-template #body let-produit>
-            <tr class="produit-row" (dblclick)="onRowDblClick($event, produit)" pTooltip="Double-cliquez pour modifier" tooltipPosition="left" [tooltipOptions]="{ showDelay: 800 }" [tooltipDisabled]="!canUpdate">
-                <td style="width: 5rem">
+            <tr class="produit-row" (dblclick)="onRowDblClick($event, produit)" [pTooltip]="getDefinitionActionTooltip(produit)" tooltipPosition="left" [tooltipOptions]="{ showDelay: 800 }" [tooltipDisabled]="!canEditDefinition(produit)">
+                <td style="width: 6.5rem">
                     <img
                         *ngIf="produit.image_url"
                         [src]="produit.getImageUrl()"
                         [alt]="produit.nom"
-                        style="width: 48px; height: 48px; object-fit: contain;"
+                        style="width: 64px; height: 64px; object-fit: contain;"
                         class="rounded border border-surface-200"
                     />
                     <i *ngIf="!produit.image_url" class="pi pi-image text-surface-300 text-2xl"></i>
@@ -305,6 +314,14 @@
                 <td style="min-width: 12rem">{{ produit.code }}</td>
                 <td style="min-width: 16rem">
                     <span>{{ produit.nom }}</span>
+                    <p-tag
+                        *ngIf="produit.is_global"
+                        value="Global"
+                        severity="info"
+                        icon="pi pi-globe"
+                        [rounded]="true"
+                        styleClass="ml-2"
+                    />
                     <p-tag
                         *ngIf="shouldShowCritiqueAlert(produit)"
                         value="Critique"
@@ -324,14 +341,24 @@
                 </td>
                 <td>
                     <button
+                        *ngIf="canEditDefinition(produit)"
                         pButton
                         pRipple
                         icon="pi pi-eye"
                         class="p-button-rounded p-button-text p-button-sm mr-2"
-                        [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                        [pTooltip]="getDefinitionActionTooltip(produit)"
                         tooltipPosition="top"
-                        (click)="goToEditProduit($event, produit.id)"
-                        [disabled]="!canUpdate"
+                        (click)="goToEditProduit($event, produit.id, produit)"
+                    ></button>
+                    <button
+                        *ngIf="needsStockOnlyAction(produit)"
+                        pButton
+                        pRipple
+                        icon="pi pi-box"
+                        class="p-button-rounded p-button-text p-button-sm mr-2"
+                        [pTooltip]="getPrimaryActionTooltip(produit)"
+                        tooltipPosition="top"
+                        (click)="openStockDialog($event, produit)"
                     ></button>
                     <p-button
                         icon="pi pi-trash"
@@ -339,13 +366,53 @@
                         [rounded]="true"
                         [outlined]="true"
                         (click)="deleteProduct(produit)"
-                        *ngIf="canDelete"
+                        *ngIf="canArchiveProduct(produit)"
                     />
                 </td>
             </tr>
         </ng-template>
     </p-table>
 </div>
+
+<p-dialog
+    [(visible)]="stockDialog"
+    [modal]="true"
+    [style]="{ width: '420px', maxWidth: '95vw' }"
+    header="Mettre a jour le stock"
+    (onHide)="closeStockDialog()"
+>
+    <ng-template #content>
+        <div class="flex flex-col gap-4">
+            <div *ngIf="stockProduit">
+                <div class="font-medium mb-2">{{ stockProduit.nom }}</div>
+                <small class="text-surface-500">Produit systeme: mise a jour du stock uniquement.</small>
+            </div>
+            <div>
+                <label for="stock_value" class="block font-bold mb-2">Quantite en stock</label>
+                <p-inputnumber
+                    inputId="stock_value"
+                    [(ngModel)]="stockValue"
+                    [min]="0"
+                    [minFractionDigits]="0"
+                    [maxFractionDigits]="0"
+                    [useGrouping]="false"
+                    fluid
+                />
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Annuler" icon="pi pi-times" text (click)="closeStockDialog()" [disabled]="stockDialogSaving" />
+        <p-button
+            label="Enregistrer"
+            icon="pi pi-check"
+            (click)="saveStockUpdate()"
+            [loading]="stockDialogSaving"
+            [disabled]="stockDialogSaving"
+        />
+    </ng-template>
+</p-dialog>
 
 <p-dialog
     [(visible)]="produitDialog"

@@ -2,7 +2,7 @@ export type PrestataireType = 'machiniste' | 'mecanicien' | 'consultant' | 'four
 
 export const PRESTATAIRE_TYPES: { value: PrestataireType; label: string }[] = [
   { value: 'machiniste', label: 'Machiniste' },
-  { value: 'mecanicien', label: 'Mécanicien' },
+  { value: 'mecanicien', label: 'Mecanicien' },
   { value: 'consultant', label: 'Consultant' },
   { value: 'fournisseur', label: 'Fournisseur' },
 ];

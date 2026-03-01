@@ -50,6 +50,17 @@ export class PackingEdit implements OnInit {
     this.packingService.getPacking(this.packingId).subscribe({
       next: (response) => {
         this.packing = response.data;
+        if (this.packing.statut !== 'impayee') {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Edition non autorisee',
+            detail: 'Seuls les packings impayes sont modifiables.',
+            life: 3000,
+          });
+          this.packingLoading = false;
+          setTimeout(() => this.router.navigate(['/packings']), 1000);
+          return;
+        }
         this.packingLoading = false;
       },
       error: (err) => {
@@ -87,6 +98,16 @@ export class PackingEdit implements OnInit {
   }
 
   onSubmit(packingData: CreatePackingDto): void {
+    if (!this.packing || this.packing.statut !== 'impayee') {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Edition non autorisee',
+        detail: 'Seuls les packings impayes sont modifiables.',
+        life: 3000,
+      });
+      return;
+    }
+
     this.loading = true;
 
     this.packingService.updatePacking(this.packingId, packingData).subscribe({

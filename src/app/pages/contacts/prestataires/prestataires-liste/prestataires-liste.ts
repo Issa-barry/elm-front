@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,6 +18,7 @@ import { MenuModule } from 'primeng/menu';
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
@@ -54,6 +55,7 @@ export class PrestatairesListe implements OnInit, OnDestroy {
   mobileVisibleCount = this.mobilePageSize;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'prestataires-mobile-pwa';
+  private readyForUsineReload = false;
 
   statusOptions = [
     { label: 'Actif', value: true },
@@ -76,14 +78,22 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
+    private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('prestataires.create');
     this.canUpdate = this.authService.hasPermission('prestataires.update');
     this.canDelete = this.authService.hasPermission('prestataires.delete');
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.loadPrestataires();
+    });
   }
 
   ngOnInit() {
+    this.readyForUsineReload = true;
     this.loadPrestataires();
     this.syncMobilePwaMode();
   }
@@ -156,7 +166,7 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     this.prestataireService.getPrestataires(filters).subscribe({
       next: (response) => {
         if (response.success) {
-          // GÃƒÂ©rer pagination ou liste simple
+          // Gérer pagination ou liste simple
           this.prestataires = Array.isArray(response.data)
             ? response.data
             : response.data.data;
@@ -196,21 +206,21 @@ export class PrestatairesListe implements OnInit, OnDestroy {
   }
 
   /**
-   * Naviguer vers la crÃƒÂ©ation d'un prestataire
+   * Naviguer vers la création d'un prestataire
    */
   navigateToCreate() {
     this.router.navigate(['contacts/prestataires/new']);
   }
 
   /**
-   * SÃƒÂ©lection d'une ligne - navigation vers l'ÃƒÂ©dition
+   * Sélection d'une ligne - navigation vers l'édition
    */
   onRowSelect(event: any) {
     this.router.navigate(['contacts/prestataires/edit', event.data.id]);
   }
 
   /**
-   * Voir les dÃƒÂ©tails d'un prestataire
+   * Voir les détails d'un prestataire
    */
   goToEdit(event: Event, prestataireId: number) {
     event.stopPropagation();
@@ -224,7 +234,7 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     event.stopPropagation();
 
     const prestataire = this.prestataires.find(p => p.id === prestataireId);
-    const action = prestataire?.is_active ? 'dÃƒÂ©sactiver' : 'activer';
+    const action = prestataire?.is_active ? 'désactiver' : 'activer';
 
     this.confirmationService.confirm({
       message: `Voulez-vous vraiment ${action} ce prestataire ?`,
@@ -238,7 +248,7 @@ export class PrestatairesListe implements OnInit, OnDestroy {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
-                summary: 'SuccÃƒÂ¨s',
+                summary: 'Succès',
                 detail: response.message
               });
               this.loadPrestataires();
@@ -264,7 +274,7 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     event.stopPropagation();
 
     this.confirmationService.confirm({
-      message: 'ÃƒÅ tes-vous sÃƒÂ»r de vouloir supprimer ce prestataire ? Cette action est irrÃƒÂ©versible.',
+      message: 'Êtes-vous sûr de vouloir supprimer ce prestataire ? Cette action est irréversible.',
       header: 'Confirmation de suppression',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui, supprimer',
@@ -276,8 +286,8 @@ export class PrestatairesListe implements OnInit, OnDestroy {
             if (response.success) {
               this.messageService.add({
                 severity: 'success',
-                summary: 'SuccÃƒÂ¨s',
-                detail: 'Prestataire supprimÃƒÂ© avec succÃƒÂ¨s'
+                summary: 'Succès',
+                detail: 'Prestataire supprimé avec succès'
               });
               this.loadPrestataires();
             }
@@ -309,12 +319,12 @@ export class PrestatairesListe implements OnInit, OnDestroy {
   }
 
   /**
-   * Formater le numÃƒÂ©ro de tÃƒÂ©lÃƒÂ©phone
+   * Formater le numéro de téléphone
    */
   formatPhone(phone: string): string {
     if (!phone) return '-';
 
-    // Supprimer le code pays s'il existe au dÃƒÂ©but (1-3 chiffres aprÃƒÂ¨s +)
+    // Supprimer le code pays s'il existe au début (1-3 chiffres après +)
     const cleanPhone = phone.replace(/^\+\d{1,3}/, '').trim();
 
     // Formater par groupe de 2 chiffres
