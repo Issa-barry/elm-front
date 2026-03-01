@@ -3,6 +3,7 @@ import { PackingListe } from './packing-liste/packing-liste';
 import { PackingNew } from './packing-new/packing-new';
 import { PackingEdit } from './packing-edit/packing-edit';
 import { authorizationGuard } from '@/guards/authorization.guard';
+import { PackingFacture } from './packing-facture/packing-facture';
 
 export default [
     {
@@ -28,6 +29,12 @@ export default [
         component: PackingEdit,
         canActivate: [authorizationGuard],
         data: { breadcrumb: 'packings-edit',  permissions: ['packings.update'] },
+    },
+    {
+        path: 'packings-facture/:id',
+        component: PackingFacture,
+        canActivate: [authorizationGuard],
+        data: { breadcrumb: 'packings-facture',  permissions: ['packings.update'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

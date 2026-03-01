@@ -45,6 +45,18 @@ interface ModePaiementOption {
   value: ModePaiement;
 }
 
+type QuickDateFilter =
+  | 'none'
+  | 'today'
+  | 'yesterday'
+  | 'this_week'
+  | 'last_week'
+  | 'this_month'
+  | 'last_month'
+  | 'this_year'
+  | 'last_year'
+  | 'last_n_days';
+
 @Component({
   selector: 'app-packing-liste',
   standalone: true,
@@ -81,6 +93,8 @@ export class PackingListe implements OnInit {
   searchQuery = signal<string>('');
   selectedStatut = signal<PackingStatut | 'all'>('all');
   filterDateRange: Date[] | null = null;
+  selectedQuickDateFilter: QuickDateFilter = 'none';
+  lastNDaysValue: number | null = null;
   loading = false;
   canCreate = false;
   canUpdate = false;
@@ -134,6 +148,19 @@ export class PackingListe implements OnInit {
     { label: 'Partielle', value: 'partielle' },
     { label: 'Payee', value: 'payee' },
     { label: 'Annulee', value: 'annulee' },
+  ];
+
+  quickDateFilterOptions: Array<{ label: string; value: QuickDateFilter }> = [
+    { label: 'Aucun filtre date', value: 'none' },
+    { label: "Aujourd'hui", value: 'today' },
+    { label: 'Hier', value: 'yesterday' },
+    { label: 'Cette semaine', value: 'this_week' },
+    { label: 'Semaine derniere', value: 'last_week' },
+    { label: 'Mois en cours', value: 'this_month' },
+    { label: 'Mois dernier', value: 'last_month' },
+    { label: 'Annee en cours', value: 'this_year' },
+    { label: 'Annee derniere', value: 'last_year' },
+    { label: 'X derniers jours', value: 'last_n_days' },
   ];
 
   filteredPackings = computed(() => {
@@ -205,8 +232,12 @@ export class PackingListe implements OnInit {
     const filters: Record<string, string> = {};
     const statut = this.selectedStatut();
     if (statut !== 'all') filters['statut'] = statut;
-    if (this.filterDateRange?.[0]) filters['date_debut'] = this.formatDate(this.filterDateRange[0]);
-    if (this.filterDateRange?.[1]) filters['date_fin'] = this.formatDate(this.filterDateRange[1]);
+    if (this.filterDateRange?.[0]) {
+      const startDate = this.filterDateRange[0];
+      const endDate = this.filterDateRange[1] ?? this.filterDateRange[0];
+      filters['date_debut'] = this.formatDate(startDate);
+      filters['date_fin'] = this.formatDate(endDate);
+    }
 
     this.packingService.getPackings(Object.keys(filters).length ? filters : undefined).subscribe({
       next: (response) => {
@@ -237,6 +268,11 @@ export class PackingListe implements OnInit {
     this.router.navigate(['/packings/packings-edit', packing.id]);
   }
 
+  goFacture(packing: Packing): void {
+    if (!this.canUpdate) return;
+    this.router.navigate(['/packings/packings-facture', packing.id]);
+  }
+
   openVersementFromCard(event: Event, packing: Packing): void {
     event.stopPropagation();
     if (this.isMobile) {
@@ -254,6 +290,11 @@ export class PackingListe implements OnInit {
   goEditFromCard(event: Event, packing: Packing): void {
     event.stopPropagation();
     this.goEdit(packing);
+  }
+
+  goFactureFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.goFacture(packing);
   }
 
   openMobilePaiement(packing: Packing): void {
@@ -313,12 +354,45 @@ export class PackingListe implements OnInit {
   }
 
   onDateRangeSelect(): void {
-    if (this.filterDateRange?.[1]) this.load();
+    this.selectedQuickDateFilter = 'none';
+    this.lastNDaysValue = null;
+    if (this.filterDateRange?.[0]) this.load();
+  }
+
+  onQuickDateFilterChange(value: QuickDateFilter): void {
+    this.selectedQuickDateFilter = value;
+
+    if (value === 'none') {
+      this.filterDateRange = null;
+      this.lastNDaysValue = null;
+      this.load();
+      return;
+    }
+
+    if (value === 'last_n_days') {
+      const nbDays = this.lastNDaysValue && this.lastNDaysValue > 0 ? this.lastNDaysValue : 7;
+      this.lastNDaysValue = nbDays;
+      this.applyLastNDaysFilter(nbDays);
+      return;
+    }
+
+    const [start, end] = this.getQuickDateRange(value);
+    this.filterDateRange = [start, end];
+    this.load();
+  }
+
+  onLastNDaysChange(value: number | null): void {
+    this.lastNDaysValue = value;
+    if (this.selectedQuickDateFilter !== 'last_n_days') return;
+    if (!value || value < 1) return;
+    this.applyLastNDaysFilter(value);
   }
 
   clearFilters(): void {
     this.selectedStatut.set('all');
     this.filterDateRange = null;
+    this.selectedQuickDateFilter = 'none';
+    this.lastNDaysValue = null;
     this.load();
   }
 
@@ -539,9 +613,80 @@ export class PackingListe implements OnInit {
     return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
   }
 
+  private applyLastNDaysFilter(days: number): void {
+    const today = this.toLocalDay(new Date());
+    const start = this.addDaysLocal(today, -(days - 1));
+    this.filterDateRange = [start, today];
+    this.load();
+  }
+
+  private getQuickDateRange(filter: Exclude<QuickDateFilter, 'none' | 'last_n_days'>): [Date, Date] {
+    const today = this.toLocalDay(new Date());
+
+    if (filter === 'today') return [today, today];
+    if (filter === 'yesterday') {
+      const yesterday = this.addDaysLocal(today, -1);
+      return [yesterday, yesterday];
+    }
+
+    if (filter === 'this_week') {
+      const start = this.startOfWeekMonday(today);
+      const end = this.addDaysLocal(start, 6);
+      return [start, end];
+    }
+
+    if (filter === 'last_week') {
+      const startCurrentWeek = this.startOfWeekMonday(today);
+      const startLastWeek = this.addDaysLocal(startCurrentWeek, -7);
+      const endLastWeek = this.addDaysLocal(startLastWeek, 6);
+      return [startLastWeek, endLastWeek];
+    }
+
+    if (filter === 'this_month') {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      return [start, end];
+    }
+
+    if (filter === 'last_month') {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return [start, end];
+    }
+
+    if (filter === 'this_year') {
+      const start = new Date(today.getFullYear(), 0, 1);
+      const end = new Date(today.getFullYear(), 11, 31);
+      return [start, end];
+    }
+
+    const start = new Date(today.getFullYear() - 1, 0, 1);
+    const end = new Date(today.getFullYear() - 1, 11, 31);
+    return [start, end];
+  }
+
+  private startOfWeekMonday(date: Date): Date {
+    const day = date.getDay(); // 0 = dimanche, 1 = lundi, ...
+    const delta = day === 0 ? -6 : 1 - day;
+    return this.addDaysLocal(date, delta);
+  }
+
+  private addDaysLocal(date: Date, nbDays: number): Date {
+    const next = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    next.setDate(next.getDate() + nbDays);
+    return next;
+  }
+
+  private toLocalDay(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
   private formatDate(date: Date | string): string {
     if (!date) return '';
     if (typeof date === 'string') return date;
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

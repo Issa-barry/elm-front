@@ -254,7 +254,7 @@
             </span>
           </div>
         </div>
-        @if ((canCreateVersement && canPay(p)) || canReadVersement || canEditPacking(p)) {
+        @if ((canCreateVersement && canPay(p)) || canReadVersement || canUpdate || canEditPacking(p)) {
           <div class="mobile-card-actions">
             @if (canCreateVersement && canPay(p)) {
               <button
@@ -282,6 +282,20 @@
                 pTooltip="Historique"
                 tooltipPosition="left"
                 (click)="openHistoriqueFromCard($event, p)"
+              ></button>
+            }
+            @if (canUpdate) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                severity="secondary"
+                text
+                rounded
+                size="small"
+                pTooltip="Voir facture"
+                tooltipPosition="left"
+                (click)="goFactureFromCard($event, p)"
               ></button>
             }
             @if (canEditPacking(p)) {
@@ -352,6 +366,28 @@
             placeholder="Tous les statuts"
             class="w-full sm:w-44"
           />
+          <p-select
+            [options]="quickDateFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedQuickDateFilter"
+            (ngModelChange)="onQuickDateFilterChange($event)"
+            placeholder="Periode rapide"
+            class="w-full sm:w-52"
+          />
+          @if (selectedQuickDateFilter === 'last_n_days') {
+            <p-inputnumber
+              [ngModel]="lastNDaysValue"
+              (ngModelChange)="onLastNDaysChange($event)"
+              [min]="1"
+              [useGrouping]="false"
+              [showButtons]="false"
+              placeholder="Nb jours"
+              suffix=" j"
+              inputStyleClass="w-full"
+              styleClass="w-full sm:w-32"
+            />
+          }
           <p-datepicker
             [(ngModel)]="filterDateRange"
             selectionMode="range"
@@ -371,7 +407,7 @@
               severity="secondary"
               outlined
               rounded
-              pTooltip="Effacer les filtres"
+              pTooltip="Reinitialiser filtres"
               tooltipPosition="top"
               (click)="clearFilters()"
             ></button>
@@ -472,6 +508,20 @@
                   pTooltip="Historique versements"
                   tooltipPosition="top"
                   (click)="openHistorique(p)"
+                ></button>
+              }
+              @if (canUpdate) {
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-eye"
+                  severity="secondary"
+                  text
+                  rounded
+                  size="small"
+                  pTooltip="Voir facture"
+                  tooltipPosition="top"
+                  (click)="goFacture(p)"
                 ></button>
               }
               @if (canEditPacking(p)) {
