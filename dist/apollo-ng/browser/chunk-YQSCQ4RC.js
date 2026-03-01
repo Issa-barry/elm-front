@@ -3517,8 +3517,14 @@ var PackingFacture = class _PackingFacture {
     return this.usineContext.currentUsine()?.nom || "Usine";
   }
   get usineAdresse() {
-    const nom = this.usineContext.currentUsine()?.nom;
-    return nom ? `${nom}, Conakry, Guin\xE9e` : "";
+    const usine = this.usineContext.currentUsine();
+    if (!usine)
+      return "";
+    const localisation = [usine.quartier, usine.ville, usine.pays].map((item) => typeof item === "string" ? item.trim() : "").filter((item) => item.length > 0);
+    if (localisation.length > 0) {
+      return localisation.join(", ");
+    }
+    return (usine.adresse ?? "").trim();
   }
   get factureDate() {
     return this.formatDateDisplay(this.packing?.date);
@@ -3614,9 +3620,39 @@ var PackingFacture = class _PackingFacture {
   }
   downloadInvoice() {
     return __async(this, null, function* () {
+      const pdf = yield this.buildInvoicePdf();
+      if (!pdf)
+        return;
+      const fileName = `${this.factureNumero || "facture-packing"}.pdf`;
+      pdf.save(fileName);
+    });
+  }
+  printInvoice() {
+    return __async(this, null, function* () {
+      const pdf = yield this.buildInvoicePdf();
+      if (!pdf)
+        return;
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      const printWindow = window.open(url, "_blank");
+      if (!printWindow) {
+        URL.revokeObjectURL(url);
+        this.messageService.add({
+          severity: "warn",
+          summary: "Popup bloquee",
+          detail: "Impossible d'ouvrir l'aper\xE7u PDF. Autorisez les popups pour imprimer.",
+          life: 5e3
+        });
+        return;
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 6e4);
+    });
+  }
+  buildInvoicePdf() {
+    return __async(this, null, function* () {
       const invoice = document.getElementById("packing-facture-invoice");
       if (!invoice)
-        return;
+        return null;
       let exportContainer = null;
       try {
         const [{ default: html2canvas }, { jsPDF }] = yield Promise.all([
@@ -3670,8 +3706,7 @@ var PackingFacture = class _PackingFacture {
           pdf.addImage(imageData, "PNG", margin, positionY, usableWidth, imageHeight, void 0, "FAST");
           heightLeft -= usableHeight;
         }
-        const fileName = `${this.factureNumero || "facture-packing"}.pdf`;
-        pdf.save(fileName);
+        return pdf;
       } catch {
         this.messageService.add({
           severity: "error",
@@ -3679,18 +3714,13 @@ var PackingFacture = class _PackingFacture {
           detail: "Impossible de generer le PDF.",
           life: 4e3
         });
+        return null;
       } finally {
         if (exportContainer?.parentNode) {
           exportContainer.parentNode.removeChild(exportContainer);
         }
       }
     });
-  }
-  printInvoice() {
-    const oldTitle = document.title;
-    document.title = this.factureNumero || "Facture packing";
-    window.print();
-    document.title = oldTitle;
   }
   payer() {
     if (!this.packing || !this.canPay)
@@ -4003,7 +4033,7 @@ var PackingFacture = class _PackingFacture {
       \u0275\u0275advance();
       \u0275\u0275property("rounded", true);
       \u0275\u0275advance(11);
-      \u0275\u0275textInterpolate1("Usine de ", ctx.usineNom);
+      \u0275\u0275textInterpolate(ctx.usineNom);
       \u0275\u0275advance();
       \u0275\u0275conditional(ctx.usineAdresse ? 17 : -1);
       \u0275\u0275advance(9);
@@ -4153,7 +4183,7 @@ var PackingFacture = class _PackingFacture {
                     >
                         EAU-LA-MAMAN
                     </div>
-                    <span class="mb-2">Usine de {{ usineNom }}</span>
+                    <span class="mb-2">{{ usineNom }}</span>
                     @if (usineAdresse) {
                         <span>{{ usineAdresse }}</span>
                     }
@@ -4418,4 +4448,4 @@ var packings_routes_default = [
 export {
   packings_routes_default as default
 };
-//# sourceMappingURL=chunk-DPBKYL4I.js.map
+//# sourceMappingURL=chunk-YQSCQ4RC.js.map

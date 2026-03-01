@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -79,8 +79,18 @@ export class PackingFacture implements OnInit {
   }
 
   get usineAdresse(): string {
-    const nom = this.usineContext.currentUsine()?.nom;
-    return nom ? `${nom}, Conakry, Guinée` : '';
+    const usine = this.usineContext.currentUsine();
+    if (!usine) return '';
+
+    const localisation = [usine.quartier, usine.ville, usine.pays]
+      .map((item) => (typeof item === 'string' ? item.trim() : ''))
+      .filter((item) => item.length > 0);
+
+    if (localisation.length > 0) {
+      return localisation.join(', ');
+    }
+
+    return (usine.adresse ?? '').trim();
   }
 
   get factureDate(): string {
@@ -205,10 +215,42 @@ export class PackingFacture implements OnInit {
   }
 
   async downloadInvoice(): Promise<void> {
+    const pdf = await this.buildInvoicePdf();
+    if (!pdf) return;
+
+    const fileName = `${this.factureNumero || 'facture-packing'}.pdf`;
+    pdf.save(fileName);
+  }
+
+  async printInvoice(): Promise<void> {
+    const pdf = await this.buildInvoicePdf();
+    if (!pdf) return;
+
+    const blob = pdf.output('blob');
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+
+    if (!printWindow) {
+      URL.revokeObjectURL(url);
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Popup bloquee',
+        detail: "Impossible d'ouvrir l'aperçu PDF. Autorisez les popups pour imprimer.",
+        life: 5000,
+      });
+      return;
+    }
+
+    // Nettoyage du blob URL apres ouverture de l'aperçu PDF.
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  }
+
+  private async buildInvoicePdf(): Promise<any | null> {
     const invoice = document.getElementById('packing-facture-invoice') as HTMLElement | null;
-    if (!invoice) return;
+    if (!invoice) return null;
 
     let exportContainer: HTMLDivElement | null = null;
+
     try {
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import('html2canvas'),
@@ -270,8 +312,7 @@ export class PackingFacture implements OnInit {
         heightLeft -= usableHeight;
       }
 
-      const fileName = `${this.factureNumero || 'facture-packing'}.pdf`;
-      pdf.save(fileName);
+      return pdf;
     } catch {
       this.messageService.add({
         severity: 'error',
@@ -279,18 +320,12 @@ export class PackingFacture implements OnInit {
         detail: 'Impossible de generer le PDF.',
         life: 4000,
       });
+      return null;
     } finally {
       if (exportContainer?.parentNode) {
         exportContainer.parentNode.removeChild(exportContainer);
       }
     }
-  }
-
-  printInvoice(): void {
-    const oldTitle = document.title;
-    document.title = this.factureNumero || 'Facture packing';
-    window.print();
-    document.title = oldTitle;
   }
 
   payer(): void {
@@ -433,3 +468,4 @@ export class PackingFacture implements OnInit {
   }
 
 }
+
