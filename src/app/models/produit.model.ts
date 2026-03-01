@@ -233,9 +233,11 @@ export class Produit {
 export interface CreateProduitDto {
   nom: string;
   type: ProduitType;
-  qte_stock: number;
+  /** Ignoré à la création (stock initial toujours 0 côté backend). Utilisé en édition via PUT. */
+  qte_stock?: number;
 
   code?: string;
+  /** Non envoyé à la création — le backend impose toujours 'brouillon'. Utilisé en édition via PUT. */
   statut?: ProduitStatut;
   cout?: number;
   description?: string;

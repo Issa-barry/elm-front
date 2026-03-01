@@ -39,7 +39,10 @@
 
 <div class="packing-facture-layout w-full flex flex-col md:flex-row items-start gap-6">
     <div class="packing-facture-main w-full md:flex-1">
-        <div id="packing-facture-invoice" class="card py-20 px-12 md:px-20 overflow-auto">
+        <div id="packing-facture-invoice" class="card py-20 px-12 md:px-20 overflow-visible">
+            <div class="packing-status-ribbon" [ngClass]="factureStatutClass">
+                {{ factureStatutLabel }}
+            </div>
             <div
                 class="flex flex-col items-start md:flex-row md:items-center md:justify-between border-b border-surface-200 dark:border-surface-700 pb-8 min-w-max"
             >
@@ -84,7 +87,7 @@
                             <span>{{ factureNumero }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="font-semibold mr-12">No MACHINISTE</span>
+                            <span class="font-semibold mr-12">N&deg; MACHINISTE</span>
                             <span>{{ machinisteReference }}</span>
                         </div>
                     </div>

@@ -39,7 +39,7 @@ export class AppMenu {
                 icon: 'pi pi-home',
                 items: [
                     {
-                        label: 'E-Commerce',
+                        label: 'Statistiques',
                         icon: 'pi pi-fw pi-home',
                         routerLink: ['/'],
                     },

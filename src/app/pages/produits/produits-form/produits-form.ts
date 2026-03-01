@@ -108,7 +108,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     prix_vente: null,
     qte_stock: 0,
     cout: null,
-    statut: 'actif',
+    statut: 'brouillon',
     type: 'materiel',
     in_stock: true,
     is_archived: false,
@@ -384,12 +384,14 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     const dto: CreateProduitDto = {
       nom: this.product.nom.trim(),
       type: this.product.type,
-      qte_stock: this.product.qte_stock,
       description: this.product.description?.trim() || undefined,
       cout: this.product.cout ?? undefined
     };
-    // Statut piloté par le switch (actif/inactif)
-    dto.statut = this.product.statut;
+    // Statut et stock uniquement en édition (à la création le backend impose brouillon + stock 0)
+    if (this.mode === 'edit') {
+      dto.statut = this.product.statut;
+      dto.qte_stock = this.product.qte_stock;
+    }
     dto.is_critique = this.product.is_critique;
     if (this.canManageSystemDefinition) {
       dto.is_global = this.product.is_global;
@@ -468,7 +470,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
       prix_vente: null,
       qte_stock: 0,
       cout: null,
-      statut: 'actif',
+      statut: 'brouillon',
       type: 'materiel',
       in_stock: true,
       is_archived: false,

@@ -9,7 +9,7 @@ import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 
-import { MODE_PAIEMENT_LABELS, ModePaiement, Packing, StoreVersementDto, Versement } from '@/models/packing.model';
+import { MODE_PAIEMENT_LABELS, ModePaiement, Packing, PackingStatut, StoreVersementDto, Versement } from '@/models/packing.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { LayoutService } from '@/layout/service/layout.service';
 import { PackingService } from '@/services/packing/packing.service';
@@ -99,6 +99,37 @@ export class PackingFacture implements OnInit {
 
   get factureNumero(): string {
     return this.packing?.reference || '-';
+  }
+
+  get factureStatut(): PackingStatut {
+    return this.packing?.statut ?? 'impayee';
+  }
+
+  get factureStatutLabel(): string {
+    const fromApi = this.packing?.statut_label?.trim();
+    if (fromApi) return fromApi;
+
+    const labels: Record<PackingStatut, string> = {
+      impayee: 'Impayee',
+      partielle: 'Partielle',
+      payee: 'Payee',
+      annulee: 'Annulee',
+    };
+    return labels[this.factureStatut] || 'Statut';
+  }
+
+  get factureStatutClass(): string {
+    switch (this.factureStatut) {
+      case 'payee':
+        return 'status-payee';
+      case 'partielle':
+        return 'status-partielle';
+      case 'annulee':
+        return 'status-annulee';
+      case 'impayee':
+      default:
+        return 'status-impayee';
+    }
   }
 
   get machinisteReference(): string {
@@ -223,43 +254,95 @@ export class PackingFacture implements OnInit {
   }
 
   async printInvoice(): Promise<void> {
-    const pdf = await this.buildInvoicePdf();
-    if (!pdf) return;
+    const invoice = document.getElementById('packing-facture-invoice') as HTMLElement | null;
+    if (!invoice) return;
 
-    if (typeof pdf.autoPrint === 'function') {
-      pdf.autoPrint();
-    }
+    const exportNode = invoice.cloneNode(true) as HTMLElement;
+    exportNode.classList.remove('card');
+    exportNode.style.border = '0';
+    exportNode.style.boxShadow = 'none';
+    exportNode.style.borderRadius = '0';
+    exportNode.style.margin = '0';
+    exportNode.style.background = '#ffffff';
+    exportNode.style.overflow = 'visible';
 
-    const blob = pdf.output('blob');
-    const url = URL.createObjectURL(blob);
-    const printWindow = window.open(url, '_blank');
+    const headStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map((node) => node.outerHTML)
+      .join('\n');
 
-    if (!printWindow) {
-      URL.revokeObjectURL(url);
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Popup bloquee',
-        detail: "Impossible d'ouvrir l'aperçu PDF. Autorisez les popups pour imprimer.",
-        life: 5000,
-      });
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
+
+    const cleanup = () => {
+      setTimeout(() => {
+        if (iframe.parentNode) {
+          iframe.parentNode.removeChild(iframe);
+        }
+      }, 1500);
+    };
+
+    document.body.appendChild(iframe);
+    const frameDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!frameDoc) {
+      cleanup();
       return;
     }
 
+    frameDoc.open();
+    frameDoc.write(`
+      <!doctype html>
+      <html lang="fr">
+        <head>
+          <meta charset="utf-8" />
+          ${headStyles}
+          <style>
+            @page { size: A4; margin: 8mm; }
+            html, body {
+              margin: 0;
+              padding: 0;
+              background: #ffffff;
+            }
+            body {
+              font-family: inherit;
+              color: inherit;
+            }
+            .packing-facture-print-root {
+              width: 100%;
+              margin: 0;
+              padding: 0;
+              background: #ffffff;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="packing-facture-print-root">${exportNode.outerHTML}</div>
+        </body>
+      </html>
+    `);
+    frameDoc.close();
+
     const triggerPrint = () => {
       try {
-        printWindow.focus();
-        printWindow.print();
-      } catch {
-        // Certains navigateurs bloquent l'appel direct: le PDF reste ouvert pour impression manuelle.
+        const frameWindow = iframe.contentWindow;
+        if (!frameWindow) {
+          cleanup();
+          return;
+        }
+        frameWindow.focus();
+        frameWindow.print();
+      } finally {
+        cleanup();
       }
     };
 
-    // Tente de declencher automatiquement le dialogue d'impression.
     setTimeout(triggerPrint, 250);
-    setTimeout(triggerPrint, 1200);
-
-    // Nettoyage du blob URL apres ouverture de l'aperçu PDF.
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
   private async buildInvoicePdf(): Promise<any | null> {
