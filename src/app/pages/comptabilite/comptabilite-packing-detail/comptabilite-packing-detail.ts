@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, effect, signal } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,24 +22,22 @@ import { TooltipModule } from 'primeng/tooltip';
 import { StyleClassModule } from 'primeng/styleclass';
 
 import { AuthService } from '@/services/auth/auth.service';
-import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
+import { PackingService } from '@/services/packing/packing.service';
 import {
-  FacturePacking,
+  Packing,
   Versement,
   VersementIndexResponse,
   StoreVersementDto,
   ModePaiement,
   MODE_PAIEMENT_LABELS,
-  FACTURE_PACKING_STATUT_SEVERITY,
-  FacturePackingStatutSeverity,
-} from '@/models/facture-packing.model';
+  PACKING_STATUT_SEVERITY,
+  PackingStatutSeverity,
+} from '@/models/packing.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { ComptabilitePackingPaiement, PaiementPayload } from '../components/comptabilite-packing-paiement/comptabilite-packing-paiement';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { RatingModule } from 'primeng/rating';
-import { ComptabilitePackingPaiementDialog } from '../components/comptabilite-packing-paiement-dialog/comptabilite-packing-paiement-dialog';
 import { ComptabiliteHistoriqueVersements } from '../components/comptabilite-historique-versements/comptabilite-historique-versements';
 import { MoneyPipe } from '@/pipes/money.pipe';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 
 interface ModePaiementOption {
   label: string;
@@ -73,35 +71,30 @@ interface ModePaiementOption {
     PhoneFormatPipe,
     StyleClassModule,
     ComptabilitePackingPaiement,
-    ComptabilitePackingPaiementDialog,
     ComptabiliteHistoriqueVersements,
-        RatingModule,
-        RadioButtonModule,
-        MoneyPipe
- 
+    MoneyPipe,
   ],
   providers: [MessageService, ConfirmationService],
 })
 export class ComptabilitePackingDetail implements OnInit, OnDestroy {
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'comptabilite-packing-detail-mobile-pwa';
+  private hasInitializedUsineWatcher = false;
 
   prestataireId: number = 0;
   prestataireNom: string = '';
   prestatairePhone: string = '';
 
-  factures = signal<FacturePacking[]>([]);
+  packings = signal<Packing[]>([]);
   loading: boolean = false;
 
-  // Totaux 
-  
-  totalFacture: number = 0;
+  totalMontant: number = 0;
   totalVerse: number = 0;
   totalRestant: number = 0;
 
   // Dialog versement
   versementDialog: boolean = false;
-  selectedFacture: FacturePacking | null = null;
+  selectedPacking: Packing | null = null;
   versementData: {
     montant: number | null;
     date_versement: Date | null;
@@ -132,35 +125,51 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
   canReadVersement: boolean = false;
   canCreateVersement: boolean = false;
   canDeleteVersement: boolean = false;
-  canDeleteFacture: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private factureService: FacturePaiementService,
+    private packingService: PackingService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
-    @Inject(DOCUMENT) private document: Document
+    private usineContext: UsineContextService,
+    @Inject(DOCUMENT) private document: Document,
   ) {
     this.canReadVersement = this.authService.hasPermission('versements.read');
     this.canCreateVersement = this.authService.hasPermission('versements.create');
     this.canDeleteVersement = this.authService.hasPermission('versements.delete');
-    this.canDeleteFacture = this.authService.hasPermission('facture-packings.delete');
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      this.usineContext.isConsolidated();
+
+      if (!this.hasInitializedUsineWatcher) {
+        this.hasInitializedUsineWatcher = true;
+        return;
+      }
+
+      if (this.prestataireId) {
+        this.loadPackings();
+      }
+    });
   }
 
   ngOnInit() {
     this.syncMobilePwaMode();
     this.route.params.subscribe((params) => {
       this.prestataireId = +params['id'] || 0;
+      if (this.prestataireId) {
+        this.loadPackings();
+      } else {
+        this.packings.set([]);
+        this.calculateTotals([]);
+      }
     });
     this.route.queryParams.subscribe((params) => {
       this.prestataireNom = params['prestataire_nom'] || '';
       this.prestatairePhone = params['prestataire_phone'] || '';
     });
-    if (this.prestataireId) {
-      this.loadFactures();
-    }
   }
 
   ngOnDestroy() {
@@ -181,21 +190,22 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
     }
   }
 
-  loadFactures() {
+  loadPackings() {
     this.loading = true;
-    this.factureService.getFactures({ prestataire_id: this.prestataireId }).subscribe({
+    this.packingService.getPackings({ prestataire_id: this.prestataireId, per_page: 500 }).subscribe({
       next: (response) => {
-        const data = (response.data || []).map((f: any) => new FacturePacking(f));
-        this.factures.set(data);
+        const data: Packing[] = 'data' in response && Array.isArray(response.data)
+          ? response.data as Packing[]
+          : ((response as any).data?.data ?? []) as Packing[];
+        this.packings.set(data);
         this.calculateTotals(data);
         this.loading = false;
-        
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les factures',
+          detail: error?.error?.message || 'Impossible de charger les packings',
           life: 3000,
         });
         this.loading = false;
@@ -203,20 +213,20 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
     });
   }
 
-  calculateTotals(factures: FacturePacking[]) {
-    this.totalFacture = factures.reduce((sum, f) => sum + f.montant_total, 0);
-    this.totalVerse = factures.reduce((sum, f) => sum + f.montant_verse, 0);
-    this.totalRestant = factures.reduce((sum, f) => sum + f.montant_restant, 0);
+  calculateTotals(packings: Packing[]) {
+    this.totalMontant = packings.reduce((sum, p) => sum + (p.montant ?? 0), 0);
+    this.totalVerse = packings.reduce((sum, p) => sum + (p.montant_verse ?? 0), 0);
+    this.totalRestant = packings.reduce((sum, p) => sum + (p.montant_restant ?? 0), 0);
   }
 
   // ========================= Versement =========================
 
-  openVersement(facture: FacturePacking) {
-    this.selectedFacture = facture;
+  openVersement(packing: Packing) {
+    this.selectedPacking = packing;
     this.versementDialog = true;
     this.versementSubmitted = false;
     this.versementData = {
-      montant: facture.montant_restant,
+      montant: packing.montant_restant,
       date_versement: new Date(),
       mode_paiement: 'especes',
       notes: '',
@@ -225,14 +235,14 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
 
   hideVersementDialog() {
     this.versementDialog = false;
-    this.selectedFacture = null;
+    this.selectedPacking = null;
     this.versementSubmitted = false;
   }
 
   saveVersement() {
     this.versementSubmitted = true;
 
-    if (!this.selectedFacture || !this.versementData.montant || !this.versementData.date_versement || this.versementSaving) {
+    if (!this.selectedPacking || !this.versementData.montant || !this.versementData.date_versement || this.versementSaving) {
       return;
     }
 
@@ -245,17 +255,25 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
       notes: this.versementData.notes || undefined,
     };
 
-    this.factureService.createVersement(this.selectedFacture.id, dto).subscribe({
-      next: () => {
+    this.packingService.createVersement(this.selectedPacking.id, dto).subscribe({
+      next: (response) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Succès',
-          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistré`,
+          summary: 'Succes',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistre`,
           life: 3000,
         });
         this.versementSaving = false;
         this.versementDialog = false;
-        this.loadFactures();
+        // Mettre a jour le packing localement
+        if (response.data?.packing) {
+          this.packings.update((list) =>
+            list.map((p) => p.id === response.data.packing.id ? response.data.packing : p),
+          );
+          this.calculateTotals(this.packings());
+        } else {
+          this.loadPackings();
+        }
       },
       error: (error) => {
         const msg = error?.error?.message || "Impossible d'enregistrer le versement";
@@ -272,7 +290,7 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
 
   // ========================= Historique versements =========================
 
-  openHistorique(facture: FacturePacking) {
+  openHistorique(packing: Packing) {
     if (this.isMobile) {
       this.historiqueSlideoverVisible = true;
     } else {
@@ -281,7 +299,7 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
     this.historiqueLoading = true;
     this.historiqueData = null;
 
-    this.factureService.getVersements(facture.id).subscribe({
+    this.packingService.getVersements(packing.id).subscribe({
       next: (response) => {
         this.historiqueData = response.data;
         this.historiqueLoading = false;
@@ -307,10 +325,10 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
 
   onHistoriqueDeleteVersement(versement: Versement) {
     if (!this.historiqueData) return;
-    this.confirmDeleteVersement(this.historiqueData.facture_id, versement);
+    this.confirmDeleteVersement(this.historiqueData.packing.id, versement);
   }
 
-  confirmDeleteVersement(factureId: number, versement: Versement) {
+  confirmDeleteVersement(packingId: number, versement: Versement) {
     this.confirmationService.confirm({
       message: `Supprimer le versement de ${this.formatCurrency(versement.montant)} ?`,
       header: 'Confirmation',
@@ -318,18 +336,20 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
       acceptLabel: 'Supprimer',
       rejectLabel: 'Annuler',
       accept: () => {
-        this.factureService.deleteVersement(factureId, versement.id).subscribe({
+        this.packingService.deleteVersement(packingId, versement.id).subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',
-              summary: 'Succès',
-              detail: 'Versement supprimé',
+              summary: 'Succes',
+              detail: 'Versement supprime',
               life: 3000,
             });
+            // Recharger l'historique si ouvert
             if (this.historiqueData) {
-              this.openHistorique({ id: factureId } as FacturePacking);
+              const packing = this.packings().find((p) => p.id === packingId);
+              if (packing) this.openHistorique(packing);
             }
-            this.loadFactures();
+            this.loadPackings();
           },
           error: () => {
             this.messageService.add({
@@ -344,42 +364,14 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
     });
   }
 
-  confirmDeleteFacture(facture: FacturePacking) {
-    this.confirmationService.confirm({
-      message: `Supprimer la facture ${facture.reference} ?`,
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      accept: () => {
-        this.factureService.deleteFacture(facture.id).subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Facture supprimée',
-              life: 3000,
-            });
-            this.loadFactures();
-          },
-          error: (error) => {
-            const msg = error?.error?.message || 'Impossible de supprimer la facture';
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur',
-              detail: msg,
-              life: 5000,
-            });
-          },
-        });
-      },
-    });
-  }
-
   // ========================= Helpers =========================
 
-  getStatutSeverity(statut: string): FacturePackingStatutSeverity {
-    return (FACTURE_PACKING_STATUT_SEVERITY as any)[statut] ?? 'info';
+  getStatutSeverity(statut: string): PackingStatutSeverity {
+    return (PACKING_STATUT_SEVERITY as any)[statut] ?? 'info';
+  }
+
+  canPay(packing: Packing): boolean {
+    return packing.statut !== 'annulee' && packing.montant_restant > 0;
   }
 
   formatDate(date: any): string {
@@ -396,14 +388,10 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
     }).format(value) + ' GNF';
   }
 
-  formatDateDisplay(dateStr: string): string {
+  formatDateDisplay(dateStr: string | Date): string {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
+    const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
     return date.toLocaleDateString('fr-FR');
-  }
-
-  getReferenceShort(ref: string): string {
-    return (ref || '').replace('FACT-PACK-', '');
   }
 
   goBack() {
@@ -419,21 +407,21 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
 
   // Slide-over paiement
   slideoverVisible: boolean = false;
-  slideoverFacture: FacturePacking | null = null;
+  slideoverPacking: Packing | null = null;
   slideoverSaving: boolean = false;
 
-  openSlideoverPaiement(facture: FacturePacking) {
-    this.slideoverFacture = facture;
+  openSlideoverPaiement(packing: Packing) {
+    this.slideoverPacking = packing;
     this.slideoverVisible = true;
   }
 
   closeSlideoverPaiement() {
     this.slideoverVisible = false;
-    this.slideoverFacture = null;
+    this.slideoverPacking = null;
   }
 
   onSlideoverPay(payload: PaiementPayload) {
-    if (!this.slideoverFacture || this.slideoverSaving) return;
+    if (!this.slideoverPacking || this.slideoverSaving) return;
 
     this.slideoverSaving = true;
 
@@ -443,17 +431,24 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
       mode_paiement: payload.mode_paiement,
     };
 
-    this.factureService.createVersement(this.slideoverFacture.id, dto).subscribe({
-      next: () => {
+    this.packingService.createVersement(this.slideoverPacking.id, dto).subscribe({
+      next: (response) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Succès',
-          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistré`,
+          summary: 'Succes',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistre`,
           life: 3000,
         });
         this.slideoverSaving = false;
         this.closeSlideoverPaiement();
-        this.loadFactures();
+        if (response.data?.packing) {
+          this.packings.update((list) =>
+            list.map((p) => p.id === response.data.packing.id ? response.data.packing : p),
+          );
+          this.calculateTotals(this.packings());
+        } else {
+          this.loadPackings();
+        }
       },
       error: (error) => {
         const msg = error?.error?.message || "Impossible d'enregistrer le versement";

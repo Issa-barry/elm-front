@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="historique-header w-full flex-shrink-0 p-6 border-b border-surface-200 dark:border-surface-700 flex items-center">
         <div class="flex-1 min-w-0">
-            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ data.reference.replace('FACT-PACK-', '') }}</div>
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ data.packing.reference }}</div>
             <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Historique des versements</div>
         </div>
         <button pButton [text]="true" [rounded]="true" class="w-10 h-10" (click)="onClose.emit()">
@@ -12,21 +12,21 @@
 
     <!-- Body (scrollable) -->
     <div class="historique-body flex-1 min-h-0 w-full overflow-y-auto">
-        <!-- Résumé facture -->
+        <!-- Resume packing -->
         <div class="p-6 border-b border-surface-200 dark:border-surface-700">
             <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col gap-4">
                 <div class="w-full flex justify-between items-center">
-                    <span class="text-surface-500 dark:text-surface-400 text-base">Total facture</span>
-                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium">{{ formatCurrency(data.montant_total) }}</span>
+                    <span class="text-surface-500 dark:text-surface-400 text-base">Total packing</span>
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium">{{ formatCurrency(data.packing.montant) }}</span>
                 </div>
                 <div class="w-full flex justify-between items-center">
-                    <span class="text-surface-500 dark:text-surface-400 text-base">Déjà versé</span>
-                    <span class="text-base font-semibold" style="color: #059669">{{ formatCurrency(data.montant_verse) }}</span>
+                    <span class="text-surface-500 dark:text-surface-400 text-base">Deja verse</span>
+                    <span class="text-base font-semibold" style="color: #059669">{{ formatCurrency(data.packing.montant_verse) }}</span>
                 </div>
                 <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
                 <div class="w-full flex justify-between items-center">
-                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Reste à payer</span>
-                    <span class="text-lg font-bold" style="color: #d97706">{{ formatCurrency(data.montant_restant) }}</span>
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Reste a payer</span>
+                    <span class="text-lg font-bold" style="color: #d97706">{{ formatCurrency(data.packing.montant_restant) }}</span>
                 </div>
             </div>
         </div>
@@ -88,7 +88,7 @@
         <!-- Empty state -->
         <div *ngIf="!loading && data.versements.length === 0" class="flex flex-col items-center justify-center gap-3 py-16 text-surface-300 dark:text-surface-500">
             <i class="pi pi-inbox text-4xl"></i>
-            <span class="text-sm">Aucun versement enregistré</span>
+            <span class="text-sm">Aucun versement enregistre</span>
         </div>
     </div>
 
@@ -98,10 +98,10 @@
             <span class="text-surface-500 dark:text-surface-400 text-sm font-medium">Statut</span>
             <span
                 class="historique-statut-badge text-sm font-semibold px-3 py-1 rounded-full"
-                [class.historique-statut-badge--success]="data.is_soldee"
-                [class.historique-statut-badge--warn]="!data.is_soldee"
+                [class.historique-statut-badge--success]="data.packing.statut === 'payee'"
+                [class.historique-statut-badge--warn]="data.packing.statut !== 'payee'"
             >
-                {{ data.is_soldee ? 'Soldé' : 'En cours' }}
+                {{ data.packing.statut === 'payee' ? 'Solde' : 'En cours' }}
             </span>
         </div>
     </div>

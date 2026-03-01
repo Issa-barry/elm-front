@@ -80,8 +80,6 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
   @Output() submitForm = new EventEmitter<CreateProduitDto>();
   @Output() cancel = new EventEmitter<void>();
   @Output() deleteImage = new EventEmitter<void>();
-  /** Émis quand l'admin bascule is_global — action immédiate, hors cycle de la form. */
-  @Output() globalToggled = new EventEmitter<boolean>();
 
   submitted = false;
   isEditing = false;
@@ -253,17 +251,6 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     this.product.statut = value ? 'actif' : 'inactif';
   }
 
-  /**
-   * Action immédiate sur le toggle "Produit global".
-   * Ne passe pas par le submit — émet directement vers le parent.
-   * Le parent appelle PATCH /produits/{id}/global.
-   */
-  onGlobalToggle(value: boolean): void {
-    if (!this.canToggleGlobal()) return;
-    this.product.is_global = value;
-    this.globalToggled.emit(value);
-  }
-
   canToggleGlobal(): boolean {
     return this.canManageSystemDefinition && !this.fieldsDisabled;
   }
@@ -404,7 +391,9 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     // Statut piloté par le switch (actif/inactif)
     dto.statut = this.product.statut;
     dto.is_critique = this.product.is_critique;
-    // is_global est géré par onGlobalToggle() → PATCH dédié, pas dans le PUT
+    if (this.canManageSystemDefinition) {
+      dto.is_global = this.product.is_global;
+    }
 
     // Seuil alerte stock : vide => null, sinon entier
     const rawSeuil = this.product.seuil_alerte_stock;
@@ -484,6 +473,7 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
       in_stock: true,
       is_archived: false,
       is_critique: false,
+      is_global: false,
       seuil_alerte_stock: null,
       description: null,
       image_url: null

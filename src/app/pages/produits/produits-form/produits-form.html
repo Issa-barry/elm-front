@@ -263,8 +263,7 @@
                 <small class="text-surface-400 text-xs">Disponible dans toutes les usines</small>
             </div>
             <p-toggleswitch
-                [ngModel]="product.is_global"
-                (ngModelChange)="onGlobalToggle($event)"
+                [(ngModel)]="product.is_global"
                 [disabled]="!canToggleGlobal()"
                 class="ml-auto"
             ></p-toggleswitch>
@@ -584,8 +583,7 @@
                                 <small class="text-surface-500">Disponible dans toutes les usines</small>
                             </div>
                             <p-toggleswitch
-                                [ngModel]="product.is_global"
-                                (ngModelChange)="onGlobalToggle($event)"
+                                [(ngModel)]="product.is_global"
                                 [disabled]="!canToggleGlobal()"
                                 class="ml-auto"
                             ></p-toggleswitch>

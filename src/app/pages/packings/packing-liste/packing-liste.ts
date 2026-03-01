@@ -17,11 +17,30 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
 
 import { PackingService } from '@/services/packing/packing.service';
-import { Packing, PACKING_STATUT_LABELS, PACKING_STATUT_SEVERITY, PackingStatut } from '@/models/packing.model';
+import {
+  Packing,
+  PACKING_STATUT_LABELS,
+  PACKING_STATUT_SEVERITY,
+  PackingStatut,
+  PackingStatutSeverity,
+  ModePaiement,
+  MODE_PAIEMENT_LABELS,
+  StoreVersementDto,
+  VersementIndexResponse,
+  Versement,
+} from '@/models/packing.model';
 import { AuthService } from '@/services/auth/auth.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+
+interface ModePaiementOption {
+  label: string;
+  value: ModePaiement;
+}
 
 @Component({
   selector: 'app-packing-liste',
@@ -46,6 +65,9 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     MenuModule,
     RippleModule,
     PhoneFormatPipe,
+    DialogModule,
+    InputNumberModule,
+    TextareaModule,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -58,27 +80,60 @@ export class PackingListe implements OnInit {
   canCreate = false;
   canUpdate = false;
   canDelete = false;
+  canReadVersement = false;
+  canCreateVersement = false;
+  canDeleteVersement = false;
 
   mobileFilterMenuItems: MenuItem[] = [];
+  skeletonCols: number[] = [];
+
+  // Versement dialog
+  versementDialog = false;
+  selectedPacking: Packing | null = null;
+  versementData: {
+    montant: number | null;
+    date_versement: Date | null;
+    mode_paiement: ModePaiement;
+    notes: string;
+  } = {
+    montant: null,
+    date_versement: new Date(),
+    mode_paiement: 'especes',
+    notes: '',
+  };
+  versementSaving = false;
+  versementSubmitted = false;
+  modesPaiement: ModePaiementOption[] = [
+    { label: MODE_PAIEMENT_LABELS.especes, value: 'especes' },
+    { label: MODE_PAIEMENT_LABELS.virement, value: 'virement' },
+    { label: MODE_PAIEMENT_LABELS.cheque, value: 'cheque' },
+    { label: MODE_PAIEMENT_LABELS.mobile_money, value: 'mobile_money' },
+  ];
+
+  // Historique dialog
+  historiqueDialog = false;
+  historiqueData: VersementIndexResponse | null = null;
+  historiqueLoading = false;
 
   statutOptions = [
     { label: 'Tous les statuts', value: 'all' },
-    { label: 'À valider', value: 'a_valider' },
-    { label: 'Validé', value: 'valide' },
-    { label: 'Annulé', value: 'annule' },
+    { label: 'Impayee', value: 'impayee' },
+    { label: 'Partielle', value: 'partielle' },
+    { label: 'Payee', value: 'payee' },
+    { label: 'Annulee', value: 'annulee' },
   ];
 
   filteredPackings = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const list = this.packings();
     if (!query) return list;
-    return list.filter((p) => {
+    return list.filter((packing) => {
       const searchable = [
-        p.reference,
-        p.prestataire?.nom,
-        p.prestataire?.prenom,
-        p.prestataire?.phone,
-        this.getStatutLabel(p.statut),
+        packing.reference,
+        packing.prestataire?.nom,
+        packing.prestataire?.prenom,
+        packing.prestataire?.phone,
+        this.getStatutLabel(packing.statut),
       ]
         .filter(Boolean)
         .join(' ')
@@ -86,6 +141,10 @@ export class PackingListe implements OnInit {
       return searchable.includes(query);
     });
   });
+
+  get hasActionsColumn(): boolean {
+    return this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
+  }
 
   constructor(
     private packingService: PackingService,
@@ -97,19 +156,28 @@ export class PackingListe implements OnInit {
     this.canCreate = this.authService.hasPermission('packings.create');
     this.canUpdate = this.authService.hasPermission('packings.update');
     this.canDelete = this.authService.hasPermission('packings.delete');
+    this.canReadVersement = this.authService.hasPermission('versements.read');
+    this.canCreateVersement = this.authService.hasPermission('versements.create');
+    this.canDeleteVersement = this.authService.hasPermission('versements.delete');
+    this.skeletonCols = this.hasActionsColumn
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      : [1, 2, 3, 4, 5, 6, 7, 8];
   }
 
   ngOnInit(): void {
     this.load();
     this.mobileFilterMenuItems = [
-      { label: 'Tous',      icon: 'pi pi-list',         command: () => this.setStatutFilter('all') },
-      { label: 'À valider', icon: 'pi pi-clock',        command: () => this.setStatutFilter('a_valider') },
-      { label: 'Validé',    icon: 'pi pi-check-circle', command: () => this.setStatutFilter('valide') },
-      { label: 'Annulé',    icon: 'pi pi-times-circle', command: () => this.setStatutFilter('annule') },
+      { label: 'Tous', icon: 'pi pi-list', command: () => this.setStatutFilter('all') },
+      { label: 'Impayee', icon: 'pi pi-times-circle', command: () => this.setStatutFilter('impayee') },
+      { label: 'Partielle', icon: 'pi pi-clock', command: () => this.setStatutFilter('partielle') },
+      { label: 'Payee', icon: 'pi pi-check-circle', command: () => this.setStatutFilter('payee') },
+      { label: 'Annulee', icon: 'pi pi-ban', command: () => this.setStatutFilter('annulee') },
     ];
   }
 
-  goBack(): void { this.router.navigate(['/']); }
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
 
   load(): void {
     this.loading = true;
@@ -124,18 +192,28 @@ export class PackingListe implements OnInit {
         const data = 'data' in response && Array.isArray(response.data)
           ? response.data
           : (response as any).data?.data ?? [];
-        this.packings.set(data);
+        this.packings.set(data as Packing[]);
         this.loading = false;
       },
       error: () => {
         this.loading = false;
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les packings.', life: 5000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les packings.',
+          life: 5000,
+        });
       },
     });
   }
 
-  goNew(): void { this.router.navigate(['/packings/packings-new']); }
-  goEdit(p: Packing): void { this.router.navigate(['/packings/packings-edit', p.id]); }
+  goNew(): void {
+    this.router.navigate(['/packings/packings-new']);
+  }
+
+  goEdit(packing: Packing): void {
+    this.router.navigate(['/packings/packings-edit', packing.id]);
+  }
 
   setStatutFilter(value: string): void {
     this.selectedStatut.set(value as PackingStatut | 'all');
@@ -152,28 +230,167 @@ export class PackingListe implements OnInit {
     this.load();
   }
 
-  deletePacking(p: Packing): void {
+  hasActiveFilters(): boolean {
+    return !!this.filterDateRange || this.selectedStatut() !== 'all';
+  }
+
+  deletePacking(packing: Packing): void {
     this.confirmationService.confirm({
-      message: `Supprimer définitivement le packing <strong>${p.reference}</strong> ?`,
+      message: `Supprimer definitivement le packing <strong>${packing.reference}</strong> ?`,
       header: 'Supprimer le packing',
       icon: 'pi pi-trash',
       rejectButtonProps: { label: 'Annuler', severity: 'secondary', outlined: true },
       acceptButtonProps: { label: 'Supprimer', severity: 'danger' },
       accept: () => {
-        this.packingService.deletePacking(p.id).subscribe({
+        this.packingService.deletePacking(packing.id).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Supprimé', detail: `Packing ${p.reference} supprimé.`, life: 3000 });
-            this.packings.update(list => list.filter(x => x.id !== p.id));
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Supprime',
+              detail: `Packing ${packing.reference} supprime.`,
+              life: 3000,
+            });
+            this.packings.update((list) => list.filter((item) => item.id !== packing.id));
           },
-          error: (err) => this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message || 'Impossible de supprimer.', life: 5000 }),
+          error: (err) => this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err.error?.message || 'Impossible de supprimer.',
+            life: 5000,
+          }),
         });
       },
     });
   }
 
-  getInitials(p: Packing): string {
-    const prenom = p.prestataire?.prenom ?? '';
-    const nom = p.prestataire?.nom ?? '';
+  canPay(packing: Packing): boolean {
+    return packing.statut !== 'annulee' && (packing.montant_restant ?? 0) > 0;
+  }
+
+  openVersement(packing: Packing): void {
+    this.selectedPacking = packing;
+    this.versementDialog = true;
+    this.versementSubmitted = false;
+    this.versementData = {
+      montant: packing.montant_restant,
+      date_versement: new Date(),
+      mode_paiement: 'especes',
+      notes: '',
+    };
+  }
+
+  hideVersementDialog(): void {
+    this.versementDialog = false;
+    this.selectedPacking = null;
+    this.versementSubmitted = false;
+  }
+
+  saveVersement(): void {
+    this.versementSubmitted = true;
+    if (!this.selectedPacking || !this.versementData.montant || !this.versementData.date_versement || this.versementSaving) {
+      return;
+    }
+    this.versementSaving = true;
+
+    const dto: StoreVersementDto = {
+      montant: this.versementData.montant,
+      date_versement: this.formatDate(this.versementData.date_versement),
+      mode_paiement: this.versementData.mode_paiement,
+      notes: this.versementData.notes || undefined,
+    };
+
+    this.packingService.createVersement(this.selectedPacking.id, dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistre`,
+          life: 3000,
+        });
+        this.versementSaving = false;
+        this.versementDialog = false;
+        if (response.data?.packing) {
+          this.packings.update((list) =>
+            list.map((p) => p.id === response.data.packing.id ? response.data.packing : p),
+          );
+        } else {
+          this.load();
+        }
+      },
+      error: (error) => {
+        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.versementSaving = false;
+      },
+    });
+  }
+
+  openHistorique(packing: Packing): void {
+    this.historiqueDialog = true;
+    this.historiqueLoading = true;
+    this.historiqueData = null;
+
+    this.packingService.getVersements(packing.id).subscribe({
+      next: (response) => {
+        this.historiqueData = response.data;
+        this.historiqueLoading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les versements',
+          life: 3000,
+        });
+        this.historiqueLoading = false;
+        this.historiqueDialog = false;
+      },
+    });
+  }
+
+  confirmDeleteVersement(versement: Versement): void {
+    if (!this.historiqueData) return;
+    const packingId = this.historiqueData.packing.id;
+    this.confirmationService.confirm({
+      message: `Supprimer le versement de ${this.formatCurrency(versement.montant)} ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.packingService.deleteVersement(packingId, versement.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succes',
+              detail: 'Versement supprime',
+              life: 3000,
+            });
+            const packing = this.packings().find((p) => p.id === packingId);
+            if (packing) this.openHistorique(packing);
+            this.load();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de supprimer le versement',
+              life: 3000,
+            });
+          },
+        });
+      },
+    });
+  }
+
+  getInitials(packing: Packing): string {
+    const prenom = packing.prestataire?.prenom ?? '';
+    const nom = packing.prestataire?.nom ?? '';
     if (!prenom && !nom) return '--';
     return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
   }
@@ -182,8 +399,12 @@ export class PackingListe implements OnInit {
     return PACKING_STATUT_LABELS[statut] || statut;
   }
 
-  getStatutSeverity(statut: PackingStatut): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+  getStatutSeverity(statut: PackingStatut): PackingStatutSeverity {
     return PACKING_STATUT_SEVERITY[statut] || 'info';
+  }
+
+  getModeLabel(mode: string): string {
+    return (MODE_PAIEMENT_LABELS as any)[mode] ?? mode;
   }
 
   formatCurrency(value: number): string {

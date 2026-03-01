@@ -44,9 +44,10 @@ export class PackingMobileForm {
   @Output() selectedPrestataireChange = new EventEmitter<Prestataire | null>();
 
   statuses: StatutOption[] = [
-    { label: 'À valider', value: 'a_valider' },
-    { label: 'Validé', value: 'valide' },
-    { label: 'Annulé', value: 'annule' },
+    { label: 'Impayee', value: 'impayee' },
+    { label: 'Partielle', value: 'partielle' },
+    { label: 'Payee', value: 'payee' },
+    { label: 'Annulee', value: 'annulee' },
   ];
 
   calculateMontant() {

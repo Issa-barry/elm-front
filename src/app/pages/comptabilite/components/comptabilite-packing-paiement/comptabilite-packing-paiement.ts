@@ -4,9 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { StyleClassModule } from 'primeng/styleclass';
-import { FacturePacking, ModePaiement } from '@/models/facture-packing.model';
+import { Packing, ModePaiement } from '@/models/packing.model';
 import { MoneyPipe } from '@/pipes/money.pipe';
-import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 export interface PaiementPayload {
   montant: number;
@@ -18,10 +17,10 @@ export interface PaiementPayload {
   templateUrl: './comptabilite-packing-paiement.html',
   styleUrl: './comptabilite-packing-paiement.scss',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, StyleClassModule, InputNumberModule, MoneyPipe, PhoneFormatPipe],
+  imports: [CommonModule, FormsModule, ButtonModule, StyleClassModule, InputNumberModule, MoneyPipe],
 })
 export class ComptabilitePackingPaiement implements OnChanges {
-  @Input() facture: FacturePacking | null = null;
+  @Input() packing: Packing | null = null;
   @Input() saving: boolean = false;
   @Output() onPay = new EventEmitter<PaiementPayload>();
   @Output() onClose = new EventEmitter<void>();
@@ -29,9 +28,9 @@ export class ComptabilitePackingPaiement implements OnChanges {
   montant: number | null = null;
   selectedMode: ModePaiement = 'especes';
 
-  ngOnChanges() { 
-    if (this.facture) {
-      this.montant = this.facture.montant_restant;
+  ngOnChanges() {
+    if (this.packing) {
+      this.montant = this.packing.montant_restant;
       this.selectedMode = 'especes';
     }
   }
@@ -41,7 +40,7 @@ export class ComptabilitePackingPaiement implements OnChanges {
   }
 
   confirmer() {
-    if (!this.montant || this.montant <= 0 || !this.facture) return;
+    if (!this.montant || this.montant <= 0 || !this.packing) return;
     this.onPay.emit({
       montant: this.montant,
       mode_paiement: this.selectedMode,

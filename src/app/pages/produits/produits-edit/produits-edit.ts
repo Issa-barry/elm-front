@@ -77,32 +77,6 @@ export class ProduitsEdit implements OnInit, OnDestroy {
     });
   }
 
-  onGlobalToggled(isGlobal: boolean): void {
-    if (!this.produitId) return;
-    this.loading = true;
-
-    this.produitService.toggleGlobal(this.produitId, isGlobal).subscribe({
-      next: (updatedProduit) => {
-        this.initialData = updatedProduit;
-        this.loading = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: isGlobal
-            ? 'Produit marqué comme global — visible par toutes les usines.'
-            : 'Produit retiré du catalogue global.',
-          life: 3000,
-        });
-      },
-      error: (error) => {
-        // Revenir à l'état précédent (reload du produit)
-        if (this.produitId) this.loadProduit(this.produitId);
-        this.loading = false;
-        this.showApiError(error, 'Impossible de modifier le statut global');
-      },
-    });
-  }
-
   onDeleteImage(): void {
     if (!this.produitId) return;
     this.loading = true;
