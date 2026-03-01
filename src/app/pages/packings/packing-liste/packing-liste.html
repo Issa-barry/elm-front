@@ -160,6 +160,19 @@
   }
 </p-dialog>
 
+<!-- Slide-over paiement mobile (meme composant que comptabilite) -->
+<div class="fixed inset-0 z-50" *ngIf="mobilePaiementVisible">
+  <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeMobilePaiement()"></div>
+  <div class="mobile-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
+    <app-comptabilite-packing-paiement
+      [packing]="mobilePaiementPacking"
+      [saving]="mobilePaiementSaving"
+      (onPay)="onMobilePay($event)"
+      (onClose)="closeMobilePaiement()"
+    ></app-comptabilite-packing-paiement>
+  </div>
+</div>
+
 <!-- MOBILE -->
 <div class="packing-mobile-app">
   <header class="mobile-header">
@@ -227,6 +240,51 @@
             </span>
           </div>
         </div>
+        @if ((canCreateVersement && canPay(p)) || canReadVersement || canUpdate) {
+          <div class="mobile-card-actions">
+            @if (canCreateVersement && canPay(p)) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-wallet"
+                severity="success"
+                text
+                rounded
+                size="small"
+                pTooltip="Encaisser"
+                tooltipPosition="left"
+                (click)="openVersementFromCard($event, p)"
+              ></button>
+            }
+            @if (canReadVersement) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-history"
+                severity="info"
+                text
+                rounded
+                size="small"
+                pTooltip="Historique"
+                tooltipPosition="left"
+                (click)="openHistoriqueFromCard($event, p)"
+              ></button>
+            }
+            @if (canUpdate) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-pen-to-square"
+                text
+                rounded
+                size="small"
+                pTooltip="Modifier"
+                tooltipPosition="left"
+                (click)="goEditFromCard($event, p)"
+              ></button>
+            }
+          </div>
+        }
       </article>
     </section>
 
@@ -236,7 +294,7 @@
     </ng-template>
   </div>
 
-  @if (canCreate) {
+  @if (canCreate && !mobilePaiementVisible) {
     <button type="button" class="mobile-fab" aria-label="Nouveau packing" (click)="goNew()">
       <i class="pi pi-plus"></i>
     </button>

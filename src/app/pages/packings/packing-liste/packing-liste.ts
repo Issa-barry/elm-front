@@ -37,6 +37,7 @@ import {
 import { AuthService } from '@/services/auth/auth.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { ComptabilitePackingPaiement, PaiementPayload } from '@/pages/comptabilite/components/comptabilite-packing-paiement/comptabilite-packing-paiement';
 
 interface ModePaiementOption {
   label: string;
@@ -69,6 +70,7 @@ interface ModePaiementOption {
     DialogModule,
     InputNumberModule,
     TextareaModule,
+    ComptabilitePackingPaiement,
   ],
   providers: [MessageService, ConfirmationService],
 })
@@ -84,6 +86,7 @@ export class PackingListe implements OnInit {
   canReadVersement = false;
   canCreateVersement = false;
   canDeleteVersement = false;
+  private readonly mobileBreakpoint = 768;
 
   mobileFilterMenuItems: MenuItem[] = [];
   skeletonCols: number[] = [];
@@ -116,6 +119,11 @@ export class PackingListe implements OnInit {
   historiqueDialog = false;
   historiqueData: VersementIndexResponse | null = null;
   historiqueLoading = false;
+
+  // Slide-over paiement mobile
+  mobilePaiementVisible = false;
+  mobilePaiementPacking: Packing | null = null;
+  mobilePaiementSaving = false;
 
   statutOptions = [
     { label: 'Tous les statuts', value: 'all' },
@@ -223,6 +231,76 @@ export class PackingListe implements OnInit {
 
   goEdit(packing: Packing): void {
     this.router.navigate(['/packings/packings-edit', packing.id]);
+  }
+
+  openVersementFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    if (this.isMobile) {
+      this.openMobilePaiement(packing);
+      return;
+    }
+    this.openVersement(packing);
+  }
+
+  openHistoriqueFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.openHistorique(packing);
+  }
+
+  goEditFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.goEdit(packing);
+  }
+
+  openMobilePaiement(packing: Packing): void {
+    this.mobilePaiementPacking = packing;
+    this.mobilePaiementVisible = true;
+  }
+
+  closeMobilePaiement(): void {
+    this.mobilePaiementVisible = false;
+    this.mobilePaiementPacking = null;
+    this.mobilePaiementSaving = false;
+  }
+
+  onMobilePay(payload: PaiementPayload): void {
+    if (!this.mobilePaiementPacking || this.mobilePaiementSaving) return;
+
+    this.mobilePaiementSaving = true;
+    const dto: StoreVersementDto = {
+      montant: payload.montant,
+      date_versement: this.formatDate(new Date()),
+      mode_paiement: payload.mode_paiement,
+    };
+
+    this.packingService.createVersement(this.mobilePaiementPacking.id, dto).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succes',
+          detail: `Versement de ${this.formatCurrency(dto.montant)} enregistre`,
+          life: 3000,
+        });
+        this.closeMobilePaiement();
+        if (response.data?.packing) {
+          this.packings.update((list) =>
+            list.map((p) => p.id === response.data.packing.id ? response.data.packing : p),
+          );
+        } else {
+          this.load();
+        }
+      },
+      error: (error) => {
+        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: msg,
+          life: 5000,
+        });
+        this.mobilePaiementSaving = false;
+      },
+    });
   }
 
   setStatutFilter(value: string): void {
@@ -431,6 +509,10 @@ export class PackingListe implements OnInit {
     if (!dateStr) return '-';
     const date = new Date(dateStr);
     return date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  get isMobile(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
   }
 
   private formatDate(date: Date | string): string {
