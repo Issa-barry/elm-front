@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,6 +18,7 @@ import { MenuModule } from 'primeng/menu';
 import { User } from '@/models/user.model';
 import { UserService } from '@/services/users/users.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { UtilisateursViewDialog } from '../utilisateurs-view-dialog/utilisateurs-view-dialog';
 
@@ -60,6 +61,7 @@ export class UtilisateursListe implements OnInit, OnDestroy {
   mobileVisibleCount = this.mobilePageSize;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'utilisateurs-mobile-pwa';
+  private readyForUsineReload = false;
 
   statusOptions = [
     { label: 'Actif', value: true },
@@ -82,14 +84,22 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
+    private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('users.create');
     this.canUpdate = this.authService.hasPermission('users.update');
     this.canDelete = this.authService.hasPermission('users.delete');
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.loadUsers();
+    });
   }
 
   ngOnInit() {
+    this.readyForUsineReload = true;
     this.loadUsers();
     this.syncMobilePwaMode();
   }

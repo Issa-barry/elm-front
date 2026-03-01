@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -35,6 +35,7 @@ import {
   Versement,
 } from '@/models/packing.model';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface ModePaiementOption {
@@ -86,6 +87,7 @@ export class PackingListe implements OnInit {
 
   mobileFilterMenuItems: MenuItem[] = [];
   skeletonCols: number[] = [];
+  private readyForUsineReload = false;
 
   // Versement dialog
   versementDialog = false;
@@ -152,6 +154,7 @@ export class PackingListe implements OnInit {
     private confirmationService: ConfirmationService,
     private authService: AuthService,
     private router: Router,
+    private usineContext: UsineContextService,
   ) {
     this.canCreate = this.authService.hasPermission('packings.create');
     this.canUpdate = this.authService.hasPermission('packings.update');
@@ -162,9 +165,16 @@ export class PackingListe implements OnInit {
     this.skeletonCols = this.hasActionsColumn
       ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
       : [1, 2, 3, 4, 5, 6, 7, 8];
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.load();
+    });
   }
 
   ngOnInit(): void {
+    this.readyForUsineReload = true;
     this.load();
     this.mobileFilterMenuItems = [
       { label: 'Tous', icon: 'pi pi-list', command: () => this.setStatutFilter('all') },

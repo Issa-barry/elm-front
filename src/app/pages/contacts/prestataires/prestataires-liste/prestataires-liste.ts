@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,6 +18,7 @@ import { MenuModule } from 'primeng/menu';
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
@@ -54,6 +55,7 @@ export class PrestatairesListe implements OnInit, OnDestroy {
   mobileVisibleCount = this.mobilePageSize;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'prestataires-mobile-pwa';
+  private readyForUsineReload = false;
 
   statusOptions = [
     { label: 'Actif', value: true },
@@ -76,14 +78,22 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
+    private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('prestataires.create');
     this.canUpdate = this.authService.hasPermission('prestataires.update');
     this.canDelete = this.authService.hasPermission('prestataires.delete');
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.loadPrestataires();
+    });
   }
 
   ngOnInit() {
+    this.readyForUsineReload = true;
     this.loadPrestataires();
     this.syncMobilePwaMode();
   }
