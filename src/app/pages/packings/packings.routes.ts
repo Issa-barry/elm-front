@@ -34,7 +34,7 @@ export default [
         path: 'packings-facture/:id',
         component: PackingFacture,
         canActivate: [authorizationGuard],
-        data: { breadcrumb: 'packings-facture',  permissions: ['packings.update'] },
+        data: { breadcrumb: 'packings-facture',  permissions: ['packings.read'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

@@ -14,7 +14,7 @@ var apps_routes_default = [
   },
   {
     path: "files",
-    loadComponent: () => import("./chunk-7C7C435O.js").then((c) => c.Files),
+    loadComponent: () => import("./chunk-LXOHU5YL.js").then((c) => c.Files),
     data: { breadcrumb: "files" }
   },
   {
@@ -36,4 +36,4 @@ var apps_routes_default = [
 export {
   apps_routes_default as default
 };
-//# sourceMappingURL=chunk-XG2XXMB6.js.map
+//# sourceMappingURL=chunk-EJCYLLGQ.js.map

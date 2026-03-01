@@ -2,6 +2,9 @@ import {
   ParametresService
 } from "./chunk-ZT6H642Y.js";
 import {
+  LayoutService
+} from "./chunk-KPTCPOPL.js";
+import {
   ComptabiliteHistoriqueVersements,
   ComptabilitePackingPaiement,
   MODE_PAIEMENT_LABELS,
@@ -528,7 +531,7 @@ function PackingListe_section_27_article_1_Conditional_14_Conditional_1_Template
       \u0275\u0275restoreView(_r11);
       const p_r10 = \u0275\u0275nextContext(2).$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openVersementFromCard($event, p_r10));
+      return \u0275\u0275resetView(ctx_r2.goFactureFromCard($event, p_r10));
     });
     \u0275\u0275elementEnd();
   }
@@ -541,7 +544,7 @@ function PackingListe_section_27_article_1_Conditional_14_Conditional_2_Template
       \u0275\u0275restoreView(_r12);
       const p_r10 = \u0275\u0275nextContext(2).$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openHistoriqueFromCard($event, p_r10));
+      return \u0275\u0275resetView(ctx_r2.openVersementFromCard($event, p_r10));
     });
     \u0275\u0275elementEnd();
   }
@@ -554,7 +557,7 @@ function PackingListe_section_27_article_1_Conditional_14_Conditional_3_Template
       \u0275\u0275restoreView(_r13);
       const p_r10 = \u0275\u0275nextContext(2).$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.goFactureFromCard($event, p_r10));
+      return \u0275\u0275resetView(ctx_r2.openHistoriqueFromCard($event, p_r10));
     });
     \u0275\u0275elementEnd();
   }
@@ -585,11 +588,11 @@ function PackingListe_section_27_article_1_Conditional_14_Template(rf, ctx) {
     const p_r10 = \u0275\u0275nextContext().$implicit;
     const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canCreateVersement && ctx_r2.canPay(p_r10) ? 1 : -1);
+    \u0275\u0275conditional(ctx_r2.canViewFacture ? 1 : -1);
     \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canReadVersement ? 2 : -1);
+    \u0275\u0275conditional(ctx_r2.canCreateVersement && ctx_r2.canPay(p_r10) ? 2 : -1);
     \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canUpdate ? 3 : -1);
+    \u0275\u0275conditional(ctx_r2.canReadVersement ? 3 : -1);
     \u0275\u0275advance();
     \u0275\u0275conditional(ctx_r2.canEditPacking(p_r10) ? 4 : -1);
   }
@@ -638,7 +641,7 @@ function PackingListe_section_27_article_1_Template(rf, ctx) {
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", p_r10.montant_restant > 0);
     \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canCreateVersement && ctx_r2.canPay(p_r10) || ctx_r2.canReadVersement || ctx_r2.canUpdate || ctx_r2.canEditPacking(p_r10) ? 14 : -1);
+    \u0275\u0275conditional(ctx_r2.canCreateVersement && ctx_r2.canPay(p_r10) || ctx_r2.canReadVersement || ctx_r2.canViewFacture || ctx_r2.canEditPacking(p_r10) ? 14 : -1);
   }
 }
 function PackingListe_section_27_Template(rf, ctx) {
@@ -886,12 +889,12 @@ function PackingListe_ng_template_37_Conditional_6_Template(rf, ctx) {
 function PackingListe_ng_template_37_Conditional_20_Conditional_2_Template(rf, ctx) {
   if (rf & 1) {
     const _r21 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 125);
+    \u0275\u0275elementStart(0, "button", 124);
     \u0275\u0275listener("click", function PackingListe_ng_template_37_Conditional_20_Conditional_2_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r21);
       const p_r20 = \u0275\u0275nextContext(2).$implicit;
       const ctx_r2 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r2.openVersement(p_r20));
+      return \u0275\u0275resetView(ctx_r2.goFacture(p_r20));
     });
     \u0275\u0275elementEnd();
   }
@@ -899,7 +902,7 @@ function PackingListe_ng_template_37_Conditional_20_Conditional_2_Template(rf, c
 function PackingListe_ng_template_37_Conditional_20_Conditional_3_Template(rf, ctx) {
   if (rf & 1) {
     const _r22 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 126);
+    \u0275\u0275elementStart(0, "button", 125);
     \u0275\u0275listener("click", function PackingListe_ng_template_37_Conditional_20_Conditional_3_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r22);
       const p_r20 = \u0275\u0275nextContext(2).$implicit;
@@ -912,22 +915,9 @@ function PackingListe_ng_template_37_Conditional_20_Conditional_3_Template(rf, c
 function PackingListe_ng_template_37_Conditional_20_Conditional_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r23 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 127);
+    \u0275\u0275elementStart(0, "button", 126);
     \u0275\u0275listener("click", function PackingListe_ng_template_37_Conditional_20_Conditional_4_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r23);
-      const p_r20 = \u0275\u0275nextContext(2).$implicit;
-      const ctx_r2 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r2.goFacture(p_r20));
-    });
-    \u0275\u0275elementEnd();
-  }
-}
-function PackingListe_ng_template_37_Conditional_20_Conditional_5_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r24 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 128);
-    \u0275\u0275listener("click", function PackingListe_ng_template_37_Conditional_20_Conditional_5_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r24);
       const p_r20 = \u0275\u0275nextContext(2).$implicit;
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.goEdit(p_r20));
@@ -935,12 +925,12 @@ function PackingListe_ng_template_37_Conditional_20_Conditional_5_Template(rf, c
     \u0275\u0275elementEnd();
   }
 }
-function PackingListe_ng_template_37_Conditional_20_Conditional_6_Template(rf, ctx) {
+function PackingListe_ng_template_37_Conditional_20_Conditional_5_Template(rf, ctx) {
   if (rf & 1) {
-    const _r25 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 129);
-    \u0275\u0275listener("click", function PackingListe_ng_template_37_Conditional_20_Conditional_6_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r25);
+    const _r24 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 127);
+    \u0275\u0275listener("click", function PackingListe_ng_template_37_Conditional_20_Conditional_5_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r24);
       const p_r20 = \u0275\u0275nextContext(2).$implicit;
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.deletePacking(p_r20));
@@ -955,22 +945,19 @@ function PackingListe_ng_template_37_Conditional_20_Template(rf, ctx) {
     \u0275\u0275conditionalCreate(3, PackingListe_ng_template_37_Conditional_20_Conditional_3_Template, 1, 0, "button", 121);
     \u0275\u0275conditionalCreate(4, PackingListe_ng_template_37_Conditional_20_Conditional_4_Template, 1, 0, "button", 122);
     \u0275\u0275conditionalCreate(5, PackingListe_ng_template_37_Conditional_20_Conditional_5_Template, 1, 0, "button", 123);
-    \u0275\u0275conditionalCreate(6, PackingListe_ng_template_37_Conditional_20_Conditional_6_Template, 1, 0, "button", 124);
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
     const p_r20 = \u0275\u0275nextContext().$implicit;
     const ctx_r2 = \u0275\u0275nextContext();
     \u0275\u0275advance(2);
-    \u0275\u0275conditional(ctx_r2.canCreateVersement && ctx_r2.canPay(p_r20) ? 2 : -1);
+    \u0275\u0275conditional(ctx_r2.canViewFacture ? 2 : -1);
     \u0275\u0275advance();
     \u0275\u0275conditional(ctx_r2.canReadVersement ? 3 : -1);
     \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canUpdate ? 4 : -1);
+    \u0275\u0275conditional(ctx_r2.canEditPacking(p_r20) ? 4 : -1);
     \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canEditPacking(p_r20) ? 5 : -1);
-    \u0275\u0275advance();
-    \u0275\u0275conditional(ctx_r2.canDelete ? 6 : -1);
+    \u0275\u0275conditional(ctx_r2.canDelete ? 5 : -1);
   }
 }
 function PackingListe_ng_template_37_Template(rf, ctx) {
@@ -999,7 +986,7 @@ function PackingListe_ng_template_37_Template(rf, ctx) {
     \u0275\u0275elementStart(18, "td");
     \u0275\u0275element(19, "p-tag", 116);
     \u0275\u0275elementEnd();
-    \u0275\u0275conditionalCreate(20, PackingListe_ng_template_37_Conditional_20_Template, 7, 5, "td");
+    \u0275\u0275conditionalCreate(20, PackingListe_ng_template_37_Conditional_20_Template, 6, 4, "td");
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -1029,8 +1016,8 @@ function PackingListe_ng_template_37_Template(rf, ctx) {
 }
 function PackingListe_ng_template_39_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 130)(2, "div", 131);
-    \u0275\u0275element(3, "i", 132);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 128)(2, "div", 129);
+    \u0275\u0275element(3, "i", 130);
     \u0275\u0275elementStart(4, "span");
     \u0275\u0275text(5, "Aucun packing trouve");
     \u0275\u0275elementEnd()()()();
@@ -1083,6 +1070,7 @@ var PackingListe = class _PackingListe {
   lastNDaysValue = null;
   loading = false;
   canCreate = false;
+  canViewFacture = false;
   canUpdate = false;
   canDelete = false;
   canReadVersement = false;
@@ -1154,7 +1142,7 @@ var PackingListe = class _PackingListe {
     });
   }, ...ngDevMode ? [{ debugName: "filteredPackings" }] : []);
   get hasActionsColumn() {
-    return this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
+    return this.canViewFacture || this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
   }
   constructor(packingService, messageService, confirmationService, authService, router, usineContext) {
     this.packingService = packingService;
@@ -1164,6 +1152,7 @@ var PackingListe = class _PackingListe {
     this.router = router;
     this.usineContext = usineContext;
     this.canCreate = this.authService.hasPermission("packings.create");
+    this.canViewFacture = this.authService.hasPermission("packings.read") || this.authService.hasPermission("packings.update");
     this.canUpdate = this.authService.hasPermission("packings.update");
     this.canDelete = this.authService.hasPermission("packings.delete");
     this.canReadVersement = this.authService.hasPermission("versements.read");
@@ -1229,7 +1218,7 @@ var PackingListe = class _PackingListe {
     this.router.navigate(["/packings/packings-edit", packing.id]);
   }
   goFacture(packing) {
-    if (!this.canUpdate)
+    if (!this.canViewFacture)
       return;
     this.router.navigate(["/packings/packings-facture", packing.id]);
   }
@@ -1610,7 +1599,7 @@ var PackingListe = class _PackingListe {
   static \u0275fac = function PackingListe_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _PackingListe)(\u0275\u0275directiveInject(PackingService), \u0275\u0275directiveInject(MessageService), \u0275\u0275directiveInject(ConfirmationService), \u0275\u0275directiveInject(AuthService), \u0275\u0275directiveInject(Router), \u0275\u0275directiveInject(UsineContextService));
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _PackingListe, selectors: [["app-packing-liste"]], features: [\u0275\u0275ProvidersFeature([MessageService, ConfirmationService])], decls: 43, vars: 31, consts: [["footer", ""], ["statusMenu", ""], ["mobileListState", ""], ["caption", ""], ["header", ""], ["body", ""], ["emptymessage", ""], ["loadingbody", ""], ["header", "Nouveau versement", 3, "visibleChange", "onHide", "visible", "modal", "closable"], [1, "flex", "flex-col", "gap-4"], ["header", "Historique des versements", 3, "visibleChange", "visible", "modal"], [1, "flex", "justify-center", "py-6"], ["class", "fixed inset-0 z-50", 4, "ngIf"], [1, "packing-mobile-app"], [1, "mobile-header"], ["pButton", "", "pRipple", "", "icon", "pi pi-arrow-left", "aria-label", "Retour a l'accueil", 1, "p-button-rounded", "p-button-text", "mobile-back", 3, "click"], [1, "mobile-title-wrap"], [1, "mobile-title"], [1, "mobile-subtitle"], ["appendTo", "body", "styleClass", "mobile-status-menu", 3, "model", "popup"], ["pButton", "", "pRipple", "", "icon", "pi pi-filter", "aria-label", "Filtrer", 1, "p-button-rounded", "p-button-text", "mobile-add", 3, "click"], [1, "mobile-scroll"], [1, "mobile-search"], [1, "pi", "pi-search"], ["pInputText", "", "type", "text", "placeholder", "Prestataire, reference...", 1, "w-full", 3, "ngModelChange", "ngModel"], ["class", "mobile-list", 4, "ngIf", "ngIfElse"], ["type", "button", "aria-label", "Nouveau packing", 1, "mobile-fab"], [1, "card", "packing-desktop"], ["paginatorDropdownAppendTo", "body", "responsiveLayout", "scroll", "currentPageReportTemplate", "  {first} / {last} de {totalRecords} packings", 3, "value", "loading", "paginator", "rows", "rowsPerPageOptions", "showCurrentPageReport", "rowHover"], [1, "flex", "flex-col", "gap-1", "p-3", "bg-surface-50", "dark:bg-surface-800", "rounded-lg", "text-sm"], [1, "font-semibold"], [1, "text-surface-500"], [1, "text-orange-500", "font-medium"], [1, "flex", "flex-col", "gap-1"], [1, "text-sm", "font-medium"], [1, "text-red-500"], ["placeholder", "0", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "min", "max", "useGrouping"], [1, "text-red-500", "text-xs"], ["dateFormat", "dd/mm/yy", "placeholder", "Selectionner la date", "styleClass", "w-full", "inputStyleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "showIcon"], ["optionLabel", "label", "optionValue", "value", "styleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "options"], ["pTextarea", "", "rows", "2", "placeholder", "Optionnel...", 1, "w-full", 3, "ngModelChange", "ngModel"], ["pButton", "", "label", "Annuler", "icon", "pi pi-times", "severity", "secondary", "outlined", "", 3, "click", "disabled"], ["pButton", "", "label", "Enregistrer", "icon", "pi pi-check", 3, "click", "loading", "disabled"], [1, "pi", "pi-spin", "pi-spinner", "text-2xl"], [1, "grid", "grid-cols-3", "gap-3", "text-sm"], [1, "flex", "flex-col", "gap-0.5", "p-3", "bg-surface-50", "dark:bg-surface-800", "rounded-lg"], [1, "text-surface-500", "text-xs"], [1, "flex", "flex-col", "gap-0.5", "p-3", "bg-green-50", "dark:bg-green-900/20", "rounded-lg"], [1, "font-semibold", "text-green-600"], [1, "flex", "flex-col", "gap-0.5", "p-3", "rounded-lg"], [1, "text-center", "text-surface-500", "py-4", "text-sm"], [3, "value", "tableStyle"], [1, "text-xs"], [1, "text-sm"], [1, "text-sm", "text-surface-500"], [1, "fixed", "inset-0", "z-50"], [1, "absolute", "inset-0", "bg-black/50", "animate-fadein", 3, "click"], [1, "mobile-paiement-slideover", "bg-surface-0", "dark:bg-surface-900", "absolute", "top-0", "right-0", "shadow-xl", "w-full", "md:w-108", "h-full", "animate-fadeinright"], [3, "onPay", "onClose", "packing", "saving"], [3, "onClose", "onDeleteVersement", "data", "loading", "canDelete"], [1, "mobile-list"], ["class", "mobile-packing-card", 3, "click", 4, "ngFor", "ngForOf"], [1, "mobile-packing-card", 3, "click"], [1, "mobile-card-avatar"], [1, "mobile-card-body"], [1, "mobile-card-name"], [1, "mobile-card-meta"], [1, "mobile-card-footer"], ["styleClass", "mobile-status-tag", 3, "value", "severity"], [1, "mobile-card-amounts"], [4, "ngIf"], [1, "mobile-card-actions"], ["pButton", "", "type", "button", "icon", "pi pi-wallet", "severity", "success", "text", "", "rounded", "", "size", "small", "pTooltip", "Encaisser", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-wallet", "severity", "success", "text", "", "rounded", "", "size", "small", "pTooltip", "Encaisser", "tooltipPosition", "left", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique", "tooltipPosition", "left", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "left", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "left", 3, "click"], ["class", "mobile-state", 4, "ngIf"], [1, "mobile-state"], ["type", "button", "aria-label", "Nouveau packing", 1, "mobile-fab", 3, "click"], [1, "pi", "pi-plus"], [1, "flex", "flex-wrap", "gap-2", "items-center", "justify-between"], [1, "w-full", "sm:w-80", "order-1", "sm:order-0"], ["pInputText", "", "type", "text", "placeholder", "Rechercher un packing...", 1, "w-full", 3, "ngModelChange", "ngModel"], [1, "flex", "flex-wrap", "gap-2", "w-full", "sm:w-auto"], ["optionLabel", "label", "optionValue", "value", "placeholder", "Tous les statuts", 1, "w-full", "sm:w-44", 3, "ngModelChange", "options", "ngModel"], ["optionLabel", "label", "optionValue", "value", "placeholder", "Periode rapide", 1, "w-full", "sm:w-52", 3, "ngModelChange", "options", "ngModel"], ["placeholder", "Nb jours", "suffix", " j", "inputStyleClass", "w-full", "styleClass", "w-full sm:w-32", 3, "ngModel", "min", "useGrouping", "showButtons"], ["selectionMode", "range", "dateFormat", "dd/mm/yy", "placeholder", "Periode", "inputStyleClass", "w-full", "styleClass", "w-52", 3, "ngModelChange", "onSelect", "ngModel", "showIcon", "readonlyInput"], ["pButton", "", "type", "button", "icon", "pi pi-filter-slash", "severity", "secondary", "outlined", "", "rounded", "", "pTooltip", "Reinitialiser filtres", "tooltipPosition", "top"], ["pButton", "", "outlined", "", "icon", "pi pi-plus", "label", "Nouveau packing"], ["placeholder", "Nb jours", "suffix", " j", "inputStyleClass", "w-full", "styleClass", "w-full sm:w-32", 3, "ngModelChange", "ngModel", "min", "useGrouping", "showButtons"], ["pButton", "", "type", "button", "icon", "pi pi-filter-slash", "severity", "secondary", "outlined", "", "rounded", "", "pTooltip", "Reinitialiser filtres", "tooltipPosition", "top", 3, "click"], ["pButton", "", "outlined", "", "icon", "pi pi-plus", "label", "Nouveau packing", 3, "click"], ["pSortableColumn", "prestataire.nom", 2, "width", "18%"], [1, "flex", "items-center", "gap-2"], ["field", "prestataire.nom"], [2, "width", "11%"], ["pSortableColumn", "date", 2, "width", "9%"], ["field", "date"], ["pSortableColumn", "nb_rouleaux", 2, "width", "8%"], ["field", "nb_rouleaux"], ["pSortableColumn", "montant", 2, "width", "11%"], ["field", "montant"], ["pSortableColumn", "montant_verse", 2, "width", "10%"], ["field", "montant_verse"], ["pSortableColumn", "montant_restant", 2, "width", "10%"], ["field", "montant_restant"], ["pSortableColumn", "statut", 2, "width", "10%"], ["field", "statut"], [1, "text-center", 2, "width", "13%"], [1, "text-surface-400"], [1, "text-sm", "font-medium", "text-green-600"], [3, "value", "severity"], [1, "inline-flex", "items-center", "justify-center", "rounded-full", "bg-primary", "text-white", "font-bold", "text-xs", "flex-shrink-0", 2, "width", "2rem", "height", "2rem"], [1, "font-medium"], [1, "flex", "gap-1", "justify-center"], ["pButton", "", "type", "button", "icon", "pi pi-wallet", "severity", "success", "text", "", "rounded", "", "size", "small", "pTooltip", "Ajouter un versement", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique versements", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-trash", "severity", "danger", "text", "", "rounded", "", "size", "small", "pTooltip", "Supprimer", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-wallet", "severity", "success", "text", "", "rounded", "", "size", "small", "pTooltip", "Ajouter un versement", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique versements", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-trash", "severity", "danger", "text", "", "rounded", "", "size", "small", "pTooltip", "Supprimer", "tooltipPosition", "top", 3, "click"], [1, "text-center", "py-8"], [1, "flex", "flex-col", "items-center", "gap-3", "text-surface-500"], [1, "pi", "pi-inbox", "text-4xl"]], template: function PackingListe_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _PackingListe, selectors: [["app-packing-liste"]], features: [\u0275\u0275ProvidersFeature([MessageService, ConfirmationService])], decls: 43, vars: 31, consts: [["footer", ""], ["statusMenu", ""], ["mobileListState", ""], ["caption", ""], ["header", ""], ["body", ""], ["emptymessage", ""], ["loadingbody", ""], ["header", "Nouveau versement", 3, "visibleChange", "onHide", "visible", "modal", "closable"], [1, "flex", "flex-col", "gap-4"], ["header", "Historique des versements", 3, "visibleChange", "visible", "modal"], [1, "flex", "justify-center", "py-6"], ["class", "fixed inset-0 z-50", 4, "ngIf"], [1, "packing-mobile-app"], [1, "mobile-header"], ["pButton", "", "pRipple", "", "icon", "pi pi-arrow-left", "aria-label", "Retour a l'accueil", 1, "p-button-rounded", "p-button-text", "mobile-back", 3, "click"], [1, "mobile-title-wrap"], [1, "mobile-title"], [1, "mobile-subtitle"], ["appendTo", "body", "styleClass", "mobile-status-menu", 3, "model", "popup"], ["pButton", "", "pRipple", "", "icon", "pi pi-filter", "aria-label", "Filtrer", 1, "p-button-rounded", "p-button-text", "mobile-add", 3, "click"], [1, "mobile-scroll"], [1, "mobile-search"], [1, "pi", "pi-search"], ["pInputText", "", "type", "text", "placeholder", "Prestataire, reference...", 1, "w-full", 3, "ngModelChange", "ngModel"], ["class", "mobile-list", 4, "ngIf", "ngIfElse"], ["type", "button", "aria-label", "Nouveau packing", 1, "mobile-fab"], [1, "card", "packing-desktop"], ["paginatorDropdownAppendTo", "body", "responsiveLayout", "scroll", "currentPageReportTemplate", "  {first} / {last} de {totalRecords} packings", 3, "value", "loading", "paginator", "rows", "rowsPerPageOptions", "showCurrentPageReport", "rowHover"], [1, "flex", "flex-col", "gap-1", "p-3", "bg-surface-50", "dark:bg-surface-800", "rounded-lg", "text-sm"], [1, "font-semibold"], [1, "text-surface-500"], [1, "text-orange-500", "font-medium"], [1, "flex", "flex-col", "gap-1"], [1, "text-sm", "font-medium"], [1, "text-red-500"], ["placeholder", "0", "styleClass", "w-full", 3, "ngModelChange", "ngModel", "min", "max", "useGrouping"], [1, "text-red-500", "text-xs"], ["dateFormat", "dd/mm/yy", "placeholder", "Selectionner la date", "styleClass", "w-full", "inputStyleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "showIcon"], ["optionLabel", "label", "optionValue", "value", "styleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "options"], ["pTextarea", "", "rows", "2", "placeholder", "Optionnel...", 1, "w-full", 3, "ngModelChange", "ngModel"], ["pButton", "", "label", "Annuler", "icon", "pi pi-times", "severity", "secondary", "outlined", "", 3, "click", "disabled"], ["pButton", "", "label", "Enregistrer", "icon", "pi pi-check", 3, "click", "loading", "disabled"], [1, "pi", "pi-spin", "pi-spinner", "text-2xl"], [1, "grid", "grid-cols-3", "gap-3", "text-sm"], [1, "flex", "flex-col", "gap-0.5", "p-3", "bg-surface-50", "dark:bg-surface-800", "rounded-lg"], [1, "text-surface-500", "text-xs"], [1, "flex", "flex-col", "gap-0.5", "p-3", "bg-green-50", "dark:bg-green-900/20", "rounded-lg"], [1, "font-semibold", "text-green-600"], [1, "flex", "flex-col", "gap-0.5", "p-3", "rounded-lg"], [1, "text-center", "text-surface-500", "py-4", "text-sm"], [3, "value", "tableStyle"], [1, "text-xs"], [1, "text-sm"], [1, "text-sm", "text-surface-500"], [1, "fixed", "inset-0", "z-50"], [1, "absolute", "inset-0", "bg-black/50", "animate-fadein", 3, "click"], [1, "mobile-paiement-slideover", "bg-surface-0", "dark:bg-surface-900", "absolute", "top-0", "right-0", "shadow-xl", "w-full", "md:w-108", "h-full", "animate-fadeinright"], [3, "onPay", "onClose", "packing", "saving"], [3, "onClose", "onDeleteVersement", "data", "loading", "canDelete"], [1, "mobile-list"], ["class", "mobile-packing-card", 3, "click", 4, "ngFor", "ngForOf"], [1, "mobile-packing-card", 3, "click"], [1, "mobile-card-avatar"], [1, "mobile-card-body"], [1, "mobile-card-name"], [1, "mobile-card-meta"], [1, "mobile-card-footer"], ["styleClass", "mobile-status-tag", 3, "value", "severity"], [1, "mobile-card-amounts"], [4, "ngIf"], [1, "mobile-card-actions"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-wallet", "severity", "success", "text", "", "rounded", "", "size", "small", "pTooltip", "Encaisser", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "left"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "left", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-wallet", "severity", "success", "text", "", "rounded", "", "size", "small", "pTooltip", "Encaisser", "tooltipPosition", "left", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique", "tooltipPosition", "left", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "left", 3, "click"], ["class", "mobile-state", 4, "ngIf"], [1, "mobile-state"], ["type", "button", "aria-label", "Nouveau packing", 1, "mobile-fab", 3, "click"], [1, "pi", "pi-plus"], [1, "flex", "flex-wrap", "gap-2", "items-center", "justify-between"], [1, "w-full", "sm:w-80", "order-1", "sm:order-0"], ["pInputText", "", "type", "text", "placeholder", "Rechercher un packing...", 1, "w-full", 3, "ngModelChange", "ngModel"], [1, "flex", "flex-wrap", "gap-2", "w-full", "sm:w-auto"], ["optionLabel", "label", "optionValue", "value", "placeholder", "Tous les statuts", 1, "w-full", "sm:w-44", 3, "ngModelChange", "options", "ngModel"], ["optionLabel", "label", "optionValue", "value", "placeholder", "Periode rapide", 1, "w-full", "sm:w-52", 3, "ngModelChange", "options", "ngModel"], ["placeholder", "Nb jours", "suffix", " j", "inputStyleClass", "w-full", "styleClass", "w-full sm:w-32", 3, "ngModel", "min", "useGrouping", "showButtons"], ["selectionMode", "range", "dateFormat", "dd/mm/yy", "placeholder", "Periode", "inputStyleClass", "w-full", "styleClass", "w-52", 3, "ngModelChange", "onSelect", "ngModel", "showIcon", "readonlyInput"], ["pButton", "", "type", "button", "icon", "pi pi-filter-slash", "severity", "secondary", "outlined", "", "rounded", "", "pTooltip", "Reinitialiser filtres", "tooltipPosition", "top"], ["pButton", "", "outlined", "", "icon", "pi pi-plus", "label", "Nouveau packing"], ["placeholder", "Nb jours", "suffix", " j", "inputStyleClass", "w-full", "styleClass", "w-full sm:w-32", 3, "ngModelChange", "ngModel", "min", "useGrouping", "showButtons"], ["pButton", "", "type", "button", "icon", "pi pi-filter-slash", "severity", "secondary", "outlined", "", "rounded", "", "pTooltip", "Reinitialiser filtres", "tooltipPosition", "top", 3, "click"], ["pButton", "", "outlined", "", "icon", "pi pi-plus", "label", "Nouveau packing", 3, "click"], ["pSortableColumn", "prestataire.nom", 2, "width", "18%"], [1, "flex", "items-center", "gap-2"], ["field", "prestataire.nom"], [2, "width", "11%"], ["pSortableColumn", "date", 2, "width", "9%"], ["field", "date"], ["pSortableColumn", "nb_rouleaux", 2, "width", "8%"], ["field", "nb_rouleaux"], ["pSortableColumn", "montant", 2, "width", "11%"], ["field", "montant"], ["pSortableColumn", "montant_verse", 2, "width", "10%"], ["field", "montant_verse"], ["pSortableColumn", "montant_restant", 2, "width", "10%"], ["field", "montant_restant"], ["pSortableColumn", "statut", 2, "width", "10%"], ["field", "statut"], [1, "text-center", 2, "width", "13%"], [1, "text-surface-400"], [1, "text-sm", "font-medium", "text-green-600"], [3, "value", "severity"], [1, "inline-flex", "items-center", "justify-center", "rounded-full", "bg-primary", "text-white", "font-bold", "text-xs", "flex-shrink-0", 2, "width", "2rem", "height", "2rem"], [1, "font-medium"], [1, "flex", "gap-1", "justify-center"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique versements", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-trash", "severity", "danger", "text", "", "rounded", "", "size", "small", "pTooltip", "Supprimer", "tooltipPosition", "top"], ["pButton", "", "type", "button", "icon", "pi pi-eye", "severity", "secondary", "text", "", "rounded", "", "size", "small", "pTooltip", "Voir facture", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-history", "severity", "info", "text", "", "rounded", "", "size", "small", "pTooltip", "Historique versements", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-pen-to-square", "text", "", "rounded", "", "size", "small", "pTooltip", "Modifier", "tooltipPosition", "top", 3, "click"], ["pButton", "", "type", "button", "icon", "pi pi-trash", "severity", "danger", "text", "", "rounded", "", "size", "small", "pTooltip", "Supprimer", "tooltipPosition", "top", 3, "click"], [1, "text-center", "py-8"], [1, "flex", "flex-col", "items-center", "gap-3", "text-surface-500"], [1, "pi", "pi-inbox", "text-4xl"]], template: function PackingListe_Template(rf, ctx) {
     if (rf & 1) {
       const _r1 = \u0275\u0275getCurrentView();
       \u0275\u0275element(0, "p-toast")(1, "p-confirmdialog");
@@ -1673,7 +1662,7 @@ var PackingListe = class _PackingListe {
       \u0275\u0275elementEnd()();
     }
     if (rf & 2) {
-      const mobileListState_r26 = \u0275\u0275reference(29);
+      const mobileListState_r25 = \u0275\u0275reference(29);
       \u0275\u0275advance(2);
       \u0275\u0275styleMap(\u0275\u0275pureFunction0(28, _c0));
       \u0275\u0275twoWayProperty("visible", ctx.versementDialog);
@@ -1697,7 +1686,7 @@ var PackingListe = class _PackingListe {
       \u0275\u0275advance(7);
       \u0275\u0275property("ngModel", ctx.searchQuery());
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", !ctx.loading && ctx.filteredPackings().length)("ngIfElse", mobileListState_r26);
+      \u0275\u0275property("ngIf", !ctx.loading && ctx.filteredPackings().length)("ngIfElse", mobileListState_r25);
       \u0275\u0275advance(3);
       \u0275\u0275conditional(ctx.canCreate && !ctx.mobilePaiementVisible && !ctx.mobileHistoriqueVisible ? 30 : -1);
       \u0275\u0275advance(2);
@@ -2034,8 +2023,22 @@ var PackingListe = class _PackingListe {
             </span>
           </div>
         </div>
-        @if ((canCreateVersement && canPay(p)) || canReadVersement || canUpdate || canEditPacking(p)) {
+        @if ((canCreateVersement && canPay(p)) || canReadVersement || canViewFacture || canEditPacking(p)) {
           <div class="mobile-card-actions">
+                  @if (canViewFacture) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                severity="secondary"
+                text
+                rounded
+                size="small"
+                pTooltip="Voir facture"
+                tooltipPosition="left"
+                (click)="goFactureFromCard($event, p)"
+              ></button>
+            }
             @if (canCreateVersement && canPay(p)) {
               <button
                 pButton
@@ -2064,20 +2067,7 @@ var PackingListe = class _PackingListe {
                 (click)="openHistoriqueFromCard($event, p)"
               ></button>
             }
-            @if (canUpdate) {
-              <button
-                pButton
-                type="button"
-                icon="pi pi-eye"
-                severity="secondary"
-                text
-                rounded
-                size="small"
-                pTooltip="Voir facture"
-                tooltipPosition="left"
-                (click)="goFactureFromCard($event, p)"
-              ></button>
-            }
+      
             @if (canEditPacking(p)) {
               <button
                 pButton
@@ -2262,18 +2252,18 @@ var PackingListe = class _PackingListe {
         @if (hasActionsColumn) {
           <td>
             <div class="flex gap-1 justify-center">
-              @if (canCreateVersement && canPay(p)) {
+              @if (canViewFacture) {
                 <button
                   pButton
                   type="button"
-                  icon="pi pi-wallet"
-                  severity="success"
+                  icon="pi pi-eye"
+                  severity="secondary"
                   text
                   rounded
                   size="small"
-                  pTooltip="Ajouter un versement"
+                  pTooltip="Voir facture"
                   tooltipPosition="top"
-                  (click)="openVersement(p)"
+                  (click)="goFacture(p)"
                 ></button>
               }
               @if (canReadVersement) {
@@ -2288,20 +2278,6 @@ var PackingListe = class _PackingListe {
                   pTooltip="Historique versements"
                   tooltipPosition="top"
                   (click)="openHistorique(p)"
-                ></button>
-              }
-              @if (canUpdate) {
-                <button
-                  pButton
-                  type="button"
-                  icon="pi pi-eye"
-                  severity="secondary"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Voir facture"
-                  tooltipPosition="top"
-                  (click)="goFacture(p)"
                 ></button>
               }
               @if (canEditPacking(p)) {
@@ -3367,7 +3343,8 @@ var PackingEdit = class _PackingEdit {
 })();
 
 // src/app/pages/packings/packing-facture/packing-facture.ts
-function PackingFacture_Conditional_12_Template(rf, ctx) {
+var _forTrack0 = ($index, $item) => $item.id;
+function PackingFacture_Conditional_17_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementStart(0, "span");
     \u0275\u0275text(1);
@@ -3379,9 +3356,9 @@ function PackingFacture_Conditional_12_Template(rf, ctx) {
     \u0275\u0275textInterpolate(ctx_r0.usineAdresse);
   }
 }
-function PackingFacture_Conditional_68_Template(rf, ctx) {
+function PackingFacture_Conditional_73_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 28);
+    \u0275\u0275elementStart(0, "span", 33);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -3391,14 +3368,118 @@ function PackingFacture_Conditional_68_Template(rf, ctx) {
     \u0275\u0275textInterpolate(ctx_r0.notes);
   }
 }
+function PackingFacture_Conditional_99_For_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 56)(1, "span", 57);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "span", 58);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const versement_r2 = ctx.$implicit;
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2(" ", ctx_r0.formatDateDisplay(versement_r2.date_versement), " - ", ctx_r0.formatVersementMode(versement_r2), " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", ctx_r0.formatAmount(versement_r2.montant), " ");
+  }
+}
+function PackingFacture_Conditional_99_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 35);
+    \u0275\u0275repeaterCreate(1, PackingFacture_Conditional_99_For_2_Template, 5, 3, "div", 56, _forTrack0);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275repeater(ctx_r0.versementsAffiches);
+  }
+}
+function PackingFacture_Conditional_100_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 36);
+    \u0275\u0275text(1, "Aucun verssement");
+    \u0275\u0275elementEnd();
+  }
+}
+function PackingFacture_Conditional_106_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 41)(1, "div", 46);
+    \u0275\u0275text(2, "Espece");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 47);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate(ctx_r0.formatAmount(ctx_r0.totalEspeces));
+  }
+}
+function PackingFacture_Conditional_107_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 41)(1, "div", 46);
+    \u0275\u0275text(2, "Mobile");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 47);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate(ctx_r0.formatAmount(ctx_r0.totalMobile));
+  }
+}
+function PackingFacture_Conditional_108_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 41)(1, "div", 46);
+    \u0275\u0275text(2, "Banque");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 47);
+    \u0275\u0275text(4);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate(ctx_r0.formatAmount(ctx_r0.totalBanque));
+  }
+}
+function PackingFacture_Conditional_109_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 42);
+    \u0275\u0275text(1, "Aucun versement");
+    \u0275\u0275elementEnd();
+  }
+}
+function PackingFacture_Conditional_127_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 52);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("Le montant ne doit pas depasser le reste a payer (", ctx_r0.formatAmount(ctx_r0.resteAPayer), ").");
+  }
+}
 var PackingFacture = class _PackingFacture {
   route;
   router;
+  layoutService;
   packingService;
   usineContext;
+  authService;
   messageService;
   loading = false;
   encaissementSaving = false;
+  canCreateVersement = false;
   packing = null;
   versements = [];
   encaissementMontant = null;
@@ -3409,12 +3490,15 @@ var PackingFacture = class _PackingFacture {
     { label: MODE_PAIEMENT_LABELS.virement, value: "virement" },
     { label: MODE_PAIEMENT_LABELS.cheque, value: "cheque" }
   ];
-  constructor(route, router, packingService, usineContext, messageService) {
+  constructor(route, router, layoutService, packingService, usineContext, authService, messageService) {
     this.route = route;
     this.router = router;
+    this.layoutService = layoutService;
     this.packingService = packingService;
     this.usineContext = usineContext;
+    this.authService = authService;
     this.messageService = messageService;
+    this.canCreateVersement = this.authService.hasPermission("versements.create");
   }
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
@@ -3485,6 +3569,9 @@ var PackingFacture = class _PackingFacture {
     const latest = versementsTries[0];
     return latest.mode_paiement_label || MODE_PAIEMENT_LABELS[latest.mode_paiement] || "-";
   }
+  get versementsAffiches() {
+    return [...this.versements].sort((a, b) => new Date(b.date_versement).getTime() - new Date(a.date_versement).getTime());
+  }
   get notes() {
     return this.packing?.notes?.trim() || "-";
   }
@@ -3500,8 +3587,15 @@ var PackingFacture = class _PackingFacture {
   get totalEncaisse() {
     return this.versements.reduce((sum, versement) => sum + (versement.montant || 0), 0);
   }
+  get isEncaissementMontantExceedsReste() {
+    if (this.encaissementMontant == null)
+      return false;
+    if (this.resteAPayer <= 0)
+      return false;
+    return this.encaissementMontant > this.resteAPayer;
+  }
   get canPay() {
-    return !this.loading && !this.encaissementSaving && this.resteAPayer > 0;
+    return this.canCreateVersement && !this.loading && !this.encaissementSaving && this.resteAPayer > 0 && !this.isEncaissementMontantExceedsReste;
   }
   formatAmount(value) {
     return `${new Intl.NumberFormat("fr-FR", {
@@ -3510,9 +3604,47 @@ var PackingFacture = class _PackingFacture {
       maximumFractionDigits: 0
     }).format(value)} FG`;
   }
+  formatVersementMode(versement) {
+    return versement.mode_paiement_label || MODE_PAIEMENT_LABELS[versement.mode_paiement] || versement.mode_paiement;
+  }
+  toggleSidebar() {
+    this.layoutService.onMenuToggle();
+  }
+  downloadInvoice() {
+    const invoice = document.getElementById("packing-facture-invoice");
+    if (!invoice)
+      return;
+    const fileName = `${this.factureNumero || "facture-packing"}.html`;
+    const html = `<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${this.factureNumero || "Facture packing"}</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f1f5f9; font-family: Arial, sans-serif; }
+  </style>
+</head>
+<body>${invoice.outerHTML}</body>
+</html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+  printInvoice() {
+    const oldTitle = document.title;
+    document.title = this.factureNumero || "Facture packing";
+    window.print();
+    document.title = oldTitle;
+  }
   payer() {
     if (!this.packing || !this.canPay)
       return;
+    const packingId = this.packing.id;
     if (!this.encaissementMontant || this.encaissementMontant <= 0) {
       this.messageService.add({
         severity: "warn",
@@ -3537,15 +3669,22 @@ var PackingFacture = class _PackingFacture {
       mode_paiement: this.encaissementMode
     };
     this.encaissementSaving = true;
-    this.packingService.createVersement(this.packing.id, dto).subscribe({
-      next: () => {
+    this.packingService.createVersement(packingId, dto).subscribe({
+      next: (response) => {
+        if (response.data?.packing) {
+          this.packing = response.data.packing;
+        }
+        if (response.data?.versement) {
+          this.versements = [response.data.versement, ...this.versements];
+        }
+        this.syncEncaissementDefaults();
         this.messageService.add({
           severity: "success",
           summary: "Succes",
           detail: `Versement de ${this.formatAmount(dto.montant)} enregistre.`,
           life: 3e3
         });
-        this.loadPacking(this.packing.id);
+        this.loadPacking(packingId);
       },
       error: (error) => {
         this.encaissementSaving = false;
@@ -3568,6 +3707,7 @@ var PackingFacture = class _PackingFacture {
       },
       error: () => {
         this.loading = false;
+        this.encaissementSaving = false;
         this.messageService.add({
           severity: "error",
           summary: "Erreur",
@@ -3625,183 +3765,196 @@ var PackingFacture = class _PackingFacture {
     return `${year}-${month}-${day}`;
   }
   static \u0275fac = function PackingFacture_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _PackingFacture)(\u0275\u0275directiveInject(ActivatedRoute), \u0275\u0275directiveInject(Router), \u0275\u0275directiveInject(PackingService), \u0275\u0275directiveInject(UsineContextService), \u0275\u0275directiveInject(MessageService));
+    return new (__ngFactoryType__ || _PackingFacture)(\u0275\u0275directiveInject(ActivatedRoute), \u0275\u0275directiveInject(Router), \u0275\u0275directiveInject(LayoutService), \u0275\u0275directiveInject(PackingService), \u0275\u0275directiveInject(UsineContextService), \u0275\u0275directiveInject(AuthService), \u0275\u0275directiveInject(MessageService));
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _PackingFacture, selectors: [["app-packing-facture"]], features: [\u0275\u0275ProvidersFeature([MessageService])], decls: 138, vars: 34, consts: [["position", "top-right", "appendTo", "body", 3, "baseZIndex", "preventOpenDuplicates"], [1, "w-full", "flex", "flex-col", "md:flex-row", "items-start", "gap-6"], [1, "w-full", "md:flex-1"], [1, "card", "py-20", "px-12", "md:px-20", "overflow-auto"], [1, "flex", "flex-col", "items-start", "md:flex-row", "md:items-center", "md:justify-between", "border-b", "border-surface-200", "dark:border-surface-700", "pb-8", "min-w-max"], [1, "flex", "flex-col"], ["width", "48", "height", "50", "viewBox", "0 0 48 50", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fillRule", "evenodd", "clipRule", "evenodd", "d", "M33.1548 9.65956L23.9913 4.86169L5.54723 14.5106L0.924465 12.0851L23.9913 0L37.801 7.23403L33.1548 9.65956ZM23.9931 19.3085L42.4255 9.65955L47.0717 12.0851L23.9931 24.1595L10.1952 16.9361L14.8297 14.5106L23.9931 19.3085ZM4.6345 25.8937L0 23.4681V37.9149L23.0669 50V45.1489L4.6345 35.4894V25.8937ZM18.4324 28.2658L0 18.6169V13.7658L23.0669 25.8403V40.2977L18.4324 37.8615V28.2658ZM38.7301 23.468V18.6169L24.9205 25.8403V49.9999L29.555 47.5743V28.2659L38.7301 23.468ZM43.3546 35.4892V16.1914L48.0008 13.7659V37.9148L34.1912 45.1488V40.2977L43.3546 35.4892Z", "fill", "var(--p-primary-color)"], [1, "my-4", "text-4xl", "font-bold", "text-surface-900", "dark:text-surface-0"], [1, "mb-2"], [1, "flex", "flex-col", "mt-8", "md:mt-0"], [1, "text-2xl", "font-semibold", "text-left", "md:text-right", "mb-4"], [1, "flex", "justify-between", "items-center", "mb-2"], [1, "font-semibold", "mr-12"], [1, "flex", "justify-between", "items-center"], [1, "mt-8", "mb-20", "flex", "flex-col"], [1, "mb-4", "text-2xl", "font-medium"], [1, "overflow-x-auto"], [1, "w-full", 2, "border-collapse", "collapse", "table-layout", "auto"], [1, "text-left", "font-semibold", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap"], [1, "text-right", "font-semibold", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap", "px-4"], [1, "text-right", "font-semibold", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap"], [1, "text-left", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap"], [1, "text-right", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "px-4"], [1, "text-right", "py-4", "border-b", "border-surface-200", "dark:border-surface-700"], [1, "flex", "flex-col", "md:flex-row", "md:items-start", "md:justify-between", "mt-20"], [1, "flex", "flex-col", "mb-4", "md:mb-0"], [1, "font-semibold", "mb-2"], [1, "text-surface-600", "dark:text-surface-300", "max-w-xs", "text-sm"], [1, "font-semibold", "mb-4", "md:mb-0"], [1, "w-full", "md:w-80", "flex", "flex-col", "justify-start", "items-start", "gap-6"], [1, "w-full", "p-4", "md:p-6", "rounded-lg", "border", "border-surface-200", "dark:border-surface-700", "flex", "flex-col", "justify-start", "items-start", "gap-4", "md:gap-6", "overflow-hidden", "bg-surface-0", "dark:bg-surface-900"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-semibold", "leading-tight"], [1, "w-full", "py-2", "flex", "flex-col", "justify-start", "items-start", "gap-3", "md:gap-4"], [1, "w-full", "flex", "justify-start", "items-start", "gap-2"], [1, "flex-1", "text-surface-700", "dark:text-surface-200", "text-sm", "md:text-base", "font-normal", "leading-tight"], [1, "text-surface-900", "dark:text-surface-0", "text-sm", "md:text-base", "font-medium", "leading-tight"], [1, "w-full", "flex", "justify-start", "items-start"], [1, "flex-1", "flex", "flex-col", "justify-start", "items-start"], [1, "w-full", "h-px", "bg-surface-200", "dark:bg-surface-700"], [1, "text-orange-500", "text-sm", "md:text-base", "font-medium", "leading-tight"], [1, "w-full", "flex", "flex-col", "gap-2"], [1, "text-surface-900", "dark:text-surface-0", "text-sm", "font-medium"], ["inputStyleClass", "w-full", "styleClass", "w-full", "suffix", " FG", "placeholder", "0", 3, "ngModelChange", "ngModel", "min", "max", "useGrouping"], ["optionLabel", "label", "optionValue", "value", "styleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "options"], ["pButton", "", "severity", "contrast", 1, "w-full", 3, "click", "disabled", "loading"], ["pButtonLabel", ""]], template: function PackingFacture_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _PackingFacture, selectors: [["app-packing-facture"]], features: [\u0275\u0275ProvidersFeature([MessageService])], decls: 135, vars: 42, consts: [["position", "top-right", "appendTo", "body", 3, "baseZIndex", "preventOpenDuplicates"], [1, "packing-facture-actions", "w-full", "flex", "justify-end", "mb-4"], [1, "flex", "items-center", "gap-3"], ["pButton", "", "type", "button", "icon", "pi pi-arrows-h", "severity", "success", "pTooltip", "Fermer/Ouvrir menu", "tooltipPosition", "top", 3, "click", "outlined", "rounded"], ["pButton", "", "type", "button", "icon", "pi pi-download", "severity", "success", "pTooltip", "Telecharger la facture", "tooltipPosition", "top", 3, "click", "outlined", "rounded"], ["pButton", "", "type", "button", "icon", "pi pi-print", "severity", "success", "pTooltip", "Imprimer la facture", "tooltipPosition", "top", 3, "click", "rounded"], [1, "packing-facture-layout", "w-full", "flex", "flex-col", "md:flex-row", "items-start", "gap-6"], [1, "packing-facture-main", "w-full", "md:flex-1"], ["id", "packing-facture-invoice", 1, "card", "py-20", "px-12", "md:px-20", "overflow-auto"], [1, "flex", "flex-col", "items-start", "md:flex-row", "md:items-center", "md:justify-between", "border-b", "border-surface-200", "dark:border-surface-700", "pb-8", "min-w-max"], [1, "flex", "flex-col"], ["width", "48", "height", "50", "viewBox", "0 0 48 50", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fillRule", "evenodd", "clipRule", "evenodd", "d", "M33.1548 9.65956L23.9913 4.86169L5.54723 14.5106L0.924465 12.0851L23.9913 0L37.801 7.23403L33.1548 9.65956ZM23.9931 19.3085L42.4255 9.65955L47.0717 12.0851L23.9931 24.1595L10.1952 16.9361L14.8297 14.5106L23.9931 19.3085ZM4.6345 25.8937L0 23.4681V37.9149L23.0669 50V45.1489L4.6345 35.4894V25.8937ZM18.4324 28.2658L0 18.6169V13.7658L23.0669 25.8403V40.2977L18.4324 37.8615V28.2658ZM38.7301 23.468V18.6169L24.9205 25.8403V49.9999L29.555 47.5743V28.2659L38.7301 23.468ZM43.3546 35.4892V16.1914L48.0008 13.7659V37.9148L34.1912 45.1488V40.2977L43.3546 35.4892Z", "fill", "var(--p-primary-color)"], [1, "my-4", "text-4xl", "font-bold", "text-surface-900", "dark:text-surface-0"], [1, "mb-2"], [1, "flex", "flex-col", "mt-8", "md:mt-0"], [1, "text-2xl", "font-semibold", "text-left", "md:text-right", "mb-4"], [1, "flex", "justify-between", "items-center", "mb-2"], [1, "font-semibold", "mr-12"], [1, "flex", "justify-between", "items-center"], [1, "mt-8", "mb-20", "flex", "flex-col"], [1, "mb-4", "text-2xl", "font-medium"], [1, "overflow-x-auto"], [1, "w-full", 2, "border-collapse", "collapse", "table-layout", "auto"], [1, "text-left", "font-semibold", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap"], [1, "text-right", "font-semibold", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap", "px-4"], [1, "text-right", "font-semibold", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap"], [1, "text-left", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "whitespace-nowrap"], [1, "text-right", "py-4", "border-b", "border-surface-200", "dark:border-surface-700", "px-4"], [1, "text-right", "py-4", "border-b", "border-surface-200", "dark:border-surface-700"], [1, "flex", "flex-col", "md:flex-row", "md:items-start", "md:justify-between", "mt-20"], [1, "flex", "flex-col", "mb-4", "md:mb-0"], [1, "font-semibold", "mb-2"], [1, "text-surface-600", "dark:text-surface-300", "max-w-xs", "text-sm"], [1, "font-semibold", "mb-4", "md:mb-0"], [1, "flex", "flex-col", "gap-2", "mt-4", "pt-3", "border-t", "border-surface-200", "dark:border-surface-700"], [1, "mt-3", "text-sm", "text-surface-500", "dark:text-surface-400"], [1, "packing-facture-sidepanel", "w-full", "md:w-80", "flex", "flex-col", "justify-start", "items-start", "gap-6"], [1, "w-full", "p-4", "md:p-6", "rounded-lg", "border", "border-surface-200", "dark:border-surface-700", "flex", "flex-col", "justify-start", "items-start", "gap-4", "md:gap-6", "overflow-hidden", "bg-surface-0", "dark:bg-surface-900"], [1, "text-surface-900", "dark:text-surface-0", "text-base", "font-semibold", "leading-tight"], [1, "w-full", "py-2", "flex", "flex-col", "justify-start", "items-start", "gap-3", "md:gap-4"], [1, "w-full", "flex", "justify-start", "items-start", "gap-2"], [1, "w-full", "text-surface-500", "dark:text-surface-400", "text-sm", "leading-tight"], [1, "w-full", "flex", "justify-start", "items-start"], [1, "flex-1", "flex", "flex-col", "justify-start", "items-start"], [1, "w-full", "h-px", "bg-surface-200", "dark:bg-surface-700"], [1, "flex-1", "text-surface-700", "dark:text-surface-200", "text-sm", "md:text-base", "font-normal", "leading-tight"], [1, "text-surface-900", "dark:text-surface-0", "text-sm", "md:text-base", "font-medium", "leading-tight"], [1, "text-orange-500", "text-sm", "md:text-base", "font-medium", "leading-tight"], [1, "w-full", "flex", "flex-col", "gap-2"], [1, "text-surface-900", "dark:text-surface-0", "text-sm", "font-medium"], ["inputStyleClass", "w-full", "styleClass", "w-full", "suffix", " FG", "placeholder", "0", 3, "ngModelChange", "ngModel", "min", "max", "invalid", "useGrouping"], [1, "text-red-500", "text-xs"], ["optionLabel", "label", "optionValue", "value", "styleClass", "w-full", "appendTo", "body", 3, "ngModelChange", "ngModel", "options"], ["pButton", "", "severity", "contrast", 1, "w-full", 3, "click", "disabled", "loading"], ["pButtonLabel", ""], [1, "flex", "justify-between", "items-center", "gap-4", "text-sm"], [1, "text-surface-600", "dark:text-surface-300"], [1, "font-medium", "text-surface-900", "dark:text-surface-0"]], template: function PackingFacture_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275element(0, "p-toast", 0);
-      \u0275\u0275elementStart(1, "div", 1)(2, "div", 2)(3, "div", 3)(4, "div", 4)(5, "div", 5);
+      \u0275\u0275elementStart(1, "div", 1)(2, "div", 2)(3, "button", 3);
+      \u0275\u0275listener("click", function PackingFacture_Template_button_click_3_listener() {
+        return ctx.toggleSidebar();
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(4, "button", 4);
+      \u0275\u0275listener("click", function PackingFacture_Template_button_click_4_listener() {
+        return ctx.downloadInvoice();
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(5, "button", 5);
+      \u0275\u0275listener("click", function PackingFacture_Template_button_click_5_listener() {
+        return ctx.printInvoice();
+      });
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(6, "div", 6)(7, "div", 7)(8, "div", 8)(9, "div", 9)(10, "div", 10);
       \u0275\u0275namespaceSVG();
-      \u0275\u0275elementStart(6, "svg", 6);
-      \u0275\u0275element(7, "path", 7);
+      \u0275\u0275elementStart(11, "svg", 11);
+      \u0275\u0275element(12, "path", 12);
       \u0275\u0275elementEnd();
       \u0275\u0275namespaceHTML();
-      \u0275\u0275elementStart(8, "div", 8);
-      \u0275\u0275text(9, " EAU-LA-MAMAN ");
+      \u0275\u0275elementStart(13, "div", 13);
+      \u0275\u0275text(14, " EAU-LA-MAMAN ");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(10, "span", 9);
-      \u0275\u0275text(11);
+      \u0275\u0275elementStart(15, "span", 14);
+      \u0275\u0275text(16);
       \u0275\u0275elementEnd();
-      \u0275\u0275conditionalCreate(12, PackingFacture_Conditional_12_Template, 2, 1, "span");
+      \u0275\u0275conditionalCreate(17, PackingFacture_Conditional_17_Template, 2, 1, "span");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(13, "div", 10)(14, "div", 11);
-      \u0275\u0275text(15, " FACTURE PACKING ");
+      \u0275\u0275elementStart(18, "div", 15)(19, "div", 16);
+      \u0275\u0275text(20, " FACTURE PACKING ");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(16, "div", 5)(17, "div", 12)(18, "span", 13);
-      \u0275\u0275text(19, "DATE");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(20, "span");
-      \u0275\u0275text(21);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(22, "div", 12)(23, "span", 13);
-      \u0275\u0275text(24, "FACTURE #");
+      \u0275\u0275elementStart(21, "div", 10)(22, "div", 17)(23, "span", 18);
+      \u0275\u0275text(24, "DATE");
       \u0275\u0275elementEnd();
       \u0275\u0275elementStart(25, "span");
       \u0275\u0275text(26);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(27, "div", 14)(28, "span", 13);
-      \u0275\u0275text(29, "No MACHINISTE");
+      \u0275\u0275elementStart(27, "div", 17)(28, "span", 18);
+      \u0275\u0275text(29, "FACTURE #");
       \u0275\u0275elementEnd();
       \u0275\u0275elementStart(30, "span");
       \u0275\u0275text(31);
-      \u0275\u0275elementEnd()()()()();
-      \u0275\u0275elementStart(32, "div", 15)(33, "div", 16);
-      \u0275\u0275text(34, "Prestataire (Machiniste)");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(32, "div", 19)(33, "span", 18);
+      \u0275\u0275text(34, "No MACHINISTE");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(35, "span", 9);
+      \u0275\u0275elementStart(35, "span");
       \u0275\u0275text(36);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(37, "span", 9);
-      \u0275\u0275text(38);
-      \u0275\u0275pipe(39, "phoneFormat");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(40, "span");
-      \u0275\u0275text(41);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(42, "div", 17)(43, "table", 18)(44, "thead")(45, "tr")(46, "th", 19);
-      \u0275\u0275text(47, " Description ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(48, "th", 20);
-      \u0275\u0275text(49, " Quantite ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(50, "th", 20);
-      \u0275\u0275text(51, " Prix unitaire ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(52, "th", 21);
-      \u0275\u0275text(53, " Total ligne ");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(54, "tbody")(55, "tr")(56, "td", 22);
-      \u0275\u0275text(57, " Rouleau ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(58, "td", 23);
-      \u0275\u0275text(59);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(60, "td", 23);
-      \u0275\u0275text(61);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(62, "td", 24);
-      \u0275\u0275text(63);
       \u0275\u0275elementEnd()()()()();
-      \u0275\u0275elementStart(64, "div", 25)(65, "div", 26)(66, "div", 27);
-      \u0275\u0275text(67, "NOTES");
+      \u0275\u0275elementStart(37, "div", 20)(38, "div", 21);
+      \u0275\u0275text(39, "Prestataire (Machiniste)");
       \u0275\u0275elementEnd();
-      \u0275\u0275conditionalCreate(68, PackingFacture_Conditional_68_Template, 2, 1, "span", 28);
+      \u0275\u0275elementStart(40, "span", 14);
+      \u0275\u0275text(41);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(69, "div", 5)(70, "div", 12)(71, "span", 13);
-      \u0275\u0275text(72, "TVA #");
+      \u0275\u0275elementStart(42, "span", 14);
+      \u0275\u0275text(43);
+      \u0275\u0275pipe(44, "phoneFormat");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(73, "span");
-      \u0275\u0275text(74, "0");
+      \u0275\u0275elementStart(45, "span");
+      \u0275\u0275text(46);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(75, "div", 14)(76, "span", 13);
-      \u0275\u0275text(77, "TOTAL");
+      \u0275\u0275elementStart(47, "div", 22)(48, "table", 23)(49, "thead")(50, "tr")(51, "th", 24);
+      \u0275\u0275text(52, " Description ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(53, "th", 25);
+      \u0275\u0275text(54, " Quantite ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(55, "th", 25);
+      \u0275\u0275text(56, " Prix unitaire ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(57, "th", 26);
+      \u0275\u0275text(58, " Total ligne ");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(59, "tbody")(60, "tr")(61, "td", 27);
+      \u0275\u0275text(62, " Rouleau ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(63, "td", 28);
+      \u0275\u0275text(64);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(65, "td", 28);
+      \u0275\u0275text(66);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(67, "td", 29);
+      \u0275\u0275text(68);
+      \u0275\u0275elementEnd()()()()();
+      \u0275\u0275elementStart(69, "div", 30)(70, "div", 31)(71, "div", 32);
+      \u0275\u0275text(72, "NOTES");
+      \u0275\u0275elementEnd();
+      \u0275\u0275conditionalCreate(73, PackingFacture_Conditional_73_Template, 2, 1, "span", 33);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(74, "div", 10)(75, "div", 17)(76, "span", 18);
+      \u0275\u0275text(77, "TVA #");
       \u0275\u0275elementEnd();
       \u0275\u0275elementStart(78, "span");
-      \u0275\u0275text(79);
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(80, "div", 25)(81, "div", 29);
-      \u0275\u0275text(82, "Encaissement");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(83, "div", 5)(84, "div", 12)(85, "span", 13);
-      \u0275\u0275text(86, "Montant paye");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(87, "span");
-      \u0275\u0275text(88);
+      \u0275\u0275text(79, "0");
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(89, "div", 14)(90, "span", 13);
-      \u0275\u0275text(91, "Reste a payer");
+      \u0275\u0275elementStart(80, "div", 19)(81, "span", 18);
+      \u0275\u0275text(82, "TOTAL");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(83, "span");
+      \u0275\u0275text(84);
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(85, "div", 30)(86, "div", 34);
+      \u0275\u0275text(87, "Paiements");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(88, "div", 10)(89, "div", 17)(90, "span", 18);
+      \u0275\u0275text(91, "Montant paye");
       \u0275\u0275elementEnd();
       \u0275\u0275elementStart(92, "span");
       \u0275\u0275text(93);
-      \u0275\u0275elementEnd()()()()()();
-      \u0275\u0275elementStart(94, "div", 30)(95, "div", 31)(96, "div", 32);
-      \u0275\u0275text(97, "Encaissement");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(98, "div", 33)(99, "div", 34)(100, "div", 35);
-      \u0275\u0275text(101, "Espece");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(102, "div", 36);
-      \u0275\u0275text(103);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(104, "div", 34)(105, "div", 35);
-      \u0275\u0275text(106, "Mobile");
+      \u0275\u0275elementStart(94, "div", 19)(95, "span", 18);
+      \u0275\u0275text(96, "Reste a payer");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(107, "div", 36);
-      \u0275\u0275text(108);
+      \u0275\u0275elementStart(97, "span");
+      \u0275\u0275text(98);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(109, "div", 34)(110, "div", 35);
-      \u0275\u0275text(111, "Banque");
+      \u0275\u0275conditionalCreate(99, PackingFacture_Conditional_99_Template, 3, 0, "div", 35)(100, PackingFacture_Conditional_100_Template, 2, 0, "span", 36);
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(101, "div", 37)(102, "div", 38)(103, "div", 39);
+      \u0275\u0275text(104, "Payer la facture");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(112, "div", 36);
-      \u0275\u0275text(113);
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(114, "div", 37)(115, "div", 38);
-      \u0275\u0275element(116, "div", 39);
+      \u0275\u0275elementStart(105, "div", 40);
+      \u0275\u0275conditionalCreate(106, PackingFacture_Conditional_106_Template, 5, 1, "div", 41);
+      \u0275\u0275conditionalCreate(107, PackingFacture_Conditional_107_Template, 5, 1, "div", 41);
+      \u0275\u0275conditionalCreate(108, PackingFacture_Conditional_108_Template, 5, 1, "div", 41);
+      \u0275\u0275conditionalCreate(109, PackingFacture_Conditional_109_Template, 2, 0, "div", 42);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(110, "div", 43)(111, "div", 44);
+      \u0275\u0275element(112, "div", 45);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(117, "div", 34)(118, "div", 35);
-      \u0275\u0275text(119, "Total");
+      \u0275\u0275elementStart(113, "div", 41)(114, "div", 46);
+      \u0275\u0275text(115, "Pay\xE9e");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(120, "div", 36);
-      \u0275\u0275text(121);
+      \u0275\u0275elementStart(116, "div", 47);
+      \u0275\u0275text(117);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(122, "div", 34)(123, "div", 35);
-      \u0275\u0275text(124, "Reste");
+      \u0275\u0275elementStart(118, "div", 41)(119, "div", 46);
+      \u0275\u0275text(120, "Reste");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(125, "div", 40);
-      \u0275\u0275text(126);
+      \u0275\u0275elementStart(121, "div", 48);
+      \u0275\u0275text(122);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(127, "div", 41)(128, "label", 42);
-      \u0275\u0275text(129, "Montant a encaisser");
+      \u0275\u0275elementStart(123, "div", 49)(124, "label", 50);
+      \u0275\u0275text(125, "Montant \xE0 encaisser");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(130, "p-inputnumber", 43);
-      \u0275\u0275twoWayListener("ngModelChange", function PackingFacture_Template_p_inputnumber_ngModelChange_130_listener($event) {
+      \u0275\u0275elementStart(126, "p-inputnumber", 51);
+      \u0275\u0275twoWayListener("ngModelChange", function PackingFacture_Template_p_inputnumber_ngModelChange_126_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.encaissementMontant, $event) || (ctx.encaissementMontant = $event);
         return $event;
       });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(131, "div", 41)(132, "label", 42);
-      \u0275\u0275text(133, "Mode de paiement");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(134, "p-select", 44);
-      \u0275\u0275twoWayListener("ngModelChange", function PackingFacture_Template_p_select_ngModelChange_134_listener($event) {
+      \u0275\u0275conditionalCreate(127, PackingFacture_Conditional_127_Template, 2, 1, "small", 52);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(128, "div", 49)(129, "label", 50);
+      \u0275\u0275text(130, "Mode de paiement");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(131, "p-select", 53);
+      \u0275\u0275twoWayListener("ngModelChange", function PackingFacture_Template_p_select_ngModelChange_131_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.encaissementMode, $event) || (ctx.encaissementMode = $event);
         return $event;
       });
       \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(135, "button", 45);
-      \u0275\u0275listener("click", function PackingFacture_Template_button_click_135_listener() {
+      \u0275\u0275elementStart(132, "button", 54);
+      \u0275\u0275listener("click", function PackingFacture_Template_button_click_132_listener() {
         return ctx.payer();
       });
-      \u0275\u0275elementStart(136, "span", 46);
-      \u0275\u0275text(137, "Payer");
+      \u0275\u0275elementStart(133, "span", 55);
+      \u0275\u0275text(134, "Payer");
       \u0275\u0275elementEnd()()()();
     }
     if (rf & 2) {
       \u0275\u0275property("baseZIndex", 1100)("preventOpenDuplicates", true);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("outlined", true)("rounded", true);
+      \u0275\u0275advance();
+      \u0275\u0275property("outlined", true)("rounded", true);
+      \u0275\u0275advance();
+      \u0275\u0275property("rounded", true);
       \u0275\u0275advance(11);
       \u0275\u0275textInterpolate1("Usine de ", ctx.usineNom);
       \u0275\u0275advance();
-      \u0275\u0275conditional(ctx.usineAdresse ? 12 : -1);
+      \u0275\u0275conditional(ctx.usineAdresse ? 17 : -1);
       \u0275\u0275advance(9);
       \u0275\u0275textInterpolate(ctx.factureDate);
       \u0275\u0275advance(5);
@@ -3811,7 +3964,7 @@ var PackingFacture = class _PackingFacture {
       \u0275\u0275advance(5);
       \u0275\u0275textInterpolate(ctx.prestataireNomComplet);
       \u0275\u0275advance(2);
-      \u0275\u0275textInterpolate(ctx.prestatairePhone ? \u0275\u0275pipeBind2(39, 31, ctx.prestatairePhone, "INT") : "-");
+      \u0275\u0275textInterpolate(ctx.prestatairePhone ? \u0275\u0275pipeBind2(44, 39, ctx.prestatairePhone, "INT") : "-");
       \u0275\u0275advance(3);
       \u0275\u0275textInterpolate(ctx.prestataireAdresse);
       \u0275\u0275advance(18);
@@ -3821,26 +3974,32 @@ var PackingFacture = class _PackingFacture {
       \u0275\u0275advance(2);
       \u0275\u0275textInterpolate1(" ", ctx.formatAmount(ctx.totalLigne), " ");
       \u0275\u0275advance(5);
-      \u0275\u0275conditional((ctx.packing == null ? null : ctx.packing.notes == null ? null : ctx.packing.notes.trim()) ? 68 : -1);
+      \u0275\u0275conditional((ctx.packing == null ? null : ctx.packing.notes == null ? null : ctx.packing.notes.trim()) ? 73 : -1);
       \u0275\u0275advance(11);
       \u0275\u0275textInterpolate(ctx.formatAmount(ctx.totalFacture));
       \u0275\u0275advance(9);
-      \u0275\u0275textInterpolate2("", ctx.formatAmount(ctx.montantPaye), "", ctx.modePaiementLabel !== "-" ? " " + ctx.modePaiementLabel : "");
+      \u0275\u0275textInterpolate(ctx.formatAmount(ctx.montantPaye));
       \u0275\u0275advance(5);
       \u0275\u0275textInterpolate(ctx.formatAmount(ctx.resteAPayer));
-      \u0275\u0275advance(10);
-      \u0275\u0275textInterpolate(ctx.formatAmount(ctx.totalEspeces));
-      \u0275\u0275advance(5);
-      \u0275\u0275textInterpolate(ctx.formatAmount(ctx.totalMobile));
-      \u0275\u0275advance(5);
-      \u0275\u0275textInterpolate(ctx.formatAmount(ctx.totalBanque));
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.versementsAffiches.length > 0 ? 99 : 100);
+      \u0275\u0275advance(7);
+      \u0275\u0275conditional(ctx.totalEspeces > 0 ? 106 : -1);
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.totalMobile > 0 ? 107 : -1);
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.totalBanque > 0 ? 108 : -1);
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.totalEncaisse === 0 ? 109 : -1);
       \u0275\u0275advance(8);
       \u0275\u0275textInterpolate(ctx.formatAmount(ctx.totalEncaisse));
       \u0275\u0275advance(5);
       \u0275\u0275textInterpolate(ctx.formatAmount(ctx.resteAPayer));
       \u0275\u0275advance(4);
       \u0275\u0275twoWayProperty("ngModel", ctx.encaissementMontant);
-      \u0275\u0275property("min", 1)("max", ctx.resteAPayer)("useGrouping", true);
+      \u0275\u0275property("min", 1)("max", ctx.resteAPayer)("invalid", ctx.isEncaissementMontantExceedsReste)("useGrouping", true);
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.isEncaissementMontantExceedsReste ? 127 : -1);
       \u0275\u0275advance(4);
       \u0275\u0275twoWayProperty("ngModel", ctx.encaissementMode);
       \u0275\u0275property("options", ctx.modesPaiement);
@@ -3861,8 +4020,10 @@ var PackingFacture = class _PackingFacture {
     InputNumber,
     SelectModule,
     Select,
+    TooltipModule,
+    Tooltip,
     PhoneFormatPipe
-  ], encapsulation: 2 });
+  ], styles: ["\n\n@media print {\n  .packing-facture-actions[_ngcontent-%COMP%], \n   .packing-facture-sidepanel[_ngcontent-%COMP%] {\n    display: none !important;\n  }\n  .packing-facture-layout[_ngcontent-%COMP%] {\n    display: block !important;\n  }\n  .packing-facture-main[_ngcontent-%COMP%] {\n    width: 100% !important;\n  }\n  #packing-facture-invoice[_ngcontent-%COMP%] {\n    padding: 0 !important;\n    border: 0 !important;\n    box-shadow: none !important;\n  }\n}\n/*# sourceMappingURL=packing-facture.css.map */"] });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PackingFacture, [{
@@ -3874,12 +4035,50 @@ var PackingFacture = class _PackingFacture {
       ButtonModule,
       InputNumberModule,
       SelectModule,
+      TooltipModule,
       PhoneFormatPipe
     ], providers: [MessageService], template: `<p-toast position="top-right" appendTo="body" [baseZIndex]="1100" [preventOpenDuplicates]="true" />
 
-<div class="w-full flex flex-col md:flex-row items-start gap-6">
-    <div class="w-full md:flex-1">
-        <div class="card py-20 px-12 md:px-20 overflow-auto">
+<div class="packing-facture-actions w-full flex justify-end mb-4">
+    <div class="flex items-center gap-3">
+        <button
+            pButton
+            type="button"
+            icon="pi pi-arrows-h"
+            severity="success"
+            [outlined]="true"
+            [rounded]="true"
+            pTooltip="Fermer/Ouvrir menu"
+            tooltipPosition="top"
+            (click)="toggleSidebar()"
+        ></button>
+        <button
+            pButton
+            type="button"
+            icon="pi pi-download"
+            severity="success"
+            [outlined]="true"
+            [rounded]="true"
+            pTooltip="Telecharger la facture"
+            tooltipPosition="top"
+            (click)="downloadInvoice()"
+        ></button>
+        <button
+            pButton
+            type="button"
+            icon="pi pi-print"
+            severity="success"
+            [rounded]="true"
+            pTooltip="Imprimer la facture"
+            tooltipPosition="top"
+            (click)="printInvoice()"
+        ></button>
+    </div>
+</div>
+
+<div class="packing-facture-layout w-full flex flex-col md:flex-row items-start gap-6">
+    <div class="packing-facture-main w-full md:flex-1">
+        <div id="packing-facture-invoice" class="card py-20 px-12 md:px-20 overflow-auto">
             <div
                 class="flex flex-col items-start md:flex-row md:items-center md:justify-between border-b border-surface-200 dark:border-surface-700 pb-8 min-w-max"
             >
@@ -4018,37 +4217,62 @@ var PackingFacture = class _PackingFacture {
             <div
                 class="flex flex-col md:flex-row md:items-start md:justify-between mt-20"
             >
-                <div class="font-semibold mb-4 md:mb-0">Encaissement</div>
+                <div class="font-semibold mb-4 md:mb-0">Paiements</div>
                 <div class="flex flex-col">
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-semibold mr-12">Montant paye</span>
-                        <span>{{ formatAmount(montantPaye) }}{{ modePaiementLabel !== '-' ? '  ' + modePaiementLabel : '' }}</span>
+                        <span>{{ formatAmount(montantPaye) }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="font-semibold mr-12">Reste a payer</span>
                         <span>{{ formatAmount(resteAPayer) }}</span>
                     </div>
+                    @if (versementsAffiches.length > 0) {
+                        <div class="flex flex-col gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
+                            @for (versement of versementsAffiches; track versement.id) {
+                                <div class="flex justify-between items-center gap-4 text-sm">
+                                    <span class="text-surface-600 dark:text-surface-300">
+                                        {{ formatDateDisplay(versement.date_versement) }} - {{ formatVersementMode(versement) }}
+                                    </span>
+                                    <span class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ formatAmount(versement.montant) }}
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <span class="mt-3 text-sm text-surface-500 dark:text-surface-400">Aucun verssement</span>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="w-full md:w-80 flex flex-col justify-start items-start gap-6">
+    <div class="packing-facture-sidepanel w-full md:w-80 flex flex-col justify-start items-start gap-6">
         <div class="w-full p-4 md:p-6 rounded-lg border border-surface-200 dark:border-surface-700 flex flex-col justify-start items-start gap-4 md:gap-6 overflow-hidden bg-surface-0 dark:bg-surface-900">
-            <div class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Encaissement</div>
+            <div class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Payer la facture</div>
             <div class="w-full py-2 flex flex-col justify-start items-start gap-3 md:gap-4">
-                <div class="w-full flex justify-start items-start gap-2">
-                    <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Espece</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalEspeces) }}</div>
-                </div>
-                <div class="w-full flex justify-start items-start gap-2">
-                    <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Mobile</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalMobile) }}</div>
-                </div>
-                <div class="w-full flex justify-start items-start gap-2">
-                    <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Banque</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalBanque) }}</div>
-                </div>
+                @if (totalEspeces > 0) {
+                    <div class="w-full flex justify-start items-start gap-2">
+                        <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Espece</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalEspeces) }}</div>
+                    </div>
+                }
+                @if (totalMobile > 0) {
+                    <div class="w-full flex justify-start items-start gap-2">
+                        <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Mobile</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalMobile) }}</div>
+                    </div>
+                }
+                @if (totalBanque > 0) {
+                    <div class="w-full flex justify-start items-start gap-2">
+                        <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Banque</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalBanque) }}</div>
+                    </div>
+                }
+                @if (totalEncaisse === 0) {
+                    <div class="w-full text-surface-500 dark:text-surface-400 text-sm leading-tight">Aucun versement</div>
+                }
             </div>
             <div class="w-full flex justify-start items-start">
                 <div class="flex-1 flex flex-col justify-start items-start">
@@ -4056,7 +4280,7 @@ var PackingFacture = class _PackingFacture {
                 </div>
             </div>
             <div class="w-full flex justify-start items-start gap-2">
-                <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Total</div>
+                <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Pay\xE9e</div>
                 <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalEncaisse) }}</div>
             </div>
             <div class="w-full flex justify-start items-start gap-2">
@@ -4065,17 +4289,21 @@ var PackingFacture = class _PackingFacture {
             </div>
 
             <div class="w-full flex flex-col gap-2">
-                <label class="text-surface-900 dark:text-surface-0 text-sm font-medium">Montant a encaisser</label>
+                <label class="text-surface-900 dark:text-surface-0 text-sm font-medium">Montant \xE0 encaisser</label>
                 <p-inputnumber
                     [(ngModel)]="encaissementMontant"
                     [min]="1"
                     [max]="resteAPayer"
+                    [invalid]="isEncaissementMontantExceedsReste"
                     [useGrouping]="true"
                     inputStyleClass="w-full"
                     styleClass="w-full"
                     suffix=" FG"
                     placeholder="0"
                 />
+                @if (isEncaissementMontantExceedsReste) {
+                    <small class="text-red-500 text-xs">Le montant ne doit pas depasser le reste a payer ({{ formatAmount(resteAPayer) }}).</small>
+                }
             </div>
             <div class="w-full flex flex-col gap-2">
                 <label class="text-surface-900 dark:text-surface-0 text-sm font-medium">Mode de paiement</label>
@@ -4095,11 +4323,11 @@ var PackingFacture = class _PackingFacture {
         </button>
     </div>
 </div>
-` }]
-  }], () => [{ type: ActivatedRoute }, { type: Router }, { type: PackingService }, { type: UsineContextService }, { type: MessageService }], null);
+`, styles: ["/* src/app/pages/packings/packing-facture/packing-facture.scss */\n@media print {\n  .packing-facture-actions,\n  .packing-facture-sidepanel {\n    display: none !important;\n  }\n  .packing-facture-layout {\n    display: block !important;\n  }\n  .packing-facture-main {\n    width: 100% !important;\n  }\n  #packing-facture-invoice {\n    padding: 0 !important;\n    border: 0 !important;\n    box-shadow: none !important;\n  }\n}\n/*# sourceMappingURL=packing-facture.css.map */\n"] }]
+  }], () => [{ type: ActivatedRoute }, { type: Router }, { type: LayoutService }, { type: PackingService }, { type: UsineContextService }, { type: AuthService }, { type: MessageService }], null);
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(PackingFacture, { className: "PackingFacture", filePath: "src/app/pages/packings/packing-facture/packing-facture.ts", lineNumber: 32 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(PackingFacture, { className: "PackingFacture", filePath: "src/app/pages/packings/packing-facture/packing-facture.ts", lineNumber: 36 });
 })();
 
 // src/app/pages/packings/packings.routes.ts
@@ -4132,11 +4360,11 @@ var packings_routes_default = [
     path: "packings-facture/:id",
     component: PackingFacture,
     canActivate: [authorizationGuard],
-    data: { breadcrumb: "packings-facture", permissions: ["packings.update"] }
+    data: { breadcrumb: "packings-facture", permissions: ["packings.read"] }
   },
   { path: "**", redirectTo: "/notfound" }
 ];
 export {
   packings_routes_default as default
 };
-//# sourceMappingURL=chunk-P2XHDO36.js.map
+//# sourceMappingURL=chunk-YU53NYRV.js.map

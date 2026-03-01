@@ -3792,7 +3792,7 @@ var appRoutes = [
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-P2XHDO36.js"),
+        loadChildren: () => import("./chunk-YU53NYRV.js"),
         data: { breadcrumb: "packings" }
       },
       {
@@ -3838,12 +3838,12 @@ var appRoutes = [
       },
       {
         path: "pages",
-        loadChildren: () => import("./chunk-IDBFK27R.js"),
+        loadChildren: () => import("./chunk-LRSJJDFP.js"),
         data: { breadcrumb: "pages" }
       },
       {
         path: "apps",
-        loadChildren: () => import("./chunk-XG2XXMB6.js"),
+        loadChildren: () => import("./chunk-EJCYLLGQ.js"),
         data: { breadcrumb: "apps" }
       },
       {
@@ -3879,7 +3879,7 @@ var appRoutes = [
     path: "auth",
     canActivate: [guestGuard],
     // ← Protection : redirige vers dashboard si déjà connecté
-    loadChildren: () => import("./chunk-ZFBKLOOT.js"),
+    loadChildren: () => import("./chunk-PSXGCIHF.js"),
     data: { breadcrumb: "auth" }
   },
   // Route 404

@@ -1,8 +1,45 @@
 <p-toast position="top-right" appendTo="body" [baseZIndex]="1100" [preventOpenDuplicates]="true" />
 
-<div class="w-full flex flex-col md:flex-row items-start gap-6">
-    <div class="w-full md:flex-1">
-        <div class="card py-20 px-12 md:px-20 overflow-auto">
+<div class="packing-facture-actions w-full flex justify-end mb-4">
+    <div class="flex items-center gap-3">
+        <button
+            pButton
+            type="button"
+            icon="pi pi-arrows-h"
+            severity="success"
+            [outlined]="true"
+            [rounded]="true"
+            pTooltip="Fermer/Ouvrir menu"
+            tooltipPosition="top"
+            (click)="toggleSidebar()"
+        ></button>
+        <button
+            pButton
+            type="button"
+            icon="pi pi-download"
+            severity="success"
+            [outlined]="true"
+            [rounded]="true"
+            pTooltip="Telecharger la facture"
+            tooltipPosition="top"
+            (click)="downloadInvoice()"
+        ></button>
+        <button
+            pButton
+            type="button"
+            icon="pi pi-print"
+            severity="success"
+            [rounded]="true"
+            pTooltip="Imprimer la facture"
+            tooltipPosition="top"
+            (click)="printInvoice()"
+        ></button>
+    </div>
+</div>
+
+<div class="packing-facture-layout w-full flex flex-col md:flex-row items-start gap-6">
+    <div class="packing-facture-main w-full md:flex-1">
+        <div id="packing-facture-invoice" class="card py-20 px-12 md:px-20 overflow-auto">
             <div
                 class="flex flex-col items-start md:flex-row md:items-center md:justify-between border-b border-surface-200 dark:border-surface-700 pb-8 min-w-max"
             >
@@ -141,37 +178,62 @@
             <div
                 class="flex flex-col md:flex-row md:items-start md:justify-between mt-20"
             >
-                <div class="font-semibold mb-4 md:mb-0">Encaissement</div>
+                <div class="font-semibold mb-4 md:mb-0">Paiements</div>
                 <div class="flex flex-col">
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-semibold mr-12">Montant paye</span>
-                        <span>{{ formatAmount(montantPaye) }}{{ modePaiementLabel !== '-' ? '  ' + modePaiementLabel : '' }}</span>
+                        <span>{{ formatAmount(montantPaye) }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="font-semibold mr-12">Reste a payer</span>
                         <span>{{ formatAmount(resteAPayer) }}</span>
                     </div>
+                    @if (versementsAffiches.length > 0) {
+                        <div class="flex flex-col gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
+                            @for (versement of versementsAffiches; track versement.id) {
+                                <div class="flex justify-between items-center gap-4 text-sm">
+                                    <span class="text-surface-600 dark:text-surface-300">
+                                        {{ formatDateDisplay(versement.date_versement) }} - {{ formatVersementMode(versement) }}
+                                    </span>
+                                    <span class="font-medium text-surface-900 dark:text-surface-0">
+                                        {{ formatAmount(versement.montant) }}
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <span class="mt-3 text-sm text-surface-500 dark:text-surface-400">Aucun verssement</span>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="w-full md:w-80 flex flex-col justify-start items-start gap-6">
+    <div class="packing-facture-sidepanel w-full md:w-80 flex flex-col justify-start items-start gap-6">
         <div class="w-full p-4 md:p-6 rounded-lg border border-surface-200 dark:border-surface-700 flex flex-col justify-start items-start gap-4 md:gap-6 overflow-hidden bg-surface-0 dark:bg-surface-900">
-            <div class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Encaissement</div>
+            <div class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Payer la facture</div>
             <div class="w-full py-2 flex flex-col justify-start items-start gap-3 md:gap-4">
-                <div class="w-full flex justify-start items-start gap-2">
-                    <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Espece</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalEspeces) }}</div>
-                </div>
-                <div class="w-full flex justify-start items-start gap-2">
-                    <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Mobile</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalMobile) }}</div>
-                </div>
-                <div class="w-full flex justify-start items-start gap-2">
-                    <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Banque</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalBanque) }}</div>
-                </div>
+                @if (totalEspeces > 0) {
+                    <div class="w-full flex justify-start items-start gap-2">
+                        <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Espece</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalEspeces) }}</div>
+                    </div>
+                }
+                @if (totalMobile > 0) {
+                    <div class="w-full flex justify-start items-start gap-2">
+                        <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Mobile</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalMobile) }}</div>
+                    </div>
+                }
+                @if (totalBanque > 0) {
+                    <div class="w-full flex justify-start items-start gap-2">
+                        <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Banque</div>
+                        <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalBanque) }}</div>
+                    </div>
+                }
+                @if (totalEncaisse === 0) {
+                    <div class="w-full text-surface-500 dark:text-surface-400 text-sm leading-tight">Aucun versement</div>
+                }
             </div>
             <div class="w-full flex justify-start items-start">
                 <div class="flex-1 flex flex-col justify-start items-start">
@@ -188,17 +250,21 @@
             </div>
 
             <div class="w-full flex flex-col gap-2">
-                <label class="text-surface-900 dark:text-surface-0 text-sm font-medium">Montant a encaisser</label>
+                <label class="text-surface-900 dark:text-surface-0 text-sm font-medium">Montant à encaisser</label>
                 <p-inputnumber
                     [(ngModel)]="encaissementMontant"
                     [min]="1"
                     [max]="resteAPayer"
+                    [invalid]="isEncaissementMontantExceedsReste"
                     [useGrouping]="true"
                     inputStyleClass="w-full"
                     styleClass="w-full"
                     suffix=" FG"
                     placeholder="0"
                 />
+                @if (isEncaissementMontantExceedsReste) {
+                    <small class="text-red-500 text-xs">Le montant ne doit pas depasser le reste a payer ({{ formatAmount(resteAPayer) }}).</small>
+                }
             </div>
             <div class="w-full flex flex-col gap-2">
                 <label class="text-surface-900 dark:text-surface-0 text-sm font-medium">Mode de paiement</label>

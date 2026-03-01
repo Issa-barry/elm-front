@@ -254,8 +254,22 @@
             </span>
           </div>
         </div>
-        @if ((canCreateVersement && canPay(p)) || canReadVersement || canUpdate || canEditPacking(p)) {
+        @if ((canCreateVersement && canPay(p)) || canReadVersement || canViewFacture || canEditPacking(p)) {
           <div class="mobile-card-actions">
+                  @if (canViewFacture) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                severity="secondary"
+                text
+                rounded
+                size="small"
+                pTooltip="Voir facture"
+                tooltipPosition="left"
+                (click)="goFactureFromCard($event, p)"
+              ></button>
+            }
             @if (canCreateVersement && canPay(p)) {
               <button
                 pButton
@@ -284,20 +298,7 @@
                 (click)="openHistoriqueFromCard($event, p)"
               ></button>
             }
-            @if (canUpdate) {
-              <button
-                pButton
-                type="button"
-                icon="pi pi-eye"
-                severity="secondary"
-                text
-                rounded
-                size="small"
-                pTooltip="Voir facture"
-                tooltipPosition="left"
-                (click)="goFactureFromCard($event, p)"
-              ></button>
-            }
+      
             @if (canEditPacking(p)) {
               <button
                 pButton
@@ -482,18 +483,18 @@
         @if (hasActionsColumn) {
           <td>
             <div class="flex gap-1 justify-center">
-              @if (canCreateVersement && canPay(p)) {
+              @if (canViewFacture) {
                 <button
                   pButton
                   type="button"
-                  icon="pi pi-wallet"
-                  severity="success"
+                  icon="pi pi-eye"
+                  severity="secondary"
                   text
                   rounded
                   size="small"
-                  pTooltip="Ajouter un versement"
+                  pTooltip="Voir facture"
                   tooltipPosition="top"
-                  (click)="openVersement(p)"
+                  (click)="goFacture(p)"
                 ></button>
               }
               @if (canReadVersement) {
@@ -508,20 +509,6 @@
                   pTooltip="Historique versements"
                   tooltipPosition="top"
                   (click)="openHistorique(p)"
-                ></button>
-              }
-              @if (canUpdate) {
-                <button
-                  pButton
-                  type="button"
-                  icon="pi pi-eye"
-                  severity="secondary"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Voir facture"
-                  tooltipPosition="top"
-                  (click)="goFacture(p)"
                 ></button>
               }
               @if (canEditPacking(p)) {

@@ -4,9 +4,6 @@ import {
 import "./chunk-KDGBQ4H7.js";
 import "./chunk-6D23Z7JQ.js";
 import {
-  LayoutService
-} from "./chunk-KPTCPOPL.js";
-import {
   Password,
   PasswordModule
 } from "./chunk-EV76EIF3.js";
@@ -18,6 +15,9 @@ import {
   Message,
   MessageModule
 } from "./chunk-6NCQYAXE.js";
+import {
+  LayoutService
+} from "./chunk-KPTCPOPL.js";
 import "./chunk-C5GRAO6X.js";
 import {
   AuthService
@@ -1861,4 +1861,4 @@ var auth_routes_default = [
 export {
   auth_routes_default as default
 };
-//# sourceMappingURL=chunk-ZFBKLOOT.js.map
+//# sourceMappingURL=chunk-PSXGCIHF.js.map

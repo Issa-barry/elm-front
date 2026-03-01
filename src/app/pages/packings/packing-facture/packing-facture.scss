@@ -1,0 +1,20 @@
+@media print {
+  .packing-facture-actions,
+  .packing-facture-sidepanel {
+    display: none !important;
+  }
+
+  .packing-facture-layout {
+    display: block !important;
+  }
+
+  .packing-facture-main {
+    width: 100% !important;
+  }
+
+  #packing-facture-invoice {
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}

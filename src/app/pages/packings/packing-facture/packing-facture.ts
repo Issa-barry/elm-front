@@ -7,11 +7,14 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { MODE_PAIEMENT_LABELS, ModePaiement, Packing, StoreVersementDto, Versement } from '@/models/packing.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { LayoutService } from '@/layout/service/layout.service';
 import { PackingService } from '@/services/packing/packing.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
+import { AuthService } from '@/services/auth/auth.service';
 
 @Component({
   selector: 'app-packing-facture',
@@ -23,6 +26,7 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
     ButtonModule,
     InputNumberModule,
     SelectModule,
+    TooltipModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService],
@@ -32,6 +36,7 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
 export class PackingFacture implements OnInit {
   loading = false;
   encaissementSaving = false;
+  canCreateVersement = false;
   packing: Packing | null = null;
   versements: Versement[] = [];
   encaissementMontant: number | null = null;
@@ -46,10 +51,14 @@ export class PackingFacture implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private layoutService: LayoutService,
     private packingService: PackingService,
     private usineContext: UsineContextService,
+    private authService: AuthService,
     private messageService: MessageService,
-  ) {}
+  ) {
+    this.canCreateVersement = this.authService.hasPermission('versements.create');
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -139,6 +148,12 @@ export class PackingFacture implements OnInit {
     return latest.mode_paiement_label || MODE_PAIEMENT_LABELS[latest.mode_paiement] || '-';
   }
 
+  get versementsAffiches(): Versement[] {
+    return [...this.versements].sort(
+      (a, b) => new Date(b.date_versement).getTime() - new Date(a.date_versement).getTime(),
+    );
+  }
+
   get notes(): string {
     return this.packing?.notes?.trim() || '-';
   }
@@ -159,8 +174,18 @@ export class PackingFacture implements OnInit {
     return this.versements.reduce((sum, versement) => sum + (versement.montant || 0), 0);
   }
 
+  get isEncaissementMontantExceedsReste(): boolean {
+    if (this.encaissementMontant == null) return false;
+    if (this.resteAPayer <= 0) return false;
+    return this.encaissementMontant > this.resteAPayer;
+  }
+
   get canPay(): boolean {
-    return !this.loading && !this.encaissementSaving && this.resteAPayer > 0;
+    return this.canCreateVersement
+      && !this.loading
+      && !this.encaissementSaving
+      && this.resteAPayer > 0
+      && !this.isEncaissementMontantExceedsReste;
   }
 
   formatAmount(value: number): string {
@@ -171,8 +196,52 @@ export class PackingFacture implements OnInit {
     }).format(value)} FG`;
   }
 
+  formatVersementMode(versement: Versement): string {
+    return versement.mode_paiement_label || MODE_PAIEMENT_LABELS[versement.mode_paiement] || versement.mode_paiement;
+  }
+
+  toggleSidebar(): void {
+    this.layoutService.onMenuToggle();
+  }
+
+  downloadInvoice(): void {
+    const invoice = document.getElementById('packing-facture-invoice');
+    if (!invoice) return;
+
+    const fileName = `${this.factureNumero || 'facture-packing'}.html`;
+    const html = `<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${this.factureNumero || 'Facture packing'}</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #f1f5f9; font-family: Arial, sans-serif; }
+  </style>
+</head>
+<body>${invoice.outerHTML}</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  printInvoice(): void {
+    const oldTitle = document.title;
+    document.title = this.factureNumero || 'Facture packing';
+    window.print();
+    document.title = oldTitle;
+  }
+
   payer(): void {
     if (!this.packing || !this.canPay) return;
+    const packingId = this.packing.id;
+
     if (!this.encaissementMontant || this.encaissementMontant <= 0) {
       this.messageService.add({
         severity: 'warn',
@@ -200,15 +269,23 @@ export class PackingFacture implements OnInit {
     };
 
     this.encaissementSaving = true;
-    this.packingService.createVersement(this.packing.id, dto).subscribe({
-      next: () => {
+    this.packingService.createVersement(packingId, dto).subscribe({
+      next: (response) => {
+        if (response.data?.packing) {
+          this.packing = response.data.packing;
+        }
+        if (response.data?.versement) {
+          this.versements = [response.data.versement, ...this.versements];
+        }
+        this.syncEncaissementDefaults();
+
         this.messageService.add({
           severity: 'success',
           summary: 'Succes',
           detail: `Versement de ${this.formatAmount(dto.montant)} enregistre.`,
           life: 3000,
         });
-        this.loadPacking(this.packing!.id);
+        this.loadPacking(packingId);
       },
       error: (error) => {
         this.encaissementSaving = false;
@@ -232,6 +309,7 @@ export class PackingFacture implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.encaissementSaving = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
@@ -278,7 +356,7 @@ export class PackingFacture implements OnInit {
       .reduce((sum, versement) => sum + (versement.montant || 0), 0);
   }
 
-  private formatDateDisplay(dateValue: string | Date | null | undefined): string {
+  formatDateDisplay(dateValue: string | Date | null | undefined): string {
     if (!dateValue) return '-';
 
     if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {

@@ -9,9 +9,6 @@ import {
   ProductService
 } from "./chunk-U5ULGPSQ.js";
 import {
-  LayoutService
-} from "./chunk-KPTCPOPL.js";
-import {
   Toolbar,
   ToolbarModule
 } from "./chunk-WR7L22A7.js";
@@ -22,6 +19,9 @@ import {
   AccordionModule,
   AccordionPanel
 } from "./chunk-ICECLQEL.js";
+import {
+  LayoutService
+} from "./chunk-KPTCPOPL.js";
 import {
   Textarea,
   TextareaModule
@@ -2349,4 +2349,4 @@ var pages_routes_default = [
 export {
   pages_routes_default as default
 };
-//# sourceMappingURL=chunk-IDBFK27R.js.map
+//# sourceMappingURL=chunk-LRSJJDFP.js.map

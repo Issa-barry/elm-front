@@ -97,6 +97,7 @@ export class PackingListe implements OnInit {
   lastNDaysValue: number | null = null;
   loading = false;
   canCreate = false;
+  canViewFacture = false;
   canUpdate = false;
   canDelete = false;
   canReadVersement = false;
@@ -183,7 +184,7 @@ export class PackingListe implements OnInit {
   });
 
   get hasActionsColumn(): boolean {
-    return this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
+    return this.canViewFacture || this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
   }
 
   constructor(
@@ -195,6 +196,7 @@ export class PackingListe implements OnInit {
     private usineContext: UsineContextService,
   ) {
     this.canCreate = this.authService.hasPermission('packings.create');
+    this.canViewFacture = this.authService.hasPermission('packings.read') || this.authService.hasPermission('packings.update');
     this.canUpdate = this.authService.hasPermission('packings.update');
     this.canDelete = this.authService.hasPermission('packings.delete');
     this.canReadVersement = this.authService.hasPermission('versements.read');
@@ -269,7 +271,7 @@ export class PackingListe implements OnInit {
   }
 
   goFacture(packing: Packing): void {
-    if (!this.canUpdate) return;
+    if (!this.canViewFacture) return;
     this.router.navigate(['/packings/packings-facture', packing.id]);
   }
 
