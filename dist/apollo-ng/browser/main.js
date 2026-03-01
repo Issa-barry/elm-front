@@ -1,11 +1,11 @@
 import {
   AppConfigurator,
   Qr
-} from "./chunk-D7635OIY.js";
+} from "./chunk-4VU4XUHJ.js";
 import {
   Drawer,
   DrawerModule
-} from "./chunk-KDGBQ4H7.js";
+} from "./chunk-Y3JKTTQ5.js";
 import "./chunk-6D23Z7JQ.js";
 import {
   LayoutService
@@ -17,7 +17,6 @@ import {
 import {
   authorizationGuard
 } from "./chunk-DRIERSGW.js";
-import "./chunk-C5GRAO6X.js";
 import {
   AuthService,
   UsineContextService
@@ -37,6 +36,7 @@ import {
   DomRendererFactory2,
   bootstrapApplication
 } from "./chunk-4WV22ZEZ.js";
+import "./chunk-C5GRAO6X.js";
 import {
   environment
 } from "./chunk-CSVYKJ4F.js";
@@ -58,7 +58,7 @@ import {
 import {
   Select,
   SelectModule
-} from "./chunk-TXVRC2SU.js";
+} from "./chunk-2UOA5RIX.js";
 import "./chunk-GSLAPXC6.js";
 import "./chunk-RNBHJ3IS.js";
 import "./chunk-XCVSS3ID.js";
@@ -69,11 +69,6 @@ import {
   InputIconModule
 } from "./chunk-URQMWJE6.js";
 import {
-  Tooltip,
-  TooltipModule
-} from "./chunk-55R5VFNU.js";
-import "./chunk-4WKDSNIY.js";
-import {
   InputText,
   InputTextModule
 } from "./chunk-DQKWWXZT.js";
@@ -82,15 +77,20 @@ import {
   NgControlStatus,
   NgModel
 } from "./chunk-FGSFU6DI.js";
+import {
+  Tooltip,
+  TooltipModule
+} from "./chunk-55R5VFNU.js";
+import "./chunk-4WKDSNIY.js";
 import "./chunk-KWGIJUAU.js";
 import "./chunk-ORG54PNZ.js";
+import "./chunk-CJMBUE5J.js";
+import "./chunk-3DMR3ILK.js";
 import {
   Button,
   ButtonDirective,
   ButtonModule
 } from "./chunk-73OLBEDX.js";
-import "./chunk-CJMBUE5J.js";
-import "./chunk-3DMR3ILK.js";
 import {
   Badge,
   BadgeModule
@@ -1406,7 +1406,20 @@ var AppMenu = class _AppMenu {
   buildMenuModel(permissions) {
     return [
       {
-        items: []
+        label: "Dashboards",
+        icon: "pi pi-home",
+        items: [
+          {
+            label: "E-Commerce",
+            icon: "pi pi-fw pi-home",
+            routerLink: ["/"]
+          }
+          // {
+          //     label: 'Banking',
+          //     icon: 'pi pi-fw pi-image',
+          //     routerLink: ['/dashboard-banking'],
+          // },
+        ]
       },
       {
         label: "Modules",
@@ -3777,59 +3790,59 @@ var appRoutes = [
     children: [
       {
         path: "",
-        loadComponent: () => import("./chunk-YDUJ4ZFU.js").then((c) => c.EcommerceDashboard),
+        loadComponent: () => import("./chunk-NFRQMCJD.js").then((c) => c.EcommerceDashboard),
         data: { breadcrumb: "accueil" }
       },
       {
         path: "comptabilite",
-        loadChildren: () => import("./chunk-TADS5EO7.js"),
+        loadChildren: () => import("./chunk-ZI2EKL6M.js"),
         data: { breadcrumb: "comptabilite" }
       },
       {
         path: "contacts",
-        loadChildren: () => import("./chunk-UPSDERHL.js"),
+        loadChildren: () => import("./chunk-GG4WM7J7.js"),
         data: { breadcrumb: "contacts" }
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-YU53NYRV.js"),
+        loadChildren: () => import("./chunk-DPBKYL4I.js"),
         data: { breadcrumb: "packings" }
       },
       {
         path: "produits",
-        loadChildren: () => import("./chunk-3K2STPX5.js"),
+        loadChildren: () => import("./chunk-YM4QQNMX.js"),
         data: { breadcrumb: "produits" }
       },
       {
         path: "vehicules",
-        loadChildren: () => import("./chunk-KMIWODHC.js"),
+        loadChildren: () => import("./chunk-UJG5Y7QO.js"),
         data: { breadcrumb: "vehicules" }
       },
       {
         path: "ventes",
-        loadChildren: () => import("./chunk-NP7FOGEU.js"),
+        loadChildren: () => import("./chunk-LOSZEWWH.js"),
         data: { breadcrumb: "ventes" }
       },
       {
         path: "parametres",
-        loadChildren: () => import("./chunk-XANZZYW2.js"),
+        loadChildren: () => import("./chunk-RME3BWYS.js"),
         data: { breadcrumb: "parametres" }
       },
       {
         path: "roles",
         canActivate: [authorizationGuard],
         data: { breadcrumb: "roles", roles: ["admin"] },
-        loadChildren: () => import("./chunk-VEZBL7HD.js")
+        loadChildren: () => import("./chunk-PAMXTJF7.js")
       },
       {
         path: "dashboard-banking",
-        loadComponent: () => import("./chunk-YWRQS3PI.js").then((c) => c.BankingDashboard),
+        loadComponent: () => import("./chunk-MO6WIAWW.js").then((c) => c.BankingDashboard),
         data: { breadcrumb: "dashboard-banking" }
       },
       {
         path: "uikit",
         data: { breadcrumb: "uikit" },
-        loadChildren: () => import("./chunk-RZQCCDAX.js")
+        loadChildren: () => import("./chunk-ID3LP5JB.js")
       },
       {
         path: "documentation",
@@ -3838,27 +3851,27 @@ var appRoutes = [
       },
       {
         path: "pages",
-        loadChildren: () => import("./chunk-LRSJJDFP.js"),
+        loadChildren: () => import("./chunk-IPNZBYCB.js"),
         data: { breadcrumb: "pages" }
       },
       {
         path: "apps",
-        loadChildren: () => import("./chunk-EJCYLLGQ.js"),
+        loadChildren: () => import("./chunk-WJOQNREQ.js"),
         data: { breadcrumb: "apps" }
       },
       {
         path: "blocks",
         data: { breadcrumb: "blocks" },
-        loadChildren: () => import("./chunk-O5KSQCFT.js")
+        loadChildren: () => import("./chunk-OGR3PEMS.js")
       },
       {
         path: "ecommerce",
-        loadChildren: () => import("./chunk-B24PI5EI.js"),
+        loadChildren: () => import("./chunk-UR6DQWGB.js"),
         data: { breadcrumb: "ecommerce" }
       },
       {
         path: "profile",
-        loadChildren: () => import("./chunk-2XMBDDDS.js"),
+        loadChildren: () => import("./chunk-U25TAY3B.js"),
         data: { breadcrumb: "profile" }
       }
     ]
@@ -3879,7 +3892,7 @@ var appRoutes = [
     path: "auth",
     canActivate: [guestGuard],
     // ← Protection : redirige vers dashboard si déjà connecté
-    loadChildren: () => import("./chunk-PSXGCIHF.js"),
+    loadChildren: () => import("./chunk-657P5D72.js"),
     data: { breadcrumb: "auth" }
   },
   // Route 404

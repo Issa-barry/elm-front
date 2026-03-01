@@ -999,6 +999,9 @@
   .flex\! {
     display: flex !important;
   }
+  .flow-root {
+    display: flow-root;
+  }
   .grid {
     display: grid;
   }
@@ -1017,6 +1020,15 @@
   .inline-flex {
     display: inline-flex;
   }
+  .inline-grid {
+    display: inline-grid;
+  }
+  .inline-table {
+    display: inline-table;
+  }
+  .list-item {
+    display: list-item;
+  }
   .table {
     display: table;
   }
@@ -1026,8 +1038,26 @@
   .table-caption {
     display: table-caption;
   }
+  .table-cell {
+    display: table-cell;
+  }
+  .table-column {
+    display: table-column;
+  }
+  .table-column-group {
+    display: table-column-group;
+  }
+  .table-footer-group {
+    display: table-footer-group;
+  }
+  .table-header-group {
+    display: table-header-group;
+  }
   .table-row {
     display: table-row;
+  }
+  .table-row-group {
+    display: table-row-group;
   }
   .h-1\! {
     height: calc(var(--spacing) * 1) !important;
@@ -2310,6 +2340,9 @@
   }
   .no-underline {
     text-decoration-line: none;
+  }
+  .overline {
+    text-decoration-line: overline;
   }
   .underline {
     text-decoration-line: underline;

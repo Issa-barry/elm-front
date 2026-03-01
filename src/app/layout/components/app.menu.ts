@@ -34,13 +34,27 @@ export class AppMenu {
 
     private buildMenuModel(permissions: string[]) {
         return [
-            {
-                items: [],
+           {
+                label: 'Dashboards',
+                icon: 'pi pi-home',
+                items: [
+                    {
+                        label: 'E-Commerce',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/'],
+                    },
+                    // {
+                    //     label: 'Banking',
+                    //     icon: 'pi pi-fw pi-image',
+                    //     routerLink: ['/dashboard-banking'],
+                    // },
+                ],
             },
             {
                 label: 'Modules',
                 icon: 'pi pi-th-large',
                 items: [
+                    
                     // Ventes
                     // {
                     //     label: 'Ventes',

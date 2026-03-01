@@ -204,31 +204,86 @@ export class PackingFacture implements OnInit {
     this.layoutService.onMenuToggle();
   }
 
-  downloadInvoice(): void {
-    const invoice = document.getElementById('packing-facture-invoice');
+  async downloadInvoice(): Promise<void> {
+    const invoice = document.getElementById('packing-facture-invoice') as HTMLElement | null;
     if (!invoice) return;
 
-    const fileName = `${this.factureNumero || 'facture-packing'}.html`;
-    const html = `<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${this.factureNumero || 'Facture packing'}</title>
-  <style>
-    body { margin: 0; padding: 24px; background: #f1f5f9; font-family: Arial, sans-serif; }
-  </style>
-</head>
-<body>${invoice.outerHTML}</body>
-</html>`;
+    let exportContainer: HTMLDivElement | null = null;
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
 
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    URL.revokeObjectURL(url);
+      const exportNode = invoice.cloneNode(true) as HTMLElement;
+      exportNode.classList.remove('card');
+      exportNode.style.border = '0';
+      exportNode.style.boxShadow = 'none';
+      exportNode.style.borderRadius = '0';
+      exportNode.style.background = '#ffffff';
+      exportNode.style.margin = '0';
+      exportNode.style.overflow = 'visible';
+
+      exportContainer = document.createElement('div');
+      exportContainer.style.position = 'fixed';
+      exportContainer.style.left = '-100000px';
+      exportContainer.style.top = '0';
+      exportContainer.style.background = '#ffffff';
+      exportContainer.style.padding = '0';
+      exportContainer.style.margin = '0';
+      exportContainer.style.width = `${invoice.scrollWidth}px`;
+      exportContainer.style.zIndex = '-1';
+      exportContainer.appendChild(exportNode);
+      document.body.appendChild(exportContainer);
+
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+      const canvas = await html2canvas(exportNode, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: exportNode.scrollWidth,
+        height: exportNode.scrollHeight,
+        windowWidth: exportNode.scrollWidth,
+        windowHeight: exportNode.scrollHeight,
+      });
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 8;
+      const usableWidth = pageWidth - margin * 2;
+      const usableHeight = pageHeight - margin * 2;
+
+      const imageData = canvas.toDataURL('image/png', 1.0);
+      const imageHeight = (canvas.height * usableWidth) / canvas.width;
+      let heightLeft = imageHeight;
+      let positionY = margin;
+
+      pdf.addImage(imageData, 'PNG', margin, positionY, usableWidth, imageHeight, undefined, 'FAST');
+      heightLeft -= usableHeight;
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        positionY = margin - (imageHeight - heightLeft);
+        pdf.addImage(imageData, 'PNG', margin, positionY, usableWidth, imageHeight, undefined, 'FAST');
+        heightLeft -= usableHeight;
+      }
+
+      const fileName = `${this.factureNumero || 'facture-packing'}.pdf`;
+      pdf.save(fileName);
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Impossible de generer le PDF.',
+        life: 4000,
+      });
+    } finally {
+      if (exportContainer?.parentNode) {
+        exportContainer.parentNode.removeChild(exportContainer);
+      }
+    }
   }
 
   printInvoice(): void {
