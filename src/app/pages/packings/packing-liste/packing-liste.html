@@ -141,9 +141,8 @@
               <th class="text-xs">Date</th>
               <th class="text-xs">Montant</th>
               <th class="text-xs">Mode</th>
-              @if (canDeleteVersement) {
-                <th class="text-xs text-center" style="width:3rem"></th>
-              }
+              <th class="text-xs">Par</th>
+              <th class="text-xs">Heure</th>
             </tr>
           </ng-template>
           <ng-template #body let-v>
@@ -151,22 +150,8 @@
               <td class="text-sm">{{ formatDateDisplay(v.date_versement) }}</td>
               <td class="text-sm font-medium">{{ formatCurrency(v.montant) }}</td>
               <td class="text-sm text-surface-500">{{ getModeLabel(v.mode_paiement) }}</td>
-              @if (canDeleteVersement) {
-                <td class="text-center">
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    rounded
-                    size="small"
-                    pTooltip="Supprimer"
-                    tooltipPosition="top"
-                    (click)="confirmDeleteVersement(v)"
-                  ></button>
-                </td>
-              }
+              <td class="text-sm text-surface-500">{{ v.creator?.nom_complet || '-' }}</td>
+              <td class="text-sm text-surface-500">{{ formatDateTime(v.created_at) }}</td>
             </tr>
           </ng-template>
         </p-table>

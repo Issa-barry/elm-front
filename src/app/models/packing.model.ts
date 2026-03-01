@@ -48,7 +48,7 @@ export interface Versement {
 
   // Appended
   mode_paiement_label: string;
-  creator?: { id: number; name: string };
+  creator?: { id: number; nom: string; prenom: string; nom_complet: string };
 }
 
 export interface StoreVersementDto {

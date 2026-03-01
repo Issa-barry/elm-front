@@ -138,7 +138,9 @@
                 [(ngModel)]="model.phone"
                 [invalid]="(submitted || phoneError) && (!model.phone?.trim() || !!phoneError)"
                 [disabled]="fieldsDisabled"
-                (input)="onPhoneInput()"
+                (beforeinput)="onPhoneBeforeInput($event)"
+                (keydown)="onPhoneKeyDown($event)"
+                (input)="onPhoneInput($event)"
                 (blur)="onPhoneBlur()"
                 placeholder="Numero local sans indicatif"
               />

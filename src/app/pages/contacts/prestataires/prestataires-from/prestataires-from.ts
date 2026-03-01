@@ -188,16 +188,46 @@ export class PrestatairesFrom implements OnInit, OnChanges {
     this.phoneError = null;
   }
 
-  onPhoneInput() {
-    const normalized = this.sanitizePhoneDigits(this.model.phone);
-    if (this.model.phone !== normalized) {
-      this.model.phone = normalized;
+  onPhoneInput(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const rawValue = input ? input.value : String(this.model.phone || '');
+    const normalized = this.sanitizePhoneDigits(rawValue);
+
+    if (input && input.value !== normalized) {
+      input.value = normalized;
     }
+
+    this.model.phone = normalized;
 
     if (this.submitted) {
       this.validatePhone();
     } else if (!normalized) {
       this.phoneError = null;
+    }
+  }
+
+  onPhoneBeforeInput(event: InputEvent) {
+    if (!event.data) {
+      return;
+    }
+
+    if (/\D/.test(event.data)) {
+      event.preventDefault();
+    }
+  }
+
+  onPhoneKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'];
+    if (allowedKeys.includes(event.key)) {
+      return;
+    }
+
+    if (!/^\d$/.test(event.key)) {
+      event.preventDefault();
     }
   }
 

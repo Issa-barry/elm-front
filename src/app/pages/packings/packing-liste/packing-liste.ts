@@ -417,6 +417,12 @@ export class PackingListe implements OnInit {
     return date.toLocaleDateString('fr-FR');
   }
 
+  formatDateTime(dateStr: string): string {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
   private formatDate(date: Date | string): string {
     if (!date) return '';
     if (typeof date === 'string') return date;
