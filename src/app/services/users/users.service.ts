@@ -160,6 +160,13 @@ export class UserService {
   }
 
   /**
+   * Archiver un utilisateur (désactivation définitive)
+   */
+  archiveUser(id: number): Observable<ApiResponse<User>> {
+    return this.http.patch<ApiResponse<User>>(`${this.apiUrl}/${id}/archiver`, {});
+  }
+
+  /**
    * Supprimer un utilisateur (soft delete)
    */
   deleteUser(id: number): Observable<ApiResponse<null>> {

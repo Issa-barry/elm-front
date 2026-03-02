@@ -55,6 +55,31 @@ import { DashboardService, DashboardStats } from '@/services/dashboard/dashboard
 
             <div class="col-span-12 md:col-span-6 xl:col-span-3">
                 <div class="card h-full">
+                    <span class="font-semibold text-lg">Packing</span>
+                    <div class="flex justify-between items-start mt-4">
+                        <div class="w-6/12">
+                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ stats.utilisateurs.value }}</span>
+                            <div [class]="trendClass(stats.utilisateurs.trend)">
+                                <span class="font-medium">{{ formatDelta(stats.utilisateurs.delta_pct) }}</span>
+                                @if (stats.utilisateurs.trend !== 'flat') {
+                                    <i [class]="trendIcon(stats.utilisateurs.trend)"></i>
+                                }
+                            </div>
+                        </div>
+                        <div class="w-6/12">
+                            <svg width="100%" viewBox="0 0 258 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    [attr.d]="sparklinePath(stats.utilisateurs.sparkline)"
+                                    [style]="{ strokeWidth: '2px', stroke: strokeColor(stats.utilisateurs.trend) }"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                <div class="card h-full">
                     <span class="font-semibold text-lg">Utilisateurs</span>
                     <div class="flex justify-between items-start mt-4">
                         <div class="w-6/12">

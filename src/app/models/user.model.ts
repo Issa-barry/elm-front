@@ -45,6 +45,8 @@ export interface User {
   type: UserType;
   type_label?: string;          // optionnel : si l'API le renvoie, sinon utiliser getUserTypeLabel()
   is_active: boolean;
+  is_archived: boolean;
+  archived_at: string | null;
   email_verified_at: string | null;
   last_login_at: string | null;
   last_login_ip: string | null;

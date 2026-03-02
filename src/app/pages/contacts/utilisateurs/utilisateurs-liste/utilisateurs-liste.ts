@@ -180,7 +180,7 @@ export class UtilisateursListe implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les utilisateurs'
+          detail: this.getApiErrorDetail(error, 'Impossible de charger les utilisateurs')
         });
         this.loading = false;
       }
@@ -268,7 +268,7 @@ export class UtilisateursListe implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de changer le statut de l\'utilisateur'
+              detail: this.getApiErrorDetail(error, 'Impossible de changer le statut de l\'utilisateur')
             });
           }
         });
@@ -300,9 +300,9 @@ export class UtilisateursListe implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erreur:', error);
-            const apiMessage: string = error?.error?.message ?? 'Impossible de supprimer l\'utilisateur';
+            const apiMessage = this.getApiErrorDetail(error, 'Impossible de supprimer l\'utilisateur');
             this.messageService.add({ severity: 'error', summary: 'Erreur', detail: apiMessage });
-            if (apiMessage.includes('archiver')) {
+            if (error?.error?.errors?.action === 'archive') {
               this.proposeArchiveUser(userId);
             }
           }
@@ -311,38 +311,96 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     });
   }
 
-  private proposeArchiveUser(userId: number): void {
-    const user = this.users.find(u => u.id === userId);
-    if (!user?.is_active) return;
+  archiveUserAction(event: Event, userId: number): void {
+    event.stopPropagation();
 
     this.confirmationService.confirm({
-      message: 'Voulez-vous archiver (désactiver) cet utilisateur à la place ?',
+      message: 'Voulez-vous archiver cet utilisateur ? Il sera désactivé et ne pourra plus se connecter.',
+      header: 'Archiver l\'utilisateur',
+      icon: 'pi pi-inbox',
+      acceptLabel: 'Oui, archiver',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.userService.archiveUser(userId).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Utilisateur archivé avec succès' });
+              this.loadUsers();
+            }
+          },
+          error: (error) => {
+            const apiMessage = this.getApiErrorDetail(error, 'Impossible d\'archiver l\'utilisateur');
+            this.messageService.add({ severity: 'error', summary: 'Erreur', detail: apiMessage });
+          }
+        });
+      }
+    });
+  }
+
+  private proposeArchiveUser(userId: number): void {
+    const user = this.users.find(u => u.id === userId);
+    if (user?.is_archived) return;
+
+    this.confirmationService.confirm({
+      message: 'Cet utilisateur a des données liées. Voulez-vous l\'archiver à la place ?',
       header: 'Archiver l\'utilisateur',
       icon: 'pi pi-info-circle',
       acceptLabel: 'Oui, archiver',
       rejectLabel: 'Non',
       accept: () => {
-        this.userService.toggleUserStatus(userId).subscribe({
+        this.userService.archiveUser(userId).subscribe({
           next: (response) => {
             if (response.success) {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Succès',
-                detail: 'Utilisateur archivé avec succès'
-              });
+              this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Utilisateur archivé avec succès' });
               this.loadUsers();
             }
           },
-          error: () => {
+          error: (error) => {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible d\'archiver l\'utilisateur'
+              detail: this.getApiErrorDetail(error, 'Impossible d\'archiver l\'utilisateur'),
             });
           }
         });
       }
     });
+  }
+
+  private getApiErrorDetail(error: unknown, fallback: string): string {
+    const validationMessages = this.extractValidationMessages(error);
+    if (validationMessages.length > 0) {
+      return validationMessages.join('; ');
+    }
+
+    const apiMessage = this.extractApiMessage(error);
+    if (apiMessage) {
+      return apiMessage;
+    }
+
+    return fallback;
+  }
+
+  private extractApiMessage(error: unknown): string | null {
+    const message = (error as { error?: { message?: unknown } })?.error?.message;
+    if (typeof message !== 'string') {
+      return null;
+    }
+
+    const trimmedMessage = message.trim();
+    return trimmedMessage.length > 0 ? trimmedMessage : null;
+  }
+
+  private extractValidationMessages(error: unknown): string[] {
+    const validationErrors = (error as { error?: { errors?: unknown } })?.error?.errors;
+    if (!validationErrors || typeof validationErrors !== 'object') {
+      return [];
+    }
+
+    return Object.values(validationErrors as Record<string, unknown>)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((message) => String(message).trim())
+      .filter((message) => message.length > 0);
   }
 
   getInitials(nomComplet: string): string {
