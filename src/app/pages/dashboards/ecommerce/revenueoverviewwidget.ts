@@ -24,7 +24,7 @@ interface Week {
             <p-select
                 [options]="weeks"
                 [(ngModel)]="selectedWeek"
-                class="w-40"
+                class="w-56"
                 optionLabel="label"
                 (onChange)="onWeekChange()"
             ></p-select>

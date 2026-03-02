@@ -71,13 +71,13 @@ export class PackingFrom implements OnInit, OnChanges {
   @Output() cancel = new EventEmitter<void>();
 
   submitted = false;
+  isEditing = false;
   model: PackingFormModel = new PackingFormModel();
   dateError: string | null = null;
 
-  readonly statutOptions = (Object.keys(PACKING_STATUT_LABELS) as PackingStatut[]).map(k => ({
-    value: k,
-    label: PACKING_STATUT_LABELS[k],
-  }));
+  get statutLabel(): string {
+    return PACKING_STATUT_LABELS[this.model.statut] ?? this.model.statut;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['defaultPrixRouleau'] && !changes['defaultPrixRouleau'].firstChange
@@ -89,6 +89,7 @@ export class PackingFrom implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.model = this.initialData ? new PackingFormModel(this.initialData) : new PackingFormModel();
+    this.isEditing = this.mode === 'create';
     if (!this.model.date) {
       this.model.date = new Date();
     }
@@ -155,10 +156,16 @@ export class PackingFrom implements OnInit, OnChanges {
 
   onEnterKey(event: Event): void {
     event.preventDefault();
+    if (this.mode === 'edit' && !this.isEditing) {
+      return;
+    }
     this.onSubmit();
   }
 
   onSubmit(): void {
+    if (this.mode === 'edit' && !this.isEditing) {
+      return;
+    }
     this.submitted = true;
     if (!this.isValid()) return;
     this.model.calculateMontant();
@@ -176,7 +183,12 @@ export class PackingFrom implements OnInit, OnChanges {
     this.cancel.emit();
   }
 
+  enableEditing(): void {
+    if (this.mode !== 'edit') return;
+    this.isEditing = true;
+  }
+
   get fieldsDisabled(): boolean {
-    return this.loading;
+    return this.loading || (this.mode === 'edit' && !this.isEditing);
   }
 }

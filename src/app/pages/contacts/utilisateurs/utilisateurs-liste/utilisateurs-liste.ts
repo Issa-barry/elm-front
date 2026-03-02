@@ -44,7 +44,7 @@ import { UtilisateursViewDialog } from '../utilisateurs-view-dialog/utilisateurs
     PhoneFormatPipe,
     UtilisateursViewDialog,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
 })
 export class UtilisateursListe implements OnInit, OnDestroy {
   users: User[] = [];

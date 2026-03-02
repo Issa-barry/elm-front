@@ -33,7 +33,7 @@ export class PackingNew implements OnInit {
   ) {
     // Rechargement automatique quand l'usine change
     effect(() => {
-      this.usineContext.currentUsineId(); // déclare la dépendance au signal
+      this.usineContext.currentUsineId(); // declare la dependance au signal
       this.loadPrestataires();
     });
   }
@@ -79,24 +79,35 @@ export class PackingNew implements OnInit {
 
     this.packingService.createPacking(packingData).subscribe({
       next: (response) => {
+        if (!response?.success) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: response?.message || 'Impossible de creer le packing',
+            life: 3000
+          });
+          this.loading = false;
+          return;
+        }
+
         this.messageService.add({
           severity: 'success',
-          summary: 'Succès',
-          detail: 'Packing créé avec succès',
+          summary: 'Succes',
+          detail: 'Packing cree avec succes',
           life: 3000
         });
         this.loading = false;
-        // Redirection vers la liste après création
+        // Redirection vers la liste apres creation
         setTimeout(() => {
           this.router.navigate(['/packings']);
         }, 1000);
       },
       error: (err) => {
-        console.error('Erreur lors de la création du packing :', err);
+        console.error('Erreur lors de la creation du packing :', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de créer le packing',
+          detail: this.getApiErrorDetail(err, 'Impossible de creer le packing'),
           life: 3000
         });
         this.loading = false;
@@ -106,5 +117,41 @@ export class PackingNew implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/packings']);
+  }
+
+  private getApiErrorDetail(error: unknown, fallback: string): string {
+    const validationMessages = this.extractValidationMessages(error);
+    if (validationMessages.length > 0) {
+      return validationMessages.join('; ');
+    }
+
+    const apiMessage = this.extractApiMessage(error);
+    if (apiMessage) {
+      return apiMessage;
+    }
+
+    return fallback;
+  }
+
+  private extractApiMessage(error: unknown): string | null {
+    const message = (error as { error?: { message?: unknown } })?.error?.message;
+    if (typeof message !== 'string') {
+      return null;
+    }
+
+    const trimmedMessage = message.trim();
+    return trimmedMessage.length > 0 ? trimmedMessage : null;
+  }
+
+  private extractValidationMessages(error: unknown): string[] {
+    const validationErrors = (error as { error?: { errors?: unknown } })?.error?.errors;
+    if (!validationErrors || typeof validationErrors !== 'object') {
+      return [];
+    }
+
+    return Object.values(validationErrors as Record<string, unknown>)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((message) => String(message).trim())
+      .filter((message) => message.length > 0);
   }
 }
