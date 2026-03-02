@@ -477,7 +477,7 @@ export class PackingListe implements OnInit {
   }
 
   canCancelPacking(packing: Packing): boolean {
-    return this.canUpdate && packing.statut !== 'annulee';
+    return this.canUpdate && (packing.statut === 'impayee' || packing.statut === 'partielle');
   }
 
   openVersement(packing: Packing): void {

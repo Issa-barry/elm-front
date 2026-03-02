@@ -9,6 +9,8 @@
             icon="pi pi-arrow-left"
             class="p-button-rounded p-button-text packing-facture-mobile-back"
             aria-label="Retour aux packings"
+            [loading]="backNavigating"
+            [disabled]="backNavigating"
             (click)="goBack()"
         ></button>
         <div class="packing-facture-mobile-title-wrap">
@@ -47,6 +49,8 @@
             icon="pi pi-print"
             severity="primary"
             [rounded]="true"
+            [loading]="printLoading"
+            [disabled]="printLoading"
             pTooltip="Imprimer la facture"
             tooltipPosition="top"
             (click)="printInvoice()"

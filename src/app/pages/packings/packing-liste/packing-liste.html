@@ -552,7 +552,7 @@
                   (click)="cancelPacking(p)"
                 ></button>
               }
-              @if (canDelete) {
+              @if (canDelete && p.statut === 'impayee') {
                 <button
                   pButton
                   type="button"

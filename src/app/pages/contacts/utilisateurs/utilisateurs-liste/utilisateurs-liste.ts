@@ -300,10 +300,44 @@ export class UtilisateursListe implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erreur:', error);
+            const apiMessage: string = error?.error?.message ?? 'Impossible de supprimer l\'utilisateur';
+            this.messageService.add({ severity: 'error', summary: 'Erreur', detail: apiMessage });
+            if (apiMessage.includes('archiver')) {
+              this.proposeArchiveUser(userId);
+            }
+          }
+        });
+      }
+    });
+  }
+
+  private proposeArchiveUser(userId: number): void {
+    const user = this.users.find(u => u.id === userId);
+    if (!user?.is_active) return;
+
+    this.confirmationService.confirm({
+      message: 'Voulez-vous archiver (désactiver) cet utilisateur à la place ?',
+      header: 'Archiver l\'utilisateur',
+      icon: 'pi pi-info-circle',
+      acceptLabel: 'Oui, archiver',
+      rejectLabel: 'Non',
+      accept: () => {
+        this.userService.toggleUserStatus(userId).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Succès',
+                detail: 'Utilisateur archivé avec succès'
+              });
+              this.loadUsers();
+            }
+          },
+          error: () => {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de supprimer l\'utilisateur'
+              detail: 'Impossible d\'archiver l\'utilisateur'
             });
           }
         });

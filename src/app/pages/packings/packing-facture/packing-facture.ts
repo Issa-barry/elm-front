@@ -38,6 +38,8 @@ import { AuthService } from '@/services/auth/auth.service';
 export class PackingFacture implements OnInit {
   loading = false;
   encaissementSaving = false;
+  backNavigating = false;
+  printLoading = false;
   canCreateVersement = false;
   packing: Packing | null = null;
   usineFacture: Usine | null = null;
@@ -249,8 +251,15 @@ export class PackingFacture implements OnInit {
     this.layoutService.onMenuToggle();
   }
 
-  goBack(): void {
-    this.router.navigate(['/packings']);
+  async goBack(): Promise<void> {
+    if (this.backNavigating) return;
+
+    this.backNavigating = true;
+    try {
+      await this.router.navigate(['/packings']);
+    } finally {
+      this.backNavigating = false;
+    }
   }
 
   async downloadInvoice(): Promise<void> {
@@ -262,8 +271,14 @@ export class PackingFacture implements OnInit {
   }
 
   async printInvoice(): Promise<void> {
+    if (this.printLoading) return;
+    this.printLoading = true;
+
     const invoice = document.getElementById('packing-facture-invoice') as HTMLElement | null;
-    if (!invoice) return;
+    if (!invoice) {
+      this.printLoading = false;
+      return;
+    }
 
     const exportNode = invoice.cloneNode(true) as HTMLElement;
     exportNode.classList.remove('card');
@@ -294,6 +309,7 @@ export class PackingFacture implements OnInit {
           iframe.parentNode.removeChild(iframe);
         }
       }, 1500);
+      this.printLoading = false;
     };
 
     document.body.appendChild(iframe);
@@ -326,6 +342,26 @@ export class PackingFacture implements OnInit {
               margin: 0;
               padding: 0;
               background: #ffffff;
+            }
+            #packing-facture-invoice {
+              position: relative !important;
+              overflow: visible !important;
+            }
+            .packing-status-ribbon {
+              top: 6mm !important;
+              right: 6mm !important;
+              left: auto !important;
+              width: auto !important;
+              min-width: 4.8rem;
+              padding: 0.2rem 0.55rem !important;
+              border-radius: 9999px !important;
+              font-size: 0.62rem !important;
+              line-height: 1.1;
+              letter-spacing: 0.03em !important;
+              transform: none !important;
+              transform-origin: center !important;
+              box-shadow: none !important;
+              white-space: nowrap;
             }
           </style>
         </head>
