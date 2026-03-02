@@ -39,6 +39,7 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { ComptabilitePackingPaiement, PaiementPayload } from '@/pages/comptabilite/components/comptabilite-packing-paiement/comptabilite-packing-paiement';
 import { ComptabiliteHistoriqueVersements } from '@/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements';
+import { ConsolidatedDisableDirective } from '@/directives/consolidated-disable.directive';
 
 interface ModePaiementOption {
   label: string;
@@ -85,6 +86,7 @@ type QuickDateFilter =
     TextareaModule,
     ComptabilitePackingPaiement,
     ComptabiliteHistoriqueVersements,
+    ConsolidatedDisableDirective,
   ],
   providers: [MessageService, ConfirmationService],
 })

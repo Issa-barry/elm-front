@@ -58,17 +58,19 @@ import { DashboardService, DashboardStats } from '@/services/dashboard/dashboard
                     <span class="font-semibold text-lg">Packing</span>
                     <div class="flex justify-between items-start mt-4">
                         <div class="w-6/12">
-                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0"> </span>
-                            <div [class]="trendClass(stats.utilisateurs.trend)">
-                                <span class="font-medium"> </span>
-                                
+                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ stats.packings.value }}</span>
+                            <div [class]="trendClass(stats.packings.trend)">
+                                <span class="font-medium">{{ formatDelta(stats.packings.delta_pct) }}</span>
+                                @if (stats.packings.trend !== 'flat') {
+                                    <i [class]="trendIcon(stats.packings.trend)"></i>
+                                }
                             </div>
                         </div>
                         <div class="w-6/12">
                             <svg width="100%" viewBox="0 0 258 96" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
-                                    [attr.d]="sparklinePath(stats.utilisateurs.sparkline)"
-                                    [style]="{ strokeWidth: '2px', stroke: strokeColor(stats.utilisateurs.trend) }"
+                                    [attr.d]="sparklinePath(stats.packings.sparkline)"
+                                    [style]="{ strokeWidth: '2px', stroke: strokeColor(stats.packings.trend) }"
                                 />
                             </svg>
                         </div>
