@@ -254,14 +254,14 @@
             </span>
           </div>
         </div>
-        @if ((canCreateVersement && canPay(p)) || canReadVersement || canViewFacture || canEditPacking(p)) {
+        @if ((canCreateVersement && canPay(p)) || canReadVersement || canViewFacture || canEditPacking(p) || canCancelPacking(p)) {
           <div class="mobile-card-actions">
                   @if (canViewFacture) {
               <button
                 pButton
                 type="button"
                 icon="pi pi-eye"
-                severity="secondary"
+                severity="primary"
                 text
                 rounded
                 size="small"
@@ -289,7 +289,7 @@
                 pButton
                 type="button"
                 icon="pi pi-history"
-                severity="info"
+                severity="secondary"
                 text
                 rounded
                 size="small"
@@ -310,6 +310,20 @@
                 pTooltip="Modifier"
                 tooltipPosition="left"
                 (click)="goEditFromCard($event, p)"
+              ></button>
+            }
+            @if (canCancelPacking(p)) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-ban"
+                severity="warn"
+                text
+                rounded
+                size="small"
+                pTooltip="Annuler"
+                tooltipPosition="left"
+                (click)="cancelPackingFromCard($event, p)"
               ></button>
             }
           </div>
@@ -485,28 +499,28 @@
             <div class="flex gap-1 justify-center">
               @if (canViewFacture) {
                 <button
-                  pButton
-                  type="button"
-                  icon="pi pi-eye"
-                  severity="secondary"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Voir facture"
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                severity="primary"
+                text
+                rounded
+                size="small"
+                pTooltip="Voir facture"
                   tooltipPosition="top"
                   (click)="goFacture(p)"
                 ></button>
               }
               @if (canReadVersement) {
                 <button
-                  pButton
-                  type="button"
-                  icon="pi pi-history"
-                  severity="info"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Historique versements"
+                pButton
+                type="button"
+                icon="pi pi-history"
+                severity="secondary"
+                text
+                rounded
+                size="small"
+                pTooltip="Historique versements"
                   tooltipPosition="top"
                   (click)="openHistorique(p)"
                 ></button>
@@ -522,6 +536,20 @@
                   pTooltip="Modifier"
                   tooltipPosition="top"
                   (click)="goEdit(p)"
+                ></button>
+              }
+              @if (canCancelPacking(p)) {
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-ban"
+                  severity="warn"
+                  text
+                  rounded
+                  size="small"
+                  pTooltip="Annuler"
+                  tooltipPosition="top"
+                  (click)="cancelPacking(p)"
                 ></button>
               }
               @if (canDelete) {

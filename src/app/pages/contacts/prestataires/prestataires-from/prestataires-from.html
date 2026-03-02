@@ -3,6 +3,17 @@
     <span class="text-surface-900 dark:text-surface-0 text-xl font-bold">
       {{ formTitle }}
     </span>
+    <button
+      *ngIf="mode === 'edit' && !isEditing"
+      pButton
+      pRipple
+      type="button"
+      label="Modifier"
+      icon="pi pi-pencil"
+      severity="secondary"
+      [outlined]="true"
+      (click)="enableEditing()"
+    ></button>
   </div>
 
   <div class="grid grid-cols-12 gap-4">
@@ -53,6 +64,25 @@
           </small>
         </div>
 
+        
+        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
+          <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
+            Prenom <span class="text-red-500" *ngIf="isEditing">*</span>
+          </label>
+          <input
+            id="prenom"
+            type="text"
+            pInputText
+            fluid
+            [(ngModel)]="model.prenom"
+            [invalid]="submitted && !model.prenom?.trim()"
+            [disabled]="fieldsDisabled"
+          />
+          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
+            Prenom obligatoire.
+          </small>
+        </div>
+
         <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
           <label for="nom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
             Nom <span class="text-red-500" *ngIf="isEditing">*</span>
@@ -71,23 +101,6 @@
           </small>
         </div>
 
-        <div class="mb-6 col-span-12 md:col-span-6" *ngIf="model.type !== 'fournisseur'">
-          <label for="prenom" class="font-medium text-surface-900 dark:text-surface-0 mb-2 block">
-            Prenom <span class="text-red-500" *ngIf="isEditing">*</span>
-          </label>
-          <input
-            id="prenom"
-            type="text"
-            pInputText
-            fluid
-            [(ngModel)]="model.prenom"
-            [invalid]="submitted && !model.prenom?.trim()"
-            [disabled]="fieldsDisabled"
-          />
-          <small class="text-red-500" *ngIf="submitted && !model.prenom?.trim() && isEditing">
-            Prenom obligatoire.
-          </small>
-        </div>
 
         <div class="mb-6 col-span-12">
           <div class="grid grid-cols-12 gap-3">

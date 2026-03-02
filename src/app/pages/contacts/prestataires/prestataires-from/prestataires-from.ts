@@ -62,7 +62,9 @@ export class PrestatairesFrom implements OnInit, OnChanges {
       this.model.ville = 'Conakry';
     }
 
-    this.isEditing = this.mode === 'create' || (this.mode === 'edit' && !!this.initialData);
+    // En edition, l'ecran s'ouvre en lecture seule.
+    // L'utilisateur active la modification via le bouton "Modifier".
+    this.isEditing = this.mode === 'create';
 
     if (this.model.code_pays) {
       this.phoneCountry = this.model.code_pays;

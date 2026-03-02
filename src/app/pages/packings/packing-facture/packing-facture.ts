@@ -10,10 +10,12 @@ import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { MODE_PAIEMENT_LABELS, ModePaiement, Packing, PackingStatut, StoreVersementDto, Versement } from '@/models/packing.model';
+import { Usine } from '@/models/usine.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 import { LayoutService } from '@/layout/service/layout.service';
 import { PackingService } from '@/services/packing/packing.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
+import { UsineService } from '@/services/usine/usine.service';
 import { AuthService } from '@/services/auth/auth.service';
 
 @Component({
@@ -38,6 +40,7 @@ export class PackingFacture implements OnInit {
   encaissementSaving = false;
   canCreateVersement = false;
   packing: Packing | null = null;
+  usineFacture: Usine | null = null;
   versements: Versement[] = [];
   encaissementMontant: number | null = null;
   encaissementMode: ModePaiement = 'especes';
@@ -54,6 +57,7 @@ export class PackingFacture implements OnInit {
     private layoutService: LayoutService,
     private packingService: PackingService,
     private usineContext: UsineContextService,
+    private usineService: UsineService,
     private authService: AuthService,
     private messageService: MessageService,
   ) {
@@ -75,11 +79,11 @@ export class PackingFacture implements OnInit {
   }
 
   get usineNom(): string {
-    return this.usineContext.currentUsine()?.nom || 'Usine';
+    return this.getUsineFactureSource()?.nom || 'Usine';
   }
 
   get usineAdresse(): string {
-    const usine = this.usineContext.currentUsine();
+    const usine = this.getUsineFactureSource();
     if (!usine) return '';
 
     const localisation = [usine.quartier, usine.ville, usine.pays]
@@ -498,6 +502,7 @@ export class PackingFacture implements OnInit {
     this.packingService.getPacking(id).subscribe({
       next: (response) => {
         this.packing = response.data;
+        this.loadUsineFacture();
         this.syncEncaissementDefaults();
         this.loadVersements(id);
       },
@@ -569,6 +574,92 @@ export class PackingFacture implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private getUsineFactureSource():
+    | { nom?: string; adresse?: string | null; quartier?: string | null; ville?: string | null; pays?: string | null }
+    | null {
+    const packingUsine = this.extractUsineFromPacking();
+    if (packingUsine) return packingUsine;
+    if (this.usineFacture) return this.usineFacture;
+    return this.usineContext.currentUsine();
+  }
+
+  private extractUsineFromPacking():
+    | { nom?: string; adresse?: string | null; quartier?: string | null; ville?: string | null; pays?: string | null }
+    | null {
+    const raw = this.packing as Record<string, unknown> | null;
+    if (!raw) return null;
+
+    const relation = raw['usine'];
+    if (relation && typeof relation === 'object') {
+      const usine = relation as Record<string, unknown>;
+      return {
+        nom: typeof usine['nom'] === 'string' ? usine['nom'] : undefined,
+        adresse: typeof usine['adresse'] === 'string' ? usine['adresse'] : null,
+        quartier: typeof usine['quartier'] === 'string' ? usine['quartier'] : null,
+        ville: typeof usine['ville'] === 'string' ? usine['ville'] : null,
+        pays: typeof usine['pays'] === 'string' ? usine['pays'] : null,
+      };
+    }
+
+    const nom = this.pickString(raw['usine_nom'], raw['usineNom']);
+    const adresse = this.pickString(raw['usine_adresse'], raw['usineAdresse']);
+    const quartier = this.pickString(raw['usine_quartier'], raw['usineQuartier']);
+    const ville = this.pickString(raw['usine_ville'], raw['usineVille']);
+    const pays = this.pickString(raw['usine_pays'], raw['usinePays']);
+
+    if (nom || adresse || quartier || ville || pays) {
+      return { nom: nom || undefined, adresse, quartier, ville, pays };
+    }
+
+    return null;
+  }
+
+  private loadUsineFacture(): void {
+    const usineId = this.resolveUsineIdForFacture();
+    if (!usineId) {
+      this.usineFacture = null;
+      return;
+    }
+
+    this.usineService.getById(usineId).subscribe({
+      next: (response) => {
+        this.usineFacture = response?.data ?? null;
+      },
+      error: () => {
+        this.usineFacture = null;
+      },
+    });
+  }
+
+  private resolveUsineIdForFacture(): number | null {
+    const raw = this.packing as Record<string, unknown> | null;
+    const fromPacking =
+      this.pickNumber(raw?.['usine_id']) ??
+      this.pickNumber(raw?.['usineId']) ??
+      this.pickNumber((raw?.['usine'] as Record<string, unknown> | undefined)?.['id']);
+
+    if (fromPacking) return fromPacking;
+    return this.usineContext.currentUsineId();
+  }
+
+  private pickString(...values: unknown[]): string | null {
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim().length > 0) {
+        return value.trim();
+      }
+    }
+    return null;
+  }
+
+  private pickNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string' && value.trim().length > 0) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
   }
 
 }

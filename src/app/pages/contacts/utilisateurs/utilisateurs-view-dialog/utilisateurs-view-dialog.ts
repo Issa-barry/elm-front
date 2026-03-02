@@ -304,7 +304,8 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
         }
 
         const user = response.data;
-        this.usineService.assignUser(currentUsineId, { user_id: user.id, role: payload.role || undefined }).subscribe({
+        const usineRole = (payload.role === 'admin' || payload.role === 'manager') ? 'manager' : 'staff';
+        this.usineService.assignUser(currentUsineId, { user_id: user.id, role: usineRole }).subscribe({
           next: () => {
             this.saving = false;
             this.userSaved.emit({ user, mode: 'create' });

@@ -249,12 +249,12 @@ export class PackingListe implements OnInit {
         this.packings.set(data as Packing[]);
         this.loading = false;
       },
-      error: () => {
+      error: (error) => {
         this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les packings.',
+          detail: this.getApiErrorDetail(error, 'Impossible de charger les packings.'),
           life: 5000,
         });
       },
@@ -299,6 +299,11 @@ export class PackingListe implements OnInit {
     this.goFacture(packing);
   }
 
+  cancelPackingFromCard(event: Event, packing: Packing): void {
+    event.stopPropagation();
+    this.cancelPacking(packing);
+  }
+
   openMobilePaiement(packing: Packing): void {
     this.mobilePaiementPacking = packing;
     this.mobilePaiementVisible = true;
@@ -338,11 +343,10 @@ export class PackingListe implements OnInit {
         }
       },
       error: (error) => {
-        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: msg,
+          detail: this.getApiErrorDetail(error, "Impossible d'enregistrer le versement"),
           life: 5000,
         });
         this.mobilePaiementSaving = false;
@@ -420,12 +424,45 @@ export class PackingListe implements OnInit {
             });
             this.packings.update((list) => list.filter((item) => item.id !== packing.id));
           },
-          error: (err) => this.messageService.add({
+          error: (error) => this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
-            detail: err.error?.message || 'Impossible de supprimer.',
+            detail: this.getApiErrorDetail(error, 'Impossible de supprimer.'),
             life: 5000,
           }),
+        });
+      },
+    });
+  }
+
+  cancelPacking(packing: Packing): void {
+    if (!this.canCancelPacking(packing)) return;
+
+    this.confirmationService.confirm({
+      message: `Voulez-vous annuler le packing <strong>${packing.reference}</strong> ?`,
+      header: 'Annulation du packing',
+      icon: 'pi pi-ban',
+      rejectButtonProps: { label: 'Fermer', severity: 'secondary', outlined: true },
+      acceptButtonProps: { label: 'Annuler le packing', severity: 'danger' },
+      accept: () => {
+        this.packingService.changeStatut(packing.id, { statut: 'annulee' }).subscribe({
+          next: (response) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succes',
+              detail: response?.message || `Packing ${packing.reference} annule.`,
+              life: 3000,
+            });
+            this.load();
+          },
+          error: (error) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: this.getApiErrorDetail(error, "Impossible d'annuler le packing."),
+              life: 5000,
+            });
+          },
         });
       },
     });
@@ -437,6 +474,10 @@ export class PackingListe implements OnInit {
 
   canEditPacking(packing: Packing): boolean {
     return this.canUpdate && packing.statut === 'impayee';
+  }
+
+  canCancelPacking(packing: Packing): boolean {
+    return this.canUpdate && packing.statut !== 'annulee';
   }
 
   openVersement(packing: Packing): void {
@@ -490,11 +531,10 @@ export class PackingListe implements OnInit {
         }
       },
       error: (error) => {
-        const msg = error?.error?.message || "Impossible d'enregistrer le versement";
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: msg,
+          detail: this.getApiErrorDetail(error, "Impossible d'enregistrer le versement"),
           life: 5000,
         });
         this.versementSaving = false;
@@ -516,11 +556,11 @@ export class PackingListe implements OnInit {
         this.historiqueData = response.data;
         this.historiqueLoading = false;
       },
-      error: () => {
+      error: (error) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les versements',
+          detail: this.getApiErrorDetail(error, 'Impossible de charger les versements'),
           life: 3000,
         });
         this.historiqueLoading = false;
@@ -563,11 +603,11 @@ export class PackingListe implements OnInit {
             if (packing) this.openHistorique(packing);
             this.load();
           },
-          error: () => {
+          error: (error) => {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de supprimer le versement',
+              detail: this.getApiErrorDetail(error, 'Impossible de supprimer le versement'),
               life: 3000,
             });
           },
@@ -690,5 +730,41 @@ export class PackingListe implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private getApiErrorDetail(error: unknown, fallback: string): string {
+    const validationMessages = this.extractValidationMessages(error);
+    if (validationMessages.length > 0) {
+      return validationMessages.join('; ');
+    }
+
+    const apiMessage = this.extractApiMessage(error);
+    if (apiMessage) {
+      return apiMessage;
+    }
+
+    return fallback;
+  }
+
+  private extractApiMessage(error: unknown): string | null {
+    const message = (error as { error?: { message?: unknown } })?.error?.message;
+    if (typeof message !== 'string') {
+      return null;
+    }
+
+    const trimmedMessage = message.trim();
+    return trimmedMessage.length > 0 ? trimmedMessage : null;
+  }
+
+  private extractValidationMessages(error: unknown): string[] {
+    const validationErrors = (error as { error?: { errors?: unknown } })?.error?.errors;
+    if (!validationErrors || typeof validationErrors !== 'object') {
+      return [];
+    }
+
+    return Object.values(validationErrors as Record<string, unknown>)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((message) => String(message).trim())
+      .filter((message) => message.length > 0);
   }
 }

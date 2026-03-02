@@ -111,17 +111,17 @@ export class PackingEdit implements OnInit {
     this.loading = true;
 
     this.packingService.updatePacking(this.packingId, packingData).subscribe({
-      next: () => {
+      next: (response) => {
         this.messageService.add({
           severity: 'success',
-          summary: 'Succès',
-          detail: 'Packing modifié avec succès',
+          summary: 'Succes',
+          detail: response?.message || 'Packing modifie avec succes',
           life: 3000,
         });
+        if (response?.data) {
+          this.packing = response.data;
+        }
         this.loading = false;
-        setTimeout(() => {
-          this.router.navigate(['/packings']);
-        }, 1000);
       },
       error: (err) => {
         console.error('Erreur lors de la modification du packing :', err);
