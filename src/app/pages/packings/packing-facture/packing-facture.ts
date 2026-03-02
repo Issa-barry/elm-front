@@ -580,9 +580,18 @@ export class PackingFacture implements OnInit {
     | { nom?: string; adresse?: string | null; quartier?: string | null; ville?: string | null; pays?: string | null }
     | null {
     const packingUsine = this.extractUsineFromPacking();
-    if (packingUsine) return packingUsine;
-    if (this.usineFacture) return this.usineFacture;
-    return this.usineContext.currentUsine();
+    const apiUsine = this.usineFacture;
+    const contextUsine = this.usineContext.currentUsine();
+
+    if (!packingUsine && !apiUsine && !contextUsine) return null;
+
+    return {
+      nom: packingUsine?.nom ?? apiUsine?.nom ?? contextUsine?.nom,
+      adresse: packingUsine?.adresse ?? apiUsine?.adresse ?? contextUsine?.adresse ?? null,
+      quartier: packingUsine?.quartier ?? apiUsine?.quartier ?? contextUsine?.quartier ?? null,
+      ville: packingUsine?.ville ?? apiUsine?.ville ?? contextUsine?.ville ?? null,
+      pays: packingUsine?.pays ?? apiUsine?.pays ?? contextUsine?.pays ?? null,
+    };
   }
 
   private extractUsineFromPacking():
@@ -595,11 +604,11 @@ export class PackingFacture implements OnInit {
     if (relation && typeof relation === 'object') {
       const usine = relation as Record<string, unknown>;
       return {
-        nom: typeof usine['nom'] === 'string' ? usine['nom'] : undefined,
-        adresse: typeof usine['adresse'] === 'string' ? usine['adresse'] : null,
-        quartier: typeof usine['quartier'] === 'string' ? usine['quartier'] : null,
-        ville: typeof usine['ville'] === 'string' ? usine['ville'] : null,
-        pays: typeof usine['pays'] === 'string' ? usine['pays'] : null,
+        nom: this.pickString(usine['nom']) || undefined,
+        adresse: this.pickString(usine['adresse']),
+        quartier: this.pickString(usine['quartier']),
+        ville: this.pickString(usine['ville']),
+        pays: this.pickString(usine['pays']),
       };
     }
 
