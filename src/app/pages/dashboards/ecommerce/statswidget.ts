@@ -58,12 +58,10 @@ import { DashboardService, DashboardStats } from '@/services/dashboard/dashboard
                     <span class="font-semibold text-lg">Packing</span>
                     <div class="flex justify-between items-start mt-4">
                         <div class="w-6/12">
-                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ stats.utilisateurs.value }}</span>
+                            <span class="text-4xl font-bold text-surface-900 dark:text-surface-0"> </span>
                             <div [class]="trendClass(stats.utilisateurs.trend)">
-                                <span class="font-medium">{{ formatDelta(stats.utilisateurs.delta_pct) }}</span>
-                                @if (stats.utilisateurs.trend !== 'flat') {
-                                    <i [class]="trendIcon(stats.utilisateurs.trend)"></i>
-                                }
+                                <span class="font-medium"> </span>
+                                
                             </div>
                         </div>
                         <div class="w-6/12">

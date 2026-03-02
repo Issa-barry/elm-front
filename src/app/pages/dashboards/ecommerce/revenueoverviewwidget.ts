@@ -4,11 +4,11 @@ import { SelectModule } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
 import { debounceTime, Subscription } from 'rxjs';
 import { LayoutService } from '@/layout/service/layout.service';
+import { PackingService } from '@/services/packing/packing.service';
 
-interface Week {
+interface PeriodOption {
     label: string;
-    value: number;
-    data: number[][];
+    value: string;
 }
 
 @Component({
@@ -19,14 +19,15 @@ interface Week {
         <div class="flex items-start justify-between mb-12">
             <span
                 class="text-surface-900 dark:text-surface-0 text-xl font-semibold"
-                >Statistiques véhicules</span
+                >Statistiques Packing</span
             >
             <p-select
-                [options]="weeks"
-                [(ngModel)]="selectedWeek"
+                [options]="periods"
+                [(ngModel)]="selectedPeriod"
                 class="w-56"
                 optionLabel="label"
-                (onChange)="onWeekChange()"
+                optionValue="value"
+                (onChange)="onPeriodChange()"
             ></p-select>
         </div>
         <p-chart
@@ -38,81 +39,87 @@ interface Week {
     </div>`,
 })
 export class RevenueOverViewWidget {
-    weeks: Week[] = [
-        {
-            label: 'SEM DERNIERE',
-            value: 0,
-            data: [
-                [65, 59, 80, 81, 56, 55, 40],
-                [28, 48, 40, 19, 86, 27, 90],
-            ],
-        },
-        {
-            label: 'CETTE SEMAINE',
-            value: 1,
-            data: [
-                [35, 19, 40, 61, 16, 55, 30],
-                [48, 78, 10, 29, 76, 77, 10],
-            ],
-        },
+    periods: PeriodOption[] = [
+        { label: "Aujourd'hui", value: 'today' },
+        { label: 'Hier', value: 'yesterday' },
+        { label: 'Cette semaine', value: 'this_week' },
+        { label: 'Semaine dernière', value: 'last_week' },
+        { label: 'Ce mois', value: 'this_month' },
+        { label: 'Mois dernier', value: 'last_month' },
+        { label: 'T1 (Jan-Mar)', value: 'q1' },
+        { label: 'T2 (Avr-Jun)', value: 'q2' },
+        { label: 'T3 (Jul-Sep)', value: 'q3' },
+        { label: 'T4 (Oct-Déc)', value: 'q4' },
+        { label: '1er semestre', value: 's1' },
+        { label: '2ème semestre', value: 's2' },
+        { label: 'Cette année', value: 'this_year' },
+        { label: 'Année dernière', value: 'last_year' },
     ];
 
-    selectedWeek: Week = this.weeks[0];
+    selectedPeriod = 'this_week';
 
     barData: any;
-
     barOptions: any;
-
     subscription: Subscription;
 
-    constructor(private layoutService: LayoutService) {
+    private lastLabels: string[] = [];
+    private lastPayee: number[] = [];
+    private lastImpayee: number[] = [];
+
+    constructor(
+        private layoutService: LayoutService,
+        private packingService: PackingService,
+    ) {
         this.subscription = this.layoutService.configUpdate$
             .pipe(debounceTime(50))
             .subscribe(() => {
-                this.initChart();
+                this.initChart(this.lastLabels, this.lastPayee, this.lastImpayee);
             });
     }
 
     ngOnInit() {
-        this.initChart();
-        this.selectedWeek = this.weeks[0];
+        this.initChart([], [], []);
+        this.loadStats();
     }
 
-    initChart() {
+    loadStats() {
+        this.packingService.getStats(this.selectedPeriod).subscribe((res) => {
+            const { labels, payee, impayee } = res.data;
+            this.lastLabels = labels;
+            this.lastPayee = payee;
+            this.lastImpayee = impayee;
+            this.initChart(labels, payee, impayee);
+        });
+    }
+
+    initChart(labels: string[], payee: number[], impayee: number[]) {
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
-        const textColorSecondary = documentStyle.getPropertyValue(
-            '--text-color-secondary',
-        );
-        const surfaceBorder =
-            documentStyle.getPropertyValue('--surface-border');
+        const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
+        const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
         this.barData = {
-            labels: ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'],
+            labels,
             datasets: [
                 {
-                    label: 'Nouveau',
-                    backgroundColor:
-                        documentStyle.getPropertyValue('--p-primary-500'),
+                    label: 'Payée',
+                    backgroundColor: documentStyle.getPropertyValue('--p-primary-500'),
                     barThickness: 12,
                     borderRadius: 12,
-                    data: this.selectedWeek?.data[0],
+                    data: payee,
                 },
                 {
-                    label: 'Supression',
-                    backgroundColor:
-                        documentStyle.getPropertyValue('--p-primary-200'),
+                    label: 'Impayée',
+                    backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
                     barThickness: 12,
                     borderRadius: 12,
-                    data: this.selectedWeek?.data[1],
+                    data: impayee,
                 },
             ],
         };
 
         this.barOptions = {
-            animation: {
-                duration: 0,
-            },
+            animation: { duration: 0 },
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -120,9 +127,7 @@ export class RevenueOverViewWidget {
                     labels: {
                         color: textColor,
                         usePointStyle: true,
-                        font: {
-                            weight: 700,
-                        },
+                        font: { weight: 700 },
                         padding: 28,
                     },
                     position: 'bottom',
@@ -132,33 +137,19 @@ export class RevenueOverViewWidget {
                 x: {
                     ticks: {
                         color: textColorSecondary,
-                        font: {
-                            weight: 500,
-                        },
+                        font: { weight: 500 },
                     },
-                    grid: {
-                        display: false,
-                        drawBorder: false,
-                    },
+                    grid: { display: false, drawBorder: false },
                 },
                 y: {
-                    ticks: {
-                        color: textColorSecondary,
-                    },
-                    grid: {
-                        color: surfaceBorder,
-                        drawBorder: false,
-                    },
+                    ticks: { color: textColorSecondary },
+                    grid: { color: surfaceBorder, drawBorder: false },
                 },
             },
         };
     }
 
-    onWeekChange() {
-        let newBarData = { ...this.barData };
-        newBarData.datasets[0].data = this.selectedWeek.data[0];
-        newBarData.datasets[1].data = this.selectedWeek.data[1];
-        this.barData = newBarData;
-        this.initChart();
+    onPeriodChange() {
+        this.loadStats();
     }
 }
