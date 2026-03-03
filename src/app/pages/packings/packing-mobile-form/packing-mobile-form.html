@@ -35,7 +35,7 @@
                     <ng-template let-prestataire pTemplate="item">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-user text-primary"></i>
-                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} · {{ prestataire.phone }}</span>
+                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} · {{ prestataire.phone | phoneFormat }}</span>
                         </div>
                     </ng-template>
                     <ng-template let-prestataire pTemplate="selectedItem">

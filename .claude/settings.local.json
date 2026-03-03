@@ -18,10 +18,16 @@
       "Bash(npx tsc:*)",
       "Bash(npx ng lint:*)",
       "Bash(npx ng test:*)",
-      "Bash(node_modules/.bin/tsc:*)",
-      "Bash(node node_modules/typescript/bin/tsc:*)",
-      "Bash(node:*)",
-      "Bash(npm install:*)"
+      "Bash(xargs cat:*)",
+      "Bash(ng test:*)",
+      "Bash(xargs grep -l \"MessageService\\\\|HttpTestingController\")",
+      "Bash(python -c \":*)",
+      "Bash(where python)",
+      "Bash(where python3)",
+      "Bash(where py)",
+      "Bash(php artisan tinker --execute=\"echo implode\\('','', array_column\\(DB::select\\(''SHOW TABLES''\\), ''Tables_in_elm-api''\\)\\);\")",
+      "Bash(php artisan db:show)",
+      "Bash(php artisan migrate:status)"
     ],
     "additionalDirectories": [
       "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"

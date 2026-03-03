@@ -1,0 +1,297 @@
+<p-toast />
+<p-confirmdialog />
+
+<!-- ===== VUE MOBILE (≤768px) ===== -->
+<div class="vehicules-mobile-app">
+
+  <header class="mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-action-btn"
+      aria-label="Retour"
+      (click)="goBack()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Véhicules</h1>
+      <p class="mobile-subtitle">{{ total() }} véhicule{{ total() > 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu #filterMenu [model]="mobileFilterMenuItems" [popup]="true" appendTo="body" />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-action-btn"
+      aria-label="Filtrer"
+      (click)="filterMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+
+    <section class="mobile-search">
+      <p-iconfield iconPosition="left">
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Nom, immatriculation…"
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    @if (!loading && filteredVehicules().length) {
+      <section class="mobile-list">
+        @for (v of filteredVehicules(); track v.id) {
+          <article class="mobile-vehicule-card" (click)="goEdit(v)">
+
+            @if (v.photo_url) {
+              <img class="mobile-card-avatar-img" [src]="v.photo_url" [alt]="v.nom_vehicule" />
+            } @else {
+              <div class="mobile-card-avatar" aria-hidden="true">{{ getInitials(v) }}</div>
+            }
+
+            <div class="mobile-card-body">
+              <div class="mobile-card-name">{{ v.nom_vehicule }}</div>
+              <div class="mobile-card-meta">{{ v.immatriculation }} · {{ getTypeLabel(v) }}</div>
+              <div class="mobile-card-footer">
+                <p-tag
+                  [value]="v.is_active ? 'Actif' : 'Inactif'"
+                  [severity]="v.is_active ? 'success' : 'warn'"
+                  styleClass="mobile-status-tag"
+                />
+                <div class="mobile-card-actions">
+                  @if (canUpdate) {
+                    <button
+                      pButton pRipple
+                      icon="pi pi-pencil"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="Modifier" tooltipPosition="top"
+                      (click)="goEdit(v); $event.stopPropagation()"
+                    ></button>
+                    <button
+                      pButton pRipple
+                      [icon]="v.is_active ? 'pi pi-lock' : 'pi pi-lock-open'"
+                      [severity]="v.is_active ? 'warn' : 'success'"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      [pTooltip]="v.is_active ? 'Désactiver' : 'Activer'" tooltipPosition="top"
+                      (click)="toggleStatus(v); $event.stopPropagation()"
+                    ></button>
+                  }
+                </div>
+              </div>
+            </div>
+
+          </article>
+        }
+      </section>
+    }
+
+    @if (loading) {
+      <div class="mobile-state">Chargement…</div>
+    }
+
+    @if (!loading && filteredVehicules().length === 0) {
+      <div class="mobile-state">Aucun véhicule trouvé.</div>
+    }
+
+  </div>
+
+  @if (canCreate) {
+    <button
+      type="button"
+      class="mobile-fab"
+      aria-label="Nouveau véhicule"
+      (click)="goNew()"
+    >
+      <i class="pi pi-plus"></i>
+    </button>
+  }
+</div>
+
+<!-- ===== VUE DESKTOP (>768px) — inchangée ===== -->
+<div class="vehicules-desktop">
+  <div class="card">
+    <p-table
+      #dt
+      [value]="filteredVehicules()"
+      [loading]="loading"
+      [paginator]="true"
+      paginatorDropdownAppendTo="body"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      responsiveLayout="scroll"
+      currentPageReportTemplate="  {first} / {last} de {totalRecords} véhicules"
+      [showCurrentPageReport]="true"
+      [rowHover]="true"
+    >
+      <ng-template #caption>
+        <div class="flex flex-wrap gap-2 items-center justify-between">
+          <p-iconfield class="w-full sm:w-80 order-1 sm:order-0">
+            <p-inputicon class="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Rechercher un véhicule..."
+              [ngModel]="searchQuery()"
+              (ngModelChange)="searchQuery.set($event)"
+              class="w-full"
+            />
+          </p-iconfield>
+          <div class="flex gap-2 w-full sm:w-auto flex-order-0 sm:flex-order-1">
+            @if (canCreate) {
+              <button
+                (click)="goNew()"
+                pButton
+                outlined
+                class="flex-shrink-0"
+                icon="pi pi-plus"
+                label="Nouveau"
+              ></button>
+            }
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="nom_vehicule">
+            <span class="flex items-center gap-2">
+              Véhicule <p-sortIcon field="nom_vehicule" />
+            </span>
+          </th>
+          <th pSortableColumn="immatriculation" class="hidden sm:table-cell" style="width:12%">
+            <span class="flex items-center gap-2">
+              Immatriculation <p-sortIcon field="immatriculation" />
+            </span>
+          </th>
+          <th class="hidden md:table-cell" style="width:9%">Type</th>
+          <th class="hidden lg:table-cell" style="width:17%">Propriétaire</th>
+          <th class="hidden lg:table-cell" style="width:17%">Livreur</th>
+          <th class="hidden sm:table-cell text-center" style="width:9%">Statut</th>
+          @if (canUpdate || canDelete) {
+            <th class="text-center" style="width:5%">Actions</th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-v>
+        <tr>
+          <td>
+            <div class="flex items-center gap-2">
+              @if (v.photo_url) {
+                <img
+                  [src]="v.photo_url"
+                  [alt]="v.nom_vehicule"
+                  class="rounded flex-shrink-0"
+                  style="width:48px;height:48px;object-fit:cover"
+                />
+              } @else {
+                <span
+                  class="inline-flex items-center justify-center rounded bg-primary text-white font-bold text-sm flex-shrink-0"
+                  style="width:48px;height:48px"
+                >
+                  {{ getInitials(v) }}
+                </span>
+              }
+              <div class="min-w-0">
+                <div class="font-medium truncate">{{ v.nom_vehicule }}</div>
+                @if (v.marque || v.modele) {
+                  <div class="text-xs text-surface-400">{{ v.marque }} {{ v.modele }}</div>
+                }
+                <code class="sm:hidden text-xs surface-100 px-1 py-0.5 rounded">{{ v.immatriculation }}</code>
+                <div class="sm:hidden mt-1">
+                  <p-tag
+                    [value]="v.is_active ? 'Actif' : 'Inactif'"
+                    [severity]="v.is_active ? 'success' : 'warn'"
+                  />
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <td class="hidden sm:table-cell">
+            <code class="text-sm surface-100 px-2 py-1 border-round">{{ v.immatriculation }}</code>
+          </td>
+
+          <td class="hidden md:table-cell text-sm">{{ getTypeLabel(v) }}</td>
+
+          <td class="hidden lg:table-cell">
+            @if (v.proprietaire) {
+              <span class="font-medium text-sm">{{ v.proprietaire.prenom }} {{ v.proprietaire.nom }}</span>
+              <br />
+              <span class="text-surface-400 text-xs">{{ v.proprietaire.phone | phoneFormat }}</span>
+            } @else {
+              <span class="text-surface-400">—</span>
+            }
+          </td>
+
+          <td class="hidden lg:table-cell">
+            @if (v.livreur_principal) {
+              <span class="font-medium text-sm">{{ v.livreur_principal.prenom }} {{ v.livreur_principal.nom }}</span>
+              <br />
+              <span class="text-surface-400 text-xs">{{ v.livreur_principal.phone | phoneFormat }}</span>
+            } @else {
+              <span class="text-surface-400">—</span>
+            }
+          </td>
+
+          <td class="hidden sm:table-cell text-center">
+            <p-tag
+              [value]="v.is_active ? 'Actif' : 'Inactif'"
+              [severity]="v.is_active ? 'success' : 'warn'"
+            />
+          </td>
+
+          @if (canUpdate || canDelete) {
+            <td>
+              <div class="flex gap-1 justify-center">
+                @if (canUpdate) {
+                  <button pButton type="button" icon="pi pi-pen-to-square"
+                          text rounded size="small"
+                          pTooltip="Modifier" tooltipPosition="top"
+                          (click)="goEdit(v)"></button>
+                  <button pButton type="button"
+                          [icon]="v.is_active ? 'pi pi-lock' : 'pi pi-lock-open'"
+                          [severity]="v.is_active ? 'warn' : 'success'"
+                          text rounded size="small"
+                          [pTooltip]="v.is_active ? 'Désactiver' : 'Activer'" tooltipPosition="top"
+                          (click)="toggleStatus(v)"></button>
+                }
+                @if (canDelete) {
+                  <button pButton type="button" icon="pi pi-trash"
+                          severity="danger" text rounded size="small"
+                          pTooltip="Supprimer" tooltipPosition="top"
+                          (click)="deleteVehicule(v)"></button>
+                }
+              </div>
+            </td>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td [attr.colspan]="(canUpdate || canDelete) ? 7 : 6" class="text-center py-8">
+            <div class="flex flex-col items-center gap-3 text-surface-500">
+              <i class="pi pi-car text-4xl"></i>
+              <span>Aucun véhicule trouvé</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #loadingbody>
+        @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          <tr>
+            @for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {
+              <td><p-skeleton /></td>
+            }
+          </tr>
+        }
+      </ng-template>
+    </p-table>
+  </div>
+</div>

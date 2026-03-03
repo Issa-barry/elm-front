@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild, effect } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule, DOCUMENT } from '@angular/common';
@@ -23,6 +23,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil } from 'rxjs';
 import { ProduitService } from '@/services/produits/produits.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import {
     CreateProduitDto,
     Produit,
@@ -31,7 +32,8 @@ import {
     PRODUIT_TYPE_LABELS,
     ProduitStatut,
     ProduitStatutSeverity,
-    ProduitType
+    ProduitType,
+    UpdateStockResponse,
 } from '@/models/produit.model';
 
 interface Column {
@@ -78,6 +80,10 @@ export class ProduitsListe implements OnInit, OnDestroy {
     produit: Produit = new Produit();
     loading = true;
     saving = false;
+    stockDialog = false;
+    stockDialogSaving = false;
+    stockProduit: Produit | null = null;
+    stockValue: number | null = null;
 
     filterFields: string[] = ['code', 'nom', 'description', 'type', 'statut', 'qte_stock'];
     produitDialog = false;
@@ -94,6 +100,7 @@ export class ProduitsListe implements OnInit, OnDestroy {
     canCreate = false;
     canUpdate = false;
     canDelete = false;
+    canManageSystemDefinition = false;
 
     // Mobile pagination
     mobileSearchTerm = '';
@@ -117,6 +124,7 @@ export class ProduitsListe implements OnInit, OnDestroy {
 
     private destroy$ = new Subject<void>();
     private searchSubject = new Subject<string>();
+    private readyForUsineReload = false;
 
     constructor(
         private router: Router,
@@ -125,11 +133,19 @@ export class ProduitsListe implements OnInit, OnDestroy {
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
         private authService: AuthService,
+        private usineContext: UsineContextService,
         @Inject(DOCUMENT) private document: Document
     ) {
         this.canCreate = this.authService.hasPermission('produits.create');
         this.canUpdate = this.authService.hasPermission('produits.update');
         this.canDelete = this.authService.hasPermission('produits.delete');
+        this.canManageSystemDefinition = this.hasSystemDefinitionAccess();
+
+        effect(() => {
+            this.usineContext.currentUsineId(); // dépendance signal usine
+            if (!this.readyForUsineReload) return;
+            this.loadWithFilters();
+        });
     }
 
     ngOnInit() {
@@ -157,6 +173,7 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.sortOrder     = params['sort_order'] === 'asc' ? 'asc' : 'desc';
         if (params['search']) this.mobileSearchTerm = params['search'];
 
+        this.readyForUsineReload = true;
         this.loadWithFilters();
     }
 
@@ -388,6 +405,27 @@ export class ProduitsListe implements OnInit, OnDestroy {
         return `${new Intl.NumberFormat('fr-GN', { maximumFractionDigits: 0 }).format(value)} GNF`;
     }
 
+    /**
+     * Affiche l'alerte "Critique" uniquement quand le seuil est réellement atteint.
+     * - Produit non critique => jamais d'alerte.
+     * - Seuil produit défini => alerte si qte_stock <= seuil.
+     * - Sinon fallback backend (is_low_stock / is_out_of_stock).
+     */
+    shouldShowCritiqueAlert(produit: Produit): boolean {
+        if (!produit?.is_critique) return false;
+
+        const stock = Number(produit.qte_stock);
+        const seuil = produit.seuil_alerte_stock;
+        const hasValidStock = Number.isFinite(stock);
+        const hasCustomThreshold = typeof seuil === 'number' && Number.isFinite(seuil);
+
+        if (hasCustomThreshold && hasValidStock) {
+            return stock <= (seuil as number);
+        }
+
+        return produit.is_out_of_stock || produit.is_low_stock;
+    }
+
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
@@ -465,16 +503,152 @@ export class ProduitsListe implements OnInit, OnDestroy {
         this.router.navigate(['/']);
     }
 
-    goToEditProduit(event: Event, produitId: number) {
-        event.stopPropagation();
-        this.router.navigate(['/produits/produits-edit', produitId]);
-    }
-
     onRowDblClick(event: MouseEvent, produit: Produit): void {
         if (window.innerWidth <= this.mobileBreakpoint) return;
+        if (!this.canEditDefinition(produit)) return;
         const target = event.target as Element;
         if (target.closest('button, a, input, textarea, select, [role="button"], .p-checkbox, .p-button, .p-link')) return;
         this.router.navigate(['/produits/produits-edit', produit.id]);
+    }
+
+    canEditDefinition(produit: Produit): boolean {
+        if (!this.canUpdate) return false;
+        if (!produit?.is_global) return true;
+        return this.canManageSystemDefinition;
+    }
+
+    canUpdateStock(produit: Produit): boolean {
+        return this.canUpdate && !!produit?.id;
+    }
+
+    needsStockOnlyAction(produit: Produit): boolean {
+        return !!produit?.is_global && !this.canEditDefinition(produit) && this.canUpdateStock(produit);
+    }
+
+    canArchiveProduct(produit: Produit): boolean {
+        if (!this.canDelete) return false;
+        if (!produit?.is_global) return true;
+        return this.canManageSystemDefinition;
+    }
+
+    getDefinitionActionTooltip(produit: Produit): string {
+        if (this.canEditDefinition(produit)) {
+            return 'Modifier';
+        }
+        if (produit?.is_global && this.canUpdate) {
+            return 'Réservé admin/manager (produit global)';
+        }
+        return 'Voir';
+    }
+
+    goToEditProduit(event: Event, produitId: number, produit: Produit): void {
+        event.stopPropagation();
+        if (!this.canEditDefinition(produit)) {
+            return;
+        }
+        this.router.navigate(['/produits/produits-edit', produitId]);
+    }
+
+    getPrimaryActionTooltip(produit: Produit): string {
+        if (this.canEditDefinition(produit)) {
+            return 'Modifier';
+        }
+        if (this.needsStockOnlyAction(produit)) {
+            return 'Mettre a jour le stock';
+        }
+        return 'Voir';
+    }
+
+    onProduitPrimaryAction(event: Event, produit: Produit): void {
+        if (this.canEditDefinition(produit)) {
+            this.goToEditProduit(event, produit.id, produit);
+            return;
+        }
+
+        if (this.needsStockOnlyAction(produit)) {
+            this.openStockDialog(event, produit);
+            return;
+        }
+
+        event.stopPropagation();
+    }
+
+    openStockDialog(event: Event, produit: Produit): void {
+        event.stopPropagation();
+        if (!this.canUpdateStock(produit) || !produit?.id) return;
+
+        this.stockProduit = produit;
+        this.stockValue = Number.isFinite(Number(produit.qte_stock)) ? Number(produit.qte_stock) : 0;
+        this.stockDialog = true;
+        this.stockDialogSaving = false;
+    }
+
+    closeStockDialog(): void {
+        this.stockDialog = false;
+        this.stockDialogSaving = false;
+        this.stockProduit = null;
+        this.stockValue = null;
+    }
+
+    saveStockUpdate(): void {
+        if (!this.stockProduit?.id || this.stockDialogSaving) return;
+
+        const stock = Number(this.stockValue);
+        if (!Number.isInteger(stock) || stock < 0) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Validation',
+                detail: 'La quantité de stock doit être un entier supérieur ou égal à 0.',
+                life: 5000,
+            });
+            return;
+        }
+
+        this.stockDialogSaving = true;
+        this.produitService.updateStock(this.stockProduit.id, {
+            quantite: stock,
+            operation: 'set',
+        }).subscribe({
+            next: (response: UpdateStockResponse) => {
+                const updated = Produit.fromApi(response.produit);
+                this.produits = this.produits.map((item) => (item.id === updated.id ? updated : item));
+                this.stockDialogSaving = false;
+
+                // Alerte si stock faible ou rupture
+                if (response.stock_alert?.niveau !== 'in_stock') {
+                    this.messageService.add({
+                        severity: 'warn',
+                        summary: 'Stock faible',
+                        detail: response.stock_alert.message ?? 'Le stock est en dessous du seuil d\'alerte.',
+                        life: 6000,
+                    });
+                }
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Succès',
+                    detail: 'Stock mis à jour avec succès',
+                    life: 3000,
+                });
+                this.closeStockDialog();
+            },
+            error: (err) => {
+                this.stockDialogSaving = false;
+                this.showApiError(err, 'Mise à jour du stock impossible');
+            },
+        });
+    }
+
+    /** Détermine si l'utilisateur peut modifier la définition des produits globaux (admin/manager). */
+    private hasSystemDefinitionAccess(): boolean {
+        const user = this.authService.currentUser();
+        if (!user) return false;
+
+        const roles = [...(user.roles ?? []), ...(user.role_names ?? [])]
+            .map((role) => String(role).trim().toLowerCase())
+            .filter((role) => role.length > 0);
+
+        return roles.includes('admin') || roles.includes('manager') || roles.includes('super-admin');
     }
 
     private resetMobilePagination(): void {

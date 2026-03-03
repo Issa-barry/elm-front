@@ -8,15 +8,18 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
 /** Routes qui ne doivent jamais recevoir le header X-Usine-Id */
 const EXCLUDED_PATHS = ['/auth/login', '/auth/register'];
 
+const MUTATION_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
+
 function isExcluded(url: string): boolean {
   return EXCLUDED_PATHS.some(path => url.includes(path));
 }
 
 /**
  * Intercepteur multi-usine :
- *  1. Injecte X-Usine-Id sur toutes les requêtes métier (sauf login/register
+ *  1. Bloque les mutations (POST/PUT/PATCH/DELETE) en vue consolidée siège.
+ *  2. Injecte X-Usine-Id sur toutes les requêtes métier (sauf login/register
  *     et vue consolidée siège).
- *  2. Gère les erreurs usine :
+ *  3. Gère les erreurs usine :
  *     - 403 "Accès à cette usine non autorisé." → toast + fallback usine
  *     - 404 "Usine non trouvée ou inactive."    → toast + fallback usine
  */
@@ -24,7 +27,22 @@ export const usineInterceptor: HttpInterceptorFn = (req, next) => {
   const usineCtx      = inject(UsineContextService);
   const messageService = inject(MessageService);
 
-  // ── 1. Injection du header ──────────────────────────
+  // ── 1. Blocage des mutations en vue consolidée ──────
+  if (
+    usineCtx.isConsolidated() &&
+    MUTATION_METHODS.includes(req.method) &&
+    !isExcluded(req.url)
+  ) {
+    messageService.add({
+      severity: 'warn',
+      summary:  'Vue consolidée',
+      detail:   'Sélectionnez une usine pour effectuer des modifications.',
+      life:     4000,
+    });
+    return throwError(() => new Error('Opération non autorisée en vue consolidée.'));
+  }
+
+  // ── 2. Injection du header ──────────────────────────
   let outReq = req;
   if (!isExcluded(req.url)) {
     const usineId = usineCtx.headerUsineId(); // null = vue consolidée → pas de header

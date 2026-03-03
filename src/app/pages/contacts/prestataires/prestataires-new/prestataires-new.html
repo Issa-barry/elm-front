@@ -1,0 +1,8 @@
+<p-toast></p-toast>
+
+<app-prestataires-from
+  [mode]="'create'"
+  [loading]="loading"
+  (submitForm)="onSubmit($event)"
+  (cancel)="onCancel()"
+></app-prestataires-from>

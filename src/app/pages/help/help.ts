@@ -26,7 +26,7 @@ import { InputTextModule } from 'primeng/inputtext';
                         ></path>
                     </svg>
                     <div class="font-bold mb-8 text-4xl z-10">
-                        How can we help?
+                        Comment pouvons-nous vous aider ?
                     </div>
 
                     <p-iconfield class="w-9/12 md:w-6/12">
@@ -34,7 +34,7 @@ import { InputTextModule } from 'primeng/inputtext';
                         <input
                             type="text"
                             pInputText
-                            placeholder="Search"
+                            placeholder="Rechercher"
                             style="border-radius:2rem"
                             class="w-full "
                             [style]="{ borderRadius: '2rem' }"
@@ -53,31 +53,31 @@ import { InputTextModule } from 'primeng/inputtext';
                                 ></i>
                             </span>
                             <div class="text-2xl mb-4 font-medium">
-                                Getting Started
+                                Produit
                             </div>
                             <ul class="list-none m-0 p-0 text-center">
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Lorem ipsum dolor</a
+                                        >Guide d'utilisation</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Consectetur adipiscing elit</a
+                                        >Questions fréquentes</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-4">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Sed do eiusmod tempor</a
+                                        >Résoudre un problème</a
                                     >
                                 </li>
                                 <li>
                                     <a
                                         class="text-primary hover:underline cursor-pointer font-medium"
-                                        >View all</a
+                                        >Voir tout</a
                                     >
                                 </li>
                             </ul>
@@ -94,31 +94,31 @@ import { InputTextModule } from 'primeng/inputtext';
                                 ></i>
                             </span>
                             <div class="text-2xl mb-4 font-medium">
-                                Transactions
+                                Contact
                             </div>
                             <ul class="list-none m-0 p-0 text-center">
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Lorem ipsum dolor</a
+                                        >Guide d'utilisation</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Consectetur adipiscing elit</a
+                                        >Questions fréquentes</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-4">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Sed do eiusmod tempor</a
+                                        >Résoudre un problème</a
                                     >
                                 </li>
                                 <li>
                                     <a
                                         class="text-primary hover:underline cursor-pointer font-medium"
-                                        >View all</a
+                                        >Voir tout</a
                                     >
                                 </li>
                             </ul>
@@ -133,30 +133,30 @@ import { InputTextModule } from 'primeng/inputtext';
                                     class="pi pi-user text-4xl text-primary-700"
                                 ></i>
                             </span>
-                            <div class="text-2xl mb-4 font-medium">Profile</div>
+                            <div class="text-2xl mb-4 font-medium">Véhicules</div>
                             <ul class="list-none m-0 p-0 text-center">
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Lorem ipsum dolor</a
+                                        >Guide d'utilisation</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Consectetur adipiscing elit</a
+                                        >Questions fréquentes</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-4">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Sed do eiusmod tempor</a
+                                        >Résoudre un problème</a
                                     >
                                 </li>
                                 <li>
                                     <a
                                         class="text-primary hover:underline cursor-pointer font-medium"
-                                        >View all</a
+                                        >Voir tout</a
                                     >
                                 </li>
                             </ul>
@@ -171,30 +171,32 @@ import { InputTextModule } from 'primeng/inputtext';
                                     class="pi pi-money-bill text-4xl text-primary-700"
                                 ></i>
                             </span>
-                            <div class="text-2xl mb-4 font-medium">Billing</div>
+                            <div class="text-2xl mb-4 font-medium">
+                                Facturation
+                            </div>
                             <ul class="list-none m-0 p-0 text-center">
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Lorem ipsum dolor</a
+                                        >Guide d'utilisation</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Consectetur adipiscing elit</a
+                                        >Questions fréquentes</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-4">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Sed do eiusmod tempor</a
+                                        >Résoudre un problème</a
                                     >
                                 </li>
                                 <li>
                                     <a
                                         class="text-primary hover:underline cursor-pointer font-medium"
-                                        >View all</a
+                                        >Voir tout</a
                                     >
                                 </li>
                             </ul>
@@ -210,31 +212,31 @@ import { InputTextModule } from 'primeng/inputtext';
                                 ></i>
                             </span>
                             <div class="text-2xl mb-4 font-medium">
-                                Integrations
+                                Packing
                             </div>
                             <ul class="list-none m-0 p-0 text-center">
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Lorem ipsum dolor</a
+                                        >Guide d'utilisation</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Consectetur adipiscing elit</a
+                                        >Questions fréquentes</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-4">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Sed do eiusmod tempor</a
+                                        >Résoudre un problème</a
                                     >
                                 </li>
                                 <li>
                                     <a
                                         class="text-primary hover:underline cursor-pointer font-medium"
-                                        >View all</a
+                                        >Voir tout</a
                                     >
                                 </li>
                             </ul>
@@ -250,31 +252,31 @@ import { InputTextModule } from 'primeng/inputtext';
                                 ></i>
                             </span>
                             <div class="text-2xl mb-4 font-medium">
-                                Security
+                                Ventes
                             </div>
                             <ul class="list-none m-0 p-0 text-center">
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Lorem ipsum dolor</a
+                                        >Guide d'utilisation</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-1">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Consectetur adipiscing elit</a
+                                        >Questions fréquentes</a
                                     >
                                 </li>
                                 <li class="leading-normal mb-4">
                                     <a
                                         class="text-surface-500 dark:text-surface-400 hover:text-primary cursor-pointer"
-                                        >Sed do eiusmod tempor</a
+                                        >Résoudre un problème</a
                                     >
                                 </li>
                                 <li>
                                     <a
                                         class="text-primary hover:underline cursor-pointer font-medium"
-                                        >View all</a
+                                        >Voir tout</a
                                     >
                                 </li>
                             </ul>

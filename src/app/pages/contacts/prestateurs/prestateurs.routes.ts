@@ -1,34 +1,36 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 import { authorizationGuard } from '@/guards/authorization.guard';
-import { PrestateursListe } from './prestateurs-liste/prestateurs-liste';
-import { PrestateursNew } from './prestateurs-new/prestateurs-new';
-import { PrestateursEdit } from './prestateurs-edit/prestateurs-edit';
+import { PrestatairesListe } from '../prestataires/prestataires-liste/prestataires-liste';
+import { PrestatairesNew } from '../prestataires/prestataires-new/prestataires-new';
+import { PrestatairesEdit } from '../prestataires/prestataires-edit/prestataires-edit';
+ 
  
 
 export default [
     {
         path: '',
-        component: PrestateursListe,
+        component: PrestatairesListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.read'] },
+        data: { breadcrumb: 'prestataires',  permissions: ['prestataires.read'] },
     },
     {
-        path: 'prestateurs',
-        component: PrestateursListe,
+        path: 'prestataires',
+        component: PrestatairesListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.read'] },
+        data: { breadcrumb: 'prestataires',  permissions: ['prestataires.read'] },
     },
     {
         path: 'new',
-        component: PrestateursNew,
+        component: PrestatairesNew,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.create'] },
+        data: { breadcrumb: 'new',  permissions: ['prestataires.create'] },
     },
     {
         path: 'edit/:id',
-        component: PrestateursEdit,
+        component: PrestatairesEdit,
         canActivate: [authorizationGuard],
-        data: { permissions: ['prestataires.update'] },
+        data: { breadcrumb: 'edit',  permissions: ['prestataires.update'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
+

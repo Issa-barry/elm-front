@@ -9,19 +9,19 @@ export default [
         path: '',
         component: UtilisateursListe,
         canActivate: [authorizationGuard],
-        data: { permissions: ['users.read'] },
+        data: { breadcrumb: 'utilisateurs',  permissions: ['users.read'] },
     },
     {
         path: 'new',
         component: UtilisateursNew,
         canActivate: [authorizationGuard],
-        data: { permissions: ['users.create'] },
+        data: { breadcrumb: 'new',  permissions: ['users.create'] },
     },
     {
         path: 'edit/:id',
         component: UtilisateursEdit,
         canActivate: [authorizationGuard],
-        data: { permissions: ['users.update'] },
+        data: { breadcrumb: 'edit',  permissions: ['users.update'] },
     },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

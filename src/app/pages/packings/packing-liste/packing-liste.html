@@ -1,6 +1,194 @@
 <p-toast />
+<p-confirmdialog />
 
-<!-- Mobile: app-like list (≤768px) -->
+<!-- ═══ DIALOG VERSEMENT ═══════════════════════════════════════════════════ -->
+<p-dialog
+  [(visible)]="versementDialog"
+  [style]="{ width: '28rem' }"
+  header="Nouveau versement"
+  [modal]="true"
+  [closable]="!versementSaving"
+  (onHide)="hideVersementDialog()"
+>
+  @if (selectedPacking) {
+    <div class="flex flex-col gap-4">
+      <!-- Info packing -->
+      <div class="flex flex-col gap-1 p-3 bg-surface-50 dark:bg-surface-800 rounded-lg text-sm">
+        <div class="font-semibold">{{ selectedPacking.reference }}</div>
+        <div class="text-surface-500">
+          Montant : {{ formatCurrency(selectedPacking.montant) }} &mdash;
+          Restant : <span class="text-orange-500 font-medium">{{ formatCurrency(selectedPacking.montant_restant) }}</span>
+        </div>
+      </div>
+
+      <!-- Montant -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Montant (GNF) <span class="text-red-500">*</span></label>
+        <p-inputnumber
+          [(ngModel)]="versementData.montant"
+          [min]="1"
+          [max]="selectedPacking.montant_restant"
+          [useGrouping]="true"
+          placeholder="0"
+          styleClass="w-full"
+        />
+        @if (versementSubmitted && !versementData.montant) {
+          <small class="text-red-500 text-xs">Montant requis.</small>
+        }
+      </div>
+
+      <!-- Date -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Date versement <span class="text-red-500">*</span></label>
+        <p-datepicker
+          [(ngModel)]="versementData.date_versement"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          placeholder="Selectionner la date"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          appendTo="body"
+        />
+        @if (versementSubmitted && !versementData.date_versement) {
+          <small class="text-red-500 text-xs">Date requise.</small>
+        }
+      </div>
+
+      <!-- Mode paiement -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Mode de paiement</label>
+        <p-select
+          [(ngModel)]="versementData.mode_paiement"
+          [options]="modesPaiement"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <!-- Notes -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Notes</label>
+        <textarea
+          pTextarea
+          [(ngModel)]="versementData.notes"
+          rows="2"
+          placeholder="Optionnel..."
+          class="w-full"
+        ></textarea>
+      </div>
+    </div>
+  }
+
+  <ng-template #footer>
+    <button
+      pButton
+      label="Annuler"
+      icon="pi pi-times"
+      severity="secondary"
+      outlined
+      [disabled]="versementSaving"
+      (click)="hideVersementDialog()"
+    ></button>
+    <button
+      pButton
+      appConsolidatedDisable
+      label="Enregistrer"
+      icon="pi pi-check"
+      [loading]="versementSaving"
+      [disabled]="versementSaving"
+      (click)="saveVersement()"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<!-- ═══ DIALOG HISTORIQUE VERSEMENTS ══════════════════════════════════════ -->
+<p-dialog
+  [(visible)]="historiqueDialog"
+  [style]="{ width: '36rem' }"
+  header="Historique des versements"
+  [modal]="true"
+>
+  @if (historiqueLoading) {
+    <div class="flex justify-center py-6">
+      <i class="pi pi-spin pi-spinner text-2xl"></i>
+    </div>
+  } @else if (historiqueData) {
+    <div class="flex flex-col gap-4">
+      <!-- Summary -->
+      <div class="grid grid-cols-3 gap-3 text-sm">
+        <div class="flex flex-col gap-0.5 p-3 bg-surface-50 dark:bg-surface-800 rounded-lg">
+          <span class="text-surface-500 text-xs">Montant</span>
+          <span class="font-semibold">{{ formatCurrency(historiqueData.packing.montant) }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <span class="text-surface-500 text-xs">Verse</span>
+          <span class="font-semibold text-green-600">{{ formatCurrency(historiqueData.packing.montant_verse) }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5 p-3 rounded-lg" [class.bg-orange-50]="historiqueData.packing.montant_restant > 0" [class.bg-surface-50]="historiqueData.packing.montant_restant === 0">
+          <span class="text-surface-500 text-xs">Restant</span>
+          <span class="font-semibold" [class.text-orange-500]="historiqueData.packing.montant_restant > 0">{{ formatCurrency(historiqueData.packing.montant_restant) }}</span>
+        </div>
+      </div>
+
+      <!-- Liste versements -->
+      @if (historiqueData.versements.length === 0) {
+        <div class="text-center text-surface-500 py-4 text-sm">Aucun versement enregistre.</div>
+      } @else {
+        <p-table [value]="historiqueData.versements" [tableStyle]="{ 'min-width': '20rem' }">
+          <ng-template #header>
+            <tr>
+              <th class="text-xs">Date</th>
+              <th class="text-xs">Montant</th>
+              <th class="text-xs">Mode</th>
+              <th class="text-xs">Par</th>
+              <th class="text-xs">Heure</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-v>
+            <tr>
+              <td class="text-sm">{{ formatDateDisplay(v.date_versement) }}</td>
+              <td class="text-sm font-medium">{{ formatCurrency(v.montant) }}</td>
+              <td class="text-sm text-surface-500">{{ getModeLabel(v.mode_paiement) }}</td>
+              <td class="text-sm text-surface-500">{{ v.creator?.nom_complet || '-' }}</td>
+              <td class="text-sm text-surface-500">{{ formatDateTime(v.created_at) }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </div>
+  }
+</p-dialog>
+
+<!-- Slide-over paiement mobile (meme composant que comptabilite) -->
+<div class="fixed inset-0 z-50" *ngIf="mobilePaiementVisible">
+  <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeMobilePaiement()"></div>
+  <div class="mobile-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
+    <app-comptabilite-packing-paiement
+      [packing]="mobilePaiementPacking"
+      [saving]="mobilePaiementSaving"
+      (onPay)="onMobilePay($event)"
+      (onClose)="closeMobilePaiement()"
+    ></app-comptabilite-packing-paiement>
+  </div>
+</div>
+
+<!-- Slide-over historique mobile -->
+<div class="fixed inset-0 z-50" *ngIf="mobileHistoriqueVisible">
+  <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeMobileHistorique()"></div>
+  <div class="mobile-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
+    <app-comptabilite-historique-versements
+      [data]="historiqueData"
+      [loading]="historiqueLoading"
+      [canDelete]="canDeleteVersement"
+      (onClose)="closeMobileHistorique()"
+      (onDeleteVersement)="onMobileHistoriqueDeleteVersement($event)"
+    ></app-comptabilite-historique-versements>
+  </div>
+</div>
+
+<!-- MOBILE -->
 <div class="packing-mobile-app">
   <header class="mobile-header">
     <button
@@ -8,26 +196,26 @@
       pRipple
       icon="pi pi-arrow-left"
       class="p-button-rounded p-button-text mobile-back"
-      aria-label="Retour à l'accueil"
-      (click)="goHome()"
+      aria-label="Retour a l'accueil"
+      (click)="goBack()"
     ></button>
     <div class="mobile-title-wrap">
       <h1 class="mobile-title">Packings</h1>
-      <p class="mobile-subtitle">{{ mobileFilteredPackings.length }} packing{{ mobileFilteredPackings.length !== 1 ? 's' : '' }}</p>
+      <p class="mobile-subtitle">{{ filteredPackings().length }} packing{{ filteredPackings().length !== 1 ? 's' : '' }}</p>
     </div>
     <p-menu
       #statusMenu
-      [model]="mobileStatusMenuItems"
+      [model]="mobileFilterMenuItems"
       [popup]="true"
       appendTo="body"
       styleClass="mobile-status-menu"
     />
     <button
-      pButton 
-      pRipple 
+      pButton
+      pRipple
       icon="pi pi-filter"
       class="p-button-rounded p-button-text mobile-add"
-      aria-label="Filtrer par statut"
+      aria-label="Filtrer"
       (click)="statusMenu.toggle($event)"
     ></button>
   </header>
@@ -35,340 +223,381 @@
   <div class="mobile-scroll">
     <section class="mobile-search">
       <p-iconfield>
-        <p-inputicon styleClass="pi pi-search" />
+        <p-inputicon class="pi pi-search" />
         <input
           pInputText
           type="text"
-          [(ngModel)]="mobileSearchTerm"
-          (ngModelChange)="onMobileSearchChange()"
-          placeholder="Prestataire, référence..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Prestataire, reference..."
           class="w-full"
         />
       </p-iconfield>
     </section>
 
-    <section class="mobile-list" *ngIf="!loading && mobileVisiblePackings.length; else mobileListState">
-      <article
-        class="mobile-packing-card"
-        *ngFor="let packing of mobileVisiblePackings; trackBy: trackByPackingId"
-        (click)="canUpdate && editPacking(packing)"
-      >
-        <div class="mobile-card-avatar" aria-hidden="true" *ngIf="packing.prestataire">
-          {{ getPrestataireInitials(packing.prestataire) }}
-        </div>
-        <div class="mobile-card-avatar mobile-card-avatar--fallback" *ngIf="!packing.prestataire" aria-hidden="true">?</div>
+    <section class="mobile-list" *ngIf="!loading && filteredPackings().length; else mobileListState">
+      <article class="mobile-packing-card" *ngFor="let p of filteredPackings()" (click)="goEdit(p)">
+        <div class="mobile-card-avatar">{{ getInitials(p) }}</div>
         <div class="mobile-card-body">
-          <div class="mobile-card-name">{{ packing.prestataire ? packing.prestataire.prenom + ' ' + packing.prestataire.nom : packing.reference || 'Packing' }}</div>
-          <div class="mobile-card-meta">{{ formatDateDisplay(packing.date) }} · {{ packing.nb_rouleaux }} rouleaux</div>
+          <div class="mobile-card-name">
+            {{ p.prestataire ? p.prestataire.prenom + ' ' + p.prestataire.nom : '-' }}
+          </div>
+          <div class="mobile-card-meta">{{ p.prestataire?.phone | phoneFormat }} - {{ formatDateDisplay(p.date) }}</div>
           <div class="mobile-card-footer">
-            <span class="mobile-card-summary">{{ formatCurrency(packing.montant) }}</span>
-            <span
-              class="mobile-status-badge"
-              [ngClass]="{
-                'mobile-status-badge--warn': packing.statut === 'a_valider',
-                'mobile-status-badge--success': packing.statut === 'valide',
-                'mobile-status-badge--danger': packing.statut === 'annule'
-              }"
-            >{{ getStatutLabel(packing.statut) }}</span>
-            <button
-              *ngIf="canUpdate"
-              pButton
-              pRipple
-              icon="pi pi-arrow-right"
-              class="p-button-rounded p-button-text p-button-sm mobile-action-btn"
-              pTooltip="Modifier"
-              tooltipPosition="top"
-              (click)="$event.stopPropagation(); editPacking(packing)"
-            ></button>
+            <p-tag
+              [value]="getStatutLabel(p.statut)"
+              [severity]="getStatutSeverity(p.statut)"
+              styleClass="mobile-status-tag"
+            />
+            <span class="mobile-card-amounts">
+              {{ p.nb_rouleaux }} rouleau{{ p.nb_rouleaux !== 1 ? 'x' : '' }} &middot; {{ formatCurrency(p.montant) }}
+              <span *ngIf="p.montant_restant > 0"> &middot; Reste : {{ formatCurrency(p.montant_restant) }}</span>
+            </span>
           </div>
         </div>
+        @if ((canCreateVersement && canPay(p)) || canReadVersement || canViewFacture || canEditPacking(p) || canCancelPacking(p)) {
+          <div class="mobile-card-actions">
+                  @if (canViewFacture) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                severity="primary"
+                text
+                rounded
+                size="small"
+                pTooltip="Voir facture"
+                tooltipPosition="left"
+                (click)="goFactureFromCard($event, p)"
+              ></button>
+            }
+            @if (canCreateVersement && canPay(p)) {
+              <button
+                pButton
+                appConsolidatedDisable
+                type="button"
+                icon="pi pi-wallet"
+                severity="success"
+                text
+                rounded
+                size="small"
+                pTooltip="Encaisser"
+                tooltipPosition="left"
+                (click)="openVersementFromCard($event, p)"
+              ></button>
+            }
+            @if (canReadVersement) {
+              <button
+                pButton
+                type="button"
+                icon="pi pi-history"
+                severity="secondary"
+                text
+                rounded
+                size="small"
+                pTooltip="Historique"
+                tooltipPosition="left"
+                (click)="openHistoriqueFromCard($event, p)"
+              ></button>
+            }
+      
+            @if (canEditPacking(p)) {
+              <button
+                pButton
+                appConsolidatedDisable
+                type="button"
+                icon="pi pi-pen-to-square"
+                text
+                rounded
+                size="small"
+                pTooltip="Modifier"
+                tooltipPosition="left"
+                (click)="goEditFromCard($event, p)"
+              ></button>
+            }
+            @if (canCancelPacking(p)) {
+              <button
+                pButton
+                appConsolidatedDisable
+                type="button"
+                icon="pi pi-ban"
+                severity="warn"
+                text
+                rounded
+                size="small"
+                pTooltip="Annuler"
+                tooltipPosition="left"
+                (click)="cancelPackingFromCard($event, p)"
+              ></button>
+            }
+          </div>
+        }
       </article>
     </section>
 
     <ng-template #mobileListState>
       <div class="mobile-state" *ngIf="loading">Chargement...</div>
-      <div class="mobile-state" *ngIf="!loading && !mobileFilteredPackings.length">Aucun packing.</div>
+      <div class="mobile-state" *ngIf="!loading && !filteredPackings().length">Aucun packing trouve.</div>
     </ng-template>
-
-    <div class="mobile-load-more" *ngIf="!loading && canLoadMoreMobile">
-      <button pButton label="Charger plus" icon="pi pi-angle-down" class="mobile-load-more-btn" (click)="loadMoreMobile()"></button>
-    </div>
   </div>
 
-  <button
-    *ngIf="canCreate"
-    type="button"
-    class="mobile-fab"
-    aria-label="Nouveau packing"
-    (click)="openNew()"
-  >
-    <i class="pi pi-plus"></i>
-  </button>
+  @if (canCreate && !mobilePaiementVisible && !mobileHistoriqueVisible) {
+    <button type="button" appConsolidatedDisable class="mobile-fab" aria-label="Nouveau packing" (click)="goNew()">
+      <i class="pi pi-plus"></i>
+    </button>
+  }
 </div>
 
-<!-- Desktop: toolbar + table -->
+<!-- DESKTOP -->
 <div class="card packing-desktop">
-    <p-toolbar styleClass="mb-12">
-        <ng-template #start>
-            <p-button *ngIf="canCreate" label="Ajouter packing" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-        </ng-template>
-
-        <ng-template #end>
-            <div class="flex items-center gap-2">
-                <p-select
-                    [(ngModel)]="filterStatut"
-                    [options]="statuses"
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Statut"
-                    [showClear]="true"
-                    (onChange)="onDateFilter()"
-                    styleClass="w-40"
-                />
-                <p-datepicker
-                    [(ngModel)]="filterDateRange" 
-                    selectionMode="range"
-                    dateFormat="dd/mm/yy"
-                    placeholder="Période"
-                    [showIcon]="true"
-                    (onSelect)="onDateRangeSelect()"
-                    inputStyleClass="w-full"
-                    styleClass="w-56"
-                    [readonlyInput]="true"
-                />
-                <p-button
-                    icon="pi pi-filter-slash"
-                    severity="secondary"
-                    [outlined]="true"
-                    [rounded]="true"
-                    (onClick)="clearDateFilters()"
-                    *ngIf="filterDateRange || filterStatut"
-                    pTooltip="Effacer les filtres"
-                />
-                <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
-            </div>
-        </ng-template>
-    </p-toolbar>
-
-    <p-table
-        #dt
-        [value]="packings()"
-        [rows]="10"
-        [columns]="cols"
-        [paginator]="true"
-        [globalFilterFields]="filterFields"
-        [tableStyle]="{ 'min-width': '65rem' }"
-        [(selection)]="selectedPackings"
-        [rowHover]="true"
-        dataKey="id"
-        currentPageReportTemplate="  {first} à {last} sur {totalRecords} packings"
-        [showCurrentPageReport]="true"
-        [rowsPerPageOptions]="[10, 20, 30]"
-        [loading]="loading"
-    >
-        <ng-template #caption>
-            <div class="flex items-center justify-between">
-                <h5 class="m-0">Gestion des Packings</h5>
-                <p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." />
-                </p-iconfield>
-            </div>
-        </ng-template>
-
-        <ng-template #header>
-            <tr>
-                <th pSortableColumn="prestataire.nom">
-                    <span class="col-header">Prestataire <p-sortIcon field="prestataire.nom" /></span>
-                </th>
-                <th><span class="col-header">Téléphone</span></th>
-                <th pSortableColumn="date">
-                    <span class="col-header">Date <p-sortIcon field="date" /></span>
-                </th>
-                <th pSortableColumn="nb_rouleaux" class="text-right">
-                    <span class="col-header justify-end">Rouleaux <p-sortIcon field="nb_rouleaux" /></span>
-                </th>
-                <th pSortableColumn="montant" class="text-right">
-                    <span class="col-header justify-end">Montant <p-sortIcon field="montant" /></span>
-                </th>
-                <th pSortableColumn="statut" class="text-center">
-                    <span class="col-header justify-center">Statut <p-sortIcon field="statut" /></span>
-                </th>
-                <th class="text-center" style="width: 5rem"></th>
-            </tr>
-        </ng-template>
-
-        <ng-template #body let-packing>
-            <tr class="table-row" (dblclick)="canUpdate && editPacking(packing)">
-                <td>
-                    <div class="cell-prestataire" *ngIf="packing.prestataire">
-                        <span class="cell-prestataire__avatar" [style.background]="'var(--p-primary-50)'" [style.color]="'var(--p-primary-600)'">
-                            {{ packing.prestataire.nom?.charAt(0)?.toUpperCase() }}
-                        </span>
-                        <span class="cell-prestataire__name">{{ packing.prestataire.nom }} {{ packing.prestataire.prenom }}</span>
-                    </div>
-                </td>
-                <td class="cell-secondary cell-bold">
-                    <span *ngIf="packing.prestataire">{{ packing.prestataire.phone | phoneFormat:'INT' }}</span>
-                </td>
-
-                <td class="cell-secondary cell-bold">{{ formatDateDisplay(packing.date) }}</td>
-
-                <td class="text-right cell-mono cell-bold">{{ packing.nb_rouleaux }}</td>
-
-                <td class="text-right cell-mono cell-bold">{{ formatCurrency(packing.montant) }}</td>
-                <td class="text-center">
-                    <span class="status-badge" [ngClass]="{
-                        'status-badge--warn': packing.statut === 'a_valider',
-                        'status-badge--success': packing.statut === 'valide',
-                        'status-badge--danger': packing.statut === 'annule'
-                    }">
-                        {{ getStatutLabel(packing.statut) }}
-                    </span>
-                </td>
-                <td class="text-center">
-                    <p-button *ngIf="canUpdate" icon="pi pi-arrow-right" severity="secondary" [text]="true" [rounded]="true" pTooltip="Modifier" (click)="editPacking(packing)" />
-                </td>
-            </tr>
-        </ng-template>
-
-        <ng-template #emptymessage>
-            <tr>
-                <td colspan="7">
-                    <div class="empty-state">
-                        <i class="pi pi-inbox"></i>
-                        <span>Aucun packing trouvé</span>
-                    </div>
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
-</div>
-
-<p-dialog
-    [(visible)]="packingDialog"
-    [style]="{ width: '750px', maxWidth: '95vw' }"
-    [contentStyle]="{ overflow: 'visible' }"
-    [header]="packing?.id ? 'Détails du packing' : 'Nouveau packing'"
-    [modal]="true"
-    styleClass="packing-dialog"
-    [breakpoints]="{ '960px': '95vw', '768px': '100vw', '480px': '100vw' }"
-    [maximizable]="false"
->
-    <div class="packing-dialog-content">
-        <section class="packing-dialog-section">
-            <h3 class="packing-dialog-section-title">Prestataire</h3>
-            <div class="packing-dialog-field">
-                <label for="prestataire">Machiniste</label>
-                <p-skeleton *ngIf="dialogLoading" height="2.75rem" styleClass="w-full" />
-                <p-select
-                    *ngIf="!dialogLoading"
-                    id="prestataire"
-                    [(ngModel)]="selectedPrestataire"
-                    [options]="prestataires"
-                    optionLabel="nom"
-                    [filter]="true"
-                    filterBy="nom,prenom,phone"
-                    placeholder="Sélectionner un prestataire"
-                    styleClass="w-full packing-dialog-select"
-                >
-                    <ng-template let-prestataire pTemplate="item">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-user text-primary"></i>
-                            <span>{{ prestataire.prenom }} {{ prestataire.nom }} · {{ prestataire.phone }}</span>
-                        </div>
-                    </ng-template>
-                    <ng-template let-prestataire pTemplate="selectedItem">
-                        <div class="flex items-center gap-2" *ngIf="prestataire">
-                            <i class="pi pi-user text-primary"></i>
-                            <span>{{ prestataire.prenom }} {{ prestataire.nom }}</span>
-                        </div>
-                    </ng-template>
-                </p-select>
-                <small class="packing-dialog-error" *ngIf="submitted && !selectedPrestataire && !dialogLoading">Le prestataire est requis.</small>
-            </div>
-        </section>
-
-        <section class="packing-dialog-section">
-            <h3 class="packing-dialog-section-title">Informations</h3>
-            <div class="packing-dialog-field">
-                <label for="date">Date</label>
-                <p-datepicker
-                    id="date"
-                    [(ngModel)]="packing.date"
-                    dateFormat="dd/mm/yy"
-                    [showIcon]="true"
-                    inputStyleClass="w-full"
-                    styleClass="w-full"
-                />
-            </div>
-            <div class="packing-dialog-row">
-                <div class="packing-dialog-field">
-                    <label for="nb_rouleaux">Nombre de rouleaux</label>
-                    <p-inputnumber
-                        id="nb_rouleaux"
-                        [(ngModel)]="packing.nb_rouleaux"
-                        (onInput)="calculateMontant()"
-                        [min]="0"
-                        styleClass="w-full"
-                    />
-                </div>
-                <div class="packing-dialog-field">
-                    <label for="prix_par_rouleau">Prix / rouleau (GNF)</label>
-                    <p-skeleton *ngIf="dialogLoading" height="2.75rem" styleClass="w-full" />
-                    <p-inputnumber
-                        *ngIf="!dialogLoading"
-                        id="prix_par_rouleau"
-                        [(ngModel)]="packing.prix_par_rouleau"
-                        (onInput)="calculateMontant()"
-                        [min]="0"
-                        styleClass="w-full"
-                    />
-                </div>
-            </div>
-            <div class="packing-dialog-field">
-                <label for="statut">Statut</label>
-                <p-select
-                    id="statut"
-                    [(ngModel)]="packing.statut"
-                    [options]="statuses"
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Sélectionner un statut"
-                    styleClass="w-full packing-dialog-select"
-                />
-            </div>
-        </section>
-
-        <div class="packing-dialog-total">
-            <span class="packing-dialog-total-label">Montant total</span>
-            <span class="packing-dialog-total-value">{{ formatCurrency(packing.montant || 0) }}</span>
+  <p-table
+    [value]="filteredPackings()"
+    [loading]="loading"
+    [paginator]="true"
+    paginatorDropdownAppendTo="body"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="  {first} / {last} de {totalRecords} packings"
+    [showCurrentPageReport]="true"
+    [rowHover]="true"
+  >
+    <ng-template #caption>
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <p-iconfield class="w-full sm:w-80 order-1 sm:order-0">
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Rechercher un packing..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            class="w-full"
+          />
+        </p-iconfield>
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+          <p-select
+            [options]="statutOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedStatut()"
+            (ngModelChange)="setStatutFilter($event)"
+            placeholder="Tous les statuts"
+            class="w-full sm:w-44"
+          />
+          <p-select
+            [options]="quickDateFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedQuickDateFilter"
+            (ngModelChange)="onQuickDateFilterChange($event)"
+            placeholder="Periode rapide"
+            class="w-full sm:w-52"
+          />
+          @if (selectedQuickDateFilter === 'last_n_days') {
+            <p-inputnumber
+              [ngModel]="lastNDaysValue"
+              (ngModelChange)="onLastNDaysChange($event)"
+              [min]="1"
+              [useGrouping]="false"
+              [showButtons]="false"
+              placeholder="Nb jours"
+              suffix=" j"
+              inputStyleClass="w-full"
+              styleClass="w-full sm:w-32"
+            />
+          }
+          <p-datepicker
+            [(ngModel)]="filterDateRange"
+            selectionMode="range"
+            dateFormat="dd/mm/yy"
+            placeholder="Periode"
+            [showIcon]="true"
+            (onSelect)="onDateRangeSelect()"
+            inputStyleClass="w-full"
+            styleClass="w-52"
+            [readonlyInput]="true"
+          />
+          @if (hasActiveFilters()) {
+            <button
+              pButton
+              type="button"
+              icon="pi pi-filter-slash"
+              severity="secondary"
+              outlined
+              rounded
+              pTooltip="Reinitialiser filtres"
+              tooltipPosition="top"
+              (click)="clearFilters()"
+            ></button>
+          }
+          @if (canCreate) {
+            <button pButton appConsolidatedDisable outlined icon="pi pi-plus" label="Nouveau packing" (click)="goNew()"></button>
+          }
         </div>
-    </div>
-
-    <ng-template #footer>
-        <div class="packing-dialog-footer">
-            <p-button label="Annuler" icon="pi pi-times" severity="secondary" [outlined]="true" (click)="hideDialog()" [disabled]="saving" />
-            <p-button label="Enregistrer" icon="pi pi-check" (click)="savePacking()" [disabled]="saving || dialogLoading" [loading]="saving" />
-        </div>
+      </div>
     </ng-template>
-</p-dialog>
 
-<p-confirmdialog [style]="{ width: '450px' }" />
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="prestataire.nom" style="width:18%">
+          <span class="flex items-center gap-2">Prestataire <p-sortIcon field="prestataire.nom" /></span>
+        </th>
+        <th style="width:11%">Telephone</th>
+        <th pSortableColumn="date" style="width:9%">
+          <span class="flex items-center gap-2">Date <p-sortIcon field="date" /></span>
+        </th>
+        <th pSortableColumn="nb_rouleaux" style="width:8%">
+          <span class="flex items-center gap-2">Rouleaux <p-sortIcon field="nb_rouleaux" /></span>
+        </th>
+        <th pSortableColumn="montant" style="width:11%">
+          <span class="flex items-center gap-2">Montant <p-sortIcon field="montant" /></span>
+        </th>
+        <th pSortableColumn="montant_verse" style="width:10%">
+          <span class="flex items-center gap-2">Verse <p-sortIcon field="montant_verse" /></span>
+        </th>
+        <th pSortableColumn="montant_restant" style="width:10%">
+          <span class="flex items-center gap-2">Restant <p-sortIcon field="montant_restant" /></span>
+        </th>
+        <th pSortableColumn="statut" style="width:10%">
+          <span class="flex items-center gap-2">Statut <p-sortIcon field="statut" /></span>
+        </th>
+        @if (hasActionsColumn) {
+          <th style="width:13%" class="text-center">Actions</th>
+        }
+      </tr>
+    </ng-template>
 
-<!-- Mobile slideover form (full screen, comme comptabilite-packing-paiement) -->
-<div class="fixed inset-0 z-50" *ngIf="mobileFormVisible">
-    <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeMobileForm()"></div>
-    <div class="packing-mobile-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full h-full animate-fadeinright">
-        <app-packing-mobile-form
-            [packing]="packing"
-            [prestataires]="prestataires"
-            [selectedPrestataire]="selectedPrestataire"
-            [saving]="saving"
-            [dialogLoading]="dialogLoading"
-            [submitted]="submitted"
-            (onSaveEvent)="onMobileFormSave($event)"
-            (onClose)="closeMobileForm()"
-        ></app-packing-mobile-form>
-    </div>
+    <ng-template #body let-p>
+      <tr>
+        <td>
+          @if (p.prestataire) {
+            <div class="flex items-center gap-2">
+              <span
+                class="inline-flex items-center justify-center rounded-full bg-primary text-white font-bold text-xs flex-shrink-0"
+                style="width:2rem;height:2rem"
+              >
+                {{ p.prestataire.nom?.charAt(0)?.toUpperCase() }}{{ p.prestataire.prenom?.charAt(0)?.toUpperCase() }}
+              </span>
+              <span class="font-medium">{{ p.prestataire.prenom }} {{ p.prestataire.nom }}</span>
+            </div>
+          } @else {
+            <span class="text-surface-400">-</span>
+          }
+        </td>
+        <td class="text-sm">
+          @if (p.prestataire) { {{ p.prestataire.phone | phoneFormat }} } @else { - }
+        </td>
+        <td class="text-sm">{{ formatDateDisplay(p.date) }}</td>
+        <td class="text-sm font-medium">{{ p.nb_rouleaux }}</td>
+        <td class="text-sm font-medium">{{ formatCurrency(p.montant) }}</td>
+        <td class="text-sm font-medium text-green-600">{{ formatCurrency(p.montant_verse) }}</td>
+        <td class="text-sm font-medium">
+          <span [class.text-orange-500]="p.montant_restant > 0">{{ formatCurrency(p.montant_restant) }}</span>
+        </td>
+        <td>
+          <p-tag [value]="getStatutLabel(p.statut)" [severity]="getStatutSeverity(p.statut)" />
+        </td>
+        @if (hasActionsColumn) {
+          <td>
+            <div class="flex gap-1 justify-center">
+              @if (canViewFacture) {
+                <button
+                pButton
+                type="button"
+                icon="pi pi-eye"
+                severity="primary"
+                text
+                rounded
+                size="small"
+                pTooltip="Voir facture"
+                  tooltipPosition="top"
+                  (click)="goFacture(p)"
+                ></button>
+              }
+              @if (canReadVersement) {
+                <button
+                pButton
+                type="button"
+                icon="pi pi-history"
+                severity="secondary"
+                text
+                rounded
+                size="small"
+                pTooltip="Historique versements"
+                  tooltipPosition="top"
+                  (click)="openHistorique(p)"
+                ></button>
+              }
+              @if (canEditPacking(p)) {
+                <button
+                  pButton
+                  appConsolidatedDisable
+                  type="button"
+                  icon="pi pi-pen-to-square"
+                  text
+                  rounded
+                  size="small"
+                  pTooltip="Modifier"
+                  tooltipPosition="top"
+                  (click)="goEdit(p)"
+                ></button>
+              }
+              @if (canCancelPacking(p)) {
+                <button
+                  pButton
+                  appConsolidatedDisable
+                  type="button"
+                  icon="pi pi-ban"
+                  severity="warn"
+                  text
+                  rounded
+                  size="small"
+                  pTooltip="Annuler"
+                  tooltipPosition="top"
+                  (click)="cancelPacking(p)"
+                ></button>
+              }
+              @if (canDelete && p.statut === 'impayee') {
+                <button
+                  pButton
+                  appConsolidatedDisable
+                  type="button"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  text
+                  rounded
+                  size="small"
+                  pTooltip="Supprimer"
+                  tooltipPosition="top"
+                  (click)="deletePacking(p)"
+                ></button>
+              }
+            </div>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td [attr.colspan]="hasActionsColumn ? 9 : 8" class="text-center py-8">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-inbox text-4xl"></i>
+            <span>Aucun packing trouve</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3, 4, 5]; track $index) {
+        <tr>
+          @for (__ of skeletonCols; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+  </p-table>
 </div>

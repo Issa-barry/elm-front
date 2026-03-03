@@ -16,22 +16,22 @@ function buildCountry(name: string, code: string, dialCode: string): Country {
 
 export const COUNTRIES: Country[] = [
   // Afrique de l'Ouest (Union du Fleuve Mano)
-  buildCountry('Guinée', 'GN', '+224'),
+  buildCountry('Guinee', 'GN', '+224'),
   buildCountry('Sierra Leone', 'SL', '+232'),
   buildCountry('Liberia', 'LR', '+231'),
-  buildCountry('Côte d\'Ivoire', 'CI', '+225'),
+  buildCountry("Cote d'Ivoire", 'CI', '+225'),
 
   // Autres pays de l'Afrique de l'Ouest
-  buildCountry('Sénégal', 'SN', '+221'),
+  buildCountry('Senegal', 'SN', '+221'),
   buildCountry('Mali', 'ML', '+223'),
   buildCountry('Burkina Faso', 'BF', '+226'),
   buildCountry('Niger', 'NE', '+227'),
   buildCountry('Togo', 'TG', '+228'),
-  buildCountry('Bénin', 'BJ', '+229'),
+  buildCountry('Benin', 'BJ', '+229'),
   buildCountry('Ghana', 'GH', '+233'),
   buildCountry('Nigeria', 'NG', '+234'),
   buildCountry('Gambie', 'GM', '+220'),
-  buildCountry('Guinée-Bissau', 'GW', '+245'),
+  buildCountry('Guinee-Bissau', 'GW', '+245'),
   buildCountry('Cap-Vert', 'CV', '+238'),
   buildCountry('Mauritanie', 'MR', '+222'),
 
@@ -41,18 +41,18 @@ export const COUNTRIES: Country[] = [
   buildCountry('Suisse', 'CH', '+41'),
   buildCountry('Luxembourg', 'LU', '+352'),
 
-  // Amérique du Nord
+  // Amerique du Nord
   buildCountry('Canada', 'CA', '+1'),
-  buildCountry('États-Unis', 'US', '+1'),
+  buildCountry('Etats-Unis', 'US', '+1'),
 ];
 
 export const DEFAULT_COUNTRY_CODE = 'GN';
 export const DEFAULT_DIAL_CODE = '+224';
 
 export function getCountryByCode(code: string): Country | undefined {
-  return COUNTRIES.find(c => c.code === code);
+  return COUNTRIES.find((c) => c.code === code);
 }
 
 export function getCountryByDialCode(dialCode: string): Country | undefined {
-  return COUNTRIES.find(c => c.dialCode === dialCode);
+  return COUNTRIES.find((c) => c.dialCode === dialCode);
 }

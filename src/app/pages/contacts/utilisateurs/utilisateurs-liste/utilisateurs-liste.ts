@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnDestroy, OnInit, effect } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,7 +18,9 @@ import { MenuModule } from 'primeng/menu';
 import { User } from '@/models/user.model';
 import { UserService } from '@/services/users/users.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { UtilisateursViewDialog } from '../utilisateurs-view-dialog/utilisateurs-view-dialog';
 
 @Component({
   selector: 'app-utilisateurs-liste',
@@ -39,9 +41,10 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    UtilisateursViewDialog,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
 })
 export class UtilisateursListe implements OnInit, OnDestroy {
   users: User[] = [];
@@ -49,11 +52,16 @@ export class UtilisateursListe implements OnInit, OnDestroy {
   loading = false;
   selectedStatus: boolean | null = null;
 
+  viewDialogVisible = false;
+  viewUserId: number | null = null;
+  viewDialogMode: 'create' | 'edit' = 'edit';
+
   mobileSearchTerm = '';
   readonly mobilePageSize = 10;
   mobileVisibleCount = this.mobilePageSize;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'utilisateurs-mobile-pwa';
+  private readyForUsineReload = false;
 
   statusOptions = [
     { label: 'Actif', value: true },
@@ -76,14 +84,22 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private authService: AuthService,
+    private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.canCreate = this.authService.hasPermission('users.create');
     this.canUpdate = this.authService.hasPermission('users.update');
     this.canDelete = this.authService.hasPermission('users.delete');
+
+    effect(() => {
+      this.usineContext.currentUsineId();
+      if (!this.readyForUsineReload) return;
+      this.loadUsers();
+    });
   }
 
   ngOnInit() {
+    this.readyForUsineReload = true;
     this.loadUsers();
     this.syncMobilePwaMode();
   }
@@ -164,7 +180,7 @@ export class UtilisateursListe implements OnInit, OnDestroy {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de charger les utilisateurs'
+          detail: this.getApiErrorDetail(error, 'Impossible de charger les utilisateurs')
         });
         this.loading = false;
       }
@@ -184,17 +200,43 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     this.loadUsers();
   }
 
-  navigateToCreate() {
-    this.router.navigate(['contacts/utilisateurs/new']);
+  onRowSelect(event: any) {
+    if (!this.canUpdate) return;
+    this.openEditDialog(event.data.id);
   }
 
-  onRowSelect(event: any) {
-    this.router.navigate(['contacts/utilisateurs/edit', event.data.id]);
+  openViewDialog(event: Event, userId: number) {
+    event.stopPropagation();
+    this.openEditDialog(userId);
+  }
+
+  openCreateDialog() {
+    if (!this.canCreate) return;
+    this.viewDialogMode = 'create';
+    this.viewUserId = null;
+    this.viewDialogVisible = true;
+  }
+
+  openEditDialog(userId: number) {
+    if (!this.canUpdate) return;
+    this.viewDialogMode = 'edit';
+    this.viewUserId = userId;
+    this.viewDialogVisible = true;
+  }
+
+  onDialogUserSaved(event: { user: User; mode: 'create' | 'edit' }) {
+    this.loadUsers();
+
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Succes',
+      detail: event.mode === 'create' ? 'Utilisateur cree avec succes' : 'Utilisateur modifie avec succes',
+    });
   }
 
   goToEdit(event: Event, userId: number) {
     event.stopPropagation();
-    this.router.navigate(['contacts/utilisateurs/edit/', userId]);
+    this.openEditDialog(userId);
   }
 
   toggleStatus(event: Event, userId: number) {
@@ -226,7 +268,7 @@ export class UtilisateursListe implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de changer le statut de l\'utilisateur'
+              detail: this.getApiErrorDetail(error, 'Impossible de changer le statut de l\'utilisateur')
             });
           }
         });
@@ -258,15 +300,107 @@ export class UtilisateursListe implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Erreur:', error);
+            const apiMessage = this.getApiErrorDetail(error, 'Impossible de supprimer l\'utilisateur');
+            this.messageService.add({ severity: 'error', summary: 'Erreur', detail: apiMessage });
+            if (error?.error?.errors?.action === 'archive') {
+              this.proposeArchiveUser(userId);
+            }
+          }
+        });
+      }
+    });
+  }
+
+  archiveUserAction(event: Event, userId: number): void {
+    event.stopPropagation();
+
+    this.confirmationService.confirm({
+      message: 'Voulez-vous archiver cet utilisateur ? Il sera désactivé et ne pourra plus se connecter.',
+      header: 'Archiver l\'utilisateur',
+      icon: 'pi pi-inbox',
+      acceptLabel: 'Oui, archiver',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.userService.archiveUser(userId).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Utilisateur archivé avec succès' });
+              this.loadUsers();
+            }
+          },
+          error: (error) => {
+            const apiMessage = this.getApiErrorDetail(error, 'Impossible d\'archiver l\'utilisateur');
+            this.messageService.add({ severity: 'error', summary: 'Erreur', detail: apiMessage });
+          }
+        });
+      }
+    });
+  }
+
+  private proposeArchiveUser(userId: number): void {
+    const user = this.users.find(u => u.id === userId);
+    if (user?.is_archived) return;
+
+    this.confirmationService.confirm({
+      message: 'Cet utilisateur a des données liées. Voulez-vous l\'archiver à la place ?',
+      header: 'Archiver l\'utilisateur',
+      icon: 'pi pi-info-circle',
+      acceptLabel: 'Oui, archiver',
+      rejectLabel: 'Non',
+      accept: () => {
+        this.userService.archiveUser(userId).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Utilisateur archivé avec succès' });
+              this.loadUsers();
+            }
+          },
+          error: (error) => {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de supprimer l\'utilisateur'
+              detail: this.getApiErrorDetail(error, 'Impossible d\'archiver l\'utilisateur'),
             });
           }
         });
       }
     });
+  }
+
+  private getApiErrorDetail(error: unknown, fallback: string): string {
+    const validationMessages = this.extractValidationMessages(error);
+    if (validationMessages.length > 0) {
+      return validationMessages.join('; ');
+    }
+
+    const apiMessage = this.extractApiMessage(error);
+    if (apiMessage) {
+      return apiMessage;
+    }
+
+    return fallback;
+  }
+
+  private extractApiMessage(error: unknown): string | null {
+    const message = (error as { error?: { message?: unknown } })?.error?.message;
+    if (typeof message !== 'string') {
+      return null;
+    }
+
+    const trimmedMessage = message.trim();
+    return trimmedMessage.length > 0 ? trimmedMessage : null;
+  }
+
+  private extractValidationMessages(error: unknown): string[] {
+    const validationErrors = (error as { error?: { errors?: unknown } })?.error?.errors;
+    if (!validationErrors || typeof validationErrors !== 'object') {
+      return [];
+    }
+
+    return Object.values(validationErrors as Record<string, unknown>)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((message) => String(message).trim())
+      .filter((message) => message.length > 0);
   }
 
   getInitials(nomComplet: string): string {
@@ -279,13 +413,5 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     return nomComplet.substring(0, 2).toUpperCase();
   }
 
-  getRoleSeverity(role: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    const severities: Record<string, 'success' | 'info' | 'warn' | 'danger'> = {
-      'admin': 'danger',
-      'manager': 'warn',
-      'employe': 'info',
-      'superviseur': 'success',
-    };
-    return severities[role?.toLowerCase()] || 'secondary';
-  }
 }
+

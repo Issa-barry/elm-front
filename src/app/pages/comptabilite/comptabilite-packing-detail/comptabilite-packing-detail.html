@@ -1,18 +1,18 @@
 <p-toast position="top-right" appendTo="body" [baseZIndex]="1100" [preventOpenDuplicates]="true" />
 
 <div class="detail-page-wrap">
-<!-- Mobile-only header (visible ≤768px) -->
+<!-- Mobile-only header (visible <=768px) -->
 <header class="detail-mobile-header">
     <button
         pButton
         pRipple
         icon="pi pi-arrow-left"
         class="p-button-rounded p-button-text detail-mobile-back"
-        aria-label="Retour à la liste"
+        aria-label="Retour a la liste"
         (click)="goBack()"
     ></button>
     <div class="detail-mobile-title-wrap">
-        <h1 class="detail-mobile-title">{{ prestataireNom || 'Détail' }}</h1>
+        <h1 class="detail-mobile-title">{{ prestataireNom || 'Detail' }}</h1>
         <p class="detail-mobile-subtitle" *ngIf="prestatairePhone">{{ prestatairePhone | phoneFormat:'INT' }}</p>
     </div>
 </header>
@@ -36,7 +36,7 @@
     <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="closeSlideoverPaiement()"></div>
     <div class="detail-paiement-slideover bg-surface-0 dark:bg-surface-900 absolute top-0 right-0 shadow-xl w-full md:w-108 h-full animate-fadeinright">
          <app-comptabilite-packing-paiement
-            [facture]="slideoverFacture"
+            [packing]="slideoverPacking"
             [saving]="slideoverSaving"
             (onPay)="onSlideoverPay($event)"
             (onClose)="closeSlideoverPaiement()"
@@ -65,8 +65,8 @@
     <div class="stats-bar__item">
         <div class="stats-bar__icon"><i class="pi pi-wallet"></i></div>
         <div>
-            <div class="stats-bar__value">{{ formatCurrency(totalFacture) }}</div>
-            <div class="stats-bar__label">Total à payer</div>
+            <div class="stats-bar__value">{{ formatCurrency(totalMontant) }}</div>
+            <div class="stats-bar__label">Total a payer</div>
         </div>
     </div>
     <div class="stats-bar__divider"></div>
@@ -74,7 +74,7 @@
         <div class="stats-bar__icon"><i class="pi pi-check-circle"></i></div>
         <div>
             <div class="stats-bar__value">{{ formatCurrency(totalVerse) }}</div>
-            <div class="stats-bar__label">Total versé</div>
+            <div class="stats-bar__label">Total verse</div>
         </div>
     </div>
     <div class="stats-bar__divider"></div>
@@ -82,41 +82,41 @@
         <div class="stats-bar__icon"><i class="pi pi-arrow-right"></i></div>
         <div>
             <div class="stats-bar__value">{{ formatCurrency(totalRestant) }}</div>
-            <div class="stats-bar__label">Reste à payer</div>
+            <div class="stats-bar__label">Reste a payer</div>
         </div>
     </div>
 </div>
 
-<!-- Mobile: factures en cartes (≤768px) -->
+<!-- Mobile: packings en cartes (<=768px) -->
 <div class="detail-factures-mobile">
-    <h3 class="detail-factures-mobile__title">Factures</h3>
+    <h3 class="detail-factures-mobile__title">Packings</h3>
     <div class="detail-factures-mobile__state" *ngIf="loading">Chargement...</div>
-    <div class="detail-factures-mobile__state" *ngIf="!loading && factures().length === 0">Aucune facture pour ce prestataire.</div>
-    <div class="detail-factures-mobile__list" *ngIf="!loading && factures().length">
+    <div class="detail-factures-mobile__state" *ngIf="!loading && packings().length === 0">Aucun packing pour ce prestataire.</div>
+    <div class="detail-factures-mobile__list" *ngIf="!loading && packings().length">
         <article
             class="detail-facture-card"
-            *ngFor="let facture of factures()"
+            *ngFor="let packing of packings()"
         >
             <div class="detail-facture-card__main">
-                <span class="detail-facture-card__ref">{{ getReferenceShort(facture.reference) }}</span>
-                <span class="detail-facture-card__date">{{ formatDateDisplay(facture.date) }}</span>
-                <span class="detail-facture-card__rouleaux">{{ facture.total_rouleaux }} rouleaux</span>
+                <span class="detail-facture-card__ref">{{ packing.reference }}</span>
+                <span class="detail-facture-card__date">{{ formatDateDisplay(packing.date) }}</span>
+                <span class="detail-facture-card__rouleaux">{{ packing.nb_rouleaux }} rouleaux</span>
             </div>
             <div class="detail-facture-card__amounts">
-                <span class="detail-facture-card__total">{{ facture.montant_total | money:'GNF' }}</span>
-                <span class="detail-facture-card__verse">Versé : {{ facture.montant_verse | money:'GNF' }}</span>
-                <span class="detail-facture-card__restant">Restant : {{ facture.montant_restant | money:'GNF' }}</span>
+                <span class="detail-facture-card__total">{{ packing.montant | money:'GNF' }}</span>
+                <span class="detail-facture-card__verse">Verse : {{ packing.montant_verse | money:'GNF' }}</span>
+                <span class="detail-facture-card__restant">Restant : {{ packing.montant_restant | money:'GNF' }}</span>
             </div>
             <div class="detail-facture-card__footer">
                 <span
                     class="detail-facture-card__badge"
                     [ngClass]="{
-                        'detail-facture-card__badge--danger': facture.statut === 'impayee',
-                        'detail-facture-card__badge--warn': facture.statut === 'partielle',
-                        'detail-facture-card__badge--success': facture.statut === 'payee',
-                        'detail-facture-card__badge--secondary': facture.statut === 'annulee'
+                        'detail-facture-card__badge--danger': packing.statut === 'impayee',
+                        'detail-facture-card__badge--warn': packing.statut === 'partielle',
+                        'detail-facture-card__badge--success': packing.statut === 'payee',
+                        'detail-facture-card__badge--secondary': packing.statut === 'annulee'
                     }"
-                >{{ facture.statut_label }}</span>
+                >{{ packing.statut_label || packing.statut }}</span>
                 <div class="detail-facture-card__actions">
                     <p-button
                         icon="pi pi-money-bill"
@@ -124,8 +124,8 @@
                         [text]="true"
                         [rounded]="true"
                         pTooltip="Payer"
-                        (click)="openSlideoverPaiement(facture)"
-                        *ngIf="canCreateVersement && facture.statut !== 'payee'"
+                        (click)="openSlideoverPaiement(packing)"
+                        *ngIf="canCreateVersement && canPay(packing)"
                     />
                     <p-button
                         icon="pi pi-list"
@@ -133,17 +133,8 @@
                         [text]="true"
                         [rounded]="true"
                         pTooltip="Historique"
-                        (click)="openHistorique(facture)"
+                        (click)="openHistorique(packing)"
                         *ngIf="canReadVersement"
-                    />
-                    <p-button
-                        icon="pi pi-trash"
-                        severity="danger"
-                        [text]="true"
-                        [rounded]="true"
-                        pTooltip="Supprimer"
-                        (click)="confirmDeleteFacture(facture)"
-                        *ngIf="canDeleteFacture && facture.montant_verse === 0"
                     />
                 </div>
             </div>
@@ -151,15 +142,15 @@
     </div>
 </div>
 
-<!-- Desktop: table des factures -->
+<!-- Desktop: table des packings -->
 <div class="card tableau-card detail-tableau-desktop">
     <p-table
-        [value]="factures()"
+        [value]="packings()"
         [rows]="10"
         [paginator]="true"
         [rowHover]="true"
         dataKey="id"
-        currentPageReportTemplate="{first} à {last} sur {totalRecords} factures"
+        currentPageReportTemplate="{first} a {last} sur {totalRecords} packings"
         [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]"
         [loading]="loading"
@@ -167,28 +158,28 @@
     >
         <ng-template #caption>
             <div class="table-caption">
-                <h5 class="table-caption__title">Factures</h5>
+                <h5 class="table-caption__title">Packings</h5>
             </div>
         </ng-template>
         <ng-template #header>
             <tr>
                 <th pSortableColumn="reference">
-                    <span class="col-header">Référence <p-sortIcon field="reference" /></span>
+                    <span class="col-header">Reference <p-sortIcon field="reference" /></span>
                 </th>
                 <th pSortableColumn="date">
                     <span class="col-header">Date <p-sortIcon field="date" /></span>
                 </th>
-                <th pSortableColumn="total_rouleaux" class="text-right">
-                    <span class="col-header justify-end">Rouleaux <p-sortIcon field="total_rouleaux" /></span>
+                <th pSortableColumn="nb_rouleaux" class="text-right">
+                    <span class="col-header justify-end">Rouleaux <p-sortIcon field="nb_rouleaux" /></span>
                 </th>
                 <th class="text-right">
                     <span class="col-header justify-end">Prix/rouleau</span>
                 </th>
-                <th pSortableColumn="montant_total" class="text-right">
-                    <span class="col-header justify-end">A payer <p-sortIcon field="montant_total" /></span>
+                <th pSortableColumn="montant" class="text-right">
+                    <span class="col-header justify-end">A payer <p-sortIcon field="montant" /></span>
                 </th>
                 <th pSortableColumn="montant_verse" class="text-right">
-                    <span class="col-header justify-end">Versé <p-sortIcon field="montant_verse" /></span>
+                    <span class="col-header justify-end">Verse <p-sortIcon field="montant_verse" /></span>
                 </th>
                 <th class="text-right">
                     <span class="col-header justify-end">Restant</span>
@@ -199,23 +190,23 @@
                 <th style="width: 10rem"></th>
             </tr>
         </ng-template>
-        <ng-template #body let-facture>
+        <ng-template #body let-packing>
             <tr>
-                <td class="font-semibold">{{ getReferenceShort(facture.reference) }}</td>
-                <td class="cell-secondary font-semibold">{{ formatDateDisplay(facture.date) }}</td>
-                <td class="text-right cell-mono font-semibold">{{ facture.total_rouleaux }}</td>
-                <td class="text-right cell-mono font-semibold">{{  facture.prix_par_rouleau | money :'GNF'}}</td>
-                <td class="text-right cell-mono font-semibold">{{ facture.montant_total | money :'GNF'}}</td>
-                <td class="text-right cell-mono cell-success font-semibold">{{  facture.montant_verse | money :'GNF'}}</td>
-                <td class="text-right cell-mono cell-bold">{{ facture.montant_restant | money :'GNF'}}</td>
+                <td class="font-semibold">{{ packing.reference }}</td>
+                <td class="cell-secondary font-semibold">{{ formatDateDisplay(packing.date) }}</td>
+                <td class="text-right cell-mono font-semibold">{{ packing.nb_rouleaux }}</td>
+                <td class="text-right cell-mono font-semibold">{{ packing.prix_par_rouleau | money:'GNF' }}</td>
+                <td class="text-right cell-mono font-semibold">{{ packing.montant | money:'GNF' }}</td>
+                <td class="text-right cell-mono cell-success font-semibold">{{ packing.montant_verse | money:'GNF' }}</td>
+                <td class="text-right cell-mono cell-bold">{{ packing.montant_restant | money:'GNF' }}</td>
                 <td class="text-center">
                     <span class="status-badge" [ngClass]="{
-                        'status-badge--danger': facture.statut === 'impayee',
-                        'status-badge--warn': facture.statut === 'partielle',
-                        'status-badge--success': facture.statut === 'payee',
-                        'status-badge--secondary': facture.statut === 'annulee'
+                        'status-badge--danger': packing.statut === 'impayee',
+                        'status-badge--warn': packing.statut === 'partielle',
+                        'status-badge--success': packing.statut === 'payee',
+                        'status-badge--secondary': packing.statut === 'annulee'
                     }">
-                        {{ facture.statut_label }}
+                        {{ packing.statut_label || packing.statut }}
                     </span>
                 </td>
                 <td>
@@ -225,9 +216,9 @@
                             severity="secondary"
                             [text]="true"
                             [rounded]="true"
-                            pTooltip="Payer"
-                            (click)="openSlideoverPaiement(facture)"
-                            *ngIf="canCreateVersement && facture.statut !== 'payee'"
+                            pTooltip="Ajouter versement"
+                            (click)="openSlideoverPaiement(packing)"
+                            *ngIf="canCreateVersement && canPay(packing)"
                         />
                         <p-button
                             icon="pi pi-list"
@@ -235,17 +226,8 @@
                             [text]="true"
                             [rounded]="true"
                             pTooltip="Historique versements"
-                            (click)="openHistorique(facture)"
+                            (click)="openHistorique(packing)"
                             *ngIf="canReadVersement"
-                        />
-                        <p-button
-                            icon="pi pi-trash"
-                            severity="secondary"
-                            [text]="true"
-                            [rounded]="true"
-                            pTooltip="Supprimer"
-                            (click)="confirmDeleteFacture(facture)"
-                            *ngIf="canDeleteFacture && facture.montant_verse === 0"
                         />
                     </div>
                 </td>
@@ -256,7 +238,7 @@
                 <td colspan="9">
                     <div class="empty-state">
                         <i class="pi pi-inbox"></i>
-                        <span>Aucune facture pour ce prestataire</span>
+                        <span>Aucun packing pour ce prestataire</span>
                     </div>
                 </td>
             </tr>
@@ -277,15 +259,15 @@
     [dismissableMask]="false"
     [closeOnEscape]="false"
 >
-    <div class="flex flex-col gap-4" *ngIf="selectedFacture">
+    <div class="flex flex-col gap-4" *ngIf="selectedPacking">
         <div class="preview-summary">
-            <span class="font-bold">{{ getReferenceShort(selectedFacture.reference) }}</span>
+            <span class="font-bold">{{ selectedPacking.reference }}</span>
             <span class="preview-summary__sep"></span>
-            <span>Total : <strong>{{  selectedFacture.montant_total | money :'GNF'}}</strong></span>
+            <span>Total : <strong>{{ selectedPacking.montant | money:'GNF' }}</strong></span>
             <span class="preview-summary__sep"></span>
-            <span class="cell-success">Versé : <strong>{{  selectedFacture.montant_verse | money :'GNF'}}</strong></span>
+            <span class="cell-success">Verse : <strong>{{ selectedPacking.montant_verse | money:'GNF' }}</strong></span>
             <span class="preview-summary__sep"></span>
-            <span class="font-bold" style="color: #d97706">Restant : {{ selectedFacture.montant_restant | money :'GNF'}}</span>
+            <span class="font-bold" style="color: #d97706">Restant : {{ selectedPacking.montant_restant | money:'GNF' }}</span>
         </div>
 
         <div class="flex flex-col gap-4">
@@ -302,11 +284,11 @@
             </div>
 
             <div class="mt-4">
-                <label class="block font-bold mb-2">Montant à verser</label>
+                <label class="block font-bold mb-2">Montant a verser</label>
                 <p-inputnumber
                     [(ngModel)]="versementData.montant"
                     [min]="1"
-                    [max]="selectedFacture.montant_restant"
+                    [max]="selectedPacking.montant_restant"
                     suffix=" GNF"
                     [useGrouping]="true"
                     locale="fr-FR"
@@ -314,6 +296,17 @@
                     styleClass="w-full"
                 />
                 <small class="text-red-500" *ngIf="versementSubmitted && !versementData.montant">Montant requis.</small>
+            </div>
+
+            <div class="mt-4">
+                <label class="block font-bold mb-2">Notes (optionnel)</label>
+                <textarea
+                    pTextarea
+                    [(ngModel)]="versementData.notes"
+                    rows="2"
+                    class="w-full"
+                    placeholder="Remarque..."
+                ></textarea>
             </div>
         </div>
     </div>
@@ -341,16 +334,16 @@
 
     <div *ngIf="historiqueData" class="flex flex-col gap-4">
         <div class="preview-summary">
-            <span class="font-bold text-lg">{{ getReferenceShort(historiqueData.reference) }}</span>
+            <span class="font-bold text-lg">{{ historiqueData.packing.reference }}</span>
             <span class="preview-summary__sep"></span>
-            <span>Total: <strong>{{ formatCurrency(historiqueData.montant_total) }}</strong></span>
+            <span>Total: <strong>{{ formatCurrency(historiqueData.packing.montant) }}</strong></span>
             <span class="preview-summary__sep"></span>
-            <span class="cell-success">Versé: <strong>{{ formatCurrency(historiqueData.montant_verse) }}</strong></span>
+            <span class="cell-success">Verse: <strong>{{ formatCurrency(historiqueData.packing.montant_verse) }}</strong></span>
             <span class="preview-summary__sep"></span>
-            <span class="cell-bold">Restant: {{ formatCurrency(historiqueData.montant_restant) }}</span>
+            <span class="cell-bold">Restant: {{ formatCurrency(historiqueData.packing.montant_restant) }}</span>
             <span class="ml-auto">
-                <span class="status-badge" [ngClass]="historiqueData.is_soldee ? 'status-badge--success' : 'status-badge--warn'">
-                    {{ historiqueData.is_soldee ? 'Soldé' : 'En cours' }}
+                <span class="status-badge" [ngClass]="historiqueData.packing.statut === 'payee' ? 'status-badge--success' : 'status-badge--warn'">
+                    {{ historiqueData.packing.statut === 'payee' ? 'Solde' : 'En cours' }}
                 </span>
             </span>
         </div>
@@ -372,7 +365,7 @@
                     <td>{{ versement.mode_paiement_label }}</td>
                     <td class="cell-secondary">{{ versement.notes || '-' }}</td>
                     <td class="text-center" *ngIf="canDeleteVersement">
-                        <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" pTooltip="Supprimer" (click)="confirmDeleteVersement(historiqueData!.facture_id, versement)" />
+                        <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" pTooltip="Supprimer" (click)="confirmDeleteVersement(historiqueData!.packing.id, versement)" />
                     </td>
                 </tr>
             </ng-template>
@@ -380,7 +373,7 @@
 
         <div *ngIf="historiqueData.versements.length === 0" class="empty-state">
             <i class="pi pi-inbox"></i>
-            <span>Aucun versement enregistré</span>
+            <span>Aucun versement enregistre</span>
         </div>
     </div>
 

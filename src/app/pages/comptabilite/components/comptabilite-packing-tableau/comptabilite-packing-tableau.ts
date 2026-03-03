@@ -1,47 +1,31 @@
-import { Component, OnInit, Output, EventEmitter, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { MessageService, MenuItem } from 'primeng/api';
+import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
-import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { SkeletonModule } from 'primeng/skeleton';
+import { MenuModule } from 'primeng/menu';
+import { RippleModule } from 'primeng/ripple';
 
-import { InputNumberModule } from 'primeng/inputnumber';
-
-import { FacturePaiementService } from '@/services/comptabilite/facture-paiement/facture-paiement.service';
+import { PackingService } from '@/services/packing/packing.service';
+import { Packing } from '@/models/packing.model';
 import {
   ComptabilitePrestataire,
   ComptabiliteSummary,
   ComptabiliteFilters,
-  PreviewFacturePacking,
-  StoreFacturePackingDto,
 } from '@/models/facture-packing.model';
-import { pipe } from 'rxjs';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
-
-interface Column {
-  field: string;
-  header: string;
-}
-
-interface ExportColumn {
-  title: string;
-  dataKey: string;
-}
+import { UsineContextService } from '@/services/usine/usine-context.service';
 
 @Component({
   selector: 'app-comptabilite-packing-tableau',
@@ -50,24 +34,20 @@ interface ExportColumn {
   standalone: true,
   imports: [
     CommonModule,
-    TableModule,
     FormsModule,
+    TableModule,
     ButtonModule,
-    RippleModule,
     ToastModule,
-    ToolbarModule,
     InputTextModule,
     SelectModule,
-    DialogModule,
     TagModule,
     InputIconModule,
     IconFieldModule,
-    ConfirmDialogModule,
     DatePickerModule,
-    TextareaModule,
     TooltipModule,
-    InputNumberModule,
-    ToggleSwitchModule,
+    SkeletonModule,
+    MenuModule,
+    RippleModule,
     PhoneFormatPipe,
   ],
   providers: [MessageService],
@@ -75,222 +55,198 @@ interface ExportColumn {
 export class ComptabilitePackingTableau implements OnInit {
   @Output() dataChanged = new EventEmitter<ComptabiliteFilters>();
 
-  filterFields: string[] = ['prestataire_nom', 'prestataire_phone', 'montant_total_du'];
+  private allPrestataires = signal<ComptabilitePrestataire[]>([]);
 
-  prestataires = signal<ComptabilitePrestataire[]>([]);
-  selectedPrestataires: ComptabilitePrestataire[] | null = null;
-  comptaSummary: ComptabiliteSummary | null = null;
-  loading: boolean = false;
-
-  // Filtres période
+  searchQuery = signal<string>('');
+  filtreStatut = signal<string | null>(null);
   filtrePeriodeDebut: Date | null = null;
   filtrePeriodeFin: Date | null = null;
+  loading = false;
 
-  // Filtre statut
-  filtreStatut: string | null = null;
+  mobileFilterMenuItems: MenuItem[] = [];
+  private hasInitializedUsineWatcher = false;
+
   statutOptions = [
     { label: 'Tous', value: null },
-    { label: 'Impayé', value: 'impaye' },
+    { label: 'Impaye', value: 'impaye' },
     { label: 'Partiel', value: 'partiel' },
-    { label: 'Soldé', value: 'solde' },
+    { label: 'Solde', value: 'solde' },
   ];
 
-  selectedItem: ComptabilitePrestataire | null = null;
+  filteredPrestataires = computed(() => {
+    const statut = this.filtreStatut();
+    const query = this.searchQuery().toLowerCase().trim();
+    let list = this.allPrestataires();
 
-  // Dialog prévisualisation
-  previewDialog: boolean = false;
-  previewData: PreviewFacturePacking | null = null;
-  previewLoading: boolean = false;
-
-  // Facturation
-  facturerLoading: boolean = false;
-
-  @ViewChild('dt') dt!: Table;
-  exportColumns!: ExportColumn[];
-  cols!: Column[];
-
-  // Mobile list
-  mobileSearchTerm = '';
-  readonly mobilePageSize = 10;
-  mobileVisibleCount = this.mobilePageSize;
+    if (statut) {
+      list = list.filter(p => p.statut === statut);
+    }
+    if (!query) return list;
+    return list.filter(p =>
+      (p.prestataire_nom || '').toLowerCase().includes(query) ||
+      (p.prestataire_phone || '').replace(/\s/g, '').includes(query.replace(/\s/g, '')),
+    );
+  });
 
   constructor(
     private router: Router,
-    private factureService: FacturePaiementService,
+    private packingService: PackingService,
     private messageService: MessageService,
-  ) {}
+    private usineContext: UsineContextService,
+  ) {
+    effect(() => {
+      this.usineContext.currentUsineId();
+      this.usineContext.isConsolidated();
 
-  ngOnInit() {
+      if (!this.hasInitializedUsineWatcher) {
+        this.hasInitializedUsineWatcher = true;
+        return;
+      }
+
+      this.loadComptabilite();
+    });
+  }
+
+  ngOnInit(): void {
     this.loadComptabilite();
-    this.initColumns();
-  }
-
-  initColumns() {
-    this.cols = [
-      { field: 'prestataire_nom', header: 'Prestataire' },
-      { field: 'prestataire_phone', header: 'Téléphone' },
-      { field: 'nb_packings_non_factures', header: 'Non facturés' },
-      { field: 'montant_non_facture', header: 'Mnt non facturé' },
-      { field: 'montant_facture', header: 'Facturé' },
-      { field: 'montant_verse', header: 'Versé' },
-      { field: 'montant_restant_facture', header: 'Reste facture' },
-      { field: 'montant_total_du', header: 'Total dû' },
+    this.mobileFilterMenuItems = [
+      { label: 'Tous',    icon: 'pi pi-list',         command: () => this.filtreStatut.set(null) },
+      { label: 'Impaye',  icon: 'pi pi-times-circle', command: () => this.filtreStatut.set('impaye') },
+      { label: 'Partiel', icon: 'pi pi-clock',        command: () => this.filtreStatut.set('partiel') },
+      { label: 'Solde',   icon: 'pi pi-check-circle', command: () => this.filtreStatut.set('solde') },
     ];
-
-    this.exportColumns = this.cols.map((col) => ({
-      title: col.header,
-      dataKey: col.field,
-    }));
   }
 
-  loadComptabilite() {
+  goBack(): void { this.router.navigate(['/']); }
+
+  loadComptabilite(): void {
     this.loading = true;
-    const filters: any = {};
+    const filters: ComptabiliteFilters = {};
+    if (this.filtrePeriodeDebut) filters.date_debut = this.formatDate(this.filtrePeriodeDebut);
+    if (this.filtrePeriodeFin) filters.date_fin = this.formatDate(this.filtrePeriodeFin);
 
-    if (this.filtrePeriodeDebut) {
-      filters.date_debut = this.formatDate(this.filtrePeriodeDebut);
-    }
-    if (this.filtrePeriodeFin) {
-      filters.date_fin = this.formatDate(this.filtrePeriodeFin);
-    }
-
-    this.factureService.getComptabilite(filters).subscribe({
+    this.packingService.getPackings({
+      date_debut: filters.date_debut,
+      date_fin: filters.date_fin,
+      per_page: 500,
+    }).subscribe({
       next: (response) => {
-        this.comptaSummary = new ComptabiliteSummary(response.data);
-        this.applyStatutFilter();
+        const packings: Packing[] = 'data' in response && Array.isArray(response.data)
+          ? response.data as Packing[]
+          : ((response as any).data?.data ?? []) as Packing[];
+
+        const summary = this.buildSummaryFromPackings(packings, filters);
+        this.allPrestataires.set(summary.prestataires);
         this.loading = false;
         this.dataChanged.emit(filters);
       },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger la comptabilité',
-          life: 3000,
-        });
-        this.loading = false;
-      },
-    });
-  }
-
-  applyStatutFilter() {
-    if (!this.comptaSummary) return;
-    this.mobileVisibleCount = this.mobilePageSize;
-    if (this.filtreStatut) {
-      this.prestataires.set(
-        this.comptaSummary.prestataires.filter(p => p.statut === this.filtreStatut)
-      );
-    } else {
-      this.prestataires.set(this.comptaSummary.prestataires);
-    }
-  }
-
-  /** Appelé depuis le parent (liste mobile) pour le filtre statut */
-  applyMobileStatut(value: string | null) {
-    this.filtreStatut = value;
-    this.applyStatutFilter();
-  }
-
-  exportCSV() {
-    this.dt.exportCSV();
-  }
-
-  onGlobalFilter(table: Table, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
-  openPreview(item: ComptabilitePrestataire) {
-    const periodeDebut = this.filtrePeriodeDebut ? this.formatDate(this.filtrePeriodeDebut) : '2000-01-01';
-    const periodeFin = this.filtrePeriodeFin ? this.formatDate(this.filtrePeriodeFin) : '2099-12-31';
-
-    this.selectedItem = item;
-    this.previewDialog = true;
-    this.previewLoading = true;
-    this.previewData = null;
-
-    this.factureService.getPreview(item.prestataire_id, periodeDebut, periodeFin).subscribe({
-      next: (response) => {
-        this.previewData = new PreviewFacturePacking(response.data);
-        this.previewLoading = false;
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger la prévisualisation',
-          life: 3000,
-        });
-        this.previewLoading = false;
-        this.previewDialog = false;
-      },
-    });
-  }
-
-  // ========================= Facturation =========================
-
-  facturerNonFactures() {
-    if (!this.selectedItem || this.facturerLoading) return;
-
-    this.facturerLoading = true;
-
-    const periodeDebut = this.filtrePeriodeDebut ? this.formatDate(this.filtrePeriodeDebut) : '2000-01-01';
-    const periodeFin = this.filtrePeriodeFin ? this.formatDate(this.filtrePeriodeFin) : '2099-12-31';
-
-    const dto: StoreFacturePackingDto = {
-      prestataire_id: this.selectedItem.prestataire_id,
-      date_debut: periodeDebut,
-      date_fin: periodeFin,
-    };
-
-    this.factureService.createFacture(dto).subscribe({
-      next: (response) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: `Facture ${response.data.reference} créée`,
-          life: 3000,
-        });
-        this.facturerLoading = false;
-        if (this.selectedItem) {
-          this.selectedItem.nb_packings_non_factures = 0;
-          this.selectedItem.montant_non_facture = 0;
-        }
-        this.loadComptabilite();
-      },
       error: (error) => {
-        const msg = error?.error?.message || 'Impossible de créer la facture';
+        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: msg,
+          detail: error?.error?.message || 'Impossible de charger les packings.',
           life: 5000,
         });
-        this.facturerLoading = false;
       },
     });
   }
 
-  formatDate(date: any): string {
-    if (!date) return '';
-    if (typeof date === 'string') return date;
-    const d = new Date(date);
-    return d.toISOString().split('T')[0];
+  private buildSummaryFromPackings(packings: Packing[], filters: ComptabiliteFilters): ComptabiliteSummary {
+    type Aggregate = {
+      prestataire_id: number;
+      prestataire_nom: string;
+      prestataire_phone: string;
+      derniere_date: string | null;
+      montant_facture: number;
+      montant_verse: number;
+      montant_restant_facture: number;
+    };
+
+    const byPrestataire = new Map<number, Aggregate>();
+
+    for (const packing of packings) {
+      const prestataireId = packing.prestataire_id;
+      if (!prestataireId) continue;
+
+      const fullName = packing.prestataire_nom
+        ?? `${packing.prestataire?.prenom ?? ''} ${packing.prestataire?.nom ?? ''}`.trim()
+        ?? `Prestataire #${prestataireId}`;
+      const phone = packing.prestataire?.phone ?? '';
+      const date = typeof packing.date === 'string' ? packing.date : (packing.date?.toString() ?? null);
+
+      const current = byPrestataire.get(prestataireId) ?? {
+        prestataire_id: prestataireId,
+        prestataire_nom: fullName,
+        prestataire_phone: phone,
+        derniere_date: null,
+        montant_facture: 0,
+        montant_verse: 0,
+        montant_restant_facture: 0,
+      };
+
+      current.montant_facture += packing.montant ?? 0;
+      current.montant_verse += packing.montant_verse ?? 0;
+      current.montant_restant_facture += packing.montant_restant ?? 0;
+      current.derniere_date = this.getMostRecentDate(current.derniere_date, date);
+
+      byPrestataire.set(prestataireId, current);
+    }
+
+    const prestataires = Array.from(byPrestataire.values()).map((item) => new ComptabilitePrestataire({
+      prestataire_id: item.prestataire_id,
+      prestataire_nom: item.prestataire_nom,
+      prestataire_phone: item.prestataire_phone,
+      prestataire_type: '',
+      nb_packings_non_factures: 0,
+      montant_non_facture: 0,
+      nb_factures_en_cours: 0,
+      montant_facture: item.montant_facture,
+      montant_verse: item.montant_verse,
+      montant_restant_facture: item.montant_restant_facture,
+      montant_total_du: item.montant_restant_facture,
+      derniere_date: item.derniere_date,
+    }));
+
+    const totalFacture = prestataires.reduce((sum, p) => sum + p.montant_facture, 0);
+    const totalVerse = prestataires.reduce((sum, p) => sum + p.montant_verse, 0);
+    const totalRestant = prestataires.reduce((sum, p) => sum + p.montant_restant_facture, 0);
+
+    return new ComptabiliteSummary({
+      date_debut: filters.date_debut ?? null,
+      date_fin: filters.date_fin ?? null,
+      nb_prestataires: prestataires.length,
+      total_non_facture: 0,
+      total_facture: totalFacture,
+      total_verse: totalVerse,
+      total_restant_facture: totalRestant,
+      montant_global_du: totalRestant,
+      prestataires,
+    });
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-    }).format(value) + ' GNF';
+  private getMostRecentDate(current: string | null, candidate: string | null): string | null {
+    if (!candidate) return current;
+    if (!current) return candidate;
+    const currentTime = new Date(current).getTime();
+    const candidateTime = new Date(candidate).getTime();
+    if (Number.isNaN(currentTime)) return candidate;
+    if (Number.isNaN(candidateTime)) return current;
+    return candidateTime > currentTime ? candidate : current;
   }
 
-  formatDateDisplay(dateStr: string | null | undefined): string {
-    if (dateStr == null || dateStr === '') return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR');
+  setStatutFilter(value: string | null): void {
+    this.filtreStatut.set(value);
   }
 
-  goToDetail(item: ComptabilitePrestataire) {
+  clearFilters(): void {
+    this.filtrePeriodeDebut = null;
+    this.filtrePeriodeFin = null;
+    this.filtreStatut.set(null);
+    this.loadComptabilite();
+  }
+
+  goToDetail(item: ComptabilitePrestataire): void {
     this.router.navigate(['/comptabilite/comptabilite-packing-detail', item.prestataire_id], {
       queryParams: {
         prestataire_nom: item.prestataire_nom,
@@ -299,51 +255,35 @@ export class ComptabilitePackingTableau implements OnInit {
     });
   }
 
+  getStatutLabel(statut: string): string {
+    return statut === 'impaye' ? 'Impaye' : statut === 'partiel' ? 'Partiel' : 'Solde';
+  }
+
+  getStatutSeverity(statut: string): 'success' | 'warn' | 'danger' | 'secondary' {
+    if (statut === 'solde') return 'success';
+    if (statut === 'partiel') return 'warn';
+    return 'danger';
+  }
+
   getInitials(nomComplet?: string): string {
-    if (!nomComplet || !nomComplet.trim()) {
-      return '--';
-    }
-
+    if (!nomComplet?.trim()) return '--';
     const parts = nomComplet.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 1) {
-      return parts[0].slice(0, 2).toUpperCase();
-    }
-
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
   }
 
-  get mobileFilteredPrestataires(): ComptabilitePrestataire[] {
-    const list = this.prestataires();
-    const term = this.mobileSearchTerm.trim().toLowerCase();
-    if (!term) return list;
-    return list.filter(
-      (p) =>
-        (p.prestataire_nom || '').toLowerCase().includes(term) ||
-        (p.prestataire_phone || '').replace(/\s/g, '').includes(term.replace(/\s/g, ''))
-    );
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('fr-FR', { style: 'decimal', minimumFractionDigits: 0 }).format(value) + ' GNF';
   }
 
-  get mobileVisiblePrestataires(): ComptabilitePrestataire[] {
-    return this.mobileFilteredPrestataires.slice(0, this.mobileVisibleCount);
+  formatDateDisplay(dateStr: string | null | undefined): string {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('fr-FR');
   }
 
-  get canLoadMoreMobile(): boolean {
-    return this.mobileVisibleCount < this.mobileFilteredPrestataires.length;
-  }
-
-  onMobileSearchChange() {
-    this.mobileVisibleCount = this.mobilePageSize;
-  }
-
-  loadMoreMobile() {
-    this.mobileVisibleCount += this.mobilePageSize;
-  }
-
-  trackByPrestataireId(_index: number, p: ComptabilitePrestataire): number {
-    return p.prestataire_id;
-  }
-
-  getStatutLabel(statut: string): string {
-    return statut === 'impaye' ? 'Impayé' : statut === 'partiel' ? 'Partiel' : 'Soldé';
+  private formatDate(date: Date | string): string {
+    if (!date) return '';
+    if (typeof date === 'string') return date;
+    return date.toISOString().split('T')[0];
   }
 }
