@@ -97,8 +97,13 @@ export class PackingNew implements OnInit {
           life: 3000
         });
         this.loading = false;
-        // Redirection vers la liste apres creation
+        const createdPackingId = response?.data?.id;
         setTimeout(() => {
+          if (createdPackingId) {
+            this.router.navigate(['/packings/packings-edit', createdPackingId]);
+            return;
+          }
+
           this.router.navigate(['/packings']);
         }, 1000);
       },

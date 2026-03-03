@@ -14,6 +14,7 @@ import { SelectModule } from 'primeng/select';
 import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MenuModule } from 'primeng/menu';
+import { ToastModule } from 'primeng/toast';
 
 import { Prestataire, PrestataireType } from '@/models/prestataire.model';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
@@ -41,7 +42,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     SelectModule,
     ConfirmDialogModule,
     MenuModule,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    ToastModule
   ],
 })
 export class PrestatairesListe implements OnInit, OnDestroy {
@@ -297,7 +299,10 @@ export class PrestatairesListe implements OnInit, OnDestroy {
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
-              detail: 'Impossible de supprimer le prestataire'
+              detail: this.getApiErrorDetail(
+                error,
+                'Impossible de supprimer le prestataire'
+              )
             });
           }
         });
@@ -342,5 +347,41 @@ export class PrestatairesListe implements OnInit, OnDestroy {
       'fournisseur': 'danger'
     };
     return type ? severities[type] : 'secondary';
+  }
+
+  private getApiErrorDetail(error: unknown, fallback: string): string {
+    const validationMessages = this.extractValidationMessages(error);
+    if (validationMessages.length > 0) {
+      return validationMessages.join('; ');
+    }
+
+    const apiMessage = this.extractApiMessage(error);
+    if (apiMessage) {
+      return apiMessage;
+    }
+
+    return fallback;
+  }
+
+  private extractApiMessage(error: unknown): string | null {
+    const message = (error as { error?: { message?: unknown } })?.error?.message;
+    if (typeof message !== 'string') {
+      return null;
+    }
+
+    const trimmedMessage = message.trim();
+    return trimmedMessage.length > 0 ? trimmedMessage : null;
+  }
+
+  private extractValidationMessages(error: unknown): string[] {
+    const validationErrors = (error as { error?: { errors?: unknown } })?.error?.errors;
+    if (!validationErrors || typeof validationErrors !== 'object') {
+      return [];
+    }
+
+    return Object.values(validationErrors as Record<string, unknown>)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((message) => String(message).trim())
+      .filter((message) => message.length > 0);
   }
 }

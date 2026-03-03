@@ -13,6 +13,15 @@ import {
 } from '@/models/packing.model';
 import { environment } from 'src/environments/environment';
 
+export interface PackingStats {
+  period: string;
+  labels: string[];
+  payee: number[];
+  impayee: number[];
+  partielle?: number[];
+  partiellement_payee?: number[];
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -104,5 +113,11 @@ export class PackingService {
 
   deleteVersement(packingId: number, versementId: number): Observable<ApiResponse<null>> {
     return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${packingId}/versements/${versementId}`);
+  }
+
+  getStats(period: string = 'this_week'): Observable<ApiResponse<PackingStats>> {
+    return this.http.get<ApiResponse<PackingStats>>(`${this.apiUrl}/stats`, {
+      params: { period },
+    });
   }
 }

@@ -19,6 +19,7 @@ export interface VehiculeParType {
 export interface DashboardStats {
     period: { key: string; from: string; to: string };
     prestataires: StatCard;
+    packings: StatCard;
     utilisateurs: StatCard;
     vehicules: StatCard;
     rouleaux_stock: StatCard;

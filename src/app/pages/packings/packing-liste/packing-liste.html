@@ -93,6 +93,7 @@
     ></button>
     <button
       pButton
+      appConsolidatedDisable
       label="Enregistrer"
       icon="pi pi-check"
       [loading]="versementSaving"
@@ -273,6 +274,7 @@
             @if (canCreateVersement && canPay(p)) {
               <button
                 pButton
+                appConsolidatedDisable
                 type="button"
                 icon="pi pi-wallet"
                 severity="success"
@@ -302,6 +304,7 @@
             @if (canEditPacking(p)) {
               <button
                 pButton
+                appConsolidatedDisable
                 type="button"
                 icon="pi pi-pen-to-square"
                 text
@@ -315,6 +318,7 @@
             @if (canCancelPacking(p)) {
               <button
                 pButton
+                appConsolidatedDisable
                 type="button"
                 icon="pi pi-ban"
                 severity="warn"
@@ -338,7 +342,7 @@
   </div>
 
   @if (canCreate && !mobilePaiementVisible && !mobileHistoriqueVisible) {
-    <button type="button" class="mobile-fab" aria-label="Nouveau packing" (click)="goNew()">
+    <button type="button" appConsolidatedDisable class="mobile-fab" aria-label="Nouveau packing" (click)="goNew()">
       <i class="pi pi-plus"></i>
     </button>
   }
@@ -428,7 +432,7 @@
             ></button>
           }
           @if (canCreate) {
-            <button pButton outlined icon="pi pi-plus" label="Nouveau packing" (click)="goNew()"></button>
+            <button pButton appConsolidatedDisable outlined icon="pi pi-plus" label="Nouveau packing" (click)="goNew()"></button>
           }
         </div>
       </div>
@@ -528,6 +532,7 @@
               @if (canEditPacking(p)) {
                 <button
                   pButton
+                  appConsolidatedDisable
                   type="button"
                   icon="pi pi-pen-to-square"
                   text
@@ -541,6 +546,7 @@
               @if (canCancelPacking(p)) {
                 <button
                   pButton
+                  appConsolidatedDisable
                   type="button"
                   icon="pi pi-ban"
                   severity="warn"
@@ -552,9 +558,10 @@
                   (click)="cancelPacking(p)"
                 ></button>
               }
-              @if (canDelete) {
+              @if (canDelete && p.statut === 'impayee') {
                 <button
                   pButton
+                  appConsolidatedDisable
                   type="button"
                   icon="pi pi-trash"
                   severity="danger"
