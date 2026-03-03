@@ -5,12 +5,13 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { UsineContextService } from '@/services/usine/usine-context.service';
-import { AccessibleUsine } from '@/models/usine.model';
+import { AccessibleUsine, UsineSubscriptionStatus } from '@/models/usine.model';
 
 interface UsineOption {
-  label: string;
-  value: number | null; // null = vue consolidée siège
-  icon:  string;
+  label:               string;
+  value:               number | null; // null = vue consolidée siège
+  icon:                string;
+  subscriptionStatus?: UsineSubscriptionStatus;
 }
 
 /**
@@ -61,6 +62,14 @@ interface UsineOption {
           <span class="usine-option">
             <i [class]="'pi ' + (opt?.icon ?? 'pi-building')"></i>
             {{ opt?.label }}
+            @if (opt?.subscriptionStatus) {
+              <span
+                class="usine-sub-badge"
+                [style.background]="subscriptionColor(opt.subscriptionStatus)"
+                [title]="subscriptionLabel(opt.subscriptionStatus)">
+                {{ subscriptionLabel(opt.subscriptionStatus) }}
+              </span>
+            }
           </span>
         </ng-template>
 
@@ -96,18 +105,51 @@ interface UsineOption {
       }
       .p-select-label { padding: 0.35rem 0.5rem; }
     }
+
+    .usine-sub-badge {
+      display:       inline-block;
+      padding:       0.05rem 0.4rem;
+      border-radius: 0.75rem;
+      font-size:     0.65rem;
+      font-weight:   600;
+      color:         #fff;
+      line-height:   1.4;
+      white-space:   nowrap;
+    }
   `],
 })
 export class AppUsineSelector {
   private readonly usineCtx = inject(UsineContextService);
 
+  // ── Helpers subscription_status ──────────────────────
+  subscriptionLabel(status: UsineSubscriptionStatus | undefined): string {
+    const labels: Record<UsineSubscriptionStatus, string> = {
+      active:    'Actif',
+      trial:     "Période d'essai",
+      suspended: 'Suspendu',
+      cancelled: 'Annulé',
+    };
+    return status ? (labels[status] ?? status) : '';
+  }
+
+  subscriptionColor(status: UsineSubscriptionStatus | undefined): string {
+    const colors: Record<UsineSubscriptionStatus, string> = {
+      active:    '#22c55e',
+      trial:     '#3b82f6',
+      suspended: '#f97316',
+      cancelled: '#ef4444',
+    };
+    return status ? (colors[status] ?? '#94a3b8') : '#94a3b8';
+  }
+
   // ── Options du sélecteur ─────────────────────────────
   readonly options = computed<UsineOption[]>(() => {
     const usines: AccessibleUsine[] = this.usineCtx.accessibleUsines();
     const opts: UsineOption[] = usines.map(u => ({
-      label: u.nom,
-      value: u.id,
-      icon:  'pi-building',
+      label:               u.nom,
+      value:               u.id,
+      icon:                'pi-building',
+      subscriptionStatus:  u.subscription_status,
     }));
 
     // Siège : option "Toutes les usines" en tête de liste

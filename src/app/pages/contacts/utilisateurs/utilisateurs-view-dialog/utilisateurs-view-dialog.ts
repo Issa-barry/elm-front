@@ -76,7 +76,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   readonly civiliteOptions: { label: string; value: Civilite }[] = (
     Object.entries(CIVILITE_LABELS) as [Civilite, string][]
   ).map(([value, label]) => ({ label, value }));
-  private readonly staffRoles = ['admin', 'manager', 'comptable', 'agent_vente', 'employe'];
+  private readonly staffRoles = ['admin_entreprise', 'manager', 'comptable', 'agent_vente', 'employe'];
 
   availableRoles: RoleOption[] = [];
   private rolesLoaded = false;
@@ -218,7 +218,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       },
       error: () => {
         this.availableRoles = [
-          { label: 'Admin', value: 'admin' },
+          { label: 'Admin Entreprise', value: 'admin_entreprise' },
           { label: 'Manager', value: 'manager' },
           { label: 'Comptable', value: 'comptable' },
           { label: 'Agent vente', value: 'agent_vente' },
@@ -304,7 +304,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
         }
 
         const user = response.data;
-        const usineRole = (payload.role === 'admin' || payload.role === 'manager') ? 'manager' : 'staff';
+        const usineRole = (payload.role === 'admin_entreprise' || payload.role === 'manager') ? 'manager' : 'staff';
         this.usineService.assignUser(currentUsineId, { user_id: user.id, role: usineRole }).subscribe({
           next: () => {
             this.saving = false;
@@ -480,7 +480,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   private getFirstStaffRoleValue(): string {
     const firstStaffRole = this.availableRoles.find((role) => this.staffRoles.includes(role.value));
     if (firstStaffRole) return firstStaffRole.value;
-    return this.staffRoles[0] ?? 'admin';
+    return this.staffRoles[0] ?? 'admin_entreprise';
   }
 
   private resetState(): void {

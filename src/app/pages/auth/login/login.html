@@ -135,25 +135,29 @@
                 <label for="password" class="block text-surface-600 dark:text-surface-300 text-sm mb-2 md:hidden">
                     Mot de passe
                 </label>
-                <p-iconfield class="w-full">
-                    <p-inputicon class="pi pi-lock" />
+                <div class="password-field w-full">
+                    <i class="pi pi-lock password-left-icon"></i>
                     <input
                         id="password"
                         [type]="showPassword() ? 'text' : 'password'"
                         pInputText
                         formControlName="password"
-                        class="w-full md:w-100"
+                        class="w-full password-input"
                         [class.ng-invalid]="isFieldInvalid('password') || hasFieldError('password')"
                         [class.ng-dirty]="isFieldInvalid('password') || hasFieldError('password')"
                         placeholder="Mot de passe"
                         [disabled]="isLoading()"
                     />
-                    <p-inputicon
-                        [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        [disabled]="isLoading()"
+                        [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
                         (click)="showPassword.set(!showPassword())"
-                        style="cursor: pointer"
-                    />
-                </p-iconfield>
+                    >
+                        <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                    </button>
+                </div>
 
                 @if (isFieldInvalid('password')) {
                     <small class="text-red-500 mt-1 block">
@@ -200,6 +204,63 @@
                     [loading]="isLoading()"
                 ></button>
             </div>
+
+            @if (showInstallCard()) {
+                <div class="install-app-card mt-4 mb-6 border border-surface-200 dark:border-surface-700 rounded-xl p-4 bg-surface-50 dark:bg-surface-800/50">
+                    <div class="flex items-start gap-3">
+                        <i class="pi pi-mobile text-primary text-lg mt-0.5"></i>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-surface-900 dark:text-surface-0 font-semibold">
+                                Installer FELLO
+                            </div>
+
+                            @if (canInstallDirectly()) {
+                                <p class="text-surface-600 dark:text-surface-300 text-sm mt-1">
+                                    Appuyez sur le bouton pour installer directement l'application.
+                                </p>
+                            } @else {
+                                <p class="text-surface-600 dark:text-surface-300 text-sm mt-1">
+                                    Appuyez sur le bouton. Si le navigateur bloque l'installation, les etapes s'afficheront.
+                                </p>
+                            }
+
+                            <button
+                                pButton
+                                pRipple
+                                type="button"
+                                icon="pi pi-download"
+                                label="Installer l'application"
+                                class="w-full sm:w-auto mt-3"
+                                [loading]="isInstalling()"
+                                [disabled]="isInstalling()"
+                                (click)="handleInstallClick()"
+                            ></button>
+
+                            @if (installFeedback()) {
+                                <p class="text-surface-600 dark:text-surface-300 text-sm mt-3">
+                                    {{ installFeedback() }}
+                                </p>
+                            }
+
+                            @if (showIosInstructions()) {
+                                <ol class="install-steps mt-3 text-sm text-surface-700 dark:text-surface-200">
+                                    <li>Appuyez sur <strong>Partager</strong> dans Safari.</li>
+                                    <li>Selectionnez <strong>Sur l'ecran d'accueil</strong>.</li>
+                                    <li>Validez avec <strong>Ajouter</strong>.</li>
+                                </ol>
+                            }
+
+                            @if (showManualInstallInstructions()) {
+                                <ol class="install-steps mt-3 text-sm text-surface-700 dark:text-surface-200">
+                                    <li>Ouvrez le menu du navigateur (trois points).</li>
+                                    <li>Choisissez <strong>Installer l'application</strong>.</li>
+                                    <li>Sinon choisissez <strong>Ajouter a l'ecran d'accueil</strong>.</li>
+                                </ol>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
         </form>
     </div>
 </div>

@@ -17,7 +17,7 @@ const ME_NON_SIEGE: MeResponse = {
 
 const ME_SIEGE: MeResponse = {
   user:              {},
-  roles:             ['admin'],
+  roles:             ['admin_entreprise'],
   permissions:       [],
   accessible_usines: [
     { id: 1, nom: 'Usine Alpha' },

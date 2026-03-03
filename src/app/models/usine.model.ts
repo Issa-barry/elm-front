@@ -1,6 +1,7 @@
 // ── Types ──────────────────────────────────────────────
-export type UsineType    = 'production' | 'distribution' | 'stockage' | 'mixte';
-export type UsineStatut  = 'actif' | 'inactif' | 'archive';
+export type UsineType               = 'production' | 'distribution' | 'stockage' | 'mixte';
+export type UsineStatut             = 'actif' | 'inactif' | 'archive';
+export type UsineSubscriptionStatus = 'active' | 'trial' | 'suspended' | 'cancelled';
 
 // ── Interfaces principales ──────────────────────────────
 export interface UsineRole {
@@ -10,30 +11,32 @@ export interface UsineRole {
 
 /** Usine telle que renvoyée dans accessible_usines (vue allégée) */
 export interface AccessibleUsine {
-  id:      number;
-  nom:     string;
-  code?:   string;
-  type?:   UsineType;
-  statut?: UsineStatut;
-  adresse?: string | null;
-  quartier?: string | null;
-  ville?: string | null;
-  pays?: string | null;
+  id:                   number;
+  nom:                  string;
+  code?:                string;
+  type?:                UsineType;
+  statut?:              UsineStatut;
+  subscription_status?: UsineSubscriptionStatus;
+  adresse?:             string | null;
+  quartier?:            string | null;
+  ville?:               string | null;
+  pays?:                string | null;
 }
 
 /** Usine complète (endpoint GET /usines) */
 export interface Usine {
-  id:        number;
-  nom:       string;
-  code?:     string;
-  type?:     UsineType;
-  statut?:   UsineStatut;
-  adresse?:  string | null;
-  quartier?: string | null;
-  ville?: string | null;
-  pays?: string | null;
-  created_at?: string;
-  updated_at?: string;
+  id:                   number;
+  nom:                  string;
+  code?:                string;
+  type?:                UsineType;
+  statut?:              UsineStatut;
+  subscription_status?: UsineSubscriptionStatus;
+  adresse?:             string | null;
+  quartier?:            string | null;
+  ville?:               string | null;
+  pays?:                string | null;
+  created_at?:          string;
+  updated_at?:          string;
 }
 
 /** Réponse complète de GET /auth/me (données étendues multi-usine) */

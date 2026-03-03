@@ -44,7 +44,7 @@ describe('AppProfileSidebar', () => {
             currentUser: signal({
                 nom_complet: 'Issa BARRY',
                 reference: 'USR-20260225-0001',
-                roles: ['admin'],
+                roles: ['admin_entreprise'],
             } as any),
             logout: jasmine.createSpy('logout').and.returnValue(of({})),
         };

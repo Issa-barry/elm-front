@@ -12,7 +12,7 @@
                     class="role-name-input"
                     (blur)="saveName()"
                     (keydown.enter)="saveName()"
-                    [disabled]="originalName === 'admin'"
+                    [disabled]="originalName === 'admin_entreprise'"
                 />
             </div>
             <p-skeleton *ngIf="loading" width="200px" height="2.2rem" />

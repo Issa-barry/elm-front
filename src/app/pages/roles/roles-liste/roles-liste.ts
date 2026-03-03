@@ -189,11 +189,11 @@ export class RolesListe implements OnInit {
   }
 
   deleteRole(item: RoleWithModules) {
-    if (item.role.name === 'admin') {
+    if (item.role.name === 'admin_entreprise') {
       this.messageService.add({
         severity: 'warn',
         summary: 'Attention',
-        detail: 'Le rôle admin ne peut pas être supprimé',
+        detail: 'Le rôle admin_entreprise ne peut pas être supprimé',
         life: 3000,
       });
       return;

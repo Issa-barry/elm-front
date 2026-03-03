@@ -648,7 +648,7 @@ export class ProduitsListe implements OnInit, OnDestroy {
             .map((role) => String(role).trim().toLowerCase())
             .filter((role) => role.length > 0);
 
-        return roles.includes('admin') || roles.includes('manager') || roles.includes('super-admin');
+        return roles.includes('admin_entreprise') || roles.includes('manager') || roles.includes('super-admin');
     }
 
     private resetMobilePagination(): void {

@@ -58,7 +58,7 @@ export const appRoutes: Routes = [
             {
                 path: 'roles',
                 canActivate: [authorizationGuard],
-                data: { breadcrumb: 'roles',  roles: ['admin'] },
+                data: { breadcrumb: 'roles',  roles: ['admin_entreprise'] },
                 loadChildren: () => import('@/pages/roles/roles.routes'),
             },
             {

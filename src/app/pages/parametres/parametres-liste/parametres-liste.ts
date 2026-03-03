@@ -28,7 +28,7 @@ export class ParametresListe {
 
   isAdmin = computed(() => {
     const roles = this.authService.currentUser()?.roles ?? [];
-    return roles.includes('admin') || roles.includes('super-admin');
+    return roles.includes('admin_entreprise') || roles.includes('super-admin');
   });
 
   constructor(private authService: AuthService) {}

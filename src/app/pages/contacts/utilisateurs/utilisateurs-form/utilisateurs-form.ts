@@ -107,7 +107,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
   ).map(([value, label]) => ({ label, value }));
 
   // RÃ´les rÃ©servÃ©s au staff (sÃ©lection manuelle)
-  private readonly STAFF_ROLES = ['admin', 'manager', 'comptable', 'agent_vente', 'employe'];
+  private readonly STAFF_ROLES = ['admin_entreprise', 'manager', 'comptable', 'agent_vente', 'employe'];
 
   // RÃ´les disponibles (chargÃ©s depuis l'API)
   availableRoles: { label: string; value: string }[] = [];
@@ -162,7 +162,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
       },
       error: () => {
         this.availableRoles = [
-          { label: 'Admin', value: 'admin' },
+          { label: 'Admin Entreprise', value: 'admin_entreprise' },
           { label: 'Manager', value: 'manager' },
           { label: 'Employe', value: 'employe' },
         ];
