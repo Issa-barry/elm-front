@@ -18,6 +18,8 @@ export interface PackingStats {
   labels: string[];
   payee: number[];
   impayee: number[];
+  partielle?: number[];
+  partiellement_payee?: number[];
 }
 
 export interface ApiResponse<T> {
