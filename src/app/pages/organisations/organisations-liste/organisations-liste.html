@@ -1,0 +1,147 @@
+<div class="card organisations-page">
+  <div class="flex align-items-center justify-content-between mb-4 gap-3 flex-wrap">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold">Organisations</h2>
+      <p class="m-0 text-color-secondary">Gestion des organisations (super admin).</p>
+    </div>
+    <button
+      *ngIf="canCreate()"
+      pButton
+      type="button"
+      icon="pi pi-plus"
+      label="Nouvelle organisation"
+      (click)="openCreateDialog()"
+    ></button>
+  </div>
+
+  <p-table [value]="organisations" [loading]="loading" dataKey="id" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nom</th>
+        <th>Code</th>
+        <th>Statut</th>
+        <th>Email</th>
+        <th>Telephone</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td>{{ item.nom }}</td>
+        <td>{{ item.code }}</td>
+        <td>{{ item.statut || '-' }}</td>
+        <td>{{ item.email || '-' }}</td>
+        <td>{{ item.phone || '-' }}</td>
+        <td class="text-right">
+          <div class="flex justify-content-end gap-2">
+            <button
+              pButton
+              pRipple
+              type="button"
+              class="p-button-text p-button-sm"
+              icon="pi pi-eye"
+              [routerLink]="['/organisations', item.id]"
+            ></button>
+            <button
+              *ngIf="canUpdate()"
+              pButton
+              pRipple
+              type="button"
+              class="p-button-text p-button-sm"
+              icon="pi pi-pencil"
+              (click)="openEditDialog(item)"
+            ></button>
+            <button
+              *ngIf="canDelete()"
+              pButton
+              pRipple
+              type="button"
+              class="p-button-text p-button-danger p-button-sm"
+              icon="pi pi-trash"
+              (click)="confirmDelete(item)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center text-color-secondary py-5">
+          Aucune organisation disponible.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="dialogTitle"
+  [modal]="true"
+  [style]="{ width: '42rem', maxWidth: '96vw' }"
+  [draggable]="false"
+  (onHide)="closeDialog()"
+>
+  <form class="grid" [formGroup]="organisationForm" (ngSubmit)="submitForm()">
+    <div class="col-12 md:col-6">
+      <label class="block mb-2">Nom *</label>
+      <input pInputText type="text" class="w-full" formControlName="nom" />
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block mb-2">Code *</label>
+      <input pInputText type="text" class="w-full" formControlName="code" />
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block mb-2">Email</label>
+      <input pInputText type="email" class="w-full" formControlName="email" />
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block mb-2">Telephone</label>
+      <input pInputText type="text" class="w-full" formControlName="phone" />
+    </div>
+
+    <div class="col-12 md:col-4">
+      <label class="block mb-2">Pays</label>
+      <input pInputText type="text" class="w-full" formControlName="pays" />
+    </div>
+
+    <div class="col-12 md:col-4">
+      <label class="block mb-2">Ville</label>
+      <input pInputText type="text" class="w-full" formControlName="ville" />
+    </div>
+
+    <div class="col-12 md:col-4">
+      <label class="block mb-2">Quartier</label>
+      <input pInputText type="text" class="w-full" formControlName="quartier" />
+    </div>
+
+    <div class="col-12">
+      <label class="block mb-2">Adresse</label>
+      <input pInputText type="text" class="w-full" formControlName="adresse" />
+    </div>
+
+    <div class="col-12">
+      <label class="block mb-2">Description</label>
+      <textarea pTextarea rows="3" class="w-full" formControlName="description"></textarea>
+    </div>
+
+    <div class="col-12 md:col-4">
+      <label class="block mb-2">Statut</label>
+      <select class="w-full p-inputtext" formControlName="statut">
+        <option *ngFor="let status of statutOptions" [value]="status.value">{{ status.label }}</option>
+      </select>
+    </div>
+
+    <div class="col-12 flex justify-content-end gap-2 mt-2">
+      <button pButton type="button" class="p-button-text" label="Annuler" (click)="closeDialog()"></button>
+      <button pButton type="submit" [loading]="saving" label="Enregistrer"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

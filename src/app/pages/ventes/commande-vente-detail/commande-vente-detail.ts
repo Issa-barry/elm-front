@@ -51,8 +51,8 @@ import {
 export class CommandeVenteDetail implements OnInit {
   commande: CommandeVente | null = null;
   loading = false;
-  canUpdate = false;
-  canEncaissement = false;
+  get canUpdate(): boolean { return this.authService.hasPermission('commandes.update'); }
+  get canEncaissement(): boolean { return this.authService.hasPermission('encaissements.create'); }
 
   encaissementDialogVisible = false;
   savingEncaissement = false;
@@ -68,8 +68,6 @@ export class CommandeVenteDetail implements OnInit {
     private authService: AuthService,
     private messageService: MessageService
   ) {
-    this.canUpdate = this.authService.hasPermission('commandes.update');
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
   }
 
   ngOnInit() {

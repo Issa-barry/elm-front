@@ -53,7 +53,7 @@ export class FactureVenteDetail2 implements OnInit {
   encaissementDialogVisible = false;
   encaissementForm!: FormGroup;
   modePaiementOptions = MODE_PAIEMENT_OPTIONS;
-  canEncaissement = false;
+  get canEncaissement(): boolean { return this.authService.hasPermission('encaissements.create'); }
   chevronRotated = false;
 
   constructor(
@@ -64,7 +64,6 @@ export class FactureVenteDetail2 implements OnInit {
     private authService: AuthService,
     private messageService: MessageService
   ) {
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
   }
 
   ngOnInit() {

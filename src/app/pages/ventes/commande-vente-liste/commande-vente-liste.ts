@@ -91,9 +91,9 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   vehiculeOptions: { label: string; value: number }[] = [];
   produitOptions: { label: string; value: number }[] = [];
 
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('commandes.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('commandes.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('commandes.delete'); }
 
   // Commission detail dialog
   selectedCommissionId = signal<number | null>(null);
@@ -145,9 +145,6 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     private router: Router,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.canCreate = this.authService.hasPermission('commandes.create');
-    this.canUpdate = this.authService.hasPermission('commandes.update');
-    this.canDelete = this.authService.hasPermission('commandes.delete');
   }
 
   @HostListener('window:resize')

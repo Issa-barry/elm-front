@@ -66,7 +66,7 @@ export class FactureVenteListe implements OnInit {
   modePaiementOptions = MODE_PAIEMENT_OPTIONS;
   selectedFacture: FactureVente | null = null;
 
-  canEncaissement = false;
+  get canEncaissement(): boolean { return this.authService.hasPermission('encaissements.create'); }
 
   statutOptions = [
     { label: 'Toutes', value: null },
@@ -84,7 +84,6 @@ export class FactureVenteListe implements OnInit {
     private messageService: MessageService,
     private router: Router
   ) {
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
   }
 
   goBack() {

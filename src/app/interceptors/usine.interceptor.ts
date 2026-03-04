@@ -5,76 +5,67 @@ import { catchError, throwError } from 'rxjs';
 
 import { UsineContextService } from '@/services/usine/usine-context.service';
 
-/** Routes qui ne doivent jamais recevoir le header X-Usine-Id */
+/** Routes that should never receive contextual site header. */
 const EXCLUDED_PATHS = ['/auth/login', '/auth/register'];
-
-const MUTATION_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
+/** Endpoints that do not accept consolidated HQ context ("all"). */
+const CONCRETE_SITE_ONLY_PATHS = ['/roles', '/permissions'];
 
 function isExcluded(url: string): boolean {
-  return EXCLUDED_PATHS.some(path => url.includes(path));
+  return EXCLUDED_PATHS.some((path) => url.includes(path));
+}
+
+function requiresConcreteSite(url: string): boolean {
+  return CONCRETE_SITE_ONLY_PATHS.some((path) => url.includes(path)) || /\/users\/\d+\/roles(?:\?|$|\/)/.test(url);
+}
+
+function resolveConcreteSiteId(siteCtx: UsineContextService): number | null {
+  return siteCtx.currentUsineId() ?? siteCtx.defaultUsineId() ?? siteCtx.accessibleUsines()[0]?.id ?? null;
 }
 
 /**
- * Intercepteur multi-usine :
- *  1. Bloque les mutations (POST/PUT/PATCH/DELETE) en vue consolidée siège.
- *  2. Injecte X-Usine-Id sur toutes les requêtes métier (sauf login/register
- *     et vue consolidée siège).
- *  3. Gère les erreurs usine :
- *     - 403 "Accès à cette usine non autorisé." → toast + fallback usine
- *     - 404 "Usine non trouvée ou inactive."    → toast + fallback usine
+ * Site context interceptor:
+ * - injects X-Site-Id from current site context
+ * - handles contextual 403/404 errors and falls back to default site
  */
 export const usineInterceptor: HttpInterceptorFn = (req, next) => {
-  const usineCtx      = inject(UsineContextService);
+  const siteCtx = inject(UsineContextService);
   const messageService = inject(MessageService);
 
-  // ── 1. Blocage des mutations en vue consolidée ──────
-  if (
-    usineCtx.isConsolidated() &&
-    MUTATION_METHODS.includes(req.method) &&
-    !isExcluded(req.url)
-  ) {
-    messageService.add({
-      severity: 'warn',
-      summary:  'Vue consolidée',
-      detail:   'Sélectionnez une usine pour effectuer des modifications.',
-      life:     4000,
-    });
-    return throwError(() => new Error('Opération non autorisée en vue consolidée.'));
-  }
-
-  // ── 2. Injection du header ──────────────────────────
   let outReq = req;
   if (!isExcluded(req.url)) {
-    const usineId = usineCtx.headerUsineId(); // null = vue consolidée → pas de header
-    if (usineId !== null) {
+    let siteHeaderValue = siteCtx.headerUsineId();
+    if (siteHeaderValue === 'all' && requiresConcreteSite(req.url)) {
+      siteHeaderValue = resolveConcreteSiteId(siteCtx);
+    }
+
+    if (siteHeaderValue !== null) {
       outReq = req.clone({
-        setHeaders: { 'X-Usine-Id': String(usineId) },
+        setHeaders: { 'X-Site-Id': String(siteHeaderValue) },
       });
     }
   }
 
-  // ── 2. Gestion des erreurs usine ────────────────────
   return next(outReq).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && !isExcluded(req.url)) {
-        const message: string = error.error?.message ?? '';
+        const message = typeof error.error?.message === 'string' ? error.error.message : '';
 
-        if (error.status === 403 && message === 'Accès à cette usine non autorisé.') {
+        if (error.status === 403 && (message.includes('site') || message.includes('Site') || message.includes('autorise'))) {
           messageService.add({
             severity: 'error',
-            summary:  'Accès refusé',
-            detail:   "Vous n'êtes pas autorisé à accéder à cette usine. Retour à l'usine par défaut.",
-            life:     5000,
+            summary: 'Acces refuse',
+            detail: 'Vous n\'etes pas autorise sur ce site. Retour au site par defaut.',
+            life: 5000,
           });
-          usineCtx.fallbackToDefault();
-        } else if (error.status === 404 && message === 'Usine non trouvée ou inactive.') {
+          siteCtx.fallbackToDefault();
+        } else if (error.status === 404 && (message.includes('site') || message.includes('Site') || message.includes('introuvable'))) {
           messageService.add({
             severity: 'warn',
-            summary:  'Usine introuvable',
-            detail:   "L'usine sélectionnée est introuvable ou inactive. Retour à l'usine par défaut.",
-            life:     5000,
+            summary: 'Site introuvable',
+            detail: 'Le site selectionne est introuvable. Retour au site par defaut.',
+            life: 5000,
           });
-          usineCtx.fallbackToDefault();
+          siteCtx.fallbackToDefault();
         }
       }
 

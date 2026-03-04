@@ -57,9 +57,9 @@ export class LivreurListe implements OnInit {
     { label: 'Inactifs', value: 'inactif' },
   ];
   loading = false;
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('livreurs.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('livreurs.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('livreurs.delete'); }
 
   mobileFilterMenuItems: MenuItem[] = [];
 
@@ -77,9 +77,6 @@ export class LivreurListe implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    this.canCreate = this.authService.hasPermission('livreurs.create');
-    this.canUpdate = this.authService.hasPermission('livreurs.update');
-    this.canDelete = this.authService.hasPermission('livreurs.delete');
   }
 
   ngOnInit(): void {

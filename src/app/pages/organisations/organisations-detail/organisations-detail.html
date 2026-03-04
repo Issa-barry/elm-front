@@ -1,0 +1,22 @@
+<div class="card organisation-detail-page">
+  <div class="flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <h2 class="m-0 text-2xl font-semibold">Detail organisation</h2>
+    <button pButton type="button" icon="pi pi-arrow-left" label="Retour" class="p-button-text" routerLink="/organisations"></button>
+  </div>
+
+  <div *ngIf="loading" class="text-color-secondary py-4">Chargement...</div>
+  <div *ngIf="!loading && errorMessage" class="text-red-500 py-4">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && organisation" class="grid">
+    <div class="col-12 md:col-6"><strong>Nom:</strong> {{ organisation.nom }}</div>
+    <div class="col-12 md:col-6"><strong>Code:</strong> {{ organisation.code }}</div>
+    <div class="col-12 md:col-6"><strong>Statut:</strong> {{ organisation.statut || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Email:</strong> {{ organisation.email || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Telephone:</strong> {{ organisation.phone || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Pays:</strong> {{ organisation.pays || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Ville:</strong> {{ organisation.ville || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Quartier:</strong> {{ organisation.quartier || '-' }}</div>
+    <div class="col-12"><strong>Adresse:</strong> {{ organisation.adresse || '-' }}</div>
+    <div class="col-12"><strong>Description:</strong> {{ organisation.description || '-' }}</div>
+  </div>
+</div>

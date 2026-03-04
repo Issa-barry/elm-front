@@ -9,6 +9,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@/interceptors/auth.interceptor';
 import { usineInterceptor } from '@/interceptors/usine.interceptor';
+import { apiErrorInterceptor } from '@/interceptors/api-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -20,7 +21,7 @@ export const appConfig: ApplicationConfig = {
         ),
         provideHttpClient(
             withFetch(),
-            withInterceptors([authInterceptor, usineInterceptor])
+            withInterceptors([authInterceptor, usineInterceptor, apiErrorInterceptor])
         ),
         MessageService,
         provideAnimationsAsync(),

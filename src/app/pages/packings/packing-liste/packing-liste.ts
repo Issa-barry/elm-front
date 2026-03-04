@@ -98,12 +98,12 @@ export class PackingListe implements OnInit {
   selectedQuickDateFilter: QuickDateFilter = 'none';
   lastNDaysValue: number | null = null;
   loading = false;
-  canCreate = false;
-  canViewFacture = false;
-  canUpdate = false;
-  canDelete = false;
-  canReadVersement = false;
-  canCreateVersement = false;
+  get canCreate(): boolean { return this.authService.hasPermission('packings.create'); }
+  get canViewFacture(): boolean { return this.authService.hasPermission('packings.read') || this.authService.hasPermission('packings.update'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('packings.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('packings.delete'); }
+  get canReadVersement(): boolean { return this.authService.hasPermission('versements.read'); }
+  get canCreateVersement(): boolean { return this.authService.hasPermission('versements.create'); }
   canDeleteVersement = false;
   private readonly mobileBreakpoint = 768;
 
@@ -197,13 +197,6 @@ export class PackingListe implements OnInit {
     private router: Router,
     private usineContext: UsineContextService,
   ) {
-    this.canCreate = this.authService.hasPermission('packings.create');
-    this.canViewFacture = this.authService.hasPermission('packings.read') || this.authService.hasPermission('packings.update');
-    this.canUpdate = this.authService.hasPermission('packings.update');
-    this.canDelete = this.authService.hasPermission('packings.delete');
-    this.canReadVersement = this.authService.hasPermission('versements.read');
-    this.canCreateVersement = this.authService.hasPermission('versements.create');
-    this.canDeleteVersement = false;
     this.skeletonCols = this.hasActionsColumn
       ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
       : [1, 2, 3, 4, 5, 6, 7, 8];

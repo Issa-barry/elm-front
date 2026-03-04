@@ -12,20 +12,20 @@ import {
 } from '@/models/usine.model';
 
 /**
- * Service HTTP pour tous les endpoints /usines.
+ * Service HTTP pour tous les endpoints /sites.
  *
  * Endpoints (source : contrat API backend) :
- *   GET    /usines
- *   POST   /usines                       (siÃ¨ge uniquement)
- *   PATCH  /usines/{id}                  (siÃ¨ge uniquement)
- *   PATCH  /usines/{id}/set-default
- *   POST   /usines/{usineId}/users       (siÃ¨ge uniquement)
- *   DELETE /usines/{usineId}/users/{userId} (siÃ¨ge uniquement)
+ *   GET    /sites
+ *   POST   /sites                       (siege uniquement)
+ *   PATCH  /sites/{id}                  (siege uniquement)
+ *   PATCH  /sites/{id}/set-default
+ *   POST   /sites/{siteId}/users        (siege uniquement)
+ *   DELETE /sites/{siteId}/users/{userId} (siege uniquement)
  */
 @Injectable({ providedIn: 'root' })
 export class UsineService {
   private readonly http    = inject(HttpClient);
-  private readonly apiBase = `${environment.apiUrl}/usines`;
+  private readonly apiBase = `${environment.apiUrl}/sites`;
 
   /** RÃ©cupÃ©rer toutes les usines accessibles */
   getAll(): Observable<ApiResponse<Usine[]>> {

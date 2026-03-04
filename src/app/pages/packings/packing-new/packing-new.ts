@@ -5,6 +5,7 @@ import { PrestataireService } from '@/services/prestataire/prestataire.service';
 import { PackingService } from '@/services/packing/packing.service';
 import { ParametresService } from '@/services/parametres/parametres.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
+import { PrestataireOfflineCacheService } from '@/services/prestataire/prestataire-offline-cache.service';
 import { Prestataire } from '@/models/prestataire.model';
 import { CreatePackingDto } from '@/models/packing.model';
 import { MessageService } from 'primeng/api';
@@ -22,9 +23,11 @@ export class PackingNew implements OnInit {
   prestataires: Prestataire[] = [];
   loading = false;
   defaultPrixRouleau = 0;
+  private readonly isBrowser = typeof navigator !== 'undefined';
 
   constructor(
     private prestataireService: PrestataireService,
+    private prestataireCache: PrestataireOfflineCacheService,
     private packingService: PackingService,
     private parametresService: ParametresService,
     private messageService: MessageService,
@@ -47,13 +50,46 @@ export class PackingNew implements OnInit {
 
   private loadPrestataires(): void {
     this.loading = true;
+    const usineId = this.usineContext.currentUsineId();
+    const cachedPrestataires = this.prestataireCache.getPrestataires(usineId);
+    const hasCachedPrestataires = cachedPrestataires.length > 0;
+
+    if (hasCachedPrestataires) {
+      this.prestataires = cachedPrestataires;
+    }
+
+    if (!this.isOnline()) {
+      this.loading = false;
+      if (!hasCachedPrestataires) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Mode hors ligne',
+          detail: 'Aucun machiniste synchronise. Connectez-vous pour charger la liste.',
+          life: 4000
+        });
+      }
+      return;
+    }
+
     this.prestataireService.getPrestataires().subscribe({
       next: (response) => {
-        this.prestataires = this.extractPrestataires(response);
+        const prestataires = this.extractPrestataires(response);
+        this.prestataires = prestataires;
+        this.prestataireCache.savePrestataires(prestataires, usineId);
         this.loading = false;
       },
       error: (err) => {
         console.error('Erreur lors du chargement des prestataires :', err);
+        if (hasCachedPrestataires) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Synchronisation',
+            detail: 'Connexion indisponible. Liste locale des machinistes utilisee.',
+            life: 3500
+          });
+          this.loading = false;
+          return;
+        }
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
@@ -75,6 +111,16 @@ export class PackingNew implements OnInit {
   }
 
   onSubmit(packingData: CreatePackingDto): void {
+    if (!this.isOnline()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Mode hors ligne',
+        detail: 'Creation impossible sans connexion. Les machinistes locaux restent consultables.',
+        life: 4000
+      });
+      return;
+    }
+
     this.loading = true;
 
     this.packingService.createPacking(packingData).subscribe({
@@ -158,5 +204,9 @@ export class PackingNew implements OnInit {
       .flatMap((value) => (Array.isArray(value) ? value : [value]))
       .map((message) => String(message).trim())
       .filter((message) => message.length > 0);
+  }
+
+  private isOnline(): boolean {
+    return !this.isBrowser || navigator.onLine;
   }
 }
