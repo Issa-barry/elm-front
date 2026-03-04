@@ -2100,18 +2100,18 @@ var AppMenu = class _AppMenu {
             visible: this.authService.hasAnyPermission(["produits.read", "produit.read", "products.read", "product.read"])
           }
         ]
-      },
-      {
-        label: "Compte",
-        icon: "pi pi-user",
-        items: [
-          {
-            label: "Mon profil",
-            icon: "pi pi-fw pi-id-card",
-            routerLink: ["/profile"]
-          }
-        ]
       }
+      // {
+      //   label: 'Compte',
+      //   icon: 'pi pi-user',
+      //   items: [
+      //     {
+      //       label: 'Mon profil',
+      //       icon: 'pi pi-fw pi-id-card',
+      //       routerLink: ['/profile'],
+      //     },
+      //   ],
+      // },
     ];
   }
   static \u0275fac = function AppMenu_Factory(__ngFactoryType__) {
@@ -4275,7 +4275,7 @@ var appRoutes = [
       },
       {
         path: "dashboard",
-        loadComponent: () => import("./chunk-UWSNMD3N.js").then((c) => c.EcommerceDashboard),
+        loadComponent: () => import("./chunk-RNUERAHN.js").then((c) => c.EcommerceDashboard),
         data: { breadcrumb: "dashboard" }
       },
       {
@@ -4322,7 +4322,7 @@ var appRoutes = [
       },
       {
         path: "parametres",
-        loadChildren: () => import("./chunk-LX5OGLGG.js"),
+        loadChildren: () => import("./chunk-XVCNAQCU.js"),
         data: { breadcrumb: "parametres" }
       },
       {
