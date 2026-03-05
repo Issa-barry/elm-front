@@ -223,20 +223,26 @@ export class VehiculeForm implements OnInit {
       : this.vehiculeService.create(this.buildFormData());
 
     req$.subscribe({
-      next: () => {
+      next: (response) => {
         if (this.isEditMode && this.vehicule) {
           this.reloadEditedVehicule(this.vehicule.id);
           return;
         }
 
         this.loading = false;
+        const createdId = response?.data?.id;
+        if (createdId) {
+          this.router.navigate(['/vehicules', createdId, 'edit']);
+          return;
+        }
+
         this.messageService.add({
-          severity: 'success',
-          summary: 'Succes',
-          detail: 'Vehicule cree avec succes.',
-          life: 3000,
+          severity: 'warn',
+          summary: 'Creation terminee',
+          detail: "Vehicule cree, mais l'identifiant est introuvable pour ouvrir l'edition.",
+          life: 4000,
         });
-        setTimeout(() => this.router.navigate(['/vehicules']), 1500);
+        this.router.navigate(['/vehicules']);
       },
       error: (err) => {
         this.loading = false;

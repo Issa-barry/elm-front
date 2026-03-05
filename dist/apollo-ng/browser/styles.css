@@ -599,9 +599,6 @@
   .pointer-events-none {
     pointer-events: none;
   }
-  .\!visible {
-    visibility: visible !important;
-  }
   .collapse {
     visibility: collapse;
   }
@@ -978,9 +975,6 @@
   .\!hidden {
     display: none !important;
   }
-  .\!inline {
-    display: inline !important;
-  }
   .block {
     display: block;
   }
@@ -1272,9 +1266,6 @@
   .flex-shrink-0 {
     flex-shrink: 0;
   }
-  .shrink {
-    flex-shrink: 1;
-  }
   .shrink-0 {
     flex-shrink: 0;
   }
@@ -1308,44 +1299,8 @@
   .animate-fadein {
     animation: fadein 0.15s linear;
   }
-  .animate-fadeindown {
-    animation: fadeindown 0.15s linear;
-  }
-  .animate-fadeinleft {
-    animation: fadeinleft 0.15s linear;
-  }
   .animate-fadeinright {
     animation: fadeinright 0.15s linear;
-  }
-  .animate-fadeinup {
-    animation: fadeinup 0.15s linear;
-  }
-  .animate-fadeout {
-    animation: fadeout 0.15s linear;
-  }
-  .animate-fadeoutdown {
-    animation: fadeoutdown 0.15s linear;
-  }
-  .animate-fadeoutleft {
-    animation: fadeoutleft 0.15s linear;
-  }
-  .animate-fadeoutright {
-    animation: fadeoutright 0.15s linear;
-  }
-  .animate-fadeoutup {
-    animation: fadeoutup 0.15s linear;
-  }
-  .animate-flip {
-    animation: flip 0.15s linear;
-  }
-  .animate-flipleft {
-    animation: flipleft 0.15s linear;
-  }
-  .animate-flipright {
-    animation: flipright 0.15s linear;
-  }
-  .animate-flipup {
-    animation: flipup 0.15s linear;
   }
   .animate-scalein {
     animation: scalein 0.15s linear;
@@ -1355,24 +1310,6 @@
   }
   .animate-slideup {
     animation: slideup 0.45s cubic-bezier(0, 1, 0, 1);
-  }
-  .animate-width {
-    animation: width 0.45s linear;
-  }
-  .animate-zoomin {
-    animation: zoomin 0.15s linear;
-  }
-  .animate-zoomindown {
-    animation: zoomindown 0.15s linear;
-  }
-  .animate-zoominleft {
-    animation: zoominleft 0.15s linear;
-  }
-  .animate-zoominright {
-    animation: zoominright 0.15s linear;
-  }
-  .animate-zoominup {
-    animation: zoominup 0.15s linear;
   }
   .cursor-auto {
     cursor: auto;
@@ -2164,17 +2101,9 @@
   .whitespace-nowrap {
     white-space: nowrap;
   }
-  .bg-emphasis {
-    background: var(--p-content-hover-background);
-    color: var(--p-content-hover-color);
-  }
   .bg-highlight {
     background: var(--p-highlight-background);
     color: var(--p-highlight-color);
-  }
-  .bg-highlight-emphasis {
-    background: var(--p-highlight-focus-background);
-    color: var(--p-highlight-focus-color);
   }
   .text-amber-700 {
     color: var(--color-amber-700);
@@ -2203,12 +2132,6 @@
   }
   .text-blue-700 {
     color: var(--color-blue-700);
-  }
-  .text-color {
-    color: var(--p-text-color);
-  }
-  .text-color-emphasis {
-    color: var(--p-text-hover-color);
   }
   .text-cyan-500 {
     color: var(--color-cyan-500);
@@ -2257,9 +2180,6 @@
   }
   .text-muted-color\! {
     color: var(--p-text-muted-color) !important;
-  }
-  .text-muted-color-emphasis {
-    color: var(--p-text-hover-muted-color);
   }
   .text-orange-400 {
     color: var(--color-orange-400);
@@ -2548,10 +2468,6 @@
   .ease-in {
     --tw-ease: var(--ease-in);
     transition-timing-function: var(--ease-in);
-  }
-  .ease-in-out {
-    --tw-ease: var(--ease-in-out);
-    transition-timing-function: var(--ease-in-out);
   }
   .ease-out {
     --tw-ease: var(--ease-out);

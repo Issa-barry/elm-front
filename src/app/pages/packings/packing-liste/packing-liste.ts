@@ -15,7 +15,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
-import { MenuModule } from 'primeng/menu';
+import { Menu, MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -108,6 +108,7 @@ export class PackingListe implements OnInit {
   private readonly mobileBreakpoint = 768;
 
   mobileFilterMenuItems: MenuItem[] = [];
+  desktopRowMenuItems: MenuItem[] = [];
   skeletonCols: number[] = [];
   private readyForUsineReload = false;
 
@@ -187,6 +188,59 @@ export class PackingListe implements OnInit {
 
   get hasActionsColumn(): boolean {
     return this.canViewFacture || this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
+  }
+
+  hasDesktopRowMenuActions(packing: Packing): boolean {
+    return this.getDesktopRowMenuItems(packing).length > 0;
+  }
+
+  getDesktopRowMenuItems(packing: Packing): MenuItem[] {
+    const items: MenuItem[] = [];
+    const writeDisabled = this.usineContext.isConsolidated();
+
+    if (this.canReadVersement) {
+      items.push({
+        label: 'Historique versements',
+        icon: 'pi pi-history',
+        command: () => this.openHistorique(packing),
+      });
+    }
+
+    if (this.canEditPacking(packing)) {
+      items.push({
+        label: 'Modifier',
+        icon: 'pi pi-pen-to-square',
+        disabled: writeDisabled,
+        command: () => this.goEdit(packing),
+      });
+    }
+
+    if (this.canCancelPacking(packing)) {
+      items.push({
+        label: 'Annuler',
+        icon: 'pi pi-ban',
+        disabled: writeDisabled,
+        command: () => this.cancelPacking(packing),
+      });
+    }
+
+    if (this.canDelete && packing.statut === 'impayee') {
+      items.push({
+        label: 'Supprimer',
+        icon: 'pi pi-trash',
+        disabled: writeDisabled,
+        command: () => this.deletePacking(packing),
+      });
+    }
+
+    return items;
+  }
+
+  openDesktopRowMenu(event: Event, menu: Menu, packing: Packing): void {
+    event.stopPropagation();
+    this.desktopRowMenuItems = this.getDesktopRowMenuItems(packing);
+    if (this.desktopRowMenuItems.length === 0) return;
+    menu.toggle(event);
   }
 
   constructor(

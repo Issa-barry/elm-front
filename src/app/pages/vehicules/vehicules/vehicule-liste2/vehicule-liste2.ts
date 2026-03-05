@@ -18,6 +18,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { VehiculeService } from '@/services/vehicules/vehicule.service';
 import { Vehicule, TYPE_VEHICULE_LABELS } from '@/models/vehicule.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { environment } from 'src/environments/environment';
 
 interface FilterOption {
   label: string;
@@ -49,6 +50,7 @@ interface FilterOption {
   providers: [MessageService],
 })
 export class VehiculeListe2 implements OnInit {
+  private readonly apiOrigin = this.extractApiOrigin();
   searchQuery = signal<string>('');
   selectedFilter = signal<string>('all');
   vehicules = signal<Vehicule[]>([]);
@@ -82,7 +84,11 @@ export class VehiculeListe2 implements OnInit {
     this.loading = true;
     this.vehiculeService.getAll().subscribe({
       next: (resp) => {
-        this.vehicules.set(resp.data?.data ?? []);
+        const mapped = (resp.data?.data ?? []).map((vehicule) => ({
+          ...vehicule,
+          photo_url: this.resolvePhotoUrl(vehicule),
+        }));
+        this.vehicules.set(mapped);
         this.total.set(resp.data?.total ?? 0);
         this.loading = false;
       },
@@ -142,6 +148,13 @@ export class VehiculeListe2 implements OnInit {
     this.router.navigate(['/vehicules']);
   }
 
+  onImageError(vehicule: Vehicule): void {
+    if (!vehicule.photo_url) return;
+    this.vehicules.update((list) =>
+      list.map((item) => (item.id === vehicule.id ? { ...item, photo_url: null } : item)),
+    );
+  }
+
   toggleChevron(vehiculeId: number): void {
     const chevronElement = document.querySelector(`.chevron-icon-${vehiculeId}`);
     if (chevronElement) {
@@ -195,5 +208,38 @@ export class VehiculeListe2 implements OnInit {
   private isVehiculeActive(v: Vehicule): boolean {
     const status = (v as { is_active: unknown }).is_active;
     return status === true || status === 1 || status === '1';
+  }
+
+  private resolvePhotoUrl(vehicule: Vehicule): string | null {
+    const raw = (vehicule.photo_url ?? vehicule.photo_path ?? '').trim();
+    if (!raw) return null;
+
+    if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) {
+      return raw;
+    }
+
+    if (raw.startsWith('//')) {
+      const protocol = this.apiOrigin.startsWith('https://') ? 'https:' : 'http:';
+      return `${protocol}${raw}`;
+    }
+
+    if (!this.apiOrigin) {
+      return raw;
+    }
+
+    if (raw.startsWith('/')) {
+      return `${this.apiOrigin}${raw}`;
+    }
+
+    return `${this.apiOrigin}/${raw}`;
+  }
+
+  private extractApiOrigin(): string {
+    try {
+      const url = new URL(environment.apiUrl);
+      return `${url.protocol}//${url.host}`;
+    } catch {
+      return '';
+    }
   }
 }

@@ -47,29 +47,8 @@ export class AppMenu {
           },
         ],
       },
-      // {
-      //   label: 'Administration',
-      //   icon: 'pi pi-shield',
-      //   items: [
-      //     {
-      //       label: 'Organisations',
-      //       icon: 'pi pi-fw pi-building',
-      //       routerLink: ['/organisations'],
-      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
-      //     },
-      //     {
-      //       label: 'Sites',
-      //       icon: 'pi pi-fw pi-map-marker',
-      //       routerLink: ['/sites'],
-      //       visible: this.authService.hasAnyPermission(['sites.read']),
-      //     },
-      //     {
-      //       label: 'Parametres',
-      //       icon: 'pi pi-fw pi-cog',
-      //       routerLink: ['/parametres'],
-      //     },
-      //   ],
-      // },
+     
+      
       {
         label: 'Modules',
         icon: 'pi pi-th-large',
@@ -105,8 +84,59 @@ export class AppMenu {
             routerLink: ['/produits'],
             visible: this.authService.hasAnyPermission(['produits.read', 'produit.read', 'products.read', 'product.read']),
           },
+           // Vehicules
+                    {
+                        label: 'Vehicules',
+                        icon: 'pi pi-fw pi-car',
+                        visible: true,
+                        items: [
+                            // {
+                            //     label: 'Liste des vehicules',
+                            //     icon: 'pi pi-fw pi-list',
+                            //     routerLink: ['/vehicules'],
+                            // },
+                            {
+                                label: 'Liste des vehicules ',
+                                icon: 'pi pi-fw pi-list',
+                                routerLink: ['/vehicules/vehicules-liste2'],
+                            },
+                            {
+                                label: 'Proprietaires',
+                                icon: 'pi pi-fw pi-user',
+                                routerLink: ['/vehicules/proprietaires'],
+                            },
+                            {
+                                label: 'Livreurs',
+                                icon: 'pi pi-fw pi-truck',
+                                routerLink: ['/vehicules/livreurs'],
+                            },
+                        ],
+                    },
         ],
       },
+       // {
+      //   label: 'Administration',
+      //   icon: 'pi pi-shield',
+      //   items: [
+      //     {
+      //       label: 'Organisations',
+      //       icon: 'pi pi-fw pi-building',
+      //       routerLink: ['/organisations'],
+      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
+      //     },
+      //     {
+      //       label: 'Sites',
+      //       icon: 'pi pi-fw pi-map-marker',
+      //       routerLink: ['/sites'],
+      //       visible: this.authService.hasAnyPermission(['sites.read']),
+      //     },
+      //     {
+      //       label: 'Parametres',
+      //       icon: 'pi pi-fw pi-cog',
+      //       routerLink: ['/parametres'],
+      //     },
+      //   ],
+      // },
       // {
       //   label: 'Compte',
       //   icon: 'pi pi-user',

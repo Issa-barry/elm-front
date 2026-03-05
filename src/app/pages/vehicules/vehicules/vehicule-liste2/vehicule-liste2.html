@@ -48,7 +48,12 @@
 
             <!-- Avatar : photo si disponible, sinon initiales -->
             @if (v.photo_url) {
-              <img class="mobile-card-avatar-img" [src]="v.photo_url" [alt]="v.nom_vehicule" />
+              <img
+                class="mobile-card-avatar-img"
+                [src]="v.photo_url"
+                [alt]="v.nom_vehicule"
+                (error)="onImageError(v)"
+              />
             } @else {
               <div class="mobile-card-avatar" aria-hidden="true">
                 {{ getInitials(v.nom_vehicule) }}
@@ -166,15 +171,30 @@
                     leaveActiveClass="animate-slideup"
                     (click)="toggleChevron(v.id)"
                 >
-                    <div class="flex items-center gap-4 flex-1">
-                        <img class="w-12 h-12 rounded object-cover" [src]="v.photo_url || ''" [alt]="v.nom_vehicule" />
-                        <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-4 flex-1 min-w-0 vehicule-primary-col">
+                        <div class="vehicule-photo-col">
+                          @if (v.photo_url) {
+                            <img
+                              class="vehicule-photo-lg"
+                              [src]="v.photo_url"
+                              [alt]="v.nom_vehicule"
+                              (error)="onImageError(v)"
+                            />
+                          } @else {
+                            <span
+                              class="vehicule-photo-fallback"
+                            >
+                              {{ getInitials(v.nom_vehicule) }}
+                            </span>
+                          }
+                        </div>
+                        <div class="flex flex-col gap-2 min-w-0">
                             <div class="text-surface-900 dark:text-surface-0 text-lg font-medium leading-tight">{{ v.nom_vehicule }}</div>
                             <div class="text-surface-500 dark:text-surface-400 text-base leading-tight">{{ v.immatriculation }}</div>
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1 vehicule-meta-col">
                         <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
                             <div class="px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-md">
                                 <span class="text-surface-600 dark:text-surface-300 text-sm font-bold">{{ getTypeLabel(v) }}</span>
