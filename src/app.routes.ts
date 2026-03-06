@@ -54,6 +54,18 @@ export const appRoutes: Routes = [
         data: { breadcrumb: 'ventes' },
       },
       {
+        path: 'billing',
+        loadChildren: () => import('@/pages/billing/billing.routes'),
+        canActivate: [authorizationGuard],
+        data: { breadcrumb: 'billing', roles: ['super_admin', 'super-admin'] },
+      },
+      {
+        path: 'forfaits',
+        loadChildren: () => import('@/pages/forfaits/forfaits.routes'),
+        canActivate: [authorizationGuard],
+        data: { breadcrumb: 'forfaits', roles: ['super_admin', 'super-admin'] },
+      },
+      {
         path: 'organisations',
         loadChildren: () => import('@/pages/organisations/organisations.routes'),
         canActivate: [authorizationGuard],

@@ -50,4 +50,13 @@ export class OrganisationsDetail implements OnInit {
       },
     });
   }
+
+  forfaitBadgeClass(slug: string | null | undefined): Record<string, boolean> {
+    return {
+      'bg-gray-100 text-gray-700':     slug === 'starter',
+      'bg-blue-100 text-blue-700':     slug === 'standard',
+      'bg-yellow-100 text-yellow-700': slug === 'premium',
+      'bg-gray-100 text-gray-600':     !slug || !['starter', 'standard', 'premium'].includes(slug),
+    };
+  }
 }

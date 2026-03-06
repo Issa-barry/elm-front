@@ -1,0 +1,128 @@
+<div class="card">
+  <!-- En-tête -->
+  <div class="flex align-items-center justify-content-between mb-4 gap-3 flex-wrap">
+    <div>
+      <h2 class="m-0 text-2xl font-semibold">Facturation</h2>
+      <p class="m-0 text-color-secondary">Events de facturation par organisation.</p>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="flex gap-3 mb-4 flex-wrap">
+    <p-select
+      [options]="organisationOptions"
+      [(ngModel)]="filterOrganisationId"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Toutes les organisations"
+      [style]="{ minWidth: '220px' }"
+      (onChange)="onFilterChange()"
+    />
+    <p-select
+      [options]="statusOptions"
+      [(ngModel)]="filterStatus"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Tous les statuts"
+      [style]="{ minWidth: '180px' }"
+      (onChange)="onFilterChange()"
+    />
+    <p-select
+      [options]="forfaitOptions"
+      [(ngModel)]="filterForfait"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Tous les forfaits"
+      [style]="{ minWidth: '170px' }"
+      (onChange)="onFilterChange()"
+    />
+  </div>
+
+  <!-- Tableau -->
+  <p-table [value]="events" [loading]="loading" dataKey="id" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Organisation</th>
+        <th>Forfait</th>
+        <th>Utilisateur</th>
+        <th>Réf. user</th>
+        <th>Type d'event</th>
+        <th>Montant</th>
+        <th>Statut</th>
+        <th>Date</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-event>
+      <tr>
+        <td>
+          <span class="font-semibold">{{ event.organisation?.nom }}</span>
+          <span class="text-color-secondary text-sm ml-1">({{ event.organisation?.code }})</span>
+        </td>
+        <td>
+          <ng-container *ngIf="event.organisation?.forfait; else noForfait">
+            <span
+              class="border-round px-2 text-xs font-semibold white-space-nowrap"
+              style="padding-top: 3px; padding-bottom: 3px;"
+              [ngClass]="forfaitBadgeClass(event.organisation?.forfait?.slug)"
+            >{{ event.organisation?.forfait?.nom }}</span>
+          </ng-container>
+          <ng-template #noForfait>
+            <span class="text-color-secondary">—</span>
+          </ng-template>
+        </td>
+        <td>{{ event.user?.nom_complet }}</td>
+        <td>
+          <code class="text-sm">{{ event.user?.reference }}</code>
+        </td>
+        <td>{{ getEventTypeLabel(event.event_type) }}</td>
+        <td class="font-semibold">{{ formatGNF(event.amount) }}</td>
+        <td>
+          <p-tag
+            [value]="getStatusConfig(event.status).label"
+            [severity]="getStatusConfig(event.status).severity"
+          />
+        </td>
+        <td>{{ formatDate(event.occurred_at) }}</td>
+        <td class="text-right">
+          <button
+            *ngIf="canMarkPaid(event)"
+            pButton
+            type="button"
+            label="Marquer payé"
+            icon="pi pi-check"
+            class="p-button-success p-button-sm p-button-outlined"
+            [loading]="markingPaidId === event.id"
+            [disabled]="markingPaidId !== null"
+            (click)="markPaid(event)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" class="text-center text-color-secondary py-5">
+          Aucun event de facturation trouvé.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Totaux -->
+  <div class="flex gap-4 mt-4 pt-4 border-top-1 surface-border flex-wrap">
+    <div class="flex align-items-center gap-2">
+      <span class="text-color-secondary">Total :</span>
+      <span class="font-bold">{{ formatGNF(totalAmount) }}</span>
+    </div>
+    <div class="flex align-items-center gap-2">
+      <span class="text-color-secondary">En attente :</span>
+      <span class="font-bold text-orange-500">{{ formatGNF(totalPending) }}</span>
+    </div>
+    <div class="flex align-items-center gap-2">
+      <span class="text-color-secondary">Payé :</span>
+      <span class="font-bold text-green-500">{{ formatGNF(totalPaid) }}</span>
+    </div>
+  </div>
+</div>

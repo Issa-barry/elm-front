@@ -32,8 +32,8 @@ export interface UserFormData {
   role?: string;
   reference?: string;
   civilite?: Civilite | null;
-  date_naissance?: string | null;   // format YYYY-MM-DD envoyÃ© au backend
-  // PiÃ¨ce d'identitÃ© (optionnel, mais tous requis si piece_type est renseignÃ©)
+  date_naissance?: string | null;   // format YYYY-MM-DD envoyé au backend
+  // Pièce d'identité (optionnel, mais tous requis si piece_type est renseigné)
   piece_type?: PieceType;
   piece_numero?: string;
   piece_delivree_le?: string;
@@ -63,7 +63,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
   @Input() mode: 'create' | 'edit' = 'create';
   @Input() initialData: Partial<User> | null = null;
   @Input() loading = false;
-  /** Quand true, dÃ©sactive tous les champs et le bouton Enregistrer (ex. contexte Â« Toutes les usines Â»). */
+  /** Quand true, désactive tous les champs et le bouton Enregistrer (ex. contexte Â« Toutes les usines Â»). */
   @Input() formDisabled = false;
 
   @Output() submitForm = new EventEmitter<UserFormData>();
@@ -72,7 +72,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
   submitted = false;
   isEditing = false;
   model: UserFormData = {};
-  /** Ã‰tape courante du stepper (1 = TÃ©lÃ©phone, 2 = Type+RÃ´le, 3 = Infos perso, 4 = AccÃ¨s, 5 = PiÃ¨ce). */
+  /** Ã‰tape courante du stepper (1 = Téléphone, 2 = Type+RÃ´le, 3 = Infos perso, 4 = Accès, 5 = Pièce). */
   activeStep = 1;
 
   get hasIdentityStep(): boolean {
@@ -101,23 +101,23 @@ export class UtilisateursForm implements OnInit, OnChanges {
     { label: 'Investisseur', value: 'investisseur' },
   ];
 
-  // CivilitÃ©
+  // Civilité
   readonly civiliteOptions: { label: string; value: Civilite }[] = (
     Object.entries(CIVILITE_LABELS) as [Civilite, string][]
   ).map(([value, label]) => ({ label, value }));
 
-  // RÃ´les rÃ©servÃ©s au staff (sÃ©lection manuelle)
+  // RÃ´les réservés au staff (sélection manuelle)
   private readonly STAFF_ROLES = ['admin_entreprise', 'manager', 'comptable', 'agent_vente', 'employe'];
 
-  // RÃ´les disponibles (chargÃ©s depuis l'API)
+  // RÃ´les disponibles (chargés depuis l'API)
   availableRoles: { label: string; value: string }[] = [];
 
-  // Options piÃ¨ces d'identitÃ©
+  // Options pièces d'identité
   readonly pieceTypeOptions: { label: string; value: PieceType }[] = (
     Object.entries(PIECE_TYPE_LABELS) as [PieceType, string][]
   ).map(([value, label]) => ({ label, value }));
 
-  // Validation du tÃ©lÃ©phone
+  // Validation du téléphone
   phoneError: string | null = null;
   phoneCheckLoading = false;
   phoneCountry: string = 'GN';
@@ -125,10 +125,10 @@ export class UtilisateursForm implements OnInit, OnChanges {
   // Validation du mot de passe
   passwordError: string | null = null;
 
-  // Validation KYC â€” erreurs par champ
+  // Validation KYC  erreurs par champ
   kycErrors: Record<string, string> = {};
 
-  // Liste des pays pour le sÃ©lecteur
+  // Liste des pays pour le sélecteur
   countries = COUNTRIES;
 
   constructor(
@@ -170,8 +170,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     });
   }
 
-  // â”€â”€ Type â†’ rÃ´les filtrÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
+ 
   get filteredRoles(): { label: string; value: string }[] {
     if (this.model.type === 'staff') {
       return this.availableRoles.filter(r => this.STAFF_ROLES.includes(r.value));
@@ -192,17 +191,16 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  // â”€â”€ KYC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-  /** Vrai dÃ¨s que piece_type est sÃ©lectionnÃ© â†’ tous les autres champs KYC deviennent requis */
+ 
+  /** Vrai dès que piece_type est sélectionné   tous les autres champs KYC deviennent requis */
   get isKycActive(): boolean {
     return !!this.model.piece_type;
   }
 
-  /** AppelÃ© lorsque piece_type change */
+  /** Appelé lorsque piece_type change */
   onPieceTypeChange(): void {
     if (!this.model.piece_type) {
-      // On vide le bloc KYC quand le type est retirÃ©
+      // On vide le bloc KYC quand le type est retiré
       this.model.piece_numero    = undefined;
       this.model.piece_pays      = undefined;
       this.model.piece_delivree_le = undefined;
@@ -213,14 +211,14 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  /** AppelÃ© sur chaque champ KYC aprÃ¨s soumission (re-validation en temps rÃ©el) */
+  /** Appelé sur chaque champ KYC après soumission (re-validation en temps réel) */
   onKycFieldChange(): void {
     if (this.submitted && this.isKycActive) {
       this.setKycErrors();
     }
   }
 
-  /** VÃ©rification pure (sans side-effect) â€” utilisÃ©e par isValid() */
+  /** Vérification pure (sans side-effect)  utilisée par isValid() */
   private checkKyc(): boolean {
     if (!this.model.piece_type) return true;
 
@@ -240,7 +238,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     return true;
   }
 
-  /** Renseigne kycErrors avec les messages Ã  afficher */
+  /** Renseigne kycErrors avec les messages   afficher */
   private setKycErrors(): void {
     this.kycErrors = {};
     if (!this.model.piece_type) return;
@@ -267,7 +265,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
       this.kycErrors['piece_expire_le'] = "Date d'expiration obligatoire.";
     }
 
-    // CohÃ©rence croisÃ©e expire > delivree
+    // Cohérence croisée expire > delivree
     if (this.model.piece_delivree_le && this.model.piece_expire_le) {
       const delivree = new Date(this.model.piece_delivree_le);
       const expire   = new Date(this.model.piece_expire_le);
@@ -277,8 +275,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
+ 
   private initializeModel() {
     if (this.initialData) {
       this.model = {
@@ -340,7 +337,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
         this.phoneCountry = phoneNumber.country;
       }
     } catch (error) {
-      // Garder le pays par dÃ©faut
+      // Garder le pays par défaut
     }
   }
 
@@ -385,7 +382,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     if (this.mode === 'create' && !this.model.password?.trim()) {
       this.passwordError = 'Mot de passe obligatoire.';
       return false;
-    }
+    } 
 
     const password = this.model.password || '';
 
@@ -482,7 +479,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  /** Valide l'Ã©tape 1 (TÃ©lÃ©phone) : Pays + TÃ©lÃ©phone. */
+  /** Valide l'étape 1 (Téléphone) : Pays + Téléphone. */
   isStep1Valid(): boolean {
     if (!this.phoneCountry || !this.model.phone?.trim()) return false;
     try {
@@ -492,14 +489,14 @@ export class UtilisateursForm implements OnInit, OnChanges {
     }
   }
 
-  /** Valide l'Ã©tape 2 (Type + RÃ´le) : Type de compte + RÃ´le si staff. */
+  /** Valide l'étape 2 (Type + RÃ´le) : Type de compte + RÃ´le si staff. */
   isStep2Valid(): boolean {
     if (!this.model.type) return false;
     if (this.isRoleSelectable && !this.model.role) return false;
     return true;
   }
 
-  /** Valide l'Ã©tape 3 (Informations personnelles) : Nom + PrÃ©nom + Ville + Quartier. */
+  /** Valide l'étape 3 (Informations personnelles) : Nom + Prénom + Ville + Quartier. */
   isStep3Valid(): boolean {
     return !!(
       this.model.nom?.trim() &&
@@ -509,13 +506,13 @@ export class UtilisateursForm implements OnInit, OnChanges {
     );
   }
 
-  /** Valide l'Ã©tape 4 (AccÃ¨s) : Email (optionnel) + Mot de passe si crÃ©ation. */
+  /** Valide l'étape 4 (Accès) : Email (optionnel) + Mot de passe si création. */
   isStep4Valid(): boolean {
     if (this.mode === 'create' && !this.validatePassword()) return false;
     return true;
   }
 
-  /** Ã‰tape 5 (PiÃ¨ce) facultative : pas de blocage Suivant ; validation KYC seulement si type piÃ¨ce renseignÃ©. */
+  /** Ã‰tape 5 (Pièce) facultative : pas de blocage Suivant ; validation KYC seulement si type pièce renseigné. */
   isStep5Valid(): boolean {
     return true;
   }
@@ -651,7 +648,7 @@ export class UtilisateursForm implements OnInit, OnChanges {
 
   onSubmit() {
     this.submitted = true;
-    this.setKycErrors();      // dÃ©clenche l'affichage des erreurs KYC
+    this.setKycErrors();      // déclenche l'affichage des erreurs KYC
 
     if (!this.isValid()) {
       this.goToFirstInvalidStep();

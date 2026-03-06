@@ -133,6 +133,10 @@ export class CommandeVenteDetail implements OnInit {
 
   openEncaissementDialog() {
     this.initEncaissementForm();
+    const restantDu = Number(this.commande?.facture?.montant_restant ?? 0);
+    if (restantDu > 0) {
+      this.encaissementForm.patchValue({ montant: restantDu });
+    }
     this.encaissementDialogVisible = true;
   }
 

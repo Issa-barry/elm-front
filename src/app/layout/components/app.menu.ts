@@ -52,7 +52,62 @@ export class AppMenu {
           // },
         ],
       },
-
+// // Comptabilite
+                    {
+                        label: 'Comptabilite',
+                        icon: 'pi pi-fw pi-calculator',
+                        visible: this.authService.hasAnyPermission([
+                            'commissions.read',
+                            'commandes.read',
+                            'facture-packings.read',
+                            'facture-packing.read',
+                            'facture_packings.read',
+                            'facture_packing.read',
+                            'facturepackings.read',
+                            'facturepacking.read',
+                            'factures-livraisons.read',
+                            'encaissements.read',
+                        ]),
+                        items: [
+                            {
+                                label: 'Commissions',
+                                icon: 'pi pi-fw pi-percentage',
+                                routerLink: ['/ventes/commissions'],
+                                visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
+                            },
+                            {
+                                label: 'Commissions 2',
+                                icon: 'pi pi-fw pi-percentage',
+                                routerLink: ['/ventes/commissions2'],
+                                visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
+                            },
+                            {
+                                label: 'Factures vente',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures'],
+                                visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            },
+                            {
+                                label: 'Factures vente liste 2',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures-vente-liste2'],
+                                visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            },
+                            // {
+                            //     label: 'Facture packing',
+                            //     icon: 'pi pi-fw pi-box',
+                            //     routerLink: ['/comptabilite/comptabilite-packing-liste'],
+                            //     visible: this.authService.hasAnyPermission([
+                            //         'facture-packings.read',
+                            //         'facture-packing.read',
+                            //         'facture_packings.read',
+                            //         'facture_packing.read',
+                            //         'facturepackings.read',
+                            //         'facturepacking.read',
+                            //     ]),
+                            // },
+                        ],
+                    },
 
       {
         label: 'Modules',
@@ -136,6 +191,18 @@ export class AppMenu {
       //       label: 'Organisations',
       //       icon: 'pi pi-fw pi-building',
       //       routerLink: ['/organisations'],
+      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
+      //     },
+      //     {
+      //       label: 'Forfaits',
+      //       icon: 'pi pi-fw pi-tag',
+      //       routerLink: ['/forfaits'],
+      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
+      //     },
+      //     {
+      //       label: 'Facturation',
+      //       icon: 'pi pi-fw pi-receipt',
+      //       routerLink: ['/billing'],
       //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
       //     },
       //     {

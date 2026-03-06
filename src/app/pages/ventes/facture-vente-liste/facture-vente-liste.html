@@ -112,7 +112,18 @@
         [paginator]="true"
         [rows]="10"
         [rowsPerPageOptions]="[10, 25, 50]"
-        [globalFilterFields]="['reference', 'vehicule.nom_vehicule', 'vehicule.immatriculation', 'statut_facture']"
+        [globalFilterFields]="[
+          'reference',
+          'vehicule.nom_vehicule',
+          'vehicule.immatriculation',
+          'vehicule.livreurPrincipal.nom',
+          'vehicule.livreurPrincipal.prenom',
+          'vehicule.livreurPrincipal.phone',
+          'vehicule.livreur_principal.nom',
+          'vehicule.livreur_principal.prenom',
+          'vehicule.livreur_principal.phone',
+          'statut_facture'
+        ]"
         [rowHover]="true"
         responsiveLayout="scroll"
         currentPageReportTemplate="{first} / {last} de {totalRecords} factures"
@@ -147,21 +158,24 @@
 
         <ng-template #header>
           <tr>
-            <th pSortableColumn="reference" class="white-space-nowrap" style="width:20%">
+            <th pSortableColumn="reference" class="white-space-nowrap" style="width:18%">
               <span class="flex items-center gap-2">Facture <p-sortIcon field="reference" /></span>
             </th>
-            <th pSortableColumn="vehicule.nom_vehicule" class="white-space-nowrap" style="width:20%">
+            <th pSortableColumn="vehicule.nom_vehicule" class="white-space-nowrap" style="width:16%">
               <span class="flex items-center gap-2">Véhicule <p-sortIcon field="vehicule.nom_vehicule" /></span>
             </th>
-            <th pSortableColumn="montant_brut" class="white-space-nowrap" style="width:13%">
+            <th class="white-space-nowrap" style="width:16%">
+              <span class="flex items-center gap-2">Livreur</span>
+            </th>
+            <th pSortableColumn="montant_brut" class="white-space-nowrap" style="width:12%">
               <span class="flex items-center gap-2">Montant brut <p-sortIcon field="montant_brut" /></span>
             </th>
             <th style="width:11%"><span class="flex items-center gap-2">Encaissé</span></th>
-            <th style="width:11%"><span class="flex items-center gap-2">Restant</span></th>
-            <th pSortableColumn="statut_facture" class="white-space-nowrap" style="width:10%">
+            <th style="width:10%"><span class="flex items-center gap-2">Restant</span></th>
+            <th pSortableColumn="statut_facture" class="white-space-nowrap" style="width:9%">
               <span class="flex items-center gap-2">Statut <p-sortIcon field="statut_facture" /></span>
             </th>
-            <th style="width:8%">Actions</th>
+            <th style="width:9%">Actions</th>
           </tr>
         </ng-template>
 
@@ -179,17 +193,23 @@
                   <div>
                     <div class="text-sm font-medium">{{ f.vehicule.nom_vehicule }}</div>
                     <div class="text-xs text-surface-400 font-mono">{{ f.vehicule.immatriculation }}</div>
-                    @let lv = f.vehicule.livreurPrincipal ?? f.vehicule.livreur_principal;
-                    @if (lv) {
-                      <div class="text-xs text-surface-500 mt-0.5">
-                        <i class="pi pi-user text-[10px] mr-1"></i>{{ lv.prenom }} {{ lv.nom }}
-                        @if (lv.phone) { · {{ lv.phone }} }
-                      </div>
-                    }
                   </div>
                 </div>
               } @else {
                 <span class="text-surface-300 text-sm">—</span>
+              }
+            </td>
+            <td>
+              @let lv = f.vehicule?.livreurPrincipal ?? f.vehicule?.livreur_principal;
+              @if (lv) {
+                <div class="text-sm font-medium">{{ lv.prenom }} {{ lv.nom }}</div>
+                @if (lv.phone) {
+                  <div class="text-xs text-surface-500">{{ lv.phone | phoneFormat }}</div>
+                } @else {
+                  <span class="text-surface-300 text-sm">-</span>
+                }
+              } @else {
+                <span class="text-surface-300 text-sm">-</span>
               }
             </td>
             <td class="font-semibold">{{ formatMontant(f.montant_brut) }}</td>
@@ -234,7 +254,7 @@
 
         <ng-template #emptymessage>
           <tr>
-            <td colspan="7" class="text-center py-10">
+            <td colspan="8" class="text-center py-10">
               <div class="flex flex-col items-center gap-3 text-surface-500">
                 <i class="pi pi-file-invoice text-4xl"></i>
                 <span>Aucune facture de vente</span>
@@ -247,7 +267,7 @@
         <ng-template #loadingbody>
           @for (_ of [1, 2, 3, 4, 5]; track $index) {
             <tr>
-              @for (__ of [1, 2, 3, 4, 5, 6, 7]; track $index) {
+              @for (__ of [1, 2, 3, 4, 5, 6, 7, 8]; track $index) {
                 <td><p-skeleton /></td>
               }
             </tr>

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, computed, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +16,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { RoleService } from '@/services/role/role.service';
+import { AuthService } from '@/services/auth/auth.service';
 import { RoleWithModules, PERMISSION_ACTIONS } from '@/models/role.model';
 
 @Component({
@@ -43,6 +44,7 @@ import { RoleWithModules, PERMISSION_ACTIONS } from '@/models/role.model';
 export class RolesListe implements OnInit {
   roles = signal<RoleWithModules[]>([]);
   loading = false;
+  isSuperAdmin = computed(() => this.authService.hasAnyRole(['super_admin', 'super-admin']));
 
   // Dialog création
   createDialog = false;
@@ -53,6 +55,7 @@ export class RolesListe implements OnInit {
 
   constructor(
     private roleService: RoleService,
+    private authService: AuthService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private router: Router

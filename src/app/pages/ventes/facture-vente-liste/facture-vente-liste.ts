@@ -28,7 +28,9 @@ import {
   MODE_PAIEMENT_OPTIONS,
   StoreEncaissementVenteDto,
   ModePaiement,
+  
 } from '@/models/vente.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-facture-vente-liste',
@@ -50,6 +52,7 @@ import {
     InputIconModule,
     IconFieldModule,
     DatePickerModule,
+    PhoneFormatPipe
   ],
   providers: [MessageService],
   templateUrl: './facture-vente-liste.html',
