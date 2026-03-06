@@ -58,8 +58,10 @@
               </div>
               <div class="flex-shrink-0">
                 @if (c.facture) {
-                  <p-tag [value]="getStatutLabel(c.facture.statut_facture)"
-                         [severity]="getStatutSeverity(c.facture.statut_facture)" />
+                  <span class="cv-status-inline cv-status-inline--sm">
+                    <span class="cv-status-dot" [ngClass]="getStatutDotClass(c.facture.statut_facture)"></span>
+                    <span class="cv-status-text text-surface-900 dark:text-surface-0">{{ getStatutLabel(c.facture.statut_facture) }}</span>
+                  </span>
                 } @else {
                   <span class="text-xs text-surface-400">—</span>
                 }
@@ -220,7 +222,10 @@
           <td>
             @if (c.facture) {
               <div class="flex flex-col gap-1">
-                <p-tag [value]="getStatutLabel(c.facture.statut_facture)" [severity]="getStatutSeverity(c.facture.statut_facture)" />
+                <span class="cv-status-inline">
+                  <span class="cv-status-dot" [ngClass]="getStatutDotClass(c.facture.statut_facture)"></span>
+                  <span class="cv-status-text text-surface-900 dark:text-surface-0">{{ getStatutLabel(c.facture.statut_facture) }}</span>
+                </span>
                 @if (isLocked(c)) {
                   <span class="text-xs text-surface-400 flex items-center gap-1">
                     <i class="pi pi-lock text-xs"></i> Verrouillée

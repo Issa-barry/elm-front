@@ -80,7 +80,7 @@
                         </div>
                         <div class="flex flex-col items-end gap-1">
                             <p-tag
-                                styleClass="mobile-status-tag"
+                                styleClass="mobile-status-tag app-table-status"
                                 [value]="getStatutLabel(produit.statut)"
                                 [severity]="getStatutSeverity(produit.statut)"
                             />
@@ -337,6 +337,7 @@
                     <p-tag
                         [value]="getStatutLabel(produit.statut)"
                         [severity]="getStatutSeverity(produit.statut)"
+                        styleClass="app-table-status"
                     />
                 </td>
                 <td>

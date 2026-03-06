@@ -84,7 +84,7 @@ export interface LigneCommandeVente {
   prix_usine_snapshot: number;
   prix_vente_snapshot: number;
   total_ligne: string;
-  produit?: { id: number; nom: string };
+  produit?: { id: number; nom: string; image_url?: string | null };
 }
 
 export interface CommandeVente {

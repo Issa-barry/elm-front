@@ -60,7 +60,7 @@
                 <p-tag
                   [value]="v.is_active ? 'Actif' : 'Inactif'"
                   [severity]="v.is_active ? 'success' : 'warn'"
-                  styleClass="mobile-status-tag"
+                  styleClass="mobile-status-tag app-table-status"
                 />
                 <div class="mobile-card-actions">
                   @if (canUpdate) {
@@ -206,6 +206,7 @@
                   <p-tag
                     [value]="v.is_active ? 'Actif' : 'Inactif'"
                     [severity]="v.is_active ? 'success' : 'warn'"
+                    styleClass="app-table-status"
                   />
                 </div>
               </div>
@@ -242,6 +243,7 @@
             <p-tag
               [value]="v.is_active ? 'Actif' : 'Inactif'"
               [severity]="v.is_active ? 'success' : 'warn'"
+              styleClass="app-table-status"
             />
           </td>
 

@@ -167,7 +167,7 @@ export class AppLayout implements OnDestroy {
 
     private updateAccueilBodyClass(url: string): void {
         const path = url.split('?')[0].replace(/\/$/, '') || '/';
-        const isAccueil = path === '/' || path === '';
+        const isAccueil = path === '/' || path === '' || path === '/dashboard';
         if (isAccueil) {
             document.body.classList.add(BODY_CLASS_ACCUEIL);
         } else {

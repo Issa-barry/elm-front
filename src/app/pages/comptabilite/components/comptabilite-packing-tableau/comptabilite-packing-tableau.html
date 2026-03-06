@@ -70,7 +70,7 @@
                 <p-tag
                   [value]="getStatutLabel(item.statut)"
                   [severity]="getStatutSeverity(item.statut)"
-                  styleClass="cpt-status-tag"
+                  styleClass="cpt-status-tag app-table-status"
                 />
                 <span class="cpt-card-amounts">
                   {{ formatCurrency(item.montant_facture) }}
@@ -218,7 +218,7 @@
         <td class="text-sm font-medium text-green-600">{{ formatCurrency(item.montant_verse) }}</td>
         <td class="text-sm font-medium">{{ formatCurrency(item.montant_restant_facture) }}</td>
         <td>
-          <p-tag [value]="getStatutLabel(item.statut)" [severity]="getStatutSeverity(item.statut)" />
+          <p-tag [value]="getStatutLabel(item.statut)" [severity]="getStatutSeverity(item.statut)" styleClass="app-table-status" />
         </td>
         <td>
           <div class="flex gap-1 justify-center">

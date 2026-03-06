@@ -75,12 +75,12 @@ export class AppMenu {
                                 routerLink: ['/ventes/commissions'],
                                 visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
                             },
-                            {
-                                label: 'Commissions 2',
-                                icon: 'pi pi-fw pi-percentage',
-                                routerLink: ['/ventes/commissions2'],
-                                visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
-                            },
+                            // {
+                            //     label: 'Commissions 2',
+                            //     icon: 'pi pi-fw pi-percentage',
+                            //     routerLink: ['/ventes/commissions2'],
+                            //     visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
+                            // },
                             {
                                 label: 'Factures vente',
                                 icon: 'pi pi-fw pi-receipt',
@@ -106,12 +106,12 @@ export class AppMenu {
                             //     routerLink: ['/ventes/factures-vente-detail4/1'],
                             //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
                             // },
-                            {
-                                label: 'Command vente detail 2',
-                                icon: 'pi pi-fw pi-receipt',
-                                routerLink: ['/ventes/commandes/commande-vente-detail2/1'],
-                                visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
-                            },
+                            // {
+                            //     label: 'Command vente detail 2',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/ventes/commandes/commande-vente-detail2/1'],
+                            //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            // },
                             // {
                             //     label: 'Facture packing',
                             //     icon: 'pi pi-fw pi-box',

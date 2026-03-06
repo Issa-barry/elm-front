@@ -27,7 +27,6 @@ import { AuthService } from '@/services/auth/auth.service';
 import {
   CommandeVente,
   STATUT_FACTURE_LABELS,
-  STATUT_FACTURE_SEVERITY,
   StatutFacture,
   StatutCommission,
   STATUT_COMMISSION_LABELS,
@@ -442,8 +441,14 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     return STATUT_FACTURE_LABELS[s] ?? s;
   }
 
-  getStatutSeverity(s: StatutFacture) {
-    return STATUT_FACTURE_SEVERITY[s] ?? 'info';
+  getStatutDotClass(s: StatutFacture): string {
+    const map: Record<StatutFacture, string> = {
+      impayee: 'cv-status-dot--impayee',
+      partiel: 'cv-status-dot--partiel',
+      payee: 'cv-status-dot--payee',
+      annulee: 'cv-status-dot--annulee',
+    };
+    return map[s] ?? 'cv-status-dot--annulee';
   }
 
   formatMontant(n: string | number | undefined | null): string {

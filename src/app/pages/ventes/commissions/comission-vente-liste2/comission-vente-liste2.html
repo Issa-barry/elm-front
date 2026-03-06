@@ -199,7 +199,7 @@
         </td>
 
         <td>
-          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" />
+          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" styleClass="app-table-status" />
         </td>
 
         <td (click)="$event.stopPropagation()">

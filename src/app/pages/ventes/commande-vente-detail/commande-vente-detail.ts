@@ -95,7 +95,7 @@ export class CommandeVenteDetail implements OnInit {
 
   goFacture() {
     if (this.commande?.facture?.id) {
-      this.router.navigate(['/ventes/factures', this.commande.facture.id]);
+      this.router.navigate(['/ventes//factures-vente-detail3/', this.commande.facture.id]);
     }
   }
 

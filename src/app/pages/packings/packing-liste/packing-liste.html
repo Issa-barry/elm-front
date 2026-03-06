@@ -247,7 +247,7 @@
             <p-tag
               [value]="getStatutLabel(p.statut)"
               [severity]="getStatutSeverity(p.statut)"
-              styleClass="mobile-status-tag"
+              styleClass="mobile-status-tag app-table-status"
             />
             <span class="mobile-card-amounts">
               {{ p.nb_rouleaux }} rouleau{{ p.nb_rouleaux !== 1 ? 'x' : '' }} &middot; {{ formatCurrency(p.montant) }}
@@ -495,7 +495,7 @@
         <td class="text-sm font-medium">{{ formatCurrency(p.montant_verse) }}</td>
         <td class="text-sm font-medium">{{ formatCurrency(p.montant_restant) }}</td>
         <td>
-          <p-tag [value]="getStatutLabel(p.statut)" [severity]="getStatutSeverity(p.statut)" />
+          <p-tag [value]="getStatutLabel(p.statut)" [severity]="getStatutSeverity(p.statut)" styleClass="app-table-status" />
         </td>
         @if (hasActionsColumn) {
           <td class="packing-actions-cell">

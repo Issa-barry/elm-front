@@ -3674,6 +3674,11 @@
     }
   }
   @media (width >= 1200px) {
+    .xl\:px-32 {
+      padding-inline: calc(var(--spacing) * 32);
+    }
+  }
+  @media (width >= 1200px) {
     .xl\:px-80 {
       padding-inline: calc(var(--spacing) * 80);
     }

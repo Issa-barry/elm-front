@@ -14,11 +14,6 @@ export default [
 },
   {
     path: 'commandes/:id',
-    loadComponent: () => import('./commande-vente-detail/commande-vente-detail').then(c => c.CommandeVenteDetail),
-      data: { breadcrumb: 'commandes' },
-},
- {
-    path: 'commandes/commande-vente-detail2/:id',
     loadComponent: () => import('./commande-vente-detail2/commande-vente-detail2').then(c => c.CommandeVenteDetail2),
       data: { breadcrumb: 'commandes' },
 },

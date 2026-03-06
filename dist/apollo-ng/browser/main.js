@@ -22,6 +22,11 @@ import {
 } from "./chunk-A74EIJKM.js";
 import "./chunk-2BDEB7LG.js";
 import {
+  Toast,
+  ToastModule
+} from "./chunk-AYC4YOKB.js";
+import "./chunk-5T35AX3S.js";
+import {
   NavigationEnd,
   Router,
   RouterLink,
@@ -37,15 +42,21 @@ import {
   bootstrapApplication
 } from "./chunk-DPFCOBAB.js";
 import {
-  Toast,
-  ToastModule
-} from "./chunk-AYC4YOKB.js";
-import "./chunk-5T35AX3S.js";
-import {
   UsineContextService
 } from "./chunk-7GQXFRTV.js";
 import "./chunk-EHW3ML5B.js";
 import "./chunk-VG7UIPHA.js";
+import {
+  environment
+} from "./chunk-CSVYKJ4F.js";
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+  provideHttpClient,
+  withFetch,
+  withInterceptors
+} from "./chunk-K7KGEHY2.js";
 import {
   Select,
   SelectModule
@@ -73,17 +84,6 @@ import {
   TooltipModule
 } from "./chunk-STJD6333.js";
 import "./chunk-OKTFETPA.js";
-import {
-  environment
-} from "./chunk-CSVYKJ4F.js";
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpParams,
-  provideHttpClient,
-  withFetch,
-  withInterceptors
-} from "./chunk-K7KGEHY2.js";
 import "./chunk-HDOAYFIF.js";
 import "./chunk-K2CZRXIH.js";
 import "./chunk-CJMBUE5J.js";
@@ -2080,31 +2080,31 @@ var AppMenu = class _AppMenu {
             icon: "pi pi-fw pi-receipt",
             routerLink: ["/ventes/factures"],
             visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
-          },
-          {
-            label: "Factures vente liste 2",
-            icon: "pi pi-fw pi-receipt",
-            routerLink: ["/ventes/factures-vente-liste2"],
-            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
-          },
-          {
-            label: "Factures vente detail 2",
-            icon: "pi pi-fw pi-receipt",
-            routerLink: ["/ventes/factures-vente-detail2/1"],
-            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
-          },
-          {
-            label: "Factures vente detail 3",
-            icon: "pi pi-fw pi-receipt",
-            routerLink: ["/ventes/factures-vente-detail3/1"],
-            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
-          },
-          {
-            label: "Factures vente detail 4",
-            icon: "pi pi-fw pi-receipt",
-            routerLink: ["/ventes/factures-vente-detail4/1"],
-            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
           }
+          // {
+          //     label: 'Factures vente liste 2',
+          //     icon: 'pi pi-fw pi-receipt',
+          //     routerLink: ['/ventes/factures-vente-liste2'],
+          //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+          // },
+          // {
+          //     label: 'Factures vente detail 2',
+          //     icon: 'pi pi-fw pi-receipt',
+          //     routerLink: ['/ventes/factures-vente-detail2/1'],
+          //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+          // },
+          // {
+          //     label: 'Factures vente detail 4',
+          //     icon: 'pi pi-fw pi-receipt',
+          //     routerLink: ['/ventes/factures-vente-detail4/1'],
+          //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+          // },
+          // {
+          //     label: 'Command vente detail 2',
+          //     icon: 'pi pi-fw pi-receipt',
+          //     routerLink: ['/ventes/commandes/commande-vente-detail2/1'],
+          //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+          // },
           // {
           //     label: 'Facture packing',
           //     icon: 'pi pi-fw pi-box',
@@ -2994,7 +2994,7 @@ var AppLayout = class _AppLayout {
   }
   updateAccueilBodyClass(url) {
     const path = url.split("?")[0].replace(/\/$/, "") || "/";
-    const isAccueil = path === "/" || path === "";
+    const isAccueil = path === "/" || path === "" || path === "/dashboard";
     if (isAccueil) {
       document.body.classList.add(BODY_CLASS_ACCUEIL);
     } else {
@@ -4401,73 +4401,73 @@ var appRoutes = [
       },
       {
         path: "dashboard",
-        loadComponent: () => import("./chunk-V4WOVPSY.js").then((c) => c.EcommerceDashboard),
+        loadComponent: () => import("./chunk-73B3UL64.js").then((c) => c.EcommerceDashboard),
         data: { breadcrumb: "dashboard" }
       },
       {
         path: "comptabilite",
-        loadChildren: () => import("./chunk-BWVCZTAS.js"),
+        loadChildren: () => import("./chunk-NATYMLDQ.js"),
         data: { breadcrumb: "comptabilite" }
       },
       {
         path: "contacts",
-        loadChildren: () => import("./chunk-ZWHOTVXR.js"),
+        loadChildren: () => import("./chunk-V4SNEDHB.js"),
         data: { breadcrumb: "contacts" }
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-44RS3QHB.js"),
+        loadChildren: () => import("./chunk-XMFNKPYL.js"),
         data: { breadcrumb: "packings" }
       },
       {
         path: "produits",
-        loadChildren: () => import("./chunk-JNJNEORF.js"),
+        loadChildren: () => import("./chunk-QDYOFYVV.js"),
         data: { breadcrumb: "produits" }
       },
       {
         path: "vehicules",
-        loadChildren: () => import("./chunk-WSAVUUW7.js"),
+        loadChildren: () => import("./chunk-QLJ52SLB.js"),
         data: { breadcrumb: "vehicules" }
       },
       {
         path: "ventes",
-        loadChildren: () => import("./chunk-U27EONFU.js"),
+        loadChildren: () => import("./chunk-SG3B7I4M.js"),
         data: { breadcrumb: "ventes" }
       },
       {
         path: "billing",
-        loadChildren: () => import("./chunk-CRUVMFUV.js"),
+        loadChildren: () => import("./chunk-DII5UZE7.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "billing", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "forfaits",
-        loadChildren: () => import("./chunk-QF4OI34M.js"),
+        loadChildren: () => import("./chunk-BBTY3K4I.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "forfaits", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "organisations",
-        loadChildren: () => import("./chunk-6KBUCHWE.js"),
+        loadChildren: () => import("./chunk-WC6MIZFJ.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "organisations", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "sites",
-        loadChildren: () => import("./chunk-PG3JJJHW.js"),
+        loadChildren: () => import("./chunk-XQ26N6PJ.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "sites", permissions: ["sites.read"] }
       },
       {
         path: "parametres",
-        loadChildren: () => import("./chunk-CAMEENQY.js"),
+        loadChildren: () => import("./chunk-OPM2ZXK4.js"),
         data: { breadcrumb: "parametres" }
       },
       {
         path: "roles",
         canActivate: [authorizationGuard],
         data: { breadcrumb: "roles", roles: ["admin_entreprise", "super_admin", "super-admin"] },
-        loadChildren: () => import("./chunk-YQ3LR6LG.js")
+        loadChildren: () => import("./chunk-GAZVEF5H.js")
       },
       {
         path: "profile",
@@ -4476,17 +4476,17 @@ var appRoutes = [
       },
       {
         path: "usermanagement",
-        loadChildren: () => import("./chunk-ZF3MNYTH.js"),
+        loadChildren: () => import("./chunk-GVBJ23VR.js"),
         data: { breadcrumb: "usermanagement" }
       },
       {
         path: "dashboard-banking",
-        loadComponent: () => import("./chunk-IKMP6PN3.js").then((c) => c.BankingDashboard),
+        loadComponent: () => import("./chunk-XQXA7IF2.js").then((c) => c.BankingDashboard),
         data: { breadcrumb: "dashboard-banking" }
       },
       {
         path: "uikit",
-        loadChildren: () => import("./chunk-WWQBNQOU.js"),
+        loadChildren: () => import("./chunk-3G5Q7XBY.js"),
         data: { breadcrumb: "uikit" }
       },
       {
@@ -4496,12 +4496,12 @@ var appRoutes = [
       },
       {
         path: "pages",
-        loadChildren: () => import("./chunk-6NODKUPA.js"),
+        loadChildren: () => import("./chunk-EW3QFTCN.js"),
         data: { breadcrumb: "pages" }
       },
       {
         path: "apps",
-        loadChildren: () => import("./chunk-NNGGXBCJ.js"),
+        loadChildren: () => import("./chunk-3LDDWZAI.js"),
         data: { breadcrumb: "apps" }
       },
       {
@@ -4511,7 +4511,7 @@ var appRoutes = [
       },
       {
         path: "ecommerce",
-        loadChildren: () => import("./chunk-4OD64GX7.js"),
+        loadChildren: () => import("./chunk-5NLWO4SC.js"),
         data: { breadcrumb: "ecommerce" }
       }
     ]
@@ -4534,7 +4534,7 @@ var appRoutes = [
   {
     path: "auth",
     canActivate: [guestGuard],
-    loadChildren: () => import("./chunk-3DQP6VU5.js"),
+    loadChildren: () => import("./chunk-3754LROZ.js"),
     data: { breadcrumb: "auth" }
   },
   {
