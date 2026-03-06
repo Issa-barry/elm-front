@@ -127,7 +127,7 @@ export class FactureVenteListe implements OnInit {
   }
 
   goDetail(id: number) {
-    this.router.navigate(['/ventes/factures', id]);
+    this.router.navigate(['/ventes/factures-vente-detail3/', id]);
   }
 
   // ── Encaissement ──────────────────────────────────────────────────────

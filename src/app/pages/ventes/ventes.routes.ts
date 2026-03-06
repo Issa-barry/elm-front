@@ -17,6 +17,11 @@ export default [
     loadComponent: () => import('./commande-vente-detail/commande-vente-detail').then(c => c.CommandeVenteDetail),
       data: { breadcrumb: 'commandes' },
 },
+ {
+    path: 'commandes/commande-vente-detail2/:id',
+    loadComponent: () => import('./commande-vente-detail2/commande-vente-detail2').then(c => c.CommandeVenteDetail2),
+      data: { breadcrumb: 'commandes' },
+},
   {
     path: 'factures-vente-liste2',
     loadComponent: () => import('./facture-vente-liste2/facture-vente-liste2').then(c => c.FactureVenteListe2),
@@ -30,6 +35,11 @@ export default [
 {
   path: 'factures-vente-detail3/:id',
   loadComponent: () => import('./facture-vente-detail3/facture-vente-detail3').then(c => c.FactureVenteDetail3),
+    data: { breadcrumb: 'factures-vente-detail3' },
+},
+{
+  path: 'factures-vente-detail4/:id',
+  loadComponent: () => import('./facture-vente-detail4/facture-vente-detail4').then(c => c.FactureVenteDetail4),
     data: { breadcrumb: 'factures-vente-detail2' },
 },
   {

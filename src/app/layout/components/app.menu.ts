@@ -87,10 +87,29 @@ export class AppMenu {
                                 routerLink: ['/ventes/factures'],
                                 visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
                             },
+                            // {
+                            //     label: 'Factures vente liste 2',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/ventes/factures-vente-liste2'],
+                            //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            // },
+                            // {
+                            //     label: 'Factures vente detail 2',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/ventes/factures-vente-detail2/1'],
+                            //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            // },
+
+                            // {
+                            //     label: 'Factures vente detail 4',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/ventes/factures-vente-detail4/1'],
+                            //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            // },
                             {
-                                label: 'Factures vente liste 2',
+                                label: 'Command vente detail 2',
                                 icon: 'pi pi-fw pi-receipt',
-                                routerLink: ['/ventes/factures-vente-liste2'],
+                                routerLink: ['/ventes/commandes/commande-vente-detail2/1'],
                                 visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
                             },
                             // {

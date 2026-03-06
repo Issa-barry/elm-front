@@ -1,6 +1,4 @@
 <p-toast />
-
-<!-- ══ SKELETON ══════════════════════════════════════════════════════════════ -->
 @if (loading) {
     <div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
         <div class="flex items-center gap-3 mb-8">
@@ -22,12 +20,8 @@
         </div>
     </div>
 }
-
-<!-- ══ CONTENU ═══════════════════════════════════════════════════════════════ -->
 @if (!loading && commande) {
     <div class="bg-surface-0 dark:bg-surface-900 p-12 md:p-20">
-
-        <!-- ── Header ──────────────────────────────────────────────────────── -->
         <div class="flex flex-col lg:flex-row md:justify-between items-start lg:items-end gap-4 mb-8">
             <div class="flex items-start gap-3 flex-1">
                 <button pButton [text]="true" [rounded]="true" class="w-10 h-10 flex-shrink-0" (click)="goBack()">
@@ -37,29 +31,23 @@
                     <h1 class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight">Commande Vente</h1>
                     <p class="text-surface-500 dark:text-surface-400 text-base leading-tight">
                         Total = {{ formatMontant(commande.total_commande) }} &nbsp;|&nbsp;
-                        Encaissé = {{ formatMontant(commande.facture?.montant_encaisse) }} &nbsp;|&nbsp;
+                        Encaisse = {{ formatMontant(commande.facture?.montant_encaisse) }} &nbsp;|&nbsp;
                         Restant = {{ formatMontant(commande.facture?.montant_restant) }}
                     </p>
                 </div>
             </div>
 
-            @if (canEncaisserFacture) {
+            @if (commande?.facture?.id) {
                 <div>
-                    <button pButton severity="primary" (click)="openEncaissementDialog()">
-                        <i pButtonIcon class="pi pi-plus"></i>
-                        <span pButtonLabel>Encaisser</span>
+                    <button pButton severity="primary" (click)="goFacture()">
+                        <i pButtonIcon class="pi pi-file-invoice"></i>
+                        <span pButtonLabel>Voir la facture</span>
                     </button>
                 </div>
             }
         </div>
-
-        <!-- ── Carte commande ───────────────────────────────────────────────── -->
         <div class="bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden transition-all duration-300">
-
-            <!-- Row résumé -->
             <div class="p-6 flex flex-col lg:flex-row justify-start lg:items-center gap-6">
-
-                <!-- Véhicule + référence -->
                 <div class="flex items-center gap-4 flex-1">
                     @if (commande.vehicule?.photo_url) {
                         <img class="w-12 h-12 rounded object-cover flex-shrink-0" [src]="commande.vehicule!.photo_url" [alt]="commande.vehicule!.nom_vehicule" />
@@ -70,28 +58,20 @@
                     }
                     <div class="flex flex-col gap-1">
                         <div class="text-surface-900 dark:text-surface-0 text-lg font-medium leading-tight">{{ commande.reference }}</div>
-                        <div class="text-surface-500 dark:text-surface-400 text-base leading-tight">{{ commande.vehicule?.nom_vehicule ?? '—' }}</div>
+                        <div class="text-surface-500 dark:text-surface-400 text-base leading-tight">{{ commande.vehicule?.nom_vehicule ?? '-' }}</div>
                     </div>
                 </div>
-
-                <!-- Réf facture, date, statut, montant -->
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
-
-                    <!-- Réf facture -->
                     <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
                         <div class="px-2 py-1 bg-surface-100 dark:bg-surface-800 rounded-md">
                             <span class="text-surface-600 dark:text-surface-300 text-sm font-bold font-mono">
-                                {{ commande.facture?.reference ?? '—' }}
+                                {{ commande.facture?.reference ?? '-' }}
                             </span>
                         </div>
                     </div>
-
-                    <!-- Date -->
                     <div class="flex flex-col items-start sm:items-center flex-1">
                         <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">{{ formatDate(commande.created_at) }}</span>
                     </div>
-
-                    <!-- Statut -->
                     <div class="flex flex-col items-start sm:items-center flex-1 min-w-0">
                         @if (commande.facture) {
                             <div
@@ -127,29 +107,21 @@
                                 >{{ getStatutLabel(commande.facture.statut_facture) }}</span>
                             </div>
                         } @else {
-                            <span class="text-surface-400 dark:text-surface-500 text-sm">—</span>
+                            <span class="text-surface-400 dark:text-surface-500 text-sm">-</span>
                         }
                     </div>
-
-                    <!-- Montant total -->
                     <div class="flex flex-col items-start sm:items-center flex-1">
                         <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">{{ formatMontant(commande.total_commande) }}</span>
                     </div>
 
                 </div>
             </div>
-
-            <!-- ── Détail ──────────────────────────────────────────────────── -->
             <div class="overflow-hidden">
                 <div class="flex flex-col gap-6 p-6 border-t border-surface-200 dark:border-surface-700">
-
-                    <!-- Détail commande + Véhicule -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                        <!-- Détail de la commande -->
                         <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
                             <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
-                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Détail de la commande</h3>
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Detail de la commande</h3>
                             </div>
                             <div class="p-6 flex flex-col gap-5">
                                 <div class="flex gap-2">
@@ -157,7 +129,7 @@
                                     <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.total_commande) }}</span>
                                 </div>
                                 <div class="flex gap-2">
-                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Encaissé</span>
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Encaisse</span>
                                     <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.facture?.montant_encaisse) }}</span>
                                 </div>
                                 <div class="flex gap-2">
@@ -165,30 +137,28 @@
                                     <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.facture?.montant_restant) }}</span>
                                 </div>
                                 <div class="flex gap-2">
-                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Date de création</span>
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Date de creation</span>
                                     <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatDate(commande.created_at) }}</span>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Véhicule -->
                         <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
                             <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
-                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Véhicules</h3>
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Vehicules</h3>
                             </div>
                             <div class="p-6 flex flex-col gap-5">
                                 <div class="flex gap-2">
-                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Nom du véhicule</span>
-                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ commande.vehicule?.nom_vehicule ?? '—' }}</span>
+                                    <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Nom du vehicule</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ commande.vehicule?.nom_vehicule ?? '-' }}</span>
                                 </div>
                                 <div class="flex gap-2">
                                     <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Immatriculation</span>
-                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium font-mono leading-tight">{{ commande.vehicule?.immatriculation ?? '—' }}</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium font-mono leading-tight">{{ commande.vehicule?.immatriculation ?? '-' }}</span>
                                 </div>
                                 @let prop = commande.vehicule?.proprietaire;
                                 @if (prop) {
                                     <div class="flex gap-2">
-                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Propriétaire</span>
+                                        <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Proprietaire</span>
                                         <div class="flex-1">
                                             <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ prop.prenom }} {{ prop.nom }}</div>
                                             @if (prop.phone) {
@@ -212,8 +182,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Produits -->
                     @if (commande.lignes && commande.lignes.length > 0) {
                         <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
                             <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
@@ -227,8 +195,8 @@
                                                 <i class="pi pi-box text-sm text-surface-500 dark:text-surface-400"></i>
                                             </div>
                                             <div>
-                                                <div class="text-surface-700 dark:text-surface-300 text-base font-medium leading-tight">{{ ligne.produit?.nom ?? '—' }}</div>
-                                                <div class="text-surface-400 dark:text-surface-500 text-sm mt-0.5">Qté : {{ ligne.qte }}</div>
+                                                <div class="text-surface-700 dark:text-surface-300 text-base font-medium leading-tight">{{ ligne.produit?.nom ?? '-' }}</div>
+                                                <div class="text-surface-400 dark:text-surface-500 text-sm mt-0.5">Qte : {{ ligne.qte }}</div>
                                             </div>
                                         </div>
                                         <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(ligne.total_ligne) }}</span>
@@ -242,43 +210,71 @@
                             </div>
                         </div>
                     }
-
-                    <!-- Encaissements -->
-                    <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
-                        <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
-                            <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Encaissements</h3>
-                            @if (canEncaisserFacture) {
-                                <button pButton [text]="true" [rounded]="true" severity="primary" class="h-9" (click)="openEncaissementDialog()">
-                                    <i pButtonIcon class="pi pi-plus"></i>
-                                    <span pButtonLabel>Encaisser</span>
-                                </button>
-                            }
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700 flex justify-between items-center">
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Resume encaissement</h3>
+                                @if (commande?.facture?.id) {
+                                    <button pButton [text]="true" [rounded]="true" severity="primary" class="h-9" (click)="goFacture()">
+                                        <i pButtonIcon class="pi pi-eye"></i>
+                                        <span pButtonLabel>Voir la facture</span>
+                                    </button>
+                                }
+                            </div>
+                            <div class="p-6 flex flex-col gap-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-surface-700 dark:text-surface-300 text-base">Total encaisse</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ formatMontant(commande.facture?.montant_encaisse) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-surface-700 dark:text-surface-300 text-base">Restant du</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ formatMontant(commande.facture?.montant_restant) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-surface-700 dark:text-surface-300 text-base">Nombre de versements</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ encaissementsCount }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-surface-700 dark:text-surface-300 text-base">Dernier paiement</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ formatDate(lastEncaissementDate) }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="p-6 flex flex-col gap-5">
-                            @if (commande.facture?.encaissements && commande.facture!.encaissements!.length > 0) {
-                                <div class="flex flex-col gap-4">
-                                    @for (enc of commande.facture!.encaissements!; track enc.id) {
-                                        <div class="flex justify-between items-center">
-                                            <div class="flex items-center gap-2">
-                                                <i [class]="'pi ' + getModeIcon(enc.mode_paiement) + ' text-surface-400'"></i>
-                                                <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">{{ getModeLabel(enc.mode_paiement) }}</span>
-                                                <span class="text-surface-400 dark:text-surface-500 text-sm">· {{ formatDate(enc.date_encaissement) }}</span>
-                                            </div>
-                                            <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(enc.montant) }}</span>
-                                        </div>
-                                    }
-                                    <div class="h-px bg-surface-200 dark:bg-surface-700"></div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Total</span>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.facture?.montant_encaisse) }}</span>
+
+                        <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+                            <div class="p-4 bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                                <h3 class="text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Jalons</h3>
+                            </div>
+                            <div class="p-6 flex flex-col gap-4">
+                                <div class="flex items-center gap-3">
+                                    <i class="pi pi-check-circle text-green-600"></i>
+                                    <div class="flex-1">
+                                        <div class="text-surface-900 dark:text-surface-0 text-sm font-medium">Commande cree</div>
+                                        <div class="text-surface-500 dark:text-surface-400 text-xs">{{ formatDate(commande.created_at) }}</div>
                                     </div>
                                 </div>
-                            } @else {
-                                <div class="text-center py-6 text-surface-400 dark:text-surface-500">
-                                    <i class="pi pi-inbox text-3xl mb-2 block"></i>
-                                    Aucun encaissement enregistré
+                                <div class="flex items-center gap-3">
+                                    <i [class]="commande?.facture?.id ? 'pi pi-check-circle text-green-600' : 'pi pi-circle text-surface-400'"></i>
+                                    <div class="flex-1">
+                                        <div class="text-surface-900 dark:text-surface-0 text-sm font-medium">Facture generee</div>
+                                        <div class="text-surface-500 dark:text-surface-400 text-xs">{{ commande?.facture?.id ? formatDate(commande.created_at) : '-' }}</div>
+                                    </div>
                                 </div>
-                            }
+                                <div class="flex items-center gap-3">
+                                    <i [class]="encaissementsCount > 0 ? 'pi pi-check-circle text-green-600' : 'pi pi-circle text-surface-400'"></i>
+                                    <div class="flex-1">
+                                        <div class="text-surface-900 dark:text-surface-0 text-sm font-medium">Premier encaissement</div>
+                                        <div class="text-surface-500 dark:text-surface-400 text-xs">{{ formatDate(firstEncaissementDate) }}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i [class]="commande?.facture?.statut_facture === 'payee' ? 'pi pi-check-circle text-green-600' : 'pi pi-circle text-surface-400'"></i>
+                                    <div class="flex-1">
+                                        <div class="text-surface-900 dark:text-surface-0 text-sm font-medium">Solde paye</div>
+                                        <div class="text-surface-500 dark:text-surface-400 text-xs">{{ commande?.facture?.statut_facture === 'payee' ? formatDate(lastEncaissementDate) : '-' }}</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -289,75 +285,3 @@
     </div>
 }
 
-<!-- ══ DIALOG ENCAISSEMENT ═══════════════════════════════════════════════════ -->
-<p-dialog
-    [(visible)]="encaissementDialogVisible"
-    [modal]="true"
-    header="Ajouter un encaissement"
-    [style]="{ width: '26rem' }"
-    [dismissableMask]="true"
->
-    @if (commande?.facture) {
-        <div class="mb-4 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-lg p-4 flex flex-col gap-2">
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-surface-500">Facture</span>
-                <span class="font-mono font-semibold text-surface-700 dark:text-surface-300 text-xs">{{ commande!.facture!.reference }}</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-sm text-surface-500">Restant dû</span>
-                <span class="font-bold text-orange-600 text-base">{{ formatMontant(commande!.facture!.montant_restant) }}</span>
-            </div>
-        </div>
-    }
-
-    <form [formGroup]="encaissementForm" class="flex flex-col gap-5 pt-2">
-        <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Montant *</label>
-            <p-inputNumber
-                formControlName="montant"
-                [min]="1"
-                suffix=" GNF"
-                [useGrouping]="true"
-                styleClass="w-full"
-                [ngClass]="{'ng-invalid ng-dirty': isEncaissInvalid('montant')}"
-            ></p-inputNumber>
-            @if (isEncaissInvalid('montant')) {
-                <small class="text-red-500">Montant obligatoire</small>
-            }
-        </div>
-
-        <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Mode de paiement *</label>
-            <p-select
-                formControlName="mode_paiement"
-                [options]="modePaiementOptions"
-                optionLabel="label"
-                optionValue="value"
-                styleClass="w-full"
-                appendTo="body"
-            ></p-select>
-        </div>
-
-        <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Date *</label>
-            <p-datepicker
-                formControlName="date_encaissement"
-                dateFormat="dd/mm/yy"
-                [showIcon]="true"
-                styleClass="w-full"
-                appendTo="body"
-                [readonlyInput]="true"
-            ></p-datepicker>
-        </div>
-
-        <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-surface-700 dark:text-surface-300">Note</label>
-            <input pInputText formControlName="note" placeholder="Optionnel" class="w-full" />
-        </div>
-    </form>
-
-    <ng-template #footer>
-        <button pButton severity="secondary" [text]="true" label="Annuler" (click)="encaissementDialogVisible = false"></button>
-        <button pButton label="Enregistrer" icon="pi pi-check" (click)="onSaveEncaissement()" [loading]="savingEncaissement"></button>
-    </ng-template>
-</p-dialog>

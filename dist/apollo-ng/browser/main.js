@@ -1,11 +1,11 @@
 import {
   AppConfigurator,
   Qr
-} from "./chunk-KSSIRR3U.js";
+} from "./chunk-RLDCI6SQ.js";
 import {
   Drawer,
   DrawerModule
-} from "./chunk-DF7SEUEM.js";
+} from "./chunk-JVEWW7TT.js";
 import "./chunk-QHAUGTLE.js";
 import {
   LayoutService
@@ -20,6 +20,7 @@ import {
 import {
   AuthService
 } from "./chunk-A74EIJKM.js";
+import "./chunk-2BDEB7LG.js";
 import {
   NavigationEnd,
   Router,
@@ -35,28 +36,16 @@ import {
   DomRendererFactory2,
   bootstrapApplication
 } from "./chunk-DPFCOBAB.js";
-import "./chunk-2BDEB7LG.js";
 import {
   Toast,
   ToastModule
 } from "./chunk-AYC4YOKB.js";
 import "./chunk-5T35AX3S.js";
-import "./chunk-EHW3ML5B.js";
-import "./chunk-VG7UIPHA.js";
 import {
   UsineContextService
 } from "./chunk-7GQXFRTV.js";
-import {
-  environment
-} from "./chunk-CSVYKJ4F.js";
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpParams,
-  provideHttpClient,
-  withFetch,
-  withInterceptors
-} from "./chunk-K7KGEHY2.js";
+import "./chunk-EHW3ML5B.js";
+import "./chunk-VG7UIPHA.js";
 import {
   Select,
   SelectModule
@@ -84,15 +73,26 @@ import {
   TooltipModule
 } from "./chunk-STJD6333.js";
 import "./chunk-OKTFETPA.js";
+import {
+  environment
+} from "./chunk-CSVYKJ4F.js";
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+  provideHttpClient,
+  withFetch,
+  withInterceptors
+} from "./chunk-K7KGEHY2.js";
 import "./chunk-HDOAYFIF.js";
 import "./chunk-K2CZRXIH.js";
+import "./chunk-CJMBUE5J.js";
+import "./chunk-V6ACHPKV.js";
 import {
   Button,
   ButtonDirective,
   ButtonModule
 } from "./chunk-ZB6W2VB3.js";
-import "./chunk-CJMBUE5J.js";
-import "./chunk-V6ACHPKV.js";
 import {
   Badge,
   BadgeModule
@@ -2086,6 +2086,24 @@ var AppMenu = class _AppMenu {
             icon: "pi pi-fw pi-receipt",
             routerLink: ["/ventes/factures-vente-liste2"],
             visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
+          },
+          {
+            label: "Factures vente detail 2",
+            icon: "pi pi-fw pi-receipt",
+            routerLink: ["/ventes/factures-vente-detail2/1"],
+            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
+          },
+          {
+            label: "Factures vente detail 3",
+            icon: "pi pi-fw pi-receipt",
+            routerLink: ["/ventes/factures-vente-detail3/1"],
+            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
+          },
+          {
+            label: "Factures vente detail 4",
+            icon: "pi pi-fw pi-receipt",
+            routerLink: ["/ventes/factures-vente-detail4/1"],
+            visible: this.authService.hasAnyPermission(["factures-livraisons.read", "encaissements.read"])
           }
           // {
           //     label: 'Facture packing',
@@ -2173,42 +2191,42 @@ var AppMenu = class _AppMenu {
             ]
           }
         ]
-      },
-      {
-        label: "Administration",
-        icon: "pi pi-shield",
-        items: [
-          {
-            label: "Organisations",
-            icon: "pi pi-fw pi-building",
-            routerLink: ["/organisations"],
-            visible: this.authService.hasAnyRole(["super_admin", "super-admin"])
-          },
-          {
-            label: "Forfaits",
-            icon: "pi pi-fw pi-tag",
-            routerLink: ["/forfaits"],
-            visible: this.authService.hasAnyRole(["super_admin", "super-admin"])
-          },
-          {
-            label: "Facturation",
-            icon: "pi pi-fw pi-receipt",
-            routerLink: ["/billing"],
-            visible: this.authService.hasAnyRole(["super_admin", "super-admin"])
-          },
-          {
-            label: "Sites",
-            icon: "pi pi-fw pi-map-marker",
-            routerLink: ["/sites"],
-            visible: this.authService.hasAnyPermission(["sites.read"])
-          },
-          {
-            label: "Parametres",
-            icon: "pi pi-fw pi-cog",
-            routerLink: ["/parametres"]
-          }
-        ]
       }
+      // {
+      //   label: 'Administration',
+      //   icon: 'pi pi-shield',
+      //   items: [
+      //     {
+      //       label: 'Organisations',
+      //       icon: 'pi pi-fw pi-building',
+      //       routerLink: ['/organisations'],
+      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
+      //     },
+      //     {
+      //       label: 'Forfaits',
+      //       icon: 'pi pi-fw pi-tag',
+      //       routerLink: ['/forfaits'],
+      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
+      //     },
+      //     {
+      //       label: 'Facturation',
+      //       icon: 'pi pi-fw pi-receipt',
+      //       routerLink: ['/billing'],
+      //       visible: this.authService.hasAnyRole(['super_admin', 'super-admin']),
+      //     },
+      //     {
+      //       label: 'Sites',
+      //       icon: 'pi pi-fw pi-map-marker',
+      //       routerLink: ['/sites'],
+      //       visible: this.authService.hasAnyPermission(['sites.read']),
+      //     },
+      //     {
+      //       label: 'Parametres',
+      //       icon: 'pi pi-fw pi-cog',
+      //       routerLink: ['/parametres'],
+      //     },
+      //   ],
+      // },
       // {
       //   label: 'Compte',
       //   icon: 'pi pi-user',
@@ -4383,73 +4401,73 @@ var appRoutes = [
       },
       {
         path: "dashboard",
-        loadComponent: () => import("./chunk-MNI7HVPJ.js").then((c) => c.EcommerceDashboard),
+        loadComponent: () => import("./chunk-V4WOVPSY.js").then((c) => c.EcommerceDashboard),
         data: { breadcrumb: "dashboard" }
       },
       {
         path: "comptabilite",
-        loadChildren: () => import("./chunk-LYJ7RUAW.js"),
+        loadChildren: () => import("./chunk-BWVCZTAS.js"),
         data: { breadcrumb: "comptabilite" }
       },
       {
         path: "contacts",
-        loadChildren: () => import("./chunk-L2FNYYRS.js"),
+        loadChildren: () => import("./chunk-ZWHOTVXR.js"),
         data: { breadcrumb: "contacts" }
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-H2XUIOFM.js"),
+        loadChildren: () => import("./chunk-44RS3QHB.js"),
         data: { breadcrumb: "packings" }
       },
       {
         path: "produits",
-        loadChildren: () => import("./chunk-WDVFGPFM.js"),
+        loadChildren: () => import("./chunk-JNJNEORF.js"),
         data: { breadcrumb: "produits" }
       },
       {
         path: "vehicules",
-        loadChildren: () => import("./chunk-HMH32FN4.js"),
+        loadChildren: () => import("./chunk-WSAVUUW7.js"),
         data: { breadcrumb: "vehicules" }
       },
       {
         path: "ventes",
-        loadChildren: () => import("./chunk-OGLNWLRT.js"),
+        loadChildren: () => import("./chunk-U27EONFU.js"),
         data: { breadcrumb: "ventes" }
       },
       {
         path: "billing",
-        loadChildren: () => import("./chunk-4LAQMW66.js"),
+        loadChildren: () => import("./chunk-CRUVMFUV.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "billing", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "forfaits",
-        loadChildren: () => import("./chunk-LD7AI7HX.js"),
+        loadChildren: () => import("./chunk-QF4OI34M.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "forfaits", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "organisations",
-        loadChildren: () => import("./chunk-ZPQHODT3.js"),
+        loadChildren: () => import("./chunk-6KBUCHWE.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "organisations", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "sites",
-        loadChildren: () => import("./chunk-MRI3LM3S.js"),
+        loadChildren: () => import("./chunk-PG3JJJHW.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "sites", permissions: ["sites.read"] }
       },
       {
         path: "parametres",
-        loadChildren: () => import("./chunk-QZC2DJ4H.js"),
+        loadChildren: () => import("./chunk-CAMEENQY.js"),
         data: { breadcrumb: "parametres" }
       },
       {
         path: "roles",
         canActivate: [authorizationGuard],
         data: { breadcrumb: "roles", roles: ["admin_entreprise", "super_admin", "super-admin"] },
-        loadChildren: () => import("./chunk-SWCX2GAG.js")
+        loadChildren: () => import("./chunk-YQ3LR6LG.js")
       },
       {
         path: "profile",
@@ -4458,17 +4476,17 @@ var appRoutes = [
       },
       {
         path: "usermanagement",
-        loadChildren: () => import("./chunk-CV4G3QZI.js"),
+        loadChildren: () => import("./chunk-ZF3MNYTH.js"),
         data: { breadcrumb: "usermanagement" }
       },
       {
         path: "dashboard-banking",
-        loadComponent: () => import("./chunk-EKPFH3B6.js").then((c) => c.BankingDashboard),
+        loadComponent: () => import("./chunk-IKMP6PN3.js").then((c) => c.BankingDashboard),
         data: { breadcrumb: "dashboard-banking" }
       },
       {
         path: "uikit",
-        loadChildren: () => import("./chunk-ZPW3YBTG.js"),
+        loadChildren: () => import("./chunk-WWQBNQOU.js"),
         data: { breadcrumb: "uikit" }
       },
       {
@@ -4478,22 +4496,22 @@ var appRoutes = [
       },
       {
         path: "pages",
-        loadChildren: () => import("./chunk-EN4FFIPT.js"),
+        loadChildren: () => import("./chunk-6NODKUPA.js"),
         data: { breadcrumb: "pages" }
       },
       {
         path: "apps",
-        loadChildren: () => import("./chunk-A3PKPPES.js"),
+        loadChildren: () => import("./chunk-NNGGXBCJ.js"),
         data: { breadcrumb: "apps" }
       },
       {
         path: "blocks",
-        loadChildren: () => import("./chunk-LIQSF2DP.js"),
+        loadChildren: () => import("./chunk-PQI7ZROK.js"),
         data: { breadcrumb: "blocks" }
       },
       {
         path: "ecommerce",
-        loadChildren: () => import("./chunk-LKIODOMY.js"),
+        loadChildren: () => import("./chunk-4OD64GX7.js"),
         data: { breadcrumb: "ecommerce" }
       }
     ]
@@ -4516,7 +4534,7 @@ var appRoutes = [
   {
     path: "auth",
     canActivate: [guestGuard],
-    loadChildren: () => import("./chunk-JMG3ROY3.js"),
+    loadChildren: () => import("./chunk-3DQP6VU5.js"),
     data: { breadcrumb: "auth" }
   },
   {
