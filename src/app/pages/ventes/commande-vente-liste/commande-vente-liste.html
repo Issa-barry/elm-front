@@ -140,7 +140,7 @@
     <p-menu #rowActionsMenu [model]="desktopRowMenuItems" [popup]="true" appendTo="body"></p-menu>
     <p-table
       #dt
-      [value]="commandes()"
+      [value]="commandesFiltreesParStatutFacture"
       [loading]="loading"
       [paginator]="true"
       [rows]="20"
@@ -159,6 +159,14 @@
                    placeholder="Rechercher une commande..." class="w-full" />
           </p-iconfield>
           <div class="flex flex-wrap gap-2 items-center w-full sm:w-auto">
+            <p-select
+              [options]="statutOptions"
+              [ngModel]="filtreStatut()"
+              (ngModelChange)="setFiltreStatut($event)"
+              optionLabel="label"
+              optionValue="value"
+              [style]="{ 'min-width': '160px' }"
+            />
             @if (canCreate) {
               <p-button label="Nouvelle commande" icon="pi pi-plus" [outlined]="true" (onClick)="openCreateDialog()" />
             }

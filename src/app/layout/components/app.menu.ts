@@ -48,7 +48,7 @@ export class AppMenu {
           {
             label: 'Stats-Ventes',
             icon: 'pi pi-fw pi-image',
-            routerLink: ['/dashboard-banking'],
+            routerLink: ['/dashboard-finance'],
           },
         ],
       },

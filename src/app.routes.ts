@@ -24,6 +24,16 @@ export const appRoutes: Routes = [
         data: { breadcrumb: 'dashboard' },
       },
       {
+        path: 'dashboard-banking',
+        loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then((c) => c.BankingDashboard),
+        data: { breadcrumb: 'dashboard-banking' },
+      },
+      {
+        path: 'dashboard-finance',
+        loadComponent: () => import('./app/pages/dashboards/finance/finance').then((c) => c.Finance),
+        data: { breadcrumb: 'dashboard-banking' },
+      },
+      {
         path: 'comptabilite',
         loadChildren: () => import('@/pages/comptabilite/comptabilite.routes'),
         data: { breadcrumb: 'comptabilite' },
@@ -98,11 +108,7 @@ export const appRoutes: Routes = [
         loadChildren: () => import('@/pages/usermanagement/usermanagement.routes'),
         data: { breadcrumb: 'usermanagement' },
       },
-      {
-        path: 'dashboard-banking',
-        loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then((c) => c.BankingDashboard),
-        data: { breadcrumb: 'dashboard-banking' },
-      },
+      
       {
         path: 'uikit',
         loadChildren: () => import('@/pages/uikit/uikit.routes'),

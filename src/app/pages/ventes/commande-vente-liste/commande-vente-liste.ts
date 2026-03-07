@@ -1,7 +1,7 @@
 import { Component, HostListener, Inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { MenuItem, MessageService } from 'primeng/api';
 import { TableModule, Table } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -28,7 +28,6 @@ import { AuthService } from '@/services/auth/auth.service';
 import {
   CommandeVente,
   STATUT_FACTURE_LABELS,
-  StatutCommandeVente,
   StatutFacture,
   StatutCommission,
   STATUT_COMMISSION_LABELS,
@@ -50,6 +49,7 @@ interface ProduitData {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
@@ -92,7 +92,14 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   motifAnnulation = '';
 
   // Filtre statut
-  filtreStatut = signal<'all' | StatutCommandeVente>('all');
+  filtreStatut = signal<'all' | StatutFacture>('all');
+  statutOptions: { label: string; value: 'all' | StatutFacture }[] = [
+    { label: 'Toutes', value: 'all' },
+    { label: 'Impayees', value: 'impayee' },
+    { label: 'Partielles', value: 'partiel' },
+    { label: 'Payees', value: 'payee' },
+    { label: 'Annulees', value: 'annulee' },
+  ];
 
   createForm!: FormGroup;
   vehiculeOptions: { label: string; value: number }[] = [];
@@ -110,10 +117,17 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   defaultProduitId: number | null = null;
   mobileSearchQuery = '';
 
+  get commandesFiltreesParStatutFacture(): CommandeVente[] {
+    const statut = this.filtreStatut();
+    if (statut === 'all') return this.commandes();
+    return this.commandes().filter((c) => c.facture?.statut_facture === statut);
+  }
+
   get filteredCommandes(): CommandeVente[] {
     const q = this.mobileSearchQuery.trim().toLowerCase();
-    if (!q) return this.commandes();
-    return this.commandes().filter((c) =>
+    const base = this.commandesFiltreesParStatutFacture;
+    if (!q) return base;
+    return base.filter((c) =>
       c.reference?.toLowerCase().includes(q) ||
       c.vehicule?.nom_vehicule?.toLowerCase().includes(q) ||
       c.vehicule?.immatriculation?.toLowerCase().includes(q)
@@ -393,15 +407,13 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     });
   }
 
-  setFiltreStatut(statut: 'all' | StatutCommandeVente): void {
+  setFiltreStatut(statut: 'all' | StatutFacture): void {
     this.filtreStatut.set(statut);
-    this.loadCommandes();
   }
 
   loadCommandes() {
     this.loading = true;
-    const statut = this.filtreStatut();
-    this.commandeService.getCommandes(statut !== 'all' ? { statut } : undefined).subscribe({
+    this.commandeService.getCommandes().subscribe({
       next: (resp) => {
         this.commandes.set(resp.data?.data ?? []);
         this.loading = false;
