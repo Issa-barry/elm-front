@@ -15,7 +15,7 @@ import { VentesEncaissementsPeriod } from '@/services/dashboard/dashboard.servic
             <div class="flex flex-col sm:flex-row items-center gap-4">
                 <img alt="avatar" src="/demo/images/avatar/circle/avatar-m-12.png" class="w-16 h-16 shrink-0" />
                 <div class="flex flex-col items-center sm:items-start">
-                    <span class="text-surface-900 dark:text-surface-0 font-bold text-4xl">{{ nomComplet() }}</span>
+                    <span class="text-surface-900 dark:text-surface-0 font-bold text-xl">{{ nomComplet() }}</span>
                     <p class="text-surface-600 dark:text-surface-200 m-0">{{ lastLoginLabel() }}</p>
                 </div>
             </div>

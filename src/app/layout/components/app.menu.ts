@@ -41,15 +41,16 @@ export class AppMenu {
         icon: 'pi pi-home',
         items: [
           {
+            label: 'Stats-Ventes ',
+            icon: 'pi pi-fw pi-chart-bar',
+            routerLink: ['/dashboard-finance'],
+          },
+          {
             label: 'Dashboard',
             icon: 'pi pi-fw pi-chart-bar',
             routerLink: ['/dashboard'],
           },
-          {
-            label: 'Stats-Ventes',
-            icon: 'pi pi-fw pi-image',
-            routerLink: ['/dashboard-finance'],
-          },
+          
         ],
       },
 // // Comptabilite

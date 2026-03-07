@@ -15,7 +15,7 @@ export const appRoutes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'dashboard-finance',
         pathMatch: 'full',
       },
       {

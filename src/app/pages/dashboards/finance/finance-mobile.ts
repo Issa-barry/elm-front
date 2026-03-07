@@ -51,8 +51,8 @@ export class FinanceMobile implements OnInit, OnChanges, AfterViewInit, OnDestro
     activeSlide = signal(0);
 
     readonly moduleShortcuts = [
-        { label: 'Dashboard',     icon: 'pi pi-home',          route: '/dashboard'              },
-        { label: 'Stats-Ventes',  icon: 'pi pi-chart-bar',     route: '/dashboard-finance'      },
+        { label: 'Dashboard',     icon: 'pi pi-th-large',      route: '/dashboard'              },
+        { label: 'Accueil',       icon: 'pi pi-home',          route: '/dashboard-finance'      },
         { label: 'Commissions',   icon: 'pi pi-percentage',    route: '/ventes/commissions'     },
         { label: 'Ventes',        icon: 'pi pi-shopping-cart', route: '/ventes/commandes'       },
         { label: 'Produits',      icon: 'pi pi-box',           route: '/produits'               },
