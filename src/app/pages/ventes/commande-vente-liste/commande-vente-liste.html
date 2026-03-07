@@ -100,10 +100,14 @@
               </div>
             </div>
 
-            <!-- Footer : lock + actions -->
+            <!-- Footer : statut commande + actions -->
             <div class="cv-commande-card__footer" (click)="$event.stopPropagation()">
               <div>
-                @if (isLocked(c)) {
+                @if (isAnnulee(c)) {
+                  <span class="cv-lock-badge" style="background:var(--p-red-100);color:var(--p-red-700)">
+                    <i class="pi pi-ban text-xs"></i> Annulée
+                  </span>
+                } @else if (isLocked(c)) {
                   <span class="cv-lock-badge">
                     <i class="pi pi-lock text-xs"></i> Verrouillée
                   </span>
@@ -117,8 +121,9 @@
                             [disabled]="isLocked(c)" (onClick)="openEditDialog(c)" />
                 }
                 @if (canDelete) {
-                  <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" size="small"
-                            [disabled]="isLocked(c)" (onClick)="openDeleteDialog(c)" />
+                  <p-button icon="pi pi-ban" severity="danger" [text]="true" [rounded]="true" size="small"
+                            pTooltip="Annuler la commande" tooltipPosition="top"
+                            [disabled]="isAnnulee(c)" (onClick)="openAnnulationDialog(c)" />
                 }
               </div>
             </div>
@@ -132,6 +137,7 @@
 
   <!-- ── Table desktop ────────────────────────────────────────────────── -->
   <div class="cv-tableau-desktop card">
+    <p-menu #rowActionsMenu [model]="desktopRowMenuItems" [popup]="true" appendTo="body"></p-menu>
     <p-table
       #dt
       [value]="commandes()"
@@ -152,7 +158,7 @@
             <input pInputText type="text" (input)="onGlobalFilter(dt, $event)"
                    placeholder="Rechercher une commande..." class="w-full" />
           </p-iconfield>
-          <div class="flex gap-2 w-full sm:w-auto">
+          <div class="flex flex-wrap gap-2 items-center w-full sm:w-auto">
             @if (canCreate) {
               <p-button label="Nouvelle commande" icon="pi pi-plus" [outlined]="true" (onClick)="openCreateDialog()" />
             }
@@ -184,19 +190,25 @@
       <ng-template #body let-c>
         <tr>
           <td (click)="goDetail(c.id)" class="cursor-pointer">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex-shrink-0">
-                <i class="pi pi-truck text-sm"></i>
+            <div class="flex items-start gap-3">
+              <div class="flex items-center justify-center w-6 h-10 rounded-full flex-shrink-0"
+                   [ngClass]="isAnnulee(c) ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-blue-700'">
+                <i class="text-sm" [ngClass]="isAnnulee(c) ? 'pi pi-ban' : 'pi pi-truck'"></i>
               </div>
-              <div class="font-semibold font-mono text-sm">{{ c.reference }}</div>
+              <div class="flex flex-col">
+                <div class="font-semibold font-mono">{{ c.reference }}</div>
+                @if (isAnnulee(c)) {
+                  <span class="text-xs text-red-500 font-medium">Annulée</span>
+                }
+              </div>
             </div>
           </td>
 
           <td>
             @if (c.vehicule) {
               <div>
-                <div class="font-medium text-sm">{{ c.vehicule.nom_vehicule }}</div>
-                <code class="text-xs text-surface-400">{{ c.vehicule.immatriculation }}</code>
+                <div class="font-semibold ">{{ c.vehicule.nom_vehicule }}</div>
+                <code class="text-sm text-surface-500">{{ c.vehicule.immatriculation }}</code>
               </div>
             } @else {
               <span class="text-surface-400 text-sm">—</span>
@@ -207,9 +219,9 @@
             @let livreur = c.vehicule?.livreurPrincipal ?? c.vehicule?.livreur_principal;
             @if (livreur) {
               <div>
-                <div class="font-medium text-sm">{{ livreur.prenom }} {{ livreur.nom }}</div>
+                <div class="font-semibold ">{{ livreur.prenom }} {{ livreur.nom }}</div>
                 @if (livreur.phone) {
-                  <div class="text-xs text-surface-400 font-mono">{{ livreur.phone | phoneFormat }}</div>
+                  <div class="text-sm text-surface-500 font-mono">{{ livreur.phone | phoneFormat }}</div>
                 }
               </div>
             } @else {
@@ -259,20 +271,13 @@
           <td class="text-sm text-surface-500">{{ formatDate(c.created_at) }}</td>
 
           <td>
-            <div class="flex gap-1">
+            <div class="flex items-center gap-1">
               <p-button icon="pi pi-eye" severity="info" [text]="true" [rounded]="true"
                         pTooltip="Voir le détail" tooltipPosition="top" (onClick)="goDetail(c.id)" />
-              @if (canUpdate) {
-                <p-button icon="pi pi-pencil" severity="secondary" [text]="true" [rounded]="true"
-                          [disabled]="isLocked(c)"
-                          [pTooltip]="isLocked(c) ? 'Verrouillée — encaissements existants' : 'Modifier'"
-                          tooltipPosition="top" (onClick)="openEditDialog(c)" />
-              }
-              @if (canDelete) {
-                <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true"
-                          [disabled]="isLocked(c)"
-                          [pTooltip]="isLocked(c) ? 'Verrouillée — encaissements existants' : 'Supprimer'"
-                          tooltipPosition="top" (onClick)="openDeleteDialog(c)" />
+              @if (hasDesktopRowMenuActions(c)) {
+                <p-button icon="pi pi-ellipsis-v" severity="secondary" [text]="true" [rounded]="true"
+                          pTooltip="Plus d'actions" tooltipPosition="top"
+                          (onClick)="openDesktopRowMenu($event, rowActionsMenu, c)" />
               }
             </div>
           </td>
@@ -426,26 +431,42 @@
 </p-dialog>
 }<!-- /!isMobile -->
 
-<!-- ── Dialog : Confirmation suppression ──────────────────────────── -->
+<!-- ── Dialog : Annulation commande ───────────────────────────────── -->
 <p-dialog
-  header="Supprimer la commande"
-  [(visible)]="deleteDialogVisible"
+  header="Annuler la commande"
+  [(visible)]="annulationDialogVisible"
   [modal]="true"
-  [style]="{ width: '26rem' }"
+  [style]="{ width: '32rem' }"
   [draggable]="false"
 >
-  <div class="flex items-center gap-3 py-2">
-    <i class="pi pi-exclamation-triangle text-orange-500 text-3xl flex-shrink-0"></i>
-    <p class="m-0 text-sm">
-      Supprimer la commande <strong>{{ commandeToDelete?.reference }}</strong> ?
-      Cette action est irréversible.
-    </p>
+  <div class="flex flex-col gap-4 py-2">
+    <div class="flex items-start gap-3">
+      <i class="pi pi-ban text-red-500 text-3xl flex-shrink-0 mt-0.5"></i>
+      <p class="m-0 text-sm">
+        Annuler la commande <strong>{{ commandeToAnnuler?.reference }}</strong> ?
+        Cette action est irréversible. Les stocks seront restaurés et la facture sera annulée.
+      </p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <label class="font-medium text-sm">Motif d'annulation <span class="text-red-500">*</span></label>
+      <textarea
+        rows="3"
+        maxlength="500"
+        placeholder="Indiquez le motif de l'annulation..."
+        [value]="motifAnnulation"
+        (input)="motifAnnulation = $any($event.target).value"
+        class="w-full text-sm"
+        style="border: 1px solid var(--p-surface-300); border-radius: 6px; padding: 0.5rem; resize: none; outline: none; font-family: inherit; background: var(--p-surface-0); color: var(--p-surface-900);"
+      ></textarea>
+      <small class="text-surface-400">{{ motifAnnulation.length }}/500 caractères</small>
+    </div>
   </div>
   <ng-template #footer>
-    <p-button label="Annuler" severity="secondary" [outlined]="true"
-              (onClick)="deleteDialogVisible = false" [disabled]="deleteLoading" />
-    <p-button label="Supprimer" icon="pi pi-trash" severity="danger"
-              (onClick)="confirmerSuppression()" [loading]="deleteLoading" />
+    <p-button label="Retour" severity="secondary" [outlined]="true"
+              (onClick)="annulationDialogVisible = false" [disabled]="annulationLoading" />
+    <p-button label="Confirmer l'annulation" icon="pi pi-ban" severity="danger"
+              (onClick)="confirmerAnnulation()" [loading]="annulationLoading"
+              [disabled]="!motifAnnulation.trim()" />
   </ng-template>
 </p-dialog>
 

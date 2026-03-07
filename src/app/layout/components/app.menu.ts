@@ -45,11 +45,11 @@ export class AppMenu {
             icon: 'pi pi-fw pi-chart-bar',
             routerLink: ['/dashboard'],
           },
-          // {
-          //   label: 'Banking',
-          //   icon: 'pi pi-fw pi-image',
-          //   routerLink: ['/dashboard-banking'],
-          // },
+          {
+            label: 'Stats-Ventes',
+            icon: 'pi pi-fw pi-image',
+            routerLink: ['/dashboard-banking'],
+          },
         ],
       },
 // // Comptabilite

@@ -2,12 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
+import { ToastModule } from 'primeng/toast';
 
-import { CommandeVente, STATUT_FACTURE_LABELS, StatutFacture } from '@/models/vente.model';
+import { CommandeVente, CommandeVenteActor, STATUT_FACTURE_LABELS, StatutFacture } from '@/models/vente.model';
 import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
 import { MoneyPipe } from '@/pipes/money.pipe';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface QuantityOption {
   label: string;
@@ -23,26 +27,34 @@ interface ProductRow {
   imageUrl: string;
 }
 
-type AssistantRiskLevel = 'faible' | 'moyen' | 'eleve';
-
-interface LocalAssistantInsight {
-  summary: string;
-  riskLevel: AssistantRiskLevel;
-  anomalies: string[];
-  recommendations: string[];
-  generatedAt: string;
+interface CommandeInformationPanel {
+  createdAtLabel: string;
+  creatorLabel: string;
+  creatorNom: string;
+  creatorPrenom: string;
+  creatorPhone: string;
+  vehiculeNom: string;
+  vehiculeImmatriculation: string;
+  livreurNom: string;
+  livreurPhone: string;
 }
 
 @Component({
   selector: 'app-commande-vente-detail2',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, SelectModule, MoneyPipe],
+  imports: [CommonModule, FormsModule, ButtonModule, DialogModule, SelectModule, ToastModule, MoneyPipe, PhoneFormatPipe],
+  providers: [MessageService],
   templateUrl: './commande-vente-detail2.html',
   styleUrl: './commande-vente-detail2.scss',
 })
 export class CommandeVenteDetail2 implements OnInit {
   readonly loading = signal(false);
   readonly commande = signal<CommandeVente | null>(null);
+
+  // Annulation dialog state
+  annulationDialogVisible = false;
+  annulationLoading = false;
+  motifAnnulation = '';
 
   readonly products = computed<ProductRow[]>(() =>
     (this.commande()?.lignes ?? []).map((ligne) => {
@@ -68,12 +80,15 @@ export class CommandeVenteDetail2 implements OnInit {
     })
   );
 
+  readonly isAnnulee = computed(() => this.commande()?.statut === 'annulee');
+
   readonly statutLabel = computed(() => {
     const statut = this.commande()?.facture?.statut_facture;
     return statut ? this.getStatutLabel(statut) : 'Impayee';
   });
 
   readonly canAnnuler = computed(() => {
+    if (this.isAnnulee()) return false;
     const statut = this.commande()?.facture?.statut_facture;
     return !statut || statut === 'impayee';
   });
@@ -126,90 +141,47 @@ export class CommandeVenteDetail2 implements OnInit {
     return `${livreur.prenom} ${livreur.nom}`.trim() || '-';
   });
 
+  readonly livreurPhone = computed(() => {
+    const livreur = this.commande()?.vehicule?.livreurPrincipal ?? this.commande()?.vehicule?.livreur_principal;
+    return livreur?.phone ?? '-';
+  });
+
   readonly vehiculeNom = computed(() => this.commande()?.vehicule?.nom_vehicule ?? '-');
 
-  readonly assistantInsight = computed<LocalAssistantInsight | null>(() => {
+  readonly annulationInfo = computed(() => {
+    const c = this.commande();
+    if (!c || c.statut !== 'annulee') return null;
+    return {
+      annulee_at: c.annulee_at,
+      annulee_par: c.annulee_par,
+      motif_annulation: c.motif_annulation,
+    };
+  });
+
+  readonly informationPanel = computed<CommandeInformationPanel | null>(() => {
     const commande = this.commande();
     if (!commande) return null;
-
-    const facture = commande.facture;
-    const total = this.toSafeNumber(commande.total_commande);
-    const encaisse = this.toSafeNumber(facture?.montant_encaisse ?? 0);
-    const restant =
-      typeof facture?.montant_restant === 'number' && Number.isFinite(facture.montant_restant)
-        ? Math.max(0, facture.montant_restant)
-        : Math.max(0, total - encaisse);
-    const statut = facture?.statut_facture;
-    const daysSinceCreation = this.getDaysSinceCreation(commande.created_at);
-
-    const anomalies: string[] = [];
-    const recommendations: string[] = [];
-
-    if (!facture) {
-      anomalies.push('Aucune facture liee a cette commande.');
-      recommendations.push('Generer la facture pour lancer le suivi des paiements.');
-    }
-
-    if (facture) {
-      if (total > 0 && !this.isNearlyEqual(encaisse + restant, total)) {
-        anomalies.push('Incoherence montants: encaisse + restant differents du total.');
-      }
-      if (statut === 'payee' && restant > 0) {
-        anomalies.push('Statut payee alors qu un reste est encore present.');
-      }
-      if (statut === 'impayee' && encaisse > 0) {
-        anomalies.push('Statut impayee alors qu un encaissement existe.');
-      }
-      if (statut === 'annulee' && encaisse > 0) {
-        anomalies.push('Statut annulee avec un montant deja encaisse.');
-      }
-    }
-
-    if (facture && restant > 0 && statut !== 'annulee') {
-      if (encaisse <= 0) {
-        recommendations.push('Relancer pour obtenir un premier encaissement.');
-      } else {
-        recommendations.push('Planifier un encaissement du solde restant.');
-      }
-    }
-
-    if (statut === 'partiel' && daysSinceCreation >= 3) {
-      recommendations.push('Fixer une date de reglement final avec le livreur.');
-    }
-    if (statut === 'impayee' && daysSinceCreation >= 3) {
-      recommendations.push('Escalader le suivi vers le responsable recouvrement.');
-    }
-
-    if (anomalies.length > 0) {
-      recommendations.unshift('Verifier la coherence des montants et du statut.');
-    }
-    if (!recommendations.length) {
-      recommendations.push('Aucune action urgente. Continuer le suivi normal.');
-    }
-
-    const riskLevel = this.computeRiskLevel({
-      hasFacture: !!facture,
-      total,
-      encaisse,
-      restant,
-      statut,
-      anomaliesCount: anomalies.length,
-      daysSinceCreation,
-    });
+    const creator = this.extractCreatorInfo(commande);
+    const vehicule = commande.vehicule;
 
     return {
-      summary: this.buildAssistantSummary(statut, total, encaisse, restant, !!facture, riskLevel),
-      riskLevel,
-      anomalies,
-      recommendations,
-      generatedAt: new Date().toLocaleString('fr-FR'),
+      createdAtLabel: this.formatDateTime(commande.created_at),
+      creatorLabel: creator.label,
+      creatorNom: creator.nom,
+      creatorPrenom: creator.prenom,
+      creatorPhone: creator.phone,
+      vehiculeNom: vehicule?.nom_vehicule ?? '-',
+      vehiculeImmatriculation: vehicule?.immatriculation ?? '-',
+      livreurNom: this.livreurNom(),
+      livreurPhone: this.livreurPhone(),
     };
   });
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly commandeService: CommandeVenteService
+    private readonly commandeService: CommandeVenteService,
+    private readonly messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -221,12 +193,32 @@ export class CommandeVenteDetail2 implements OnInit {
     this.loadCommande(id);
   }
 
-  annulerCommande(): void {
+  openAnnulationDialog(): void {
+    this.motifAnnulation = '';
+    this.annulationDialogVisible = true;
+  }
+
+  confirmerAnnulation(): void {
     const id = this.commande()?.id;
-    if (!id) return;
-    if (!confirm('Confirmer l\'annulation de cette commande ?')) return;
-    this.commandeService.deleteCommande(id).subscribe({
-      next: () => this.router.navigate(['/ventes/commandes']),
+    if (!id || this.annulationLoading || !this.motifAnnulation.trim()) return;
+    this.annulationLoading = true;
+    this.commandeService.annulerCommande(id, { motif_annulation: this.motifAnnulation.trim() }).subscribe({
+      next: (resp) => {
+        this.annulationLoading = false;
+        this.annulationDialogVisible = false;
+        this.commande.set(resp.data ?? null);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Commande annulée',
+          detail: 'La commande a été annulée et les stocks ont été restaurés.',
+          life: 4000,
+        });
+      },
+      error: (err) => {
+        this.annulationLoading = false;
+        const msg = err?.error?.message ?? 'Une erreur est survenue lors de l\'annulation.';
+        this.messageService.add({ severity: 'warn', summary: 'Action impossible', detail: msg, life: 5000 });
+      },
     });
   }
 
@@ -246,22 +238,9 @@ export class CommandeVenteDetail2 implements OnInit {
     return STATUT_FACTURE_LABELS[s] ?? s;
   }
 
-  getAssistantRiskLabel(level: AssistantRiskLevel): string {
-    const labels: Record<AssistantRiskLevel, string> = {
-      faible: 'Faible',
-      moyen: 'Moyen',
-      eleve: 'Eleve',
-    };
-    return labels[level];
-  }
-
-  getAssistantRiskDotClass(level: AssistantRiskLevel): string {
-    const map: Record<AssistantRiskLevel, string> = {
-      faible: 'bg-green-500',
-      moyen: 'bg-orange-500',
-      eleve: 'bg-red-500',
-    };
-    return map[level];
+  formatDateTime(d: string | undefined): string {
+    if (!d) return '-';
+    return new Date(d).toLocaleString('fr-FR');
   }
 
   private loadCommande(id: number): void {
@@ -283,70 +262,69 @@ export class CommandeVenteDetail2 implements OnInit {
     return typeof value === 'string' ? Number.parseFloat(value) : value;
   }
 
-  private toSafeNumber(value: string | number | null | undefined): number {
-    const n = this.toNumber(value);
-    return Number.isFinite(n) ? n : 0;
+  private extractCreatorInfo(commande: CommandeVente): { label: string; nom: string; prenom: string; phone: string } {
+    const raw = commande as any;
+
+    const updatedActor = this.toActor(
+      commande.updated_by ?? commande.updated_by_user ?? raw?.updatedByUser ?? null
+    );
+    if (updatedActor) {
+      return this.normalizeActorInfo(updatedActor, 'Modifie par :');
+    }
+
+    const createdActor = this.toActor(
+      commande.created_by ??
+      commande.created_by_user ??
+      commande.creator ??
+      raw?.createdByUser ??
+      raw?.creator ??
+      raw?.createur ??
+      raw?.user ??
+      null
+    );
+    if (createdActor) {
+      return this.normalizeActorInfo(createdActor, 'Cree par :');
+    }
+
+    return { label: 'Cree par :', nom: '-', prenom: '-', phone: '-' };
   }
 
-  private getDaysSinceCreation(createdAt: string | undefined): number {
-    if (!createdAt) return 0;
-    const created = new Date(createdAt).getTime();
-    if (Number.isNaN(created)) return 0;
-    const diff = Date.now() - created;
-    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  private toActor(source: unknown): CommandeVenteActor | null {
+    if (!source || typeof source !== 'object') return null;
+    return source as CommandeVenteActor;
   }
 
-  private isNearlyEqual(a: number, b: number, tolerance = 1): boolean {
-    return Math.abs(a - b) <= tolerance;
+  private normalizeActorInfo(
+    source: CommandeVenteActor,
+    label: string
+  ): { label: string; nom: string; prenom: string; phone: string } {
+    const raw = source as any;
+    let nom = this.pickFirstString([source.nom, raw?.last_name, raw?.lastname]);
+    let prenom = this.pickFirstString([source.prenom, raw?.first_name, raw?.firstname]);
+    const fullName = this.pickFirstString([source.nom_complet, raw?.full_name, source.name]);
+    const phone = this.pickFirstString([source.phone, raw?.telephone, raw?.tel]) ?? '-';
+
+    if ((!nom || !prenom) && fullName) {
+      const parts = fullName.split(/\s+/).filter(Boolean);
+      if (!prenom && parts.length > 0) prenom = parts[0];
+      if (!nom) nom = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
+    }
+
+    return {
+      label,
+      nom: nom ?? '-',
+      prenom: prenom ?? '-',
+      phone,
+    };
   }
 
-  private computeRiskLevel(input: {
-    hasFacture: boolean;
-    total: number;
-    encaisse: number;
-    restant: number;
-    statut: StatutFacture | undefined;
-    anomaliesCount: number;
-    daysSinceCreation: number;
-  }): AssistantRiskLevel {
-    let score = 0;
-    if (!input.hasFacture) score += 2;
-    if (input.restant > 0) score += 1;
-    if (input.total > 0 && input.restant / input.total >= 0.7) score += 2;
-    else if (input.total > 0 && input.restant / input.total >= 0.3) score += 1;
-    if (input.encaisse <= 0 && input.total > 0) score += 1;
-    if (input.daysSinceCreation >= 7 && input.restant > 0) score += 1;
-    if (input.statut === 'impayee') score += 1;
-    if (input.anomaliesCount > 0) score += 2;
-
-    if (score >= 5) return 'eleve';
-    if (score >= 3) return 'moyen';
-    return 'faible';
-  }
-
-  private buildAssistantSummary(
-    statut: StatutFacture | undefined,
-    total: number,
-    encaisse: number,
-    restant: number,
-    hasFacture: boolean,
-    riskLevel: AssistantRiskLevel
-  ): string {
-    if (!hasFacture) {
-      return 'Commande creee sans facture. Le suivi financier n est pas encore demarre.';
+  private pickFirstString(values: unknown[]): string | null {
+    for (const value of values) {
+      if (typeof value === 'string') {
+        const s = value.trim();
+        if (s.length > 0) return s;
+      }
     }
-    if (statut === 'payee') {
-      return 'Commande soldee. Aucun reste a encaisser attendu.';
-    }
-    if (statut === 'partiel') {
-      return `Commande partiellement payee: ${Math.round(encaisse)} GNF encaisses sur ${Math.round(total)} GNF.`;
-    }
-    if (statut === 'impayee') {
-      return `Commande impayee: ${Math.round(restant)} GNF a encaisser (${this.getAssistantRiskLabel(riskLevel).toLowerCase()} risque).`;
-    }
-    if (statut === 'annulee') {
-      return 'Commande annulee. Verifier la coherence des montants encaisses/restants.';
-    }
-    return `Commande en suivi: total ${Math.round(total)} GNF, encaisse ${Math.round(encaisse)} GNF, restant ${Math.round(restant)} GNF.`;
+    return null;
   }
 }

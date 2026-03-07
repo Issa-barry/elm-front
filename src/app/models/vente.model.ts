@@ -1,4 +1,5 @@
 export type StatutFacture = 'impayee' | 'partiel' | 'payee' | 'annulee';
+export type StatutCommandeVente = 'active' | 'annulee';
 export type ModePaiement = 'especes' | 'mobile_money' | 'virement' | 'cheque';
 
 export const STATUT_FACTURE_LABELS: Record<StatutFacture, string> = {
@@ -87,12 +88,30 @@ export interface LigneCommandeVente {
   produit?: { id: number; nom: string; image_url?: string | null };
 }
 
+export interface CommandeVenteActor {
+  id: number;
+  nom?: string;
+  prenom?: string;
+  phone?: string;
+  name?: string;
+  nom_complet?: string;
+}
+
 export interface CommandeVente {
   id: number;
   usine_id: number;
   vehicule_id: number;
   reference: string;
   total_commande: string;
+  statut?: StatutCommandeVente;
+  motif_annulation?: string | null;
+  annulee_at?: string | null;
+  annulee_par?: { id: number; nom?: string; prenom?: string } | null;
+  created_by?: CommandeVenteActor | number | null;
+  updated_by?: CommandeVenteActor | number | null;
+  created_by_user?: CommandeVenteActor | null;
+  updated_by_user?: CommandeVenteActor | null;
+  creator?: CommandeVenteActor | null;
   vehicule?: FactureVenteVehicule;
   lignes?: LigneCommandeVente[];
   facture?: Pick<
@@ -101,6 +120,10 @@ export interface CommandeVente {
   >;
   commission?: CommissionResume;
   created_at: string;
+}
+
+export interface AnnulerCommandeVenteDto {
+  motif_annulation: string;
 }
 
 export interface StoreLigneCommandeDto {

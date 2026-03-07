@@ -10,7 +10,6 @@ import { AppConfigurator } from './app.configurator';
 import { AppProfileSidebar } from './app-profile-sidebar';
 
 const BODY_CLASS_ACCUEIL = 'layout-on-accueil';
-const VENTES_REVEAL_ROUTES = ['/ventes'];
 
 @Component({
     selector: 'app-layout',
@@ -47,8 +46,6 @@ export class AppLayout implements OnDestroy {
 
     private routerSubscription: Subscription | null = null;
 
-    private previousMenuMode: string = 'static';
-
     @ViewChild(AppSidebar) appSidebar!: AppSidebar;
 
     @ViewChild(AppTopbar) appTopBar!: AppTopbar;
@@ -58,15 +55,12 @@ export class AppLayout implements OnDestroy {
         public renderer: Renderer2,
         public router: Router
     ) {
-        this.previousMenuMode = this.layoutService.layoutConfig().menuMode ?? 'static';
         this.updateAccueilBodyClass(this.router.url);
-        this.applyMenuModeForRoute(this.router.url);
         this.routerSubscription = this.router.events
             .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
             .subscribe((event) => {
                 const url = event.urlAfterRedirects || event.url;
                 this.updateAccueilBodyClass(url);
-                this.applyMenuModeForRoute(url);
             });
 
         this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
@@ -172,19 +166,6 @@ export class AppLayout implements OnDestroy {
             'layout-sidebar-active': layoutState.sidebarActive,
             'layout-sidebar-anchored': layoutState.anchored,
         };
-    }
-
-    private applyMenuModeForRoute(url: string): void {
-        const path = url.split('?')[0];
-        const isVentes = VENTES_REVEAL_ROUTES.some(prefix => path.startsWith(prefix));
-        const currentMode = this.layoutService.layoutConfig().menuMode;
-
-        if (isVentes && currentMode !== 'reveal') {
-            this.previousMenuMode = currentMode ?? 'static';
-            this.layoutService.layoutConfig.update(cfg => ({ ...cfg, menuMode: 'reveal' }));
-        } else if (!isVentes && currentMode === 'reveal') {
-            this.layoutService.layoutConfig.update(cfg => ({ ...cfg, menuMode: this.previousMenuMode }));
-        }
     }
 
     private updateAccueilBodyClass(url: string): void {

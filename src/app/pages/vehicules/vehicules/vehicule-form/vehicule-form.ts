@@ -173,10 +173,10 @@ export class VehiculeForm implements OnInit {
 
   onTypeVehiculeChange(type: string): void {
     const ctrl = this.form.get('capacite_packs');
-    if (!ctrl || ctrl.value || !type) return;
+    if (!ctrl || !type) return;
 
     const def = CAPACITE_DEFAULTS[type as keyof typeof CAPACITE_DEFAULTS];
-    if (def) ctrl.setValue(def);
+    ctrl.setValue(def ?? null);
   }
 
   onPhotoChange(event: Event): void {

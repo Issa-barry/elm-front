@@ -243,6 +243,12 @@
 .cv-status-dot--payee { background: #22c55e; }
 .cv-status-dot--annulee { background: #94a3b8; }
 
+@media (min-width: 769px) {
+    :host ::ng-deep .cv-tableau-desktop .p-datatable .p-datatable-tbody > tr > td {
+        vertical-align: top;
+    }
+}
+
 // ─── Dark mode ────────────────────────────────────────────────────────────────
 :host-context(.app-dark) {
     .cv-commande-card {
