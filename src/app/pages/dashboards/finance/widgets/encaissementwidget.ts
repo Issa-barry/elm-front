@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { finalize } from 'rxjs';
 import {
@@ -14,20 +12,8 @@ import {
 @Component({
     standalone: true,
     selector: 'app-encaissement-widget',
-    imports: [CommonModule, FormsModule, SelectModule, SkeletonModule, ButtonModule],
+    imports: [CommonModule, SkeletonModule, ButtonModule],
     template: `
-        <div class="col-span-12 flex justify-end">
-            <p-select
-                [options]="periodOptions"
-                [(ngModel)]="selectedPeriod"
-                (onChange)="onPeriodChange()"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Periode"
-                [style]="{ 'min-width': '180px' }"
-            />
-        </div>
-
         @if (errorMessage) {
             <div class="col-span-12">
                 <div class="card p-3 border-1 border-round surface-border flex items-center justify-between gap-3">
@@ -95,17 +81,10 @@ import {
         '[style.display]': '"contents"'
     }
 })
-export class EncaissementWidget implements OnInit {
+export class EncaissementWidget implements OnInit, OnChanges {
     private readonly dashboardService = inject(DashboardService);
 
-    readonly periodOptions: { label: string; value: VentesEncaissementsPeriod }[] = [
-        { label: 'Ce mois', value: 'this_month' },
-        { label: 'Mois dernier', value: 'last_month' },
-        { label: 'Cette annee', value: 'this_year' },
-        { label: 'Cette semaine', value: 'this_week' }
-    ];
-
-    selectedPeriod: VentesEncaissementsPeriod = 'this_month';
+    @Input() period: VentesEncaissementsPeriod = 'this_month';
     stat: EncaissementStat | null = null;
     loading = false;
     errorMessage: string | null = null;
@@ -114,8 +93,10 @@ export class EncaissementWidget implements OnInit {
         this.loadData();
     }
 
-    onPeriodChange(): void {
-        this.loadData();
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['period'] && !changes['period'].firstChange) {
+            this.loadData();
+        }
     }
 
     loadData(): void {
@@ -123,7 +104,7 @@ export class EncaissementWidget implements OnInit {
         this.errorMessage = null;
 
         this.dashboardService
-            .getVentesEncaissements(this.selectedPeriod)
+            .getVentesEncaissements(this.period)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
                 next: (data) => {

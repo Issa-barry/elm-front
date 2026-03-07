@@ -6,6 +6,7 @@ import { EncaissementWidget } from './widgets/encaissementwidget';
 import { VehiculewWidget } from './widgets/vehiculewidget';
 import { BarWidget } from './widgets/barWidget';
 import { DoughnutWidget } from './widgets/doughnut';
+import { VentesEncaissementsPeriod } from '@/services/dashboard/dashboard.service';
  
 @Component({
   selector: 'app-finance',
@@ -16,4 +17,9 @@ import { DoughnutWidget } from './widgets/doughnut';
   providers: [ProductService],
 })
 export class Finance {
+  encaissementPeriod: VentesEncaissementsPeriod = 'this_month';
+
+  onEncaissementPeriodChange(period: VentesEncaissementsPeriod): void {
+    this.encaissementPeriod = period;
+  }
 }
