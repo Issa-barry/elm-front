@@ -1,0 +1,96 @@
+<div class="fm-layout">
+
+    <!-- En-tête : avatar + nom + sélecteur de période -->
+    <div class="fm-header">
+        <app-header-widget2
+            [period]="period"
+            (periodChange)="onPeriodChange($event)"
+        />
+    </div>
+
+    <!-- Slider horizontal scroll-snap : un slide = un écran de carte -->
+    <div class="fm-slider" #slider>
+
+        <!-- ── Slide 1 : Total Factures ─────────────────────────────────── -->
+        <section class="fm-slide">
+            <div class="fm-stat-card fm-stat-card--primary">
+                <svg viewBox="0 0 900 600" class="fm-stat-card__bg" preserveAspectRatio="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <rect width="900" height="600" fill="var(--p-primary-600)" />
+                    <path d="M0 400L30 386.5C60 373 120 346 180 334.8C240 323.7 300 328.3 360 345.2C420 362 480 391 540 392C600 393 660 366 720 355.2C780 344.3 840 349.7 870 352.3L900 355L900 601L0 601Z"
+                          fill="var(--p-primary-500)" />
+                </svg>
+                <div class="fm-stat-card__content">
+                    <div class="fm-stat-card__label">Total Factures</div>
+                    @if (loading()) {
+                        <p-skeleton width="10rem" height="2rem" borderRadius="6px" />
+                    } @else {
+                        <div class="fm-stat-card__value">
+                            {{ (stat()?.total_factures ?? 0) | number:'1.0-0' }} GNF
+                        </div>
+                    }
+                    <div class="fm-stat-card__sub">
+                        {{ stat()?.nb_factures_total ?? 0 }} facture(s)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Slide 2 : Factures payées ───────────────────────────────── -->
+        <section class="fm-slide">
+            <div class="fm-stat-card">
+                <div class="fm-stat-card__content fm-stat-card__content--centered">
+                    <div class="fm-stat-card__label">Factures payées</div>
+                    @if (loading()) {
+                        <p-skeleton width="10rem" height="2rem" borderRadius="6px" />
+                    } @else {
+                        <div class="fm-stat-card__value fm-stat-card__value--primary">
+                            {{ (stat()?.factures_payees ?? 0) | number:'1.0-0' }} GNF
+                        </div>
+                    }
+                    <div class="fm-stat-card__sub">
+                        {{ stat()?.nb_factures_payees ?? 0 }} facture(s)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Slide 3 : Reste à encaisser ─────────────────────────────── -->
+        <section class="fm-slide">
+            <div class="fm-stat-card">
+                <div class="fm-stat-card__content fm-stat-card__content--centered">
+                    <div class="fm-stat-card__label">Reste à encaisser</div>
+                    @if (loading()) {
+                        <p-skeleton width="10rem" height="2rem" borderRadius="6px" />
+                    } @else {
+                        <div class="fm-stat-card__value fm-stat-card__value--primary">
+                            {{ (stat()?.reste_a_encaisser ?? 0) | number:'1.0-0' }} GNF
+                        </div>
+                    }
+                    <div class="fm-stat-card__sub">
+                        {{ stat()?.nb_factures_impayees ?? 0 }} en attente
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Indicateur de slides (dots) -->
+    <div class="fm-dots">
+        @for (_ of slidesArray; track $index) {
+            <span class="fm-dot" [class.fm-dot--active]="activeSlide() === $index"></span>
+        }
+    </div>
+
+    <!-- Raccourcis modules -->
+    <div class="fm-modules">
+        @for (module of moduleShortcuts; track module.label) {
+            <button type="button" class="fm-tile" (click)="goToModule(module.route)">
+                <i [class]="module.icon"></i>
+                <span>{{ module.label }}</span>
+            </button>
+        }
+    </div>
+
+</div>
