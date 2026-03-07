@@ -193,6 +193,10 @@ export class CommandeVenteDetail2 implements OnInit {
     this.loadCommande(id);
   }
 
+  goBack(): void {
+    this.router.navigate(['/ventes/commandes']);
+  }
+
   openAnnulationDialog(): void {
     this.motifAnnulation = '';
     this.annulationDialogVisible = true;

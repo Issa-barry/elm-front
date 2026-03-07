@@ -31,7 +31,7 @@ export const appRoutes: Routes = [
       {
         path: 'dashboard-finance',
         loadComponent: () => import('./app/pages/dashboards/finance/finance').then((c) => c.Finance),
-        data: { breadcrumb: 'dashboard-banking' },
+        data: { breadcrumb: 'dashboard-ventes' },
       },
       {
         path: 'comptabilite',

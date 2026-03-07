@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/pages/parametres/components/parametres-notifications/parametres-notifications.scss", "src/app/pages/parametres/components/parametres-notifications/parametres-notifications.scss"],
-  "sourcesContent": ["/* Transition douce sur le grisage du cooldown */\n.opacity-50 {\n    transition: opacity 0.2s ease;\n    pointer-events: none;\n}\n", "/* Transition douce sur le grisage du cooldown */\n.opacity-50 {\n  transition: opacity 0.2s ease;\n  pointer-events: none;\n}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJmaWxlOi8vL0M6L2xhcmFnb24vd3d3L0ZST05UL2VsbS1mcm9udC9zcmMvYXBwL3BhZ2VzL3BhcmFtZXRyZXMvY29tcG9uZW50cy9wYXJhbWV0cmVzLW5vdGlmaWNhdGlvbnMvcGFyYW1ldHJlcy1ub3RpZmljYXRpb25zLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtFQUNJO0VBQ0EiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBUcmFuc2l0aW9uIGRvdWNlIHN1ciBsZSBncmlzYWdlIGR1IGNvb2xkb3duICovXG4ub3BhY2l0eS01MCB7XG4gICAgdHJhbnNpdGlvbjogb3BhY2l0eSAwLjJzIGVhc2U7XG4gICAgcG9pbnRlci1ldmVudHM6IG5vbmU7XG59XG4iXX0= */"],
-  "mappings": ";AACA,CAAA;AACI,cAAA,QAAA,KAAA;AACA,kBAAA;ACCJ;",
-  "names": []
-}

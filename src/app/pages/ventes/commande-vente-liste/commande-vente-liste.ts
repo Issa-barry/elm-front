@@ -317,6 +317,16 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     this.dialogVisible = true;
   }
 
+  onMobileEditAction(event: Event, c: CommandeVente): void {
+    event.stopPropagation();
+    this.openEditDialog(c);
+  }
+
+  onMobileAnnulationAction(event: Event, c: CommandeVente): void {
+    event.stopPropagation();
+    this.openAnnulationDialog(c);
+  }
+
   onSaveCommande() {
     this.createForm.markAllAsTouched();
     if (this.createForm.invalid || this.saving) return;
