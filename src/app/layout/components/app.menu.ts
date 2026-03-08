@@ -82,12 +82,12 @@ export class AppMenu {
                             //     routerLink: ['/ventes/commissions2'],
                             //     visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
                             // },
-                            // {
-                            //     label: 'Factures vente',
-                            //     icon: 'pi pi-fw pi-receipt',
-                            //     routerLink: ['/ventes/factures'],
-                            //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
-                            // },
+                            {
+                                label: 'Factures vente',
+                                icon: 'pi pi-fw pi-receipt',
+                                routerLink: ['/ventes/factures'],
+                                visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            },
                             // {
                             //     label: 'Factures vente liste 2',
                             //     icon: 'pi pi-fw pi-receipt',

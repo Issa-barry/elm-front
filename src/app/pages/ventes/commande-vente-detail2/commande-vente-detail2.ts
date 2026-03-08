@@ -7,9 +7,12 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DatePickerModule } from 'primeng/datepicker';
 
-import { CommandeVente, CommandeVenteActor, STATUT_FACTURE_LABELS, StatutFacture } from '@/models/vente.model';
+import { CommandeVente, CommandeVenteActor, MODE_PAIEMENT_OPTIONS, ModePaiement, STATUT_FACTURE_LABELS, StatutFacture } from '@/models/vente.model';
 import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
+import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { MoneyPipe } from '@/pipes/money.pipe';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
@@ -42,7 +45,7 @@ interface CommandeInformationPanel {
 @Component({
   selector: 'app-commande-vente-detail2',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, DialogModule, SelectModule, ToastModule, MoneyPipe, PhoneFormatPipe],
+  imports: [CommonModule, FormsModule, ButtonModule, DialogModule, SelectModule, ToastModule, InputNumberModule, DatePickerModule, MoneyPipe, PhoneFormatPipe],
   providers: [MessageService],
   templateUrl: './commande-vente-detail2.html',
   styleUrl: './commande-vente-detail2.scss',
@@ -55,6 +58,15 @@ export class CommandeVenteDetail2 implements OnInit {
   annulationDialogVisible = false;
   annulationLoading = false;
   motifAnnulation = '';
+
+  // Encaissement dialog state
+  encaissementDialogVisible = false;
+  encaissementLoading = false;
+  encaissementMontant: number | null = null;
+  encaissementMode: ModePaiement | null = null;
+  encaissementDate: Date | null = null;
+  encaissementNote = '';
+  readonly modePaiementOptions = MODE_PAIEMENT_OPTIONS;
 
   readonly products = computed<ProductRow[]>(() =>
     (this.commande()?.lignes ?? []).map((ligne) => {
@@ -181,6 +193,7 @@ export class CommandeVenteDetail2 implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly commandeService: CommandeVenteService,
+    private readonly factureService: FactureLivraisonService,
     private readonly messageService: MessageService
   ) {}
 
@@ -195,6 +208,43 @@ export class CommandeVenteDetail2 implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/ventes/commandes']);
+  }
+
+  openEncaissementDialog(): void {
+    this.encaissementMontant = this.restantDu() > 0 ? this.restantDu() : null;
+    this.encaissementMode = 'especes';
+    this.encaissementDate = new Date();
+    this.encaissementNote = '';
+    this.encaissementDialogVisible = true;
+  }
+
+  confirmerEncaissement(): void {
+    const factureId = this.commande()?.facture?.id;
+    if (!factureId || !this.encaissementMontant || !this.encaissementMode) return;
+    const selectedDate = this.encaissementDate ?? new Date();
+    this.encaissementDate = selectedDate;
+    this.encaissementLoading = true;
+    const dto = {
+      facture_vente_id: factureId,
+      montant: this.encaissementMontant,
+      date_encaissement: selectedDate.toISOString().split('T')[0],
+      mode_paiement: this.encaissementMode,
+      note: this.encaissementNote.trim() || undefined,
+    };
+    this.factureService.createEncaissement(dto).subscribe({
+      next: () => {
+        this.encaissementLoading = false;
+        this.encaissementDialogVisible = false;
+        this.messageService.add({ severity: 'success', summary: 'Encaissement enregistré', life: 3000 });
+        const id = this.commande()?.id;
+        if (id) this.loadCommande(id);
+      },
+      error: (err) => {
+        this.encaissementLoading = false;
+        const msg = err?.error?.message ?? 'Une erreur est survenue.';
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: msg, life: 5000 });
+      },
+    });
   }
 
   openAnnulationDialog(): void {
@@ -229,7 +279,7 @@ export class CommandeVenteDetail2 implements OnInit {
   goFacture(): void {
     const factureId = this.commande()?.facture?.id;
     if (factureId) {
-      this.router.navigate(['/ventes/factures', factureId]);
+      this.router.navigate(['/ventes/factures-vente-detail3', factureId]);
     }
   }
 
@@ -242,12 +292,17 @@ export class CommandeVenteDetail2 implements OnInit {
     return STATUT_FACTURE_LABELS[s] ?? s;
   }
 
+  shouldShowEncaissementDate(): boolean {
+    if (!this.encaissementDate) return true;
+    return !this.isToday(this.encaissementDate);
+  }
+
   formatDateTime(d: string | undefined): string {
     if (!d) return '-';
     return new Date(d).toLocaleString('fr-FR');
   }
 
-  private loadCommande(id: number): void {
+  loadCommande(id: number): void {
     this.loading.set(true);
     this.commandeService.getCommande(id).subscribe({
       next: (resp) => {
@@ -264,6 +319,13 @@ export class CommandeVenteDetail2 implements OnInit {
   private toNumber(value: string | number | null | undefined): number {
     if (value == null || value === '') return Number.NaN;
     return typeof value === 'string' ? Number.parseFloat(value) : value;
+  }
+
+  private isToday(date: Date): boolean {
+    const today = new Date();
+    return date.getFullYear() === today.getFullYear()
+      && date.getMonth() === today.getMonth()
+      && date.getDate() === today.getDate();
   }
 
   private extractCreatorInfo(commande: CommandeVente): { label: string; nom: string; prenom: string; phone: string } {
