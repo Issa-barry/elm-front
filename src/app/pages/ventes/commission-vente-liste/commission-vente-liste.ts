@@ -15,6 +15,8 @@ import { DrawerModule } from 'primeng/drawer';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { forkJoin, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
 import { CommissionDetailDialog } from '../commission-detail-dialog/commission-detail-dialog';
@@ -31,6 +33,13 @@ interface CommissionStatCard {
   value: number;
   subtitle: string;
   variant: StatCardVariant;
+}
+
+interface CommissionStatsData {
+  totalCommission: number;
+  partLivreur: number;
+  partProprietaire: number;
+  count: number;
 }
 
 @Component({
@@ -63,6 +72,7 @@ export class CommissionVenteListe implements OnInit {
   commissions = signal<CommissionVente[]>([]);
   totalRecords = signal(0);
   loading = signal(false);
+  statsLoading = signal(false);
   perPage = signal(20);
   currentPage = signal(1);
 
@@ -75,6 +85,12 @@ export class CommissionVenteListe implements OnInit {
   // Dialog détail
   selectedCommissionId = signal<number | null>(null);
   detailVisible = signal(false);
+  commissionStats = signal<CommissionStatsData>({
+    totalCommission: 0,
+    partLivreur: 0,
+    partProprietaire: 0,
+    count: 0,
+  });
 
   isMobile = signal(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
   mobileFilterVisible = false;
@@ -101,6 +117,7 @@ export class CommissionVenteListe implements OnInit {
     this.filterDateDebut = this.tempFilterDateDebut;
     this.filterDateFin = this.tempFilterDateFin;
     this.mobileFilterVisible = false;
+    this.loadCommissionStats();
     this.loadCommissions(1);
   }
 
@@ -128,23 +145,26 @@ export class CommissionVenteListe implements OnInit {
   ];
 
   get commissionStatCards(): CommissionStatCard[] {
+    const stats = this.commissionStats();
+    const subtitle = this.buildStatsSubtitle(stats.count);
+
     return [
       {
         title: 'Commission totale',
-        value: 3250000,
-         subtitle: 'du 01 au 15 fevrier 2026',
+        value: stats.totalCommission,
+        subtitle,
         variant: 'primary',
       },
       {
-        title: 'Part propriétaire',
-        value: 1250000,
-        subtitle: 'du 01 au 15 fevrier 2026',
+        title: 'Part proprietaire',
+        value: stats.partProprietaire,
+        subtitle,
         variant: 'default',
       },
       {
         title: 'Part livreur',
-        value: 850000,
-        subtitle: 'du 01 au 15 fevrier 2026',
+        value: stats.partLivreur,
+        subtitle,
         variant: 'default',
       },
     ];
@@ -156,6 +176,7 @@ export class CommissionVenteListe implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadCommissionStats();
     if (this.isMobile()) this.loadCommissions(1);
   }
 
@@ -197,6 +218,7 @@ export class CommissionVenteListe implements OnInit {
   }
 
   applyFilters(): void {
+    this.loadCommissionStats();
     this.loadCommissions(1);
   }
 
@@ -204,6 +226,7 @@ export class CommissionVenteListe implements OnInit {
     this.filterStatut = '';
     this.filterDateDebut = null;
     this.filterDateFin = null;
+    this.loadCommissionStats();
     this.loadCommissions(1);
   }
 
@@ -213,6 +236,7 @@ export class CommissionVenteListe implements OnInit {
   }
 
   onVersementDone(): void {
+    this.loadCommissionStats();
     this.loadCommissions(this.currentPage());
   }
 
@@ -250,6 +274,104 @@ export class CommissionVenteListe implements OnInit {
     let hash = 0;
     for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
     return this.AVATAR_COLORS[Math.abs(hash) % this.AVATAR_COLORS.length];
+  }
+
+  private buildStatsParams(page: number, perPage: number): HttpParams {
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('per_page', String(perPage));
+
+    if (this.filterStatut) params = params.set('statut', this.filterStatut);
+    if (this.filterDateDebut) params = params.set('date_debut', this.toIsoDate(this.filterDateDebut));
+    if (this.filterDateFin) params = params.set('date_fin', this.toIsoDate(this.filterDateFin));
+
+    return params;
+  }
+
+  private loadCommissionStats(): void {
+    const perPage = 200;
+    this.statsLoading.set(true);
+
+    this.commissionService
+      .getAll(this.buildStatsParams(1, perPage))
+      .pipe(
+        switchMap((resp) => {
+          const firstPage = resp.data;
+          const firstData = firstPage?.data ?? [];
+          const lastPage = firstPage?.last_page ?? 1;
+
+          if (lastPage <= 1) {
+            return of(firstData);
+          }
+
+          const requests = Array.from({ length: lastPage - 1 }, (_, idx) =>
+            this.commissionService.getAll(this.buildStatsParams(idx + 2, perPage))
+          );
+
+          return forkJoin(requests).pipe(
+            map((results) => [
+              ...firstData,
+              ...results.flatMap((r) => r.data?.data ?? []),
+            ])
+          );
+        })
+      )
+      .subscribe({
+        next: (rows) => {
+          const stats = rows.reduce(
+            (acc, item) => {
+              acc.totalCommission += this.toNumber(item.montant_commission_total);
+              acc.partLivreur += this.toNumber(item.part_livreur);
+              acc.partProprietaire += this.toNumber(item.part_proprietaire);
+              acc.count += 1;
+              return acc;
+            },
+            { totalCommission: 0, partLivreur: 0, partProprietaire: 0, count: 0 } as CommissionStatsData
+          );
+
+          this.commissionStats.set(stats);
+          this.statsLoading.set(false);
+        },
+        error: () => {
+          this.commissionStats.set({
+            totalCommission: 0,
+            partLivreur: 0,
+            partProprietaire: 0,
+            count: 0,
+          });
+          this.statsLoading.set(false);
+        },
+      });
+  }
+
+  private toNumber(value: string | number | null | undefined): number {
+    if (value == null || value === '') return 0;
+    const n = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  private buildStatsSubtitle(count: number): string {
+    if (this.filterDateDebut && this.filterDateFin) {
+      return `du ${this.formatDateInput(this.filterDateDebut)} au ${this.formatDateInput(this.filterDateFin)}`;
+    }
+
+    if (this.filterDateDebut) {
+      return `a partir du ${this.formatDateInput(this.filterDateDebut)}`;
+    }
+
+    if (this.filterDateFin) {
+      return `jusqu'au ${this.formatDateInput(this.filterDateFin)}`;
+    }
+
+    return `${count} commission${count > 1 ? 's' : ''}`;
+  }
+
+  private formatDateInput(value: Date): string {
+    return value.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   }
 
   private showApiError(err: unknown): void {

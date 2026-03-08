@@ -1,31 +1,31 @@
 import {
   AppConfigurator,
   Qr
-} from "./chunk-U6YOIOF3.js";
+} from "./chunk-FZTWUNUP.js";
 import {
   Drawer,
   DrawerModule
-} from "./chunk-TULSERSG.js";
-import "./chunk-3JNHDKKE.js";
+} from "./chunk-ZZAJ757A.js";
+import "./chunk-4P2EG6OI.js";
 import {
   LayoutService
-} from "./chunk-AO7XXCDH.js";
+} from "./chunk-R2FUZZXK.js";
 import {
   StyleClass,
   StyleClassModule
-} from "./chunk-AL3XWU5G.js";
+} from "./chunk-L2B5NLLZ.js";
 import {
   authorizationGuard
-} from "./chunk-FJO2OT2O.js";
-import "./chunk-H7UPSY5A.js";
+} from "./chunk-ZFQCIBR5.js";
+import "./chunk-WEV7CZZY.js";
 import {
   Toast,
   ToastModule
-} from "./chunk-TMFAAIZM.js";
-import "./chunk-CZYEBXKQ.js";
+} from "./chunk-SXI4YLKA.js";
+import "./chunk-2W47BJ2H.js";
 import {
   AuthService
-} from "./chunk-JKMJDVN5.js";
+} from "./chunk-FWYLTE3T.js";
 import {
   NavigationEnd,
   Router,
@@ -36,19 +36,19 @@ import {
   provideRouter,
   withHashLocation,
   withInMemoryScrolling
-} from "./chunk-5M76Y6O2.js";
+} from "./chunk-6PLIE4IB.js";
 import {
   DomRendererFactory2,
   bootstrapApplication
-} from "./chunk-B555S3BB.js";
+} from "./chunk-UK6LIBRF.js";
 import {
   UsineContextService
-} from "./chunk-J6EUYIEM.js";
+} from "./chunk-GEBWCDCC.js";
 import {
   environment
 } from "./chunk-CSVYKJ4F.js";
-import "./chunk-YTLGTLNQ.js";
-import "./chunk-PTG476NB.js";
+import "./chunk-V5XSXX3V.js";
+import "./chunk-4NB56M3I.js";
 import {
   HttpClient,
   HttpErrorResponse,
@@ -56,65 +56,65 @@ import {
   provideHttpClient,
   withFetch,
   withInterceptors
-} from "./chunk-OP4G3N4V.js";
+} from "./chunk-NGYBJXCA.js";
 import {
   Select,
   SelectModule
-} from "./chunk-QSEARSIQ.js";
-import "./chunk-RZNPFGUI.js";
-import "./chunk-6E4MQ4P5.js";
-import "./chunk-LXNRGYDD.js";
+} from "./chunk-7FPBHFED.js";
+import "./chunk-WZGVHVRY.js";
+import "./chunk-YZHJ5FSA.js";
+import "./chunk-5OSG7M3V.js";
 import {
   IconField,
   IconFieldModule,
   InputIcon,
   InputIconModule
-} from "./chunk-X57GOT3J.js";
+} from "./chunk-YHSSX73X.js";
 import {
   InputText,
   InputTextModule
-} from "./chunk-ZJMXLI5D.js";
+} from "./chunk-52XP6VLB.js";
 import {
   FormsModule,
   NgControlStatus,
   NgModel
-} from "./chunk-BF3NO5XV.js";
+} from "./chunk-ZPTU3HTV.js";
 import {
   Tooltip,
   TooltipModule
-} from "./chunk-YSXAGVDG.js";
-import "./chunk-LSX5YOHQ.js";
-import "./chunk-P6BGZM46.js";
-import "./chunk-URYLESXH.js";
+} from "./chunk-CZVP2Z6G.js";
+import "./chunk-6FDWWH3U.js";
+import "./chunk-3MAO4O33.js";
+import "./chunk-U7PUKEXO.js";
 import "./chunk-CJMBUE5J.js";
-import "./chunk-4A7IHHEF.js";
+import "./chunk-5YV6R2XG.js";
 import {
   Button,
   ButtonDirective,
   ButtonModule
-} from "./chunk-VB3XNU3Q.js";
+} from "./chunk-DU54A2AA.js";
 import {
   Badge,
   BadgeModule
-} from "./chunk-BKCBW4AP.js";
+} from "./chunk-2LRC5QRK.js";
 import {
   DomHandler,
   Ripple,
   RippleModule
-} from "./chunk-SCR42GDN.js";
-import "./chunk-CBEWEUNZ.js";
+} from "./chunk-GZRFJIKZ.js";
+import "./chunk-4SQYV2UP.js";
 import {
   MessageService,
   PrimeTemplate,
   providePrimeNG
-} from "./chunk-AGBUVBVL.js";
+} from "./chunk-6E6G4HCZ.js";
 import {
   AsyncPipe,
   CommonModule,
   NgClass,
   NgForOf,
   NgIf
-} from "./chunk-T6X6TYBW.js";
+} from "./chunk-SHRV3VYN.js";
 import {
   animate,
   state,
@@ -210,7 +210,7 @@ import {
   ɵɵtextInterpolate1,
   ɵɵtextInterpolate2,
   ɵɵviewQuery
-} from "./chunk-HXF2V74O.js";
+} from "./chunk-DSAAE4AM.js";
 import {
   __async,
   __spreadProps,
@@ -251,7 +251,7 @@ var AsyncAnimationRendererFactory = class _AsyncAnimationRendererFactory {
    * @internal
    */
   loadImpl() {
-    const loadFn = () => this.moduleImpl ?? import("./chunk-W2B3PL33.js").then((m) => m);
+    const loadFn = () => this.moduleImpl ?? import("./chunk-CEXRDYZG.js").then((m) => m);
     let moduleImplPromise;
     if (this.loadingSchedulerFn) {
       moduleImplPromise = this.loadingSchedulerFn(loadFn);
@@ -4404,122 +4404,122 @@ var appRoutes = [
       },
       {
         path: "dashboard",
-        loadComponent: () => import("./chunk-5XBOOCET.js").then((c) => c.EcommerceDashboard),
+        loadComponent: () => import("./chunk-AXDJOPYY.js").then((c) => c.EcommerceDashboard),
         data: { breadcrumb: "dashboard" }
       },
       {
         path: "dashboard-banking",
-        loadComponent: () => import("./chunk-OXIE7D7E.js").then((c) => c.BankingDashboard),
+        loadComponent: () => import("./chunk-G6L6FTMC.js").then((c) => c.BankingDashboard),
         data: { breadcrumb: "dashboard-banking" }
       },
       {
         path: "dashboard-finance",
-        loadComponent: () => import("./chunk-RKNDDNGH.js").then((c) => c.Finance),
+        loadComponent: () => import("./chunk-2G4ZQGPI.js").then((c) => c.Finance),
         data: { breadcrumb: "dashboard-ventes" }
       },
       {
         path: "comptabilite",
-        loadChildren: () => import("./chunk-VOMSOO7X.js"),
+        loadChildren: () => import("./chunk-5LVW23AQ.js"),
         data: { breadcrumb: "comptabilite" }
       },
       {
         path: "contacts",
-        loadChildren: () => import("./chunk-HZ7YNIPW.js"),
+        loadChildren: () => import("./chunk-W46GYU5Q.js"),
         data: { breadcrumb: "contacts" }
       },
       {
         path: "packings",
-        loadChildren: () => import("./chunk-JHPFHONM.js"),
+        loadChildren: () => import("./chunk-N36O772L.js"),
         data: { breadcrumb: "packings" }
       },
       {
         path: "produits",
-        loadChildren: () => import("./chunk-RNXZHGVE.js"),
+        loadChildren: () => import("./chunk-RWIOI4FR.js"),
         data: { breadcrumb: "produits" }
       },
       {
         path: "vehicules",
-        loadChildren: () => import("./chunk-5SH64MLP.js"),
+        loadChildren: () => import("./chunk-SFE7I7TA.js"),
         data: { breadcrumb: "vehicules" }
       },
       {
         path: "ventes",
-        loadChildren: () => import("./chunk-BHDAGPNE.js"),
+        loadChildren: () => import("./chunk-BGS5YMMW.js"),
         data: { breadcrumb: "ventes" }
       },
       {
         path: "billing",
-        loadChildren: () => import("./chunk-K763RH6N.js"),
+        loadChildren: () => import("./chunk-7KMWFRSF.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "billing", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "forfaits",
-        loadChildren: () => import("./chunk-ZEEIZJWD.js"),
+        loadChildren: () => import("./chunk-BA7TUPFD.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "forfaits", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "organisations",
-        loadChildren: () => import("./chunk-IPSB2JC7.js"),
+        loadChildren: () => import("./chunk-VLOUAJO3.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "organisations", roles: ["super_admin", "super-admin"] }
       },
       {
         path: "sites",
-        loadChildren: () => import("./chunk-QJ6ILPP3.js"),
+        loadChildren: () => import("./chunk-Q5I6AKQS.js"),
         canActivate: [authorizationGuard],
         data: { breadcrumb: "sites", permissions: ["sites.read"] }
       },
       {
         path: "parametres",
-        loadChildren: () => import("./chunk-HG4BGTMD.js"),
+        loadChildren: () => import("./chunk-ZLLGS4XO.js"),
         data: { breadcrumb: "parametres" }
       },
       {
         path: "roles",
         canActivate: [authorizationGuard],
         data: { breadcrumb: "roles", roles: ["admin_entreprise", "super_admin", "super-admin"] },
-        loadChildren: () => import("./chunk-3TEM6UII.js")
+        loadChildren: () => import("./chunk-VKTBXA65.js")
       },
       {
         path: "profile",
-        loadComponent: () => import("./chunk-MZ7BXYRJ.js").then((c) => c.ProfileOverview),
+        loadComponent: () => import("./chunk-5NGQ7VAS.js").then((c) => c.ProfileOverview),
         data: { breadcrumb: "profile" }
       },
       {
         path: "usermanagement",
-        loadChildren: () => import("./chunk-C3XWMJST.js"),
+        loadChildren: () => import("./chunk-NRDAZZKP.js"),
         data: { breadcrumb: "usermanagement" }
       },
       {
         path: "uikit",
-        loadChildren: () => import("./chunk-Q75TK4YL.js"),
+        loadChildren: () => import("./chunk-24F62KEM.js"),
         data: { breadcrumb: "uikit" }
       },
       {
         path: "documentation",
-        loadComponent: () => import("./chunk-OFAANSNI.js").then((c) => c.Documentation),
+        loadComponent: () => import("./chunk-FHMH6N5S.js").then((c) => c.Documentation),
         data: { breadcrumb: "documentation" }
       },
       {
         path: "pages",
-        loadChildren: () => import("./chunk-PLMSKHYR.js"),
+        loadChildren: () => import("./chunk-MMBN6GJP.js"),
         data: { breadcrumb: "pages" }
       },
       {
         path: "apps",
-        loadChildren: () => import("./chunk-SGVW4QLF.js"),
+        loadChildren: () => import("./chunk-JI3TIW3L.js"),
         data: { breadcrumb: "apps" }
       },
       {
         path: "blocks",
-        loadChildren: () => import("./chunk-2NI4DKPF.js"),
+        loadChildren: () => import("./chunk-OVPONC6Q.js"),
         data: { breadcrumb: "blocks" }
       },
       {
         path: "ecommerce",
-        loadChildren: () => import("./chunk-PTUNQKAI.js"),
+        loadChildren: () => import("./chunk-QQOIOUEE.js"),
         data: { breadcrumb: "ecommerce" }
       }
     ]
@@ -4542,7 +4542,7 @@ var appRoutes = [
   {
     path: "auth",
     canActivate: [guestGuard],
-    loadChildren: () => import("./chunk-7XD7MACF.js"),
+    loadChildren: () => import("./chunk-65LH3NUY.js"),
     data: { breadcrumb: "auth" }
   },
   {
