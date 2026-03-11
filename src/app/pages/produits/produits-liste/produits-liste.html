@@ -102,7 +102,7 @@
                     </div>
 
                     <div class="mobile-card-footer">
-                        <span class="mobile-card-summary">{{ produit.qte_stock }} en stock · {{ formatCurrency(produit.prix_vente) }}</span>
+                        <span class="mobile-card-summary">{{ produit.qte_stock }} en stock · {{ produit.prix_vente | money }}</span>
                         <div class="mobile-card-actions">
                             <button
                                 pButton

@@ -90,7 +90,7 @@
             <div class="cv-commande-card__middle">
               <div class="cv-amount-item">
                 <span class="cv-amount-label">Total</span>
-                <span class="cv-amount-value">{{ formatMontant(c.total_commande) }}</span>
+                <span class="cv-amount-value">{{ c.total_commande | money }}</span>
               </div>
               <div class="cv-amount-item">
                 <span class="cv-amount-label">Date</span>
@@ -242,7 +242,7 @@
             }
           </td>
 
-          <td class="font-semibold">{{ formatMontant(c.total_commande) }}</td>
+          <td class="font-semibold">{{ c.total_commande | money }}</td>
 
           <td>
             @if (c.facture) {
@@ -268,7 +268,7 @@
                 <p-tag severity="success" value="Payée" />
               } @else {
                 <p-tag
-                  [value]="formatMontant(c.commission.montant_commission_total)"
+                  [value]="c.commission.montant_commission_total | money"
                   [severity]="getCommissionSeverity(c.commission.statut)"
                   styleClass="cursor-pointer"
                   (click)="openCommissionDetail(c.commission.id, $event)"
@@ -392,7 +392,7 @@
 
               <div class="text-center">
                 @if (getPrixUsine(i) > 0) {
-                  <span class="text-xs text-surface-400 font-mono">{{ formatMontant(getPrixUsine(i)) }}</span>
+                  <span class="text-xs text-surface-400 font-mono">{{ getPrixUsine(i) | money }}</span>
                 } @else { <span class="text-surface-300 text-xs">—</span> }
               </div>
 
@@ -406,7 +406,7 @@
 
               <div class="text-right">
                 @if (getTotalLigne(i) > 0) {
-                  <span class="font-semibold text-sm text-primary">{{ formatMontant(getTotalLigne(i)) }}</span>
+                  <span class="font-semibold text-sm text-primary">{{ getTotalLigne(i) | money }}</span>
                 } @else { <span class="text-surface-300 text-sm">—</span> }
               </div>
 
@@ -421,7 +421,7 @@
         <div class="flex items-center justify-between px-3 py-3 border-round"
              style="background: var(--p-primary-50, #eef2ff); border: 1px solid var(--p-primary-200, #c7d2fe)">
           <span class="font-medium text-sm">Total commande</span>
-          <span class="font-bold text-xl text-primary">{{ formatMontant(totalDialog) }}</span>
+          <span class="font-bold text-xl text-primary">{{ totalDialog | money }}</span>
         </div>
       </div>
 

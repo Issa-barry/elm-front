@@ -346,7 +346,7 @@ export class RolesEdit implements OnInit {
   }
 
   private refreshCurrentUserPermissions() {
-    this.authService.me().subscribe({
+    this.authService.me(true).subscribe({
       next: () => {},
       error: () => {},
     });
@@ -356,4 +356,3 @@ export class RolesEdit implements OnInit {
     this.router.navigate(['/parametres']);
   }
 }
-

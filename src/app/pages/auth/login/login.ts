@@ -206,9 +206,12 @@ export class Login implements OnInit, OnDestroy {
         this.isLoading.set(true);
 
         // Construire les credentials avec le code pays + téléphone
+        // Supprimer le 0 initial (format national) pour les numéros internationaux
+        const rawPhone: string = this.loginForm.value.phone ?? '';
+        const normalizedPhone = rawPhone.startsWith('0') ? rawPhone.slice(1) : rawPhone;
         const credentials = {
             ...this.loginForm.value,
-            phone: this.selectedCountry.dialCode + this.loginForm.value.phone
+            phone: this.selectedCountry.dialCode + normalizedPhone
         };
 
         // Appeler le service d'authentification

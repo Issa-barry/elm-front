@@ -37,6 +37,7 @@ import {
 import { AuthService } from '@/services/auth/auth.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { ComptabilitePackingPaiement, PaiementPayload } from '@/pages/comptabilite/components/comptabilite-packing-paiement/comptabilite-packing-paiement';
 import { ComptabiliteHistoriqueVersements } from '@/pages/comptabilite/components/comptabilite-historique-versements/comptabilite-historique-versements';
 import { ConsolidatedDisableDirective } from '@/directives/consolidated-disable.directive';
@@ -87,6 +88,7 @@ type QuickDateFilter =
     ComptabilitePackingPaiement,
     ComptabiliteHistoriqueVersements,
     ConsolidatedDisableDirective,
+    MoneyPipe,
   ],
   providers: [MessageService, ConfirmationService],
 })

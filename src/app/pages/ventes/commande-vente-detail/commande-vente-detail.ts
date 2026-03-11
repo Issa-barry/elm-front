@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
 import {
@@ -28,7 +29,7 @@ interface LocalAssistantInsight {
 @Component({
   selector: 'app-commande-vente-detail',
   standalone: true,
-  imports: [CommonModule, ButtonModule, SkeletonModule, ToastModule, PhoneFormatPipe],
+  imports: [CommonModule, ButtonModule, SkeletonModule, ToastModule, PhoneFormatPipe, MoneyPipe],
   providers: [MessageService],
   templateUrl: './commande-vente-detail.html',
 })

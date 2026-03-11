@@ -38,6 +38,7 @@ import {
 } from '@/models/vente.model';
 import { Vehicule } from '@/models/vehicule.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 interface ProduitData {
   prixUsine: number;
@@ -70,6 +71,7 @@ interface ProduitData {
     CommandeMobileForm,
     PhoneFormatPipe,
     CommissionDetailDialog,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './commande-vente-liste.html',
@@ -532,12 +534,6 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
       annulee: 'cv-status-dot--annulee',
     };
     return map[s] ?? 'cv-status-dot--annulee';
-  }
-
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   formatDate(d: string): string {

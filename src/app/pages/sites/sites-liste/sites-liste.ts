@@ -197,7 +197,7 @@ export class SitesListe implements OnInit {
     this.siteService.setDefault(item.id).subscribe({
       next: () => {
         this.contextService.switchUsine(item.id);
-        this.authService.me().subscribe({
+        this.authService.me(true).subscribe({
           next: () => {},
           error: () => {},
         });

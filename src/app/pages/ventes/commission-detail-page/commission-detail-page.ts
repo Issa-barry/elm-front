@@ -27,6 +27,7 @@ import {
     VersementCommission
 } from '@/models/vente.model';
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 interface VersementTarget {
     commissionId: number;
@@ -59,7 +60,8 @@ function validateVersementMontant(montant: number | null, montantRestant: number
         DividerModule,
         DialogModule,
         InputNumberModule,
-        SelectModule
+        SelectModule,
+        MoneyPipe,
     ],
     providers: [MessageService],
     templateUrl: './commission-detail-page.html',

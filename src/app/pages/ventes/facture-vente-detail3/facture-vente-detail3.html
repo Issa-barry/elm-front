@@ -165,10 +165,10 @@
                                             {{ ligne.qte }}
                                         </td>
                                         <td class="text-right py-4 border-b border-surface-200 dark:border-surface-700 px-4">
-                                            {{ formatAmount(getPrixUnitaire(ligne)) }}
+                                            {{ getPrixUnitaire(ligne) | money }}
                                         </td>
                                         <td class="text-right py-4 border-b border-surface-200 dark:border-surface-700">
-                                            {{ formatAmount(ligne.total_ligne) }}
+                                            {{ ligne.total_ligne | money }}
                                         </td>
                                     </tr>
                                 }
@@ -193,7 +193,7 @@
                     <div class="flex flex-col">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold mr-12">SUBTOTAL</span>
-                            <span>{{ formatAmount(sousTotal) }}</span>
+                            <span>{{ sousTotal | money }}</span>
                         </div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold mr-12">TVA #</span>
@@ -201,7 +201,7 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="font-semibold mr-12">TOTAL</span>
-                            <span>{{ formatAmount(totalFacture) }}</span>
+                            <span>{{ totalFacture | money }}</span>
                         </div>
                     </div>
                 </div>
@@ -211,11 +211,11 @@
                     <div class="flex flex-col">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-semibold mr-12">Montant paye</span>
-                            <span>{{ formatAmount(montantPaye) }}</span>
+                            <span>{{ montantPaye | money }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="font-semibold mr-12">Reste a payer</span>
-                            <span>{{ formatAmount(resteAPayer) }}</span>
+                            <span>{{ resteAPayer | money }}</span>
                         </div>
 
                         @if (versementsAffiches.length > 0) {
@@ -226,7 +226,7 @@
                                             {{ formatDateDisplay(versement.date_encaissement) }} - {{ getModePaiementLabel(versement.mode_paiement) }}
                                         </span>
                                         <span class="font-medium text-surface-900 dark:text-surface-0">
-                                            {{ formatAmount(versement.montant) }}
+                                            {{ versement.montant | money }}
                                         </span>
                                     </div>
                                 }
@@ -247,19 +247,19 @@
                     @if (totalEspeces > 0) {
                         <div class="w-full flex justify-start items-start gap-2">
                             <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Especes</div>
-                            <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalEspeces) }}</div>
+                            <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ totalEspeces | money }}</div>
                         </div>
                     }
                     @if (totalMobile > 0) {
                         <div class="w-full flex justify-start items-start gap-2">
                             <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Mobile</div>
-                            <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalMobile) }}</div>
+                            <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ totalMobile | money }}</div>
                         </div>
                     }
                     @if (totalBanque > 0) {
                         <div class="w-full flex justify-start items-start gap-2">
                             <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Banque</div>
-                            <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(totalBanque) }}</div>
+                            <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ totalBanque | money }}</div>
                         </div>
                     }
                     @if (totalEncaisse === 0) {
@@ -275,11 +275,11 @@
 
                 <div class="w-full flex justify-start items-start gap-2">
                     <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Payee</div>
-                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ formatAmount(montantPaye) }}</div>
+                    <div class="text-surface-900 dark:text-surface-0 text-sm md:text-base font-medium leading-tight">{{ montantPaye | money }}</div>
                 </div>
                 <div class="w-full flex justify-start items-start gap-2">
                     <div class="flex-1 text-surface-700 dark:text-surface-200 text-sm md:text-base font-normal leading-tight">Reste</div>
-                    <div class="text-orange-500 text-sm md:text-base font-medium leading-tight">{{ formatAmount(resteAPayer) }}</div>
+                    <div class="text-orange-500 text-sm md:text-base font-medium leading-tight">{{ resteAPayer | money }}</div>
                 </div>
 
                 <div class="w-full flex flex-col gap-2">
@@ -296,7 +296,7 @@
                         placeholder="0"
                     />
                     @if (isEncaissementMontantExceedsReste) {
-                        <small class="text-red-500 text-xs">Le montant ne doit pas depasser le reste a payer ({{ formatAmount(resteAPayer) }}).</small>
+                        <small class="text-red-500 text-xs">Le montant ne doit pas depasser le reste a payer ({{ resteAPayer | money }}).</small>
                     }
                 </div>
 

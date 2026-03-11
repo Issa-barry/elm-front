@@ -14,6 +14,7 @@ import {
     VenteFactureStatus,
     VentesParTypePeriod
 } from '@/services/dashboard/dashboard.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 type StatutTag = {
     value: string;
@@ -23,7 +24,7 @@ type StatutTag = {
 @Component({
     standalone: true,
     selector: 'app-ca-par-statut-widget',
-    imports: [CommonModule, FormsModule, TableModule, TagModule, SelectModule, SkeletonModule, ButtonModule],
+    imports: [CommonModule, FormsModule, TableModule, TagModule, SelectModule, SkeletonModule, ButtonModule, MoneyPipe],
     template: `
         <div class="card">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
@@ -72,14 +73,14 @@ type StatutTag = {
                                 @let tag = getStatutTag(row.statut_facture);
                                 <p-tag [value]="tag.value" [severity]="tag.severity"></p-tag>
                             </td>
-                            <td>{{ row.ca_total | number:'1.0-0' }} GNF</td>
+                            <td>{{ row.ca_total | money }}</td>
                             <td>{{ row.nb_commandes }}</td>
                         </tr>
                     </ng-template>
                 </p-table>
 
                 <div class="text-xs text-surface-500 mt-8 flex flex-wrap gap-2">
-                    <span>Total CA (hors annulees): {{ totalCa | number:'1.0-0' }} GNF</span>
+                    <span>Total CA (hors annulees): {{ totalCa | money }}</span>
                     <span>-</span>
                     <span>Total commandes: {{ totalCommandes }}</span>
                 </div>

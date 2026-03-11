@@ -9,6 +9,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { Packing, PackingStatut } from '@/models/packing.model';
 import { Prestataire } from '@/models/prestataire.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 interface StatutOption {
   label: string;
@@ -29,6 +30,7 @@ interface StatutOption {
     DatePickerModule,
     SkeletonModule,
     PhoneFormatPipe,
+    MoneyPipe,
   ],
 })
 export class PackingMobileForm {
@@ -64,10 +66,4 @@ export class PackingMobileForm {
     });
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-    }).format(value) + ' GNF';
-  }
 }

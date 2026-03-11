@@ -58,19 +58,19 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <p class="text-color-secondary text-sm m-0 mb-1">Montant brut</p>
-          <p class="text-2xl font-bold m-0 text-primary">{{ formatMontant(facture.montant_brut) }}</p>
+          <p class="text-2xl font-bold m-0 text-primary">{{ facture.montant_brut | money }}</p>
         </div>
         <div>
           <p class="text-color-secondary text-sm m-0 mb-1">Montant net</p>
-          <p class="text-xl font-semibold m-0">{{ formatMontant(facture.montant_net) }}</p>
+          <p class="text-xl font-semibold m-0">{{ facture.montant_net | money }}</p>
         </div>
         <div>
           <p class="text-color-secondary text-sm m-0 mb-1">Encaissé</p>
-          <p class="font-semibold text-green-600 m-0">{{ formatMontant(facture.montant_encaisse) }}</p>
+          <p class="font-semibold text-green-600 m-0">{{ facture.montant_encaisse | money }}</p>
         </div>
         <div>
           <p class="text-color-secondary text-sm m-0 mb-1">Restant</p>
-          <p class="font-semibold text-red-500 m-0">{{ formatMontant(facture.montant_restant) }}</p>
+          <p class="font-semibold text-red-500 m-0">{{ facture.montant_restant | money }}</p>
         </div>
         <div>
           <p class="text-color-secondary text-sm m-0 mb-1">Date de création</p>
@@ -156,7 +156,7 @@
           @for (enc of facture.encaissements; track enc.id) {
             <div class="flex justify-content-between align-items-center p-3 surface-100 border-round">
               <div class="flex align-items-center gap-2">
-                <span class="font-medium text-green-600">{{ formatMontant(enc.montant) }}</span>
+                <span class="font-medium text-green-600">{{ enc.montant | money }}</span>
                 <span class="surface-200 px-2 py-1 border-round text-xs">{{ enc.mode_paiement }}</span>
                 @if (enc.note) {
                   <span class="text-color-secondary text-sm">— {{ enc.note }}</span>
@@ -186,7 +186,7 @@
   @if (facture) {
     <div class="flex align-items-center justify-content-between mb-4 px-3 py-2 border-round surface-100">
       <span class="text-sm text-color-secondary">Restant à payer</span>
-      <span class="font-bold text-lg text-red-500">{{ formatMontant(facture.montant_restant) }}</span>
+      <span class="font-bold text-lg text-red-500">{{ facture.montant_restant | money }}</span>
     </div>
   }
 

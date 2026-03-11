@@ -18,6 +18,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { StatCardWidget, type StatCardVariant } from '@/pages/dashboards/finance/widgets/statcardwidget';
 import {
   CommissionVente,
@@ -59,6 +60,7 @@ interface CommissionStatsData {
     InputIconModule,
     StatCardWidget,
     DrawerModule,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './commission-vente-liste.html',
@@ -234,12 +236,6 @@ export class CommissionVenteListe implements OnInit {
 
   getStatutSeverity(s: StatutCommission) {
     return STATUT_COMMISSION_SEVERITY[s] ?? 'info';
-  }
-
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   formatDate(d: string | null): string {

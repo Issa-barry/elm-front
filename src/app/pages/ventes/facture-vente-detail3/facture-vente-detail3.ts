@@ -23,6 +23,7 @@ import {
 import { Usine } from '@/models/usine.model';
 import { LayoutService } from '@/layout/service/layout.service';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { AuthService } from '@/services/auth/auth.service';
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
@@ -42,6 +43,7 @@ import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
     SkeletonModule,
     TooltipModule,
     PhoneFormatPipe,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './facture-vente-detail3.html',

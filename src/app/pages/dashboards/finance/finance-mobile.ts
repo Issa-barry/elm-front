@@ -22,12 +22,13 @@ import {
     VentesEncaissementsPeriod,
 } from '@/services/dashboard/dashboard.service';
 import { HeaderWidget2 } from './widgets/headerwidget2';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-finance-mobile',
     standalone: true,
-    imports: [CommonModule, SkeletonModule, HeaderWidget2],
+    imports: [CommonModule, SkeletonModule, HeaderWidget2, MoneyPipe],
     templateUrl: './finance-mobile.html',
     styleUrl: './finance-mobile.scss',
 })
@@ -53,13 +54,13 @@ export class FinanceMobile implements OnInit, OnChanges, AfterViewInit, OnDestro
     readonly moduleShortcuts = [
         { label: 'Dashboard',     icon: 'pi pi-th-large',      route: '/dashboard'              },
         { label: 'Accueil',       icon: 'pi pi-home',          route: '/dashboard-finance'      },
-        { label: 'Commissions',   icon: 'pi pi-percentage',    route: '/ventes/commissions'     },
-        { label: 'Ventes',        icon: 'pi pi-shopping-cart', route: '/ventes/commandes'       },
+        // { label: 'Commissions',   icon: 'pi pi-percentage',    route: '/ventes/commissions'     },
+        // { label: 'Ventes',        icon: 'pi pi-shopping-cart', route: '/ventes/commandes'       },
         { label: 'Produits',      icon: 'pi pi-box',           route: '/produits'               },
         { label: 'Packing',       icon: 'pi pi-inbox',         route: '/packings'               },
         { label: 'Prestataires',  icon: 'pi pi-users',         route: '/contacts/prestataires'  },
         { label: 'Utilisateurs',  icon: 'pi pi-user',          route: '/contacts/utilisateurs'  },
-        { label: 'Vehicules',     icon: 'pi pi-car',           route: '/vehicules'              },
+        // { label: 'Vehicules',     icon: 'pi pi-car',           route: '/vehicules'              },
     ] as const;
 
     private observer?: IntersectionObserver;

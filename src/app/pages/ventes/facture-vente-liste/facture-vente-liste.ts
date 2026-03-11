@@ -30,6 +30,7 @@ import {
   
 } from '@/models/vente.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 @Component({
   selector: 'app-facture-vente-liste',
@@ -50,7 +51,8 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TooltipModule,
     InputIconModule,
     IconFieldModule,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './facture-vente-liste.html',
@@ -201,12 +203,6 @@ export class FactureVenteListe implements OnInit {
     if (!d) return '';
     const date = typeof d === 'string' ? new Date(d) : d;
     return date.toISOString().split('T')[0];
-  }
-
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   private showApiError(err: any, action: string) {

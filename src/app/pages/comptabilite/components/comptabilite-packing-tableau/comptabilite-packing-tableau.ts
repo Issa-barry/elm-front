@@ -25,6 +25,7 @@ import {
   ComptabiliteFilters,
 } from '@/models/facture-packing.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 
 @Component({
@@ -49,6 +50,7 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
     MenuModule,
     RippleModule,
     PhoneFormatPipe,
+    MoneyPipe,
   ],
   providers: [MessageService],
 })
@@ -270,10 +272,6 @@ export class ComptabilitePackingTableau implements OnInit {
     const parts = nomComplet.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-  }
-
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('fr-FR', { style: 'decimal', minimumFractionDigits: 0 }).format(value) + ' GNF';
   }
 
   formatDateDisplay(dateStr: string | null | undefined): string {

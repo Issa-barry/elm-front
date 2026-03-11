@@ -54,7 +54,7 @@
         <!-- Montant a payer -->
         <div class="w-full flex justify-start items-center gap-4">
             <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant a payer</div>
-            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? formatCurrency(montant) : '0 GNF' }}</div>
+            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? (montant | money) : '0 GNF' }}</div>
         </div>
 
         <!-- Mode de paiement -->

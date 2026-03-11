@@ -23,6 +23,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil } from 'rxjs';
 import { ProduitService } from '@/services/produits/produits.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 import {
     CreateProduitDto,
@@ -70,6 +71,7 @@ interface ExportColumn {
       TooltipModule,
       DrawerModule,
       ToggleSwitchModule,
+      MoneyPipe,
   ],
   providers: [MessageService, ProduitService, ConfirmationService],
   templateUrl: './produits-liste.html',
@@ -393,11 +395,6 @@ export class ProduitsListe implements OnInit, OnDestroy {
     getTypeLabel(type?: ProduitType): string {
         if (!type) return '-';
         return PRODUIT_TYPE_LABELS[type] ?? type;
-    }
-
-    formatCurrency(value?: number | null): string {
-        if (typeof value !== 'number') return '-';
-        return `${new Intl.NumberFormat('fr-GN', { maximumFractionDigits: 0 }).format(value)} GNF`;
     }
 
     /**

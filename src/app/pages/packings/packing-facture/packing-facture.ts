@@ -12,6 +12,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MODE_PAIEMENT_LABELS, ModePaiement, Packing, PackingStatut, StoreVersementDto, Versement } from '@/models/packing.model';
 import { Usine } from '@/models/usine.model';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { LayoutService } from '@/layout/service/layout.service';
 import { PackingService } from '@/services/packing/packing.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
@@ -30,6 +31,7 @@ import { AuthService } from '@/services/auth/auth.service';
     SelectModule,
     TooltipModule,
     PhoneFormatPipe,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './packing-facture.html',

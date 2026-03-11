@@ -73,7 +73,7 @@
               <div class="cv-card__meta">{{ c.commande?.reference ?? '—' }} · {{ c.vehicule?.nom_vehicule ?? '—' }}</div>
               <div class="cv-card__footer">
                 <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" styleClass="app-table-status" />
-                <span class="cv-card__montant">{{ formatMontant(c.montant_commission_total) }}</span>
+                <span class="cv-card__montant">{{ c.montant_commission_total | money }}</span>
                 <button pButton pRipple icon="pi pi-eye"
                   class="p-button-rounded p-button-text p-button-sm cv-card__action"
                   (click)="$event.stopPropagation(); openDetail(c)"></button>
@@ -266,12 +266,12 @@
         </td>
         <td class="text-sm">{{ c.livreur?.prenom }} {{ c.livreur?.nom }}</td>
         <td class="text-right">
-          <span class="font-semibold text-primary">{{ formatMontant(c.montant_commission_total) }}</span>
+          <span class="font-semibold text-primary">{{ c.montant_commission_total | money }}</span>
         </td>
-        <td class="text-right text-sm">{{ formatMontant(c.part_livreur) }}</td>
+        <td class="text-right text-sm">{{ c.part_livreur | money }}</td>
         <td class="text-right text-sm">
           @if (parseFloat(c.part_proprietaire) > 0) {
-            {{ formatMontant(c.part_proprietaire) }}
+            {{ c.part_proprietaire | money }}
           } @else {
             <span class="text-surface-300">—</span>
           }

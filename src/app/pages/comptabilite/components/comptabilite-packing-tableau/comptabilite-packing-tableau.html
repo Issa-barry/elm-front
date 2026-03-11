@@ -73,8 +73,8 @@
                   styleClass="cpt-status-tag app-table-status"
                 />
                 <span class="cpt-card-amounts">
-                  {{ formatCurrency(item.montant_facture) }}
-                  <span class="cpt-card-reste"> · Reste : {{ formatCurrency(item.montant_restant_facture) }}</span>
+                  {{ item.montant_facture | money }}
+                  <span class="cpt-card-reste"> · Reste : {{ item.montant_restant_facture | money }}</span>
                 </span>
               </div>
             </div>
@@ -214,9 +214,9 @@
         </td>
         <td class="text-sm">{{ item.prestataire_phone | phoneFormat }}</td>
         <td class="text-sm">{{ formatDateDisplay(item.derniere_date) }}</td>
-        <td class="text-sm font-medium">{{ formatCurrency(item.montant_facture) }}</td>
-        <td class="text-sm font-medium text-green-600">{{ formatCurrency(item.montant_verse) }}</td>
-        <td class="text-sm font-medium">{{ formatCurrency(item.montant_restant_facture) }}</td>
+        <td class="text-sm font-medium">{{ item.montant_facture | money }}</td>
+        <td class="text-sm font-medium text-green-600">{{ item.montant_verse | money }}</td>
+        <td class="text-sm font-medium">{{ item.montant_restant_facture | money }}</td>
         <td>
           <p-tag [value]="getStatutLabel(item.statut)" [severity]="getStatutSeverity(item.statut)" styleClass="app-table-status" />
         </td>

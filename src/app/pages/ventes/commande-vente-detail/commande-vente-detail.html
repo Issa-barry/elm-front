@@ -30,9 +30,9 @@
                 <div class="flex flex-col gap-1">
                     <h1 class="text-surface-900 dark:text-surface-0 text-2xl font-semibold leading-tight">Commande Vente</h1>
                     <p class="text-surface-500 dark:text-surface-400 text-base leading-tight">
-                        Total = {{ formatMontant(commande.total_commande) }} &nbsp;|&nbsp;
-                        Encaisse = {{ formatMontant(commande.facture?.montant_encaisse) }} &nbsp;|&nbsp;
-                        Restant = {{ formatMontant(commande.facture?.montant_restant) }}
+                        Total = {{ commande.total_commande | money }} &nbsp;|&nbsp;
+                        Encaisse = {{ commande.facture?.montant_encaisse | money }} &nbsp;|&nbsp;
+                        Restant = {{ commande.facture?.montant_restant | money }}
                     </p>
                 </div>
             </div>
@@ -155,7 +155,7 @@
                         }
                     </div>
                     <div class="flex flex-col items-start sm:items-center flex-1">
-                        <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">{{ formatMontant(commande.total_commande) }}</span>
+                        <span class="text-surface-700 dark:text-surface-300 text-base font-semibold leading-tight">{{ commande.total_commande | money }}</span>
                     </div>
 
                 </div>
@@ -170,15 +170,15 @@
                             <div class="p-6 flex flex-col gap-5">
                                 <div class="flex gap-2">
                                     <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Total commande</span>
-                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.total_commande) }}</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ commande.total_commande | money }}</span>
                                 </div>
                                 <div class="flex gap-2">
                                     <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Encaisse</span>
-                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.facture?.montant_encaisse) }}</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ commande.facture?.montant_encaisse | money }}</span>
                                 </div>
                                 <div class="flex gap-2">
                                     <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Restant</span>
-                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.facture?.montant_restant) }}</span>
+                                    <span class="flex-1 text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ commande.facture?.montant_restant | money }}</span>
                                 </div>
                                 <div class="flex gap-2">
                                     <span class="w-40 text-surface-700 dark:text-surface-300 text-base leading-tight">Date de creation</span>
@@ -243,13 +243,13 @@
                                                 <div class="text-surface-400 dark:text-surface-500 text-sm mt-0.5">Qte : {{ ligne.qte }}</div>
                                             </div>
                                         </div>
-                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(ligne.total_ligne) }}</span>
+                                        <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ ligne.total_ligne | money }}</span>
                                     </div>
                                 }
                                 <div class="h-px bg-surface-200 dark:bg-surface-700"></div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-surface-700 dark:text-surface-300 text-base leading-tight">Total</span>
-                                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ formatMontant(commande.total_commande) }}</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ commande.total_commande | money }}</span>
                                 </div>
                             </div>
                         </div>
@@ -268,11 +268,11 @@
                             <div class="p-6 flex flex-col gap-4">
                                 <div class="flex justify-between items-center">
                                     <span class="text-surface-700 dark:text-surface-300 text-base">Total encaisse</span>
-                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ formatMontant(commande.facture?.montant_encaisse) }}</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ commande.facture?.montant_encaisse | money }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-surface-700 dark:text-surface-300 text-base">Restant du</span>
-                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ formatMontant(commande.facture?.montant_restant) }}</span>
+                                    <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">{{ commande.facture?.montant_restant | money }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-surface-700 dark:text-surface-300 text-base">Nombre de versements</span>

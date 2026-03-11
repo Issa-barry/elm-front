@@ -18,6 +18,7 @@ import { InputTextModule } from 'primeng/inputtext';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import {
   FactureVente,
   STATUT_FACTURE_LABELS,
@@ -46,6 +47,7 @@ import {
     InputNumberModule,
     DatePickerModule,
     InputTextModule,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './facture-livraison-detail.html',
@@ -239,12 +241,6 @@ export class FactureLivraisonDetail implements OnInit {
 
   getStatutSeverity(s: StatutFacture) {
     return STATUT_FACTURE_SEVERITY[s] ?? 'info';
-  }
-
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   formatDate(d: string | undefined): string {

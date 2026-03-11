@@ -89,14 +89,14 @@
           </div>
         </td>
 
-        <td class="font-semibold">{{ formatMontant(f.montant_brut) }}</td>
+        <td class="font-semibold">{{ f.montant_brut | money }}</td>
 
         <td>
-          <span class="text-sm text-green-600 font-medium">{{ formatMontant(f.montant_encaisse) }}</span>
+          <span class="text-sm text-green-600 font-medium">{{ f.montant_encaisse | money }}</span>
         </td>
 
         <td>
-          <span class="text-sm text-red-500 font-medium">{{ formatMontant(f.montant_restant) }}</span>
+          <span class="text-sm text-red-500 font-medium">{{ f.montant_restant | money }}</span>
         </td>
 
         <td>
@@ -170,7 +170,7 @@
   @if (selectedFacture) {
     <div class="flex align-items-center justify-content-between mb-4 px-3 py-2 border-round surface-100">
       <span class="text-sm text-color-secondary">Restant à payer</span>
-      <span class="font-bold text-lg text-red-500">{{ formatMontant(selectedFacture.montant_restant) }}</span>
+      <span class="font-bold text-lg text-red-500">{{ selectedFacture.montant_restant | money }}</span>
     </div>
   }
 

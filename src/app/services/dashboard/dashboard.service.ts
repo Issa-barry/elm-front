@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UsineContextService } from '@/services/usine/usine-context.service';
+import { RequestCacheService, type RequestCacheOptions } from '@/services/request-cache.service';
 
 export interface StatCard {
     value: number;
@@ -126,52 +127,101 @@ interface VentesEvolutionStatutApiResponse {
     data: DashboardVentesEvolutionStatutData;
 }
 
+type DashboardCacheOptions = RequestCacheOptions;
+
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
     private readonly http = inject(HttpClient);
     private readonly usineContext = inject(UsineContextService);
+    private readonly requestCache = inject(RequestCacheService);
     private readonly baseUrl = `${environment.apiUrl}/dashboard`;
+    private readonly defaultTtlMs = 45_000;
 
-    getStats(period: string = 'this_month', days?: number): Observable<DashboardStats> {
+    getStats(period: string = 'this_month', days?: number, cacheOptions: DashboardCacheOptions = {}): Observable<DashboardStats> {
         let params = new HttpParams().set('period', period);
         if (period === 'last_x_days' && days != null) {
             params = params.set('days', days.toString());
         }
-        return this.http
-            .get<ApiResponse>(`${this.baseUrl}/stats`, { params })
-            .pipe(map((res) => res.data));
+
+        const cacheKey = this.buildCacheKey('stats', {
+            period,
+            days,
+            site: this.currentSiteCacheKey(),
+        });
+
+        return this.requestCache.query(
+            cacheKey,
+            () => this.http
+                .get<ApiResponse>(`${this.baseUrl}/stats`, { params })
+                .pipe(map((res) => res.data)),
+            this.normalizeCacheOptions(cacheOptions)
+        );
     }
 
-    getVentesParTypeVehicule(period: VentesParTypePeriod = 'this_month'): Observable<DashboardVentesParTypeData> {
+    getVentesParTypeVehicule(
+        period: VentesParTypePeriod = 'this_month',
+        cacheOptions: DashboardCacheOptions = {}
+    ): Observable<DashboardVentesParTypeData> {
         const params = new HttpParams().set('period', period);
         const headers = this.getSiteHeaders();
+        const cacheKey = this.buildCacheKey('ventes-par-type', {
+            period,
+            site: this.currentSiteCacheKey(),
+        });
 
-        return this.http
-            .get<VentesParTypeApiResponse>(`${this.baseUrl}/ventes/par-type-vehicule`, { params, headers })
-            .pipe(map((res) => res.data));
+        return this.requestCache.query(
+            cacheKey,
+            () => this.http
+                .get<VentesParTypeApiResponse>(`${this.baseUrl}/ventes/par-type-vehicule`, { params, headers })
+                .pipe(map((res) => res.data)),
+            this.normalizeCacheOptions(cacheOptions)
+        );
     }
 
-    getVentesEncaissements(period: VentesEncaissementsPeriod = 'this_month'): Observable<EncaissementStat> {
+    getVentesEncaissements(
+        period: VentesEncaissementsPeriod = 'this_month',
+        cacheOptions: DashboardCacheOptions = {}
+    ): Observable<EncaissementStat> {
         const params = new HttpParams().set('period', period);
         const headers = this.getSiteHeaders();
+        const cacheKey = this.buildCacheKey('ventes-encaissements', {
+            period,
+            site: this.currentSiteCacheKey(),
+        });
 
-        return this.http
-            .get<EncaissementApiResponse>(`${this.baseUrl}/ventes/encaissements`, { params, headers })
-            .pipe(map((res) => res.data));
+        return this.requestCache.query(
+            cacheKey,
+            () => this.http
+                .get<EncaissementApiResponse>(`${this.baseUrl}/ventes/encaissements`, { params, headers })
+                .pipe(map((res) => res.data)),
+            this.normalizeCacheOptions(cacheOptions)
+        );
     }
 
-    getVentesEvolutionParType(period: VentesEvolutionPeriod = 'this_year'): Observable<DashboardVentesEvolutionData> {
+    getVentesEvolutionParType(
+        period: VentesEvolutionPeriod = 'this_year',
+        cacheOptions: DashboardCacheOptions = {}
+    ): Observable<DashboardVentesEvolutionData> {
         const params = new HttpParams().set('period', period);
         const headers = this.getSiteHeaders();
+        const cacheKey = this.buildCacheKey('ventes-evolution-par-type', {
+            period,
+            site: this.currentSiteCacheKey(),
+        });
 
-        return this.http
-            .get<VentesEvolutionApiResponse>(`${this.baseUrl}/ventes/evolution-par-type`, { params, headers })
-            .pipe(map((res) => res.data));
+        return this.requestCache.query(
+            cacheKey,
+            () => this.http
+                .get<VentesEvolutionApiResponse>(`${this.baseUrl}/ventes/evolution-par-type`, { params, headers })
+                .pipe(map((res) => res.data)),
+            this.normalizeCacheOptions(cacheOptions)
+        );
     }
 
     getVentesEvolutionParStatut(
         period: VentesEvolutionStatutPeriod = 'this_year',
-        days?: number | null
+        days?: number | null,
+        cacheOptions: DashboardCacheOptions = {}
     ): Observable<DashboardVentesEvolutionStatutData> {
         let params = new HttpParams().set('period', period);
         if (period === 'last_x_days' && days) {
@@ -179,10 +229,23 @@ export class DashboardService {
         }
 
         const headers = this.getSiteHeaders();
+        const cacheKey = this.buildCacheKey('ventes-evolution-par-statut', {
+            period,
+            days,
+            site: this.currentSiteCacheKey(),
+        });
 
-        return this.http
-            .get<VentesEvolutionStatutApiResponse>(`${this.baseUrl}/ventes/evolution-par-statut`, { params, headers })
-            .pipe(map((res) => res.data));
+        return this.requestCache.query(
+            cacheKey,
+            () => this.http
+                .get<VentesEvolutionStatutApiResponse>(`${this.baseUrl}/ventes/evolution-par-statut`, { params, headers })
+                .pipe(map((res) => res.data)),
+            this.normalizeCacheOptions(cacheOptions)
+        );
+    }
+
+    invalidateCache(): void {
+        this.requestCache.invalidateByPrefix('dashboard:');
     }
 
     private getSiteHeaders(): HttpHeaders | undefined {
@@ -190,5 +253,27 @@ export class DashboardService {
         return siteHeaderValue !== null
             ? new HttpHeaders({ 'X-Site-Id': String(siteHeaderValue) })
             : undefined;
+    }
+
+    private normalizeCacheOptions(options: DashboardCacheOptions): RequestCacheOptions {
+        return {
+            ttlMs: options.ttlMs ?? this.defaultTtlMs,
+            forceRefresh: !!options.forceRefresh,
+        };
+    }
+
+    private currentSiteCacheKey(): string {
+        const siteHeaderValue = this.usineContext.headerUsineId();
+        return siteHeaderValue === null ? 'none' : String(siteHeaderValue);
+    }
+
+    private buildCacheKey(endpoint: string, params: Record<string, string | number | null | undefined>): string {
+        const serialized = Object.entries(params)
+            .filter(([, value]) => value !== null && value !== undefined && String(value).trim().length > 0)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([key, value]) => `${key}=${String(value)}`)
+            .join('&');
+
+        return `dashboard:${endpoint}:${serialized || 'default'}`;
     }
 }
