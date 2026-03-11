@@ -62,7 +62,7 @@ export class EncaissementVenteListe implements OnInit {
   createForm!: FormGroup;
   modePaiementOptions = MODE_PAIEMENT_OPTIONS;
 
-  canCreate = false;
+  get canCreate(): boolean { return this.authService.hasPermission('encaissements.create'); }
 
   totalEncaisse = computed(() =>
     this.encaissements().reduce((sum, e) => sum + parseFloat(String(e.montant ?? 0)), 0)
@@ -74,7 +74,6 @@ export class EncaissementVenteListe implements OnInit {
     private authService: AuthService,
     private messageService: MessageService
   ) {
-    this.canCreate = this.authService.hasPermission('encaissements.create');
   }
 
   ngOnInit() {

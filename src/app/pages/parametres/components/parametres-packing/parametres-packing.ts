@@ -21,7 +21,7 @@ import { ParametresService } from '@/services/parametres/parametres.service';
     providers: [MessageService]
 })
 export class ParametresPacking implements OnInit {
-   loading = false;
+  loading = false;
   saving = false;
   errorMessage = '';
   successMessage = '';

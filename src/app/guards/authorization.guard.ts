@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 
 import { AuthService } from '@/services/auth/auth.service';
+import { User } from '@/models/user.model';
 
 const MODULE_ALIASES: Record<string, string> = {
   produit: 'produit',
@@ -28,17 +29,19 @@ const MODULE_ALIASES: Record<string, string> = {
   facturelivraisons: 'facturelivraison',
   factureslivraison: 'facturelivraison',
   factureslivraisons: 'facturelivraison',
+  site: 'site',
+  sites: 'site',
+  organisation: 'organisation',
+  organisations: 'organisation',
 };
 
 function normalizeRole(value: string): string {
-  return value.trim().toLowerCase();
+  return value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function normalizeModule(value: string): string {
   const compact = value.trim().toLowerCase().replace(/[\s_-]+/g, '');
-  if (compact.length === 0) {
-    return '';
-  }
+  if (compact.length === 0) return '';
 
   if (MODULE_ALIASES[compact]) {
     return MODULE_ALIASES[compact];
@@ -54,9 +57,7 @@ function normalizeModule(value: string): string {
 
 function normalizePermission(value: string): string {
   const raw = value.trim().toLowerCase();
-  if (raw.length === 0) {
-    return '';
-  }
+  if (raw.length === 0) return '';
 
   const lastDot = raw.lastIndexOf('.');
   if (lastDot < 0) {
@@ -68,31 +69,26 @@ function normalizePermission(value: string): string {
   return `${modulePart}.${actionPart}`;
 }
 
-function hasAtLeastOneRole(required: string[] | undefined, current: string[] | undefined): boolean {
-  if (!required || required.length === 0) {
-    return true;
-  }
+function userRoles(user: User): string[] {
+  return [...(user.roles ?? []), ...(user.role_names ?? [])]
+    .map((role) => normalizeRole(role))
+    .filter((role) => role.length > 0);
+}
 
-  if (!current || current.length === 0) {
-    // Fallback permissif: le backend reste la source d'autorite.
-    return true;
-  }
+function hasAtLeastOneRole(required: string[] | undefined, current: string[]): boolean {
+  if (!required || required.length === 0) return true;
+  if (current.length === 0) return false;
 
-  const normalizedCurrent = new Set(current.map(normalizeRole).filter((item) => item.length > 0));
+  const normalizedCurrent = new Set(current);
   return required.some((item) => normalizedCurrent.has(normalizeRole(item)));
 }
 
-function hasAtLeastOnePermission(required: string[] | undefined, current: string[] | undefined): boolean {
-  if (!required || required.length === 0) {
-    return true;
-  }
+function hasAtLeastOnePermission(required: string[] | undefined, current: string[], isSuperAdmin: boolean): boolean {
+  if (!required || required.length === 0) return true;
+  if (isSuperAdmin) return true;
+  if (current.length === 0) return false;
 
-  if (!current || current.length === 0) {
-    // Fallback permissif: le backend reste la source d'autorite.
-    return true;
-  }
-
-  const normalizedCurrent = new Set(current.map(normalizePermission).filter((item) => item.length > 0));
+  const normalizedCurrent = new Set(current.map((item) => normalizePermission(item)).filter((item) => item.length > 0));
   return required.some((item) => normalizedCurrent.has(normalizePermission(item)));
 }
 
@@ -108,11 +104,12 @@ export const authorizationGuard: CanActivateFn = (route): boolean | UrlTree => {
   const requiredRoles = route.data?.['roles'] as string[] | undefined;
   const requiredPermissions = route.data?.['permissions'] as string[] | undefined;
 
-  const userRoles = user.roles ?? [];
-  const userPermissions = user.permissions ?? [];
+  const roles = userRoles(user);
+  const isSuperAdmin = roles.includes('superadmin');
+  const permissions = user.permissions ?? [];
 
-  const hasRole = hasAtLeastOneRole(requiredRoles, userRoles);
-  const hasPermission = hasAtLeastOnePermission(requiredPermissions, userPermissions);
+  const hasRole = hasAtLeastOneRole(requiredRoles, roles);
+  const hasPermission = hasAtLeastOnePermission(requiredPermissions, permissions, isSuperAdmin);
 
   if (hasRole && hasPermission) {
     return true;

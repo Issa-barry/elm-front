@@ -21,7 +21,7 @@ export class ProduitsEdit implements OnInit, OnDestroy {
   loading = false;
   produitId: number | null = null;
   initialData: Produit | null = null;
-  canManageSystemDefinition = false;
+  get canManageSystemDefinition(): boolean { return this.hasSystemDefinitionAccess(); }
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'produits-mobile-pwa';
 
@@ -35,7 +35,6 @@ export class ProduitsEdit implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.canManageSystemDefinition = this.hasSystemDefinitionAccess();
     this.updateMobilePwaMode();
     const idParam = this.route.snapshot.paramMap.get('id');
     const parsedId = idParam ? Number(idParam) : NaN;
@@ -176,11 +175,11 @@ export class ProduitsEdit implements OnInit, OnDestroy {
     const user = this.authService.currentUser();
     if (!user) return false;
 
-    const roles = [...(user.roles ?? []), ...(user.role_names ?? [])]
-      .map((role) => String(role).trim().toLowerCase())
+    const normalizedRoles = [...(user.roles ?? []), ...(user.role_names ?? [])]
+      .map((role) => String(role).trim().toLowerCase().replace(/[\s_-]/g, ''))
       .filter((role) => role.length > 0);
 
-    return roles.includes('admin') || roles.includes('manager') || roles.includes('super-admin');
+    return normalizedRoles.includes('adminentreprise') || normalizedRoles.includes('manager') || normalizedRoles.includes('superadmin');
   }
 
 }

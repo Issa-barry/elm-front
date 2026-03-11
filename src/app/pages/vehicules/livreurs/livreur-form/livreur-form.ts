@@ -9,11 +9,11 @@ import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { RippleModule } from 'primeng/ripple';
-import { parsePhoneNumber, CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumber, CountryCode } from 'libphonenumber-js';
 
 import { LivreurService } from '@/services/livreurs/livreur.service';
 import { Livreur } from '@/models/vehicule.model';
-import { COUNTRIES, Country } from '@/models/country.model';
+import { COUNTRIES, Country, DEFAULT_COUNTRY_CODE, getCountryByCode } from '@/models/country.model';
 
 @Component({
   selector: 'app-livreur-form',
@@ -43,7 +43,7 @@ export class LivreurForm implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
-  phoneCountry = 'GN';
+  phoneCountry = DEFAULT_COUNTRY_CODE;
   phoneError: string | null = null;
   countries: Country[] = COUNTRIES;
 
@@ -72,27 +72,50 @@ export class LivreurForm implements OnInit {
   }
 
   validatePhone(): boolean {
-    const phone = this.form.get('phone')?.value?.trim();
-    if (!phone) {
+    const phoneControl = this.form.get('phone');
+    const rawPhone = phoneControl?.value?.trim();
+    if (!rawPhone) {
       this.phoneError = 'Telephone obligatoire.';
       return false;
     }
 
+    const selectedCountry = this.getCountry(this.phoneCountry);
+    if (!selectedCountry) {
+      this.phoneError = 'Pays invalide.';
+      return false;
+    }
+
+    const normalizedPhone = this.toPhoneCandidate(rawPhone);
+    if (!normalizedPhone) {
+      this.phoneError = 'Format invalide.';
+      return false;
+    }
+
+    if (normalizedPhone.startsWith('+') && !normalizedPhone.startsWith(selectedCountry.dialCode)) {
+      this.phoneError = `Le numero doit commencer par ${selectedCountry.dialCode} pour ${selectedCountry.name}.`;
+      return false;
+    }
+
+    const phoneToParse = normalizedPhone.startsWith('+')
+      ? normalizedPhone
+      : `${selectedCountry.dialCode}${normalizedPhone}`;
+
     try {
-      if (!isValidPhoneNumber(phone, this.phoneCountry as CountryCode)) {
+      const parsed = parsePhoneNumber(phoneToParse, this.phoneCountry as CountryCode);
+      if (!parsed || !parsed.isValid()) {
         this.phoneError = `Numero invalide pour ${this.getCountryName(this.phoneCountry)}.`;
         return false;
       }
 
-      const parsed = parsePhoneNumber(phone, this.phoneCountry as CountryCode);
-      if (parsed) {
-        this.form.get('phone')?.setValue(parsed.formatInternational(), { emitEvent: false });
-        this.phoneError = null;
-        return true;
+      if (parsed.country && parsed.country !== this.phoneCountry) {
+        const parsedDial = `+${parsed.countryCallingCode}`;
+        this.phoneError = `Le prefixe ${parsedDial} ne correspond pas au pays ${selectedCountry.name}.`;
+        return false;
       }
 
-      this.phoneError = 'Format invalide.';
-      return false;
+      phoneControl?.setValue(parsed.formatInternational(), { emitEvent: false });
+      this.phoneError = null;
+      return true;
     } catch {
       this.phoneError = 'Format invalide.';
       return false;
@@ -108,11 +131,40 @@ export class LivreurForm implements OnInit {
   }
 
   onCountryChange(): void {
-    if (this.form.get('phone')?.value?.trim()) this.validatePhone();
+    const phoneControl = this.form.get('phone');
+    const rawPhone = phoneControl?.value?.trim();
+    if (!rawPhone) {
+      this.phoneError = null;
+      return;
+    }
+
+    const selectedCountry = this.getCountry(this.phoneCountry);
+    if (!selectedCountry) return;
+
+    const normalizedPhone = this.toPhoneCandidate(rawPhone);
+    if (!normalizedPhone) {
+      this.phoneError = 'Format invalide.';
+      return;
+    }
+
+    if (normalizedPhone.startsWith('+')) {
+      try {
+        const parsed = parsePhoneNumber(normalizedPhone);
+        if (parsed?.nationalNumber) {
+          phoneControl?.setValue(`${selectedCountry.dialCode} ${parsed.nationalNumber}`, { emitEvent: false });
+        }
+      } catch {
+        // Validation below will show a precise message if still invalid.
+      }
+    } else {
+      phoneControl?.setValue(`${selectedCountry.dialCode} ${normalizedPhone}`, { emitEvent: false });
+    }
+
+    this.validatePhone();
   }
 
   getCountryName(code: string): string {
-    return this.countries.find((c) => c.code === code)?.name ?? code;
+    return this.getCountry(code)?.name ?? code;
   }
 
   isInvalid(name: string): boolean {
@@ -220,8 +272,8 @@ export class LivreurForm implements OnInit {
   }
 
   private detectPhoneCountry(phone?: string | null): void {
-    this.phoneCountry = 'GN';
-    const safePhone = phone ?? '';
+    this.phoneCountry = DEFAULT_COUNTRY_CODE;
+    const safePhone = this.toPhoneCandidate(phone ?? '');
     if (!safePhone.startsWith('+')) return;
 
     try {
@@ -230,5 +282,20 @@ export class LivreurForm implements OnInit {
     } catch {
       // Keep default country
     }
+  }
+
+  private toPhoneCandidate(rawPhone: string): string {
+    const trimmed = rawPhone.trim();
+    if (!trimmed) return '';
+
+    const hasPlus = trimmed.startsWith('+');
+    const digits = trimmed.replace(/\D/g, '');
+    if (!digits) return '';
+
+    return hasPlus ? `+${digits}` : digits;
+  }
+
+  private getCountry(code: string): Country | undefined {
+    return getCountryByCode(code) ?? this.countries.find((c) => c.code === code);
   }
 }

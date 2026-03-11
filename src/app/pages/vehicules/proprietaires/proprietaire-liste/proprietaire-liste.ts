@@ -57,9 +57,9 @@ export class ProprietaireListe implements OnInit {
     { label: 'Inactifs', value: 'inactif' },
   ];
   loading = false;
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('proprietaires.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('proprietaires.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('proprietaires.delete'); }
 
   mobileFilterMenuItems: MenuItem[] = [];
 
@@ -77,9 +77,6 @@ export class ProprietaireListe implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    this.canCreate = this.authService.hasPermission('proprietaires.create');
-    this.canUpdate = this.authService.hasPermission('proprietaires.update');
-    this.canDelete = this.authService.hasPermission('proprietaires.delete');
   }
 
   ngOnInit(): void {

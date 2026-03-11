@@ -122,9 +122,9 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
   historiqueLoading: boolean = false;
 
   // Permissions
-  canReadVersement: boolean = false;
-  canCreateVersement: boolean = false;
-  canDeleteVersement: boolean = false;
+  get canReadVersement(): boolean { return this.authService.hasPermission('versements.read'); }
+  get canCreateVersement(): boolean { return this.authService.hasPermission('versements.create'); }
+  canDeleteVersement = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -136,10 +136,6 @@ export class ComptabilitePackingDetail implements OnInit, OnDestroy {
     private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document,
   ) {
-    this.canReadVersement = this.authService.hasPermission('versements.read');
-    this.canCreateVersement = this.authService.hasPermission('versements.create');
-    this.canDeleteVersement = false;
-
     effect(() => {
       this.usineContext.currentUsineId();
       this.usineContext.isConsolidated();

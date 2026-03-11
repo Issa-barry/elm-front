@@ -143,7 +143,12 @@ import { DashboardPeriodService } from '@/services/dashboard/dashboard-period.se
                     <div class="flex justify-between items-start">
                         <div class="w-6/12">
                             <span class="text-4xl font-bold text-surface-900 dark:text-surface-0">{{ stats.rouleaux_stock.value }}</span>
-                            <!-- delta masqué : pas d'historique de stock fiable -->
+                            <div [class]="trendClass(stats.rouleaux_stock.trend)">
+                                <span class="font-medium">{{ formatDelta(stats.rouleaux_stock.delta_pct) }}</span>
+                                @if (stats.rouleaux_stock.trend !== 'flat') {
+                                    <i [class]="trendIcon(stats.rouleaux_stock.trend)"></i>
+                                }
+                            </div>
                         </div>
                         <div class="w-6/12">
                             <svg width="100%" viewBox="0 0 258 96" fill="none" xmlns="http://www.w3.org/2000/svg">

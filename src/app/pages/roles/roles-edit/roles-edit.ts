@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -48,6 +48,7 @@ export class RolesEdit implements OnInit {
   private availableActionsByModule = new Map<string, Set<PermissionAction>>();
 
   readonly actions = PERMISSION_ACTIONS;
+  isSuperAdmin = computed(() => this.authService.hasAnyRole(['super_admin', 'super-admin']));
 
   constructor(
     private route: ActivatedRoute,

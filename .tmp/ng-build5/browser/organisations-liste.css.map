@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/organisations/organisations-liste/organisations-liste.scss", "src/app/pages/organisations/organisations-liste/organisations-liste.scss"],
+  "sourcesContent": [".organisations-page {\n  border-radius: 1rem;\n}\r\n", ".organisations-page {\n  border-radius: 1rem;\n}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJmaWxlOi8vL0M6L2xhcmFnb24vd3d3L0ZST05UL2VsbS1mcm9udC9zcmMvYXBwL3BhZ2VzL29yZ2FuaXNhdGlvbnMvb3JnYW5pc2F0aW9ucy1saXN0ZS9vcmdhbmlzYXRpb25zLWxpc3RlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSIsInNvdXJjZXNDb250ZW50IjpbIi5vcmdhbmlzYXRpb25zLXBhZ2Uge1xuICBib3JkZXItcmFkaXVzOiAxcmVtO1xufVxyXG4iXX0= */"],
+  "mappings": ";AAAA,CAAA;AACE,iBAAA;ACCF;",
+  "names": []
+}

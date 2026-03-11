@@ -83,7 +83,7 @@ export class UtilisateursNew {
           return;
         }
         const user = response.data;
-        const usineRole = (payload.role === 'admin' || payload.role === 'manager') ? 'manager' : 'staff';
+        const usineRole = (payload.role === 'admin_entreprise' || payload.role === 'manager') ? 'manager' : 'staff';
         this.usineService.assignUser(currentUsineId, { user_id: user.id, role: usineRole }).subscribe({
           next: () => {
             this.messageService.add({

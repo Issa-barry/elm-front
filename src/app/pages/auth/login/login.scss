@@ -2,6 +2,59 @@
     display: block;
 }
 
+.install-app-card {
+    border-radius: 0.9rem;
+}
+
+.install-steps {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-input {
+    padding-left: 2.5rem;
+    padding-right: 2.75rem;
+}
+
+.password-left-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--p-text-muted-color);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: transparent;
+    color: var(--p-text-muted-color);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.password-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
 .login-shell {
     min-height: 100dvh;
 }
@@ -83,6 +136,10 @@
     :host ::ng-deep .login-submit-button.p-button {
         min-height: 3.25rem;
         font-size: 1rem;
+    }
+
+    .install-app-card {
+        padding: 0.9rem;
     }
 }
 

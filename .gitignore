@@ -18,3 +18,11 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Cypress
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+
+# Temporary build folders
+.tmp/

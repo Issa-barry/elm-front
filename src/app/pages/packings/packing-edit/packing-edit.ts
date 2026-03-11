@@ -2,7 +2,9 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PackingFrom } from '../packing-from/packing-from';
 import { PrestataireService } from '@/services/prestataire/prestataire.service';
+import { PrestataireOfflineCacheService } from '@/services/prestataire/prestataire-offline-cache.service';
 import { PackingService } from '@/services/packing/packing.service';
+import { UsineContextService } from '@/services/usine/usine-context.service';
 import { Prestataire } from '@/models/prestataire.model';
 import { Packing, CreatePackingDto } from '@/models/packing.model';
 import { MessageService } from 'primeng/api';
@@ -25,13 +27,16 @@ export class PackingEdit implements OnInit {
   loading = false;
   packingLoading = false;
   private packingId!: number;
+  private readonly isBrowser = typeof navigator !== 'undefined';
 
   constructor(
     private prestataireService: PrestataireService,
+    private prestataireCache: PrestataireOfflineCacheService,
     private packingService: PackingService,
     private messageService: MessageService,
     private router: Router,
     private route: ActivatedRoute,
+    private usineContext: UsineContextService,
   ) {}
 
   ngOnInit(): void {
@@ -78,12 +83,42 @@ export class PackingEdit implements OnInit {
   }
 
   private loadPrestataires(): void {
+    const usineId = this.usineContext.currentUsineId();
+    const cachedPrestataires = this.prestataireCache.getPrestataires(usineId);
+    const hasCachedPrestataires = cachedPrestataires.length > 0;
+
+    if (hasCachedPrestataires) {
+      this.prestataires = cachedPrestataires;
+    }
+
+    if (!this.isOnline()) {
+      if (!hasCachedPrestataires) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Mode hors ligne',
+          detail: 'Aucun machiniste synchronise localement.',
+          life: 3500
+        });
+      }
+      return;
+    }
+
     this.prestataireService.getPrestataires().subscribe({
       next: (response) => {
-        this.prestataires = this.extractPrestataires(response);
+        const prestataires = this.extractPrestataires(response);
+        this.prestataires = prestataires;
+        this.prestataireCache.savePrestataires(prestataires, usineId);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des prestataires :', err);
+        if (hasCachedPrestataires) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Synchronisation',
+            detail: 'Connexion indisponible. Liste locale des machinistes utilisee.',
+            life: 3000
+          });
+        }
       },
     });
   }
@@ -98,6 +133,16 @@ export class PackingEdit implements OnInit {
   }
 
   onSubmit(packingData: CreatePackingDto): void {
+    if (!this.isOnline()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Mode hors ligne',
+        detail: 'Modification impossible sans connexion.',
+        life: 3500
+      });
+      return;
+    }
+
     if (!this.packing || this.packing.statut !== 'impayee') {
       this.messageService.add({
         severity: 'warn',
@@ -145,5 +190,9 @@ export class PackingEdit implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/packings']);
+  }
+
+  private isOnline(): boolean {
+    return !this.isBrowser || navigator.onLine;
   }
 }

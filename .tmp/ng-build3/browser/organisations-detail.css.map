@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/organisations/organisations-detail/organisations-detail.scss", "src/app/pages/organisations/organisations-detail/organisations-detail.scss"],
+  "sourcesContent": [".organisation-detail-page {\n  border-radius: 1rem;\n}\r\n", ".organisation-detail-page {\n  border-radius: 1rem;\n}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJmaWxlOi8vL0M6L2xhcmFnb24vd3d3L0ZST05UL2VsbS1mcm9udC9zcmMvYXBwL3BhZ2VzL29yZ2FuaXNhdGlvbnMvb3JnYW5pc2F0aW9ucy1kZXRhaWwvb3JnYW5pc2F0aW9ucy1kZXRhaWwuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFIiwic291cmNlc0NvbnRlbnQiOlsiLm9yZ2FuaXNhdGlvbi1kZXRhaWwtcGFnZSB7XG4gIGJvcmRlci1yYWRpdXM6IDFyZW07XG59XHJcbiJdfQ== */"],
+  "mappings": ";AAAA,CAAA;AACE,iBAAA;ACCF;",
+  "names": []
+}

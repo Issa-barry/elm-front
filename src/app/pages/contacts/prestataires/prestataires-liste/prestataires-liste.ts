@@ -70,9 +70,9 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     { label: 'Inactif', command: () => this.applyMobileStatusFilter(false) },
   ];
 
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('prestataires.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('prestataires.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('prestataires.delete'); }
 
   constructor(
     private prestataireService: PrestataireService,
@@ -83,10 +83,6 @@ export class PrestatairesListe implements OnInit, OnDestroy {
     private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.canCreate = this.authService.hasPermission('prestataires.create');
-    this.canUpdate = this.authService.hasPermission('prestataires.update');
-    this.canDelete = this.authService.hasPermission('prestataires.delete');
-
     effect(() => {
       this.usineContext.currentUsineId();
       if (!this.readyForUsineReload) return;

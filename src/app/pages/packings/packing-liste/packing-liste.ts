@@ -15,7 +15,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
-import { MenuModule } from 'primeng/menu';
+import { Menu, MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { DialogModule } from 'primeng/dialog';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -98,16 +98,17 @@ export class PackingListe implements OnInit {
   selectedQuickDateFilter: QuickDateFilter = 'none';
   lastNDaysValue: number | null = null;
   loading = false;
-  canCreate = false;
-  canViewFacture = false;
-  canUpdate = false;
-  canDelete = false;
-  canReadVersement = false;
-  canCreateVersement = false;
+  get canCreate(): boolean { return this.authService.hasPermission('packings.create'); }
+  get canViewFacture(): boolean { return this.authService.hasPermission('packings.read') || this.authService.hasPermission('packings.update'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('packings.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('packings.delete'); }
+  get canReadVersement(): boolean { return this.authService.hasPermission('versements.read'); }
+  get canCreateVersement(): boolean { return this.authService.hasPermission('versements.create'); }
   canDeleteVersement = false;
   private readonly mobileBreakpoint = 768;
 
   mobileFilterMenuItems: MenuItem[] = [];
+  desktopRowMenuItems: MenuItem[] = [];
   skeletonCols: number[] = [];
   private readyForUsineReload = false;
 
@@ -189,6 +190,59 @@ export class PackingListe implements OnInit {
     return this.canViewFacture || this.canUpdate || this.canDelete || this.canCreateVersement || this.canReadVersement;
   }
 
+  hasDesktopRowMenuActions(packing: Packing): boolean {
+    return this.getDesktopRowMenuItems(packing).length > 0;
+  }
+
+  getDesktopRowMenuItems(packing: Packing): MenuItem[] {
+    const items: MenuItem[] = [];
+    const writeDisabled = this.usineContext.isConsolidated();
+
+    if (this.canReadVersement) {
+      items.push({
+        label: 'Historique versements',
+        icon: 'pi pi-history',
+        command: () => this.openHistorique(packing),
+      });
+    }
+
+    if (this.canEditPacking(packing)) {
+      items.push({
+        label: 'Modifier',
+        icon: 'pi pi-pen-to-square',
+        disabled: writeDisabled,
+        command: () => this.goEdit(packing),
+      });
+    }
+
+    if (this.canCancelPacking(packing)) {
+      items.push({
+        label: 'Annuler',
+        icon: 'pi pi-ban',
+        disabled: writeDisabled,
+        command: () => this.cancelPacking(packing),
+      });
+    }
+
+    if (this.canDelete && packing.statut === 'impayee') {
+      items.push({
+        label: 'Supprimer',
+        icon: 'pi pi-trash',
+        disabled: writeDisabled,
+        command: () => this.deletePacking(packing),
+      });
+    }
+
+    return items;
+  }
+
+  openDesktopRowMenu(event: Event, menu: Menu, packing: Packing): void {
+    event.stopPropagation();
+    this.desktopRowMenuItems = this.getDesktopRowMenuItems(packing);
+    if (this.desktopRowMenuItems.length === 0) return;
+    menu.toggle(event);
+  }
+
   constructor(
     private packingService: PackingService,
     private messageService: MessageService,
@@ -197,13 +251,6 @@ export class PackingListe implements OnInit {
     private router: Router,
     private usineContext: UsineContextService,
   ) {
-    this.canCreate = this.authService.hasPermission('packings.create');
-    this.canViewFacture = this.authService.hasPermission('packings.read') || this.authService.hasPermission('packings.update');
-    this.canUpdate = this.authService.hasPermission('packings.update');
-    this.canDelete = this.authService.hasPermission('packings.delete');
-    this.canReadVersement = this.authService.hasPermission('versements.read');
-    this.canCreateVersement = this.authService.hasPermission('versements.create');
-    this.canDeleteVersement = false;
     this.skeletonCols = this.hasActionsColumn
       ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
       : [1, 2, 3, 4, 5, 6, 7, 8];

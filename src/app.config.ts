@@ -1,13 +1,15 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, isDevMode } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withHashLocation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeuix/themes/aura';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
+import { provideServiceWorker } from '@angular/service-worker';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from '@/interceptors/auth.interceptor';
 import { usineInterceptor } from '@/interceptors/usine.interceptor';
+import { apiErrorInterceptor } from '@/interceptors/api-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -19,7 +21,7 @@ export const appConfig: ApplicationConfig = {
         ),
         provideHttpClient(
             withFetch(),
-            withInterceptors([authInterceptor, usineInterceptor])
+            withInterceptors([authInterceptor, usineInterceptor, apiErrorInterceptor])
         ),
         MessageService,
         provideAnimationsAsync(),
@@ -37,6 +39,10 @@ export const appConfig: ApplicationConfig = {
                 dateFormat: 'dd/mm/yy',
                 weekHeader: 'Sm',
             }
+        }),
+        provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
         })
     ]
 };

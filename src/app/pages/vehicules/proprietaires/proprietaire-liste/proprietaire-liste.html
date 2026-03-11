@@ -61,9 +61,9 @@
           </div>
           <div class="mobile-card-footer">
             @if (p.is_active) {
-              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag" />
+              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag app-table-status" />
             } @else {
-              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag" />
+              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag app-table-status" />
             }
             @if (p.email) {
               <span class="mobile-card-email">{{ p.email }}</span>
@@ -184,9 +184,9 @@
         <td class="text-sm">{{ p.pays || '-' }}</td>
         <td>
           @if (p.is_active) {
-            <p-tag value="Actif" severity="success" />
+            <p-tag value="Actif" severity="success" styleClass="app-table-status" />
           } @else {
-            <p-tag value="Inactif" severity="secondary" />
+            <p-tag value="Inactif" severity="secondary" styleClass="app-table-status" />
           }
         </td>
         <td class="text-surface-500 text-sm">

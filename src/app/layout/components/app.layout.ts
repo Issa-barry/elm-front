@@ -58,7 +58,10 @@ export class AppLayout implements OnDestroy {
         this.updateAccueilBodyClass(this.router.url);
         this.routerSubscription = this.router.events
             .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-            .subscribe((event) => this.updateAccueilBodyClass(event.urlAfterRedirects || event.url));
+            .subscribe((event) => {
+                const url = event.urlAfterRedirects || event.url;
+                this.updateAccueilBodyClass(url);
+            });
 
         this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
             if (!this.menuOutsideClickListener) {
@@ -167,7 +170,10 @@ export class AppLayout implements OnDestroy {
 
     private updateAccueilBodyClass(url: string): void {
         const path = url.split('?')[0].replace(/\/$/, '') || '/';
-        const isAccueil = path === '/' || path === '';
+        const isAccueil =
+            path === '/' ||
+            path === '' ||
+            /^\/dashboard(?:$|[-/])/.test(path);
         if (isAccueil) {
             document.body.classList.add(BODY_CLASS_ACCUEIL);
         } else {

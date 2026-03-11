@@ -205,6 +205,50 @@
     margin-top: 0.15rem;
 }
 
+.cv-status-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cv-status-inline--sm {
+    gap: 0.4rem;
+}
+
+.cv-status-dot {
+    width: 0.60rem;
+    height: 0.60rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+
+.cv-status-inline--sm .cv-status-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+}
+
+.cv-status-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.cv-status-inline--sm .cv-status-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.cv-status-dot--impayee { background: #ef4444; }
+.cv-status-dot--partiel { background: #f59e0b; }
+.cv-status-dot--payee { background: #22c55e; }
+.cv-status-dot--annulee { background: #94a3b8; }
+
+@media (min-width: 769px) {
+    :host ::ng-deep .cv-tableau-desktop .p-datatable .p-datatable-tbody > tr > td {
+        vertical-align: top;
+    }
+}
+
 // ─── Dark mode ────────────────────────────────────────────────────────────────
 :host-context(.app-dark) {
     .cv-commande-card {

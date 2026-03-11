@@ -1,0 +1,87 @@
+<div class="card organisation-detail-page">
+  <div class="flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <h2 class="m-0 text-2xl font-semibold">Détail organisation</h2>
+    <button pButton type="button" icon="pi pi-arrow-left" label="Retour" class="p-button-text" routerLink="/organisations"></button>
+  </div>
+
+  <div *ngIf="loading" class="text-color-secondary py-4">Chargement...</div>
+  <div *ngIf="!loading && errorMessage" class="text-red-500 py-4">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && organisation">
+
+    <!-- Identité -->
+    <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Identité</p>
+    <div class="grid mb-4">
+      <div class="col-12 md:col-6">
+        <span class="text-color-secondary text-sm block mb-1">Nom</span>
+        <span class="font-semibold text-lg">{{ organisation.nom }}</span>
+      </div>
+      <div class="col-12 md:col-6">
+        <span class="text-color-secondary text-sm block mb-1">Code</span>
+        <code class="border-round px-2 py-1 surface-100 text-color font-semibold">{{ organisation.code }}</code>
+      </div>
+      <div class="col-12 md:col-6">
+        <span class="text-color-secondary text-sm block mb-1">Forfait</span>
+        <ng-container *ngIf="organisation.forfait; else noForfait">
+          <span
+            class="border-round px-2 text-sm font-semibold"
+            style="padding-top: 3px; padding-bottom: 3px;"
+            [ngClass]="forfaitBadgeClass(organisation.forfait?.slug)"
+          >{{ organisation.forfait?.nom }}</span>
+        </ng-container>
+        <ng-template #noForfait><span class="text-color-secondary">—</span></ng-template>
+      </div>
+      <div class="col-12 md:col-6">
+        <span class="text-color-secondary text-sm block mb-1">Statut</span>
+        <span
+          class="border-round px-2 text-sm font-semibold"
+          style="padding-top: 3px; padding-bottom: 3px;"
+          [ngClass]="{
+            'bg-green-100 text-green-700':   organisation.statut === 'active',
+            'bg-gray-100 text-gray-600':     organisation.statut === 'inactive' || organisation.statut === 'archived',
+            'bg-orange-100 text-orange-700': organisation.statut === 'suspended'
+          }"
+        >{{ organisation.statut || '—' }}</span>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Contact</p>
+    <div class="grid mb-4">
+      <div class="col-12 md:col-6">
+        <span class="text-color-secondary text-sm block mb-1">Email</span>
+        <span>{{ organisation.email || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-6">
+        <span class="text-color-secondary text-sm block mb-1">Téléphone</span>
+        <span>{{ organisation.phone || '—' }}</span>
+      </div>
+    </div>
+
+    <!-- Localisation -->
+    <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Localisation</p>
+    <div class="grid mb-2">
+      <div class="col-12 md:col-4">
+        <span class="text-color-secondary text-sm block mb-1">Pays</span>
+        <span>{{ organisation.pays || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-4">
+        <span class="text-color-secondary text-sm block mb-1">Ville</span>
+        <span>{{ organisation.ville || '—' }}</span>
+      </div>
+      <div class="col-12 md:col-4">
+        <span class="text-color-secondary text-sm block mb-1">Quartier</span>
+        <span>{{ organisation.quartier || '—' }}</span>
+      </div>
+      <div class="col-12">
+        <span class="text-color-secondary text-sm block mb-1">Adresse</span>
+        <span>{{ organisation.adresse || '—' }}</span>
+      </div>
+      <div class="col-12">
+        <span class="text-color-secondary text-sm block mb-1">Description</span>
+        <span>{{ organisation.description || '—' }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
