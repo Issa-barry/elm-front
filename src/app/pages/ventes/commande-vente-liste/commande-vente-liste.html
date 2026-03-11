@@ -107,6 +107,10 @@
                   <span class="cv-lock-badge" style="background:var(--p-red-100);color:var(--p-red-700)">
                     <i class="pi pi-ban text-xs"></i> Annulée
                   </span>
+                } @else if (isCloturee(c)) {
+                  <span class="cv-lock-badge" style="background:var(--p-blue-100);color:var(--p-blue-700)">
+                    <i class="pi pi-check-circle text-xs"></i> Clôturée
+                  </span>
                 } @else if (isLocked(c)) {
                   <span class="cv-lock-badge">
                     <i class="pi pi-lock text-xs"></i> Verrouillée
@@ -122,7 +126,7 @@
                 @if (canDelete) {
                   <p-button icon="pi pi-ban" severity="danger" [text]="true" [rounded]="true" size="small"
                             pTooltip="Annuler la commande" tooltipPosition="top"
-                            [disabled]="isAnnulee(c)" (onClick)="onMobileAnnulationAction($event, c)" />
+                            [disabled]="isAnnulee(c) || isCloturee(c)" (onClick)="onMobileAnnulationAction($event, c)" />
                 }
               </div>
             </div>
@@ -206,6 +210,8 @@
                 <div class="font-semibold font-mono">{{ c.reference }}</div>
                 @if (isAnnulee(c)) {
                   <span class="text-xs text-red-500 font-medium">Annulée</span>
+                } @else if (isCloturee(c)) {
+                  <span class="text-xs text-blue-600 font-medium">Clôturée</span>
                 }
               </div>
             </div>
@@ -258,8 +264,8 @@
 
           <td>
             @if (c.commission) {
-              @if (c.commission.statut === 'versee') {
-                <p-tag severity="success" value="Versée" />
+              @if (c.commission.statut === 'payee') {
+                <p-tag severity="success" value="Payée" />
               } @else {
                 <p-tag
                   [value]="formatMontant(c.commission.montant_commission_total)"

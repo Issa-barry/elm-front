@@ -16,7 +16,6 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { DatePickerModule } from 'primeng/datepicker';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
@@ -51,7 +50,6 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
     TooltipModule,
     InputIconModule,
     IconFieldModule,
-    DatePickerModule,
     PhoneFormatPipe
   ],
   providers: [MessageService],
@@ -102,7 +100,6 @@ export class FactureVenteListe implements OnInit {
     this.encaissementForm = this.fb.group({
       montant: [null, [Validators.required, Validators.min(1)]],
       mode_paiement: ['especes', Validators.required],
-      date_encaissement: [new Date(), Validators.required],
       note: [''],
     });
   }
@@ -157,7 +154,7 @@ export class FactureVenteListe implements OnInit {
       facture_vente_id: this.selectedFacture.id,
       montant: v.montant,
       mode_paiement: v.mode_paiement as ModePaiement,
-      date_encaissement: this.formatDateIso(v.date_encaissement),
+      date_encaissement: this.formatDateIso(new Date()),
       note: v.note || undefined,
     };
 

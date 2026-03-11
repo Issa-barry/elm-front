@@ -92,6 +92,7 @@ type StatutTag = {
 })
 export class caParStatutWidget implements OnInit {
     private readonly dashboardService = inject(DashboardService);
+    private readonly statutOrder: VenteFactureStatus[] = ['payee', 'partiel', 'impayee', 'annulee'];
 
     readonly periodOptions: { label: string; value: VentesParTypePeriod }[] = [
         { label: "Aujourd'hui", value: 'today' },
@@ -139,13 +140,29 @@ export class caParStatutWidget implements OnInit {
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
                 next: (data: DashboardVentesParTypeData) => {
-                    this.rows = data?.par_statut ?? [];
+                    this.rows = this.normalizeRows(data?.par_statut);
                 },
                 error: () => {
                     this.rows = [];
                     this.errorMessage = 'Impossible de charger le CA par statut.';
                 }
             });
+    }
+
+    private normalizeRows(rows: StatutRow[] | undefined): StatutRow[] {
+        const totals: Record<VenteFactureStatus, StatutRow> = {
+            payee: { statut_facture: 'payee', ca_total: 0, nb_commandes: 0 },
+            partiel: { statut_facture: 'partiel', ca_total: 0, nb_commandes: 0 },
+            impayee: { statut_facture: 'impayee', ca_total: 0, nb_commandes: 0 },
+            annulee: { statut_facture: 'annulee', ca_total: 0, nb_commandes: 0 }
+        };
+
+        for (const row of rows ?? []) {
+            totals[row.statut_facture].ca_total += row.ca_total ?? 0;
+            totals[row.statut_facture].nb_commandes += row.nb_commandes ?? 0;
+        }
+
+        return this.statutOrder.map((status) => totals[status]);
     }
 
     getStatutTag(statut: VenteFactureStatus): StatutTag {

@@ -62,6 +62,11 @@ export default [
     loadComponent: () => import('./commission-vente-liste/commission-vente-liste').then(c => c.CommissionVenteListe),
       data: { breadcrumb: 'commissions' },
 },
+  {
+    path: 'commissions/:id',
+    loadComponent: () => import('./commission-detail-page/commission-detail-page').then(c => c.CommissionDetailPage),
+      data: { breadcrumb: 'commissions-detail' },
+},
    
   { path: '**', redirectTo: '/notfound' },
 ] as Routes;

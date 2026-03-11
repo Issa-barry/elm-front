@@ -314,12 +314,3 @@
 </div>
 
 } <!-- end desktop -->
-
-@if (selectedCommissionId()) {
-  <app-commission-detail-dialog
-    [commissionId]="selectedCommissionId()!"
-    [visible]="detailVisible()"
-    (visibleChange)="detailVisible.set($event)"
-    (onVersementDone)="onVersementDone()"
-  />
-}

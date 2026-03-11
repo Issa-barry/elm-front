@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -15,11 +16,8 @@ import { DrawerModule } from 'primeng/drawer';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { forkJoin, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
 
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
-import { CommissionDetailDialog } from '../commission-detail-dialog/commission-detail-dialog';
 import { StatCardWidget, type StatCardVariant } from '@/pages/dashboards/finance/widgets/statcardwidget';
 import {
   CommissionVente,
@@ -37,8 +35,8 @@ interface CommissionStatCard {
 
 interface CommissionStatsData {
   totalCommission: number;
-  partLivreur: number;
-  partProprietaire: number;
+  dejaVersee: number;
+  resteAVerser: number;
   count: number;
 }
 
@@ -59,7 +57,6 @@ interface CommissionStatsData {
     InputTextModule,
     IconFieldModule,
     InputIconModule,
-    CommissionDetailDialog,
     StatCardWidget,
     DrawerModule,
   ],
@@ -81,14 +78,10 @@ export class CommissionVenteListe implements OnInit {
   filterDateDebut: Date | null = null;
   filterDateFin: Date | null = null;
   searchTerm = '';
-
-  // Dialog détail
-  selectedCommissionId = signal<number | null>(null);
-  detailVisible = signal(false);
   commissionStats = signal<CommissionStatsData>({
     totalCommission: 0,
-    partLivreur: 0,
-    partProprietaire: 0,
+    dejaVersee: 0,
+    resteAVerser: 0,
     count: 0,
   });
 
@@ -137,10 +130,9 @@ export class CommissionVenteListe implements OnInit {
 
   readonly statutOptions = [
     { label: 'Tous les statuts', value: '' },
-    { label: 'En attente', value: 'en_attente' },
-    { label: 'Éligible', value: 'eligible' },
-    { label: 'Partiellement versée', value: 'partiellement_versee' },
-    { label: 'Versée', value: 'versee' },
+    { label: 'Impayée', value: 'impayee' },
+    { label: 'Partielle', value: 'partielle' },
+    { label: 'Payée', value: 'payee' },
     { label: 'Annulée', value: 'annulee' },
   ];
 
@@ -156,14 +148,14 @@ export class CommissionVenteListe implements OnInit {
         variant: 'primary',
       },
       {
-        title: 'Part proprietaire',
-        value: stats.partProprietaire,
+        title: 'Deja versee',
+        value: stats.dejaVersee,
         subtitle,
         variant: 'default',
       },
       {
-        title: 'Part livreur',
-        value: stats.partLivreur,
+        title: 'Reste a verser',
+        value: stats.resteAVerser,
         subtitle,
         variant: 'default',
       },
@@ -172,7 +164,8 @@ export class CommissionVenteListe implements OnInit {
 
   constructor(
     private commissionService: CommissionVenteService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -198,8 +191,9 @@ export class CommissionVenteListe implements OnInit {
     this.loading.set(true);
     this.commissionService.getAll(this.buildParams(page)).subscribe({
       next: (resp) => {
-        this.commissions.set(resp.data?.data ?? []);
-        this.totalRecords.set(resp.data?.total ?? 0);
+        const data = resp.data?.commissions;
+        this.commissions.set(data?.data ?? []);
+        this.totalRecords.set(data?.total ?? 0);
         this.loading.set(false);
       },
       error: (err: unknown) => {
@@ -231,13 +225,7 @@ export class CommissionVenteListe implements OnInit {
   }
 
   openDetail(c: CommissionVente): void {
-    this.selectedCommissionId.set(c.id);
-    this.detailVisible.set(true);
-  }
-
-  onVersementDone(): void {
-    this.loadCommissionStats();
-    this.loadCommissions(this.currentPage());
+    this.router.navigate(['/ventes/commissions', c.id]);
   }
 
   getStatutLabel(s: StatutCommission): string {
@@ -289,54 +277,26 @@ export class CommissionVenteListe implements OnInit {
   }
 
   private loadCommissionStats(): void {
-    const perPage = 200;
     this.statsLoading.set(true);
 
     this.commissionService
-      .getAll(this.buildStatsParams(1, perPage))
-      .pipe(
-        switchMap((resp) => {
-          const firstPage = resp.data;
-          const firstData = firstPage?.data ?? [];
-          const lastPage = firstPage?.last_page ?? 1;
-
-          if (lastPage <= 1) {
-            return of(firstData);
-          }
-
-          const requests = Array.from({ length: lastPage - 1 }, (_, idx) =>
-            this.commissionService.getAll(this.buildStatsParams(idx + 2, perPage))
-          );
-
-          return forkJoin(requests).pipe(
-            map((results) => [
-              ...firstData,
-              ...results.flatMap((r) => r.data?.data ?? []),
-            ])
-          );
-        })
-      )
+      .getAll(this.buildStatsParams(1, this.perPage()))
       .subscribe({
-        next: (rows) => {
-          const stats = rows.reduce(
-            (acc, item) => {
-              acc.totalCommission += this.toNumber(item.montant_commission_total);
-              acc.partLivreur += this.toNumber(item.part_livreur);
-              acc.partProprietaire += this.toNumber(item.part_proprietaire);
-              acc.count += 1;
-              return acc;
-            },
-            { totalCommission: 0, partLivreur: 0, partProprietaire: 0, count: 0 } as CommissionStatsData
-          );
-
-          this.commissionStats.set(stats);
+        next: (resp) => {
+          const totaux = resp.data?.totaux;
+          this.commissionStats.set({
+            totalCommission: this.toNumber(totaux?.montant_total),
+            dejaVersee: this.toNumber(totaux?.montant_verse),
+            resteAVerser: this.toNumber(totaux?.montant_restant),
+            count: this.toNumber(totaux?.nb_commissions),
+          });
           this.statsLoading.set(false);
         },
         error: () => {
           this.commissionStats.set({
             totalCommission: 0,
-            partLivreur: 0,
-            partProprietaire: 0,
+            dejaVersee: 0,
+            resteAVerser: 0,
             count: 0,
           });
           this.statsLoading.set(false);

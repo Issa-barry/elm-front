@@ -29,6 +29,7 @@ import {
   CommandeVente,
   STATUT_FACTURE_LABELS,
   StatutFacture,
+  StatutCommandeVente,
   StatutCommission,
   STATUT_COMMISSION_LABELS,
   STATUT_COMMISSION_SEVERITY,
@@ -92,13 +93,14 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   motifAnnulation = '';
 
   // Filtre statut
-  filtreStatut = signal<'all' | StatutFacture>('all');
-  statutOptions: { label: string; value: 'all' | StatutFacture }[] = [
+  filtreStatut = signal<'all' | StatutFacture | 'cloturee'>('all');
+  statutOptions: { label: string; value: 'all' | StatutFacture | 'cloturee' }[] = [
     { label: 'Toutes', value: 'all' },
-    { label: 'Impayees', value: 'impayee' },
+    { label: 'Impayées', value: 'impayee' },
     { label: 'Partielles', value: 'partiel' },
-    { label: 'Payees', value: 'payee' },
-    { label: 'Annulees', value: 'annulee' },
+    { label: 'Payées', value: 'payee' },
+    { label: 'Annulées', value: 'annulee' },
+    { label: 'Clôturées', value: 'cloturee' },
   ];
 
   createForm!: FormGroup;
@@ -120,6 +122,7 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   get commandesFiltreesParStatutFacture(): CommandeVente[] {
     const statut = this.filtreStatut();
     if (statut === 'all') return this.commandes();
+    if (statut === 'cloturee') return this.commandes().filter((c) => c.statut === 'cloturee');
     return this.commandes().filter((c) => c.facture?.statut_facture === statut);
   }
 
@@ -157,8 +160,12 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     return c.statut === 'annulee';
   }
 
+  isCloturee(c: CommandeVente): boolean {
+    return c.statut === 'cloturee';
+  }
+
   isLocked(c: CommandeVente): boolean {
-    return this.isAnnulee(c) || (c.facture?.montant_encaisse ?? 0) > 0;
+    return this.isAnnulee(c) || this.isCloturee(c) || (c.facture?.montant_encaisse ?? 0) > 0;
   }
 
   hasDesktopRowMenuActions(c: CommandeVente): boolean {
@@ -181,7 +188,7 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
       items.push({
         label: 'Annuler',
         icon: 'pi pi-ban',
-        disabled: this.isAnnulee(c),
+        disabled: this.isAnnulee(c) || this.isCloturee(c),
         command: () => this.openAnnulationDialog(c),
       });
     }
@@ -417,7 +424,7 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     });
   }
 
-  setFiltreStatut(statut: 'all' | StatutFacture): void {
+  setFiltreStatut(statut: 'all' | StatutFacture | 'cloturee'): void {
     this.filtreStatut.set(statut);
   }
 

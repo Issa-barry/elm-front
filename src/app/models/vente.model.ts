@@ -1,5 +1,5 @@
 export type StatutFacture = 'impayee' | 'partiel' | 'payee' | 'annulee';
-export type StatutCommandeVente = 'active' | 'annulee';
+export type StatutCommandeVente = 'active' | 'annulee' | 'cloturee';
 export type ModePaiement = 'especes' | 'mobile_money' | 'virement' | 'cheque';
 
 export const STATUT_FACTURE_LABELS: Record<StatutFacture, string> = {
@@ -144,21 +144,15 @@ export interface UpdateCommandeVenteDto {
 
 // ── Commissions ────────────────────────────────────────────────────────
 
-export type StatutCommission =
-  | 'en_attente'
-  | 'eligible'
-  | 'partiellement_versee'
-  | 'versee'
-  | 'annulee';
+export type StatutCommission = 'impayee' | 'partielle' | 'payee' | 'annulee';
 
-export type StatutVersement = 'en_attente' | 'effectue' | 'annule';
+export type StatutVersement = 'en_attente' | 'partiellement_verse' | 'effectue' | 'annule';
 export type BeneficiaireType = 'livreur' | 'proprietaire';
 
 export const STATUT_COMMISSION_LABELS: Record<StatutCommission, string> = {
-  en_attente: 'En attente',
-  eligible: 'Éligible',
-  partiellement_versee: 'Partiellement versée',
-  versee: 'Versée',
+  impayee: 'Impayée',
+  partielle: 'Partielle',
+  payee: 'Payée',
   annulee: 'Annulée',
 };
 
@@ -166,16 +160,16 @@ export const STATUT_COMMISSION_SEVERITY: Record<
   StatutCommission,
   'success' | 'info' | 'warn' | 'danger' | 'secondary'
 > = {
-  en_attente: 'warn',
-  eligible: 'info',
-  partiellement_versee: 'secondary',
-  versee: 'success',
-  annulee: 'danger',
+  impayee: 'danger',
+  partielle: 'warn',
+  payee: 'success',
+  annulee: 'secondary',
 };
 
 export const STATUT_VERSEMENT_LABELS: Record<StatutVersement, string> = {
   en_attente: 'En attente',
-  effectue: 'Effectué',
+  partiellement_verse: 'Partiel',
+  effectue: 'Versé',
   annule: 'Annulé',
 };
 
@@ -184,6 +178,7 @@ export const STATUT_VERSEMENT_SEVERITY: Record<
   'success' | 'info' | 'warn' | 'danger' | 'secondary'
 > = {
   en_attente: 'warn',
+  partiellement_verse: 'info',
   effectue: 'success',
   annule: 'danger',
 };
@@ -202,8 +197,10 @@ export interface VersementCommission {
   beneficiaire_id: number;
   montant_attendu: string;
   montant_verse: string | null;
+  montant_restant?: number;
   statut: StatutVersement;
   verse_at: string | null;
+  date_versement?: string | null;
   note: string | null;
 }
 
@@ -235,5 +232,8 @@ export interface CommissionVente extends CommissionResume {
 }
 
 export interface StoreVersementDto {
+  montant: number;
+  date_paiement: string;
+  mode_paiement: ModePaiement;
   note?: string;
 }

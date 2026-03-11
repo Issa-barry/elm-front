@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/environments/environment.ts"],
-  "sourcesContent": ["export const environment = {\n  production: false,\n  apiUrl: 'http://127.0.0.1:8000/api/v1',\n  // Chemin de base pour les images produits\n  productImagesPath: 'assets/demo/images/produits/'\n};\n"],
-  "mappings": ";AAAO,IAAM,cAAc;EACzB,YAAY;EACZ,QAAQ;;EAER,mBAAmB;;",
-  "names": []
-}

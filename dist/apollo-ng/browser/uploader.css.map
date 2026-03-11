@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/apps/files/uploader/uploader.ts", "uploader.ts"],
-  "sourcesContent": ["\n        :host ::ng-deep .p-fileupload-header {\n            display: none;\n        }\n\n        :host ::ng-deep .p-fileupload {\n            border: none;\n        }\n\n        :host ::ng-deep .p-fileupload-file-list {\n            display: none;\n        }\n    ", ":host ::ng-deep .p-fileupload-header {\n  display: none;\n}\n\n:host ::ng-deep .p-fileupload {\n  border: none;\n}\n\n:host ::ng-deep .p-fileupload-file-list {\n  display: none;\n}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJmaWxlOi8vL0M6L2xhcmFnb24vd3d3L0ZST05UL2VsbS1mcm9udC9zcmMvYXBwL2FwcHMvZmlsZXMvdXBsb2FkZXIvdXBsb2FkZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQ1E7RUFDSTs7O0FBR0o7RUFDSTs7O0FBR0o7RUFDSSIsInNvdXJjZXNDb250ZW50IjpbIlxuICAgICAgICA6aG9zdCA6Om5nLWRlZXAgLnAtZmlsZXVwbG9hZC1oZWFkZXIge1xuICAgICAgICAgICAgZGlzcGxheTogbm9uZTtcbiAgICAgICAgfVxuXG4gICAgICAgIDpob3N0IDo6bmctZGVlcCAucC1maWxldXBsb2FkIHtcbiAgICAgICAgICAgIGJvcmRlcjogbm9uZTtcbiAgICAgICAgfVxuXG4gICAgICAgIDpob3N0IDo6bmctZGVlcCAucC1maWxldXBsb2FkLWZpbGUtbGlzdCB7XG4gICAgICAgICAgICBkaXNwbGF5OiBub25lO1xuICAgICAgICB9XG4gICAgIl19 */"],
-  "mappings": ";AACQ,MAAA,UAAA,CAAA;AACI,WAAA;ACAZ;ADGQ,MAAA,UAAA,CAAA;AACI,UAAA;ACAZ;ADGQ,MAAA,UAAA,CAAA;AACI,WAAA;ACAZ;",
-  "names": []
-}
