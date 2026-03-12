@@ -249,6 +249,13 @@
         flex-shrink: 0;
     }
 
+    .mobile-print-action {
+        width: 2.05rem;
+        height: 2.05rem;
+        color: var(--mobile-primary) !important;
+        flex-shrink: 0;
+    }
+
     .mobile-state {
         margin-top: 1rem;
         background: #f8faff;

@@ -27,12 +27,13 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 import {
   Produit,
-  CreateProduitDto,  
+  CreateProduitDto,
   PRODUIT_TYPE_LABELS,
   PRODUIT_STATUT_LABELS,
   ProduitType,
   ProduitStatut
 } from '@/models/produit.model';
+import { BarcodeDirective } from '@/shared/directives/barcode.directive';
 
 @Component({
   selector: 'app-produits-form',
@@ -49,7 +50,8 @@ import {
     RippleModule,
     ChipModule,
     FluidModule,
-    InputNumberModule
+    InputNumberModule,
+    BarcodeDirective,
   ],
   providers: [MessageService],
   templateUrl: './produits-form.html',
@@ -103,6 +105,8 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
   product: Produit = new Produit({
     nom: '',
     code: '',
+    code_interne: '',
+    code_fournisseur: null,
     prix_usine: null,
     prix_achat: null,
     prix_vente: null,
@@ -385,7 +389,9 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
       nom: this.product.nom.trim(),
       type: this.product.type,
       description: this.product.description?.trim() || undefined,
-      cout: this.product.cout ?? undefined
+      cout: this.product.cout ?? undefined,
+      code_interne: this.product.code_interne?.trim() || undefined,
+      code_fournisseur: this.product.code_fournisseur?.trim() || null,
     };
     // Statut et stock uniquement en édition (à la création le backend impose brouillon + stock 0)
     if (this.mode === 'edit') {
@@ -465,6 +471,8 @@ export class ProduitsForm implements OnInit, OnChanges, OnDestroy {
     this.product = new Produit({
       nom: '',
       code: '',
+      code_interne: '',
+      code_fournisseur: null,
       prix_usine: null,
       prix_achat: null,
       prix_vente: null,

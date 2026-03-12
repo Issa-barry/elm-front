@@ -21,6 +21,7 @@ import { DrawerModule } from 'primeng/drawer';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil } from 'rxjs';
+import JsBarcode from 'jsbarcode';
 import { ProduitService } from '@/services/produits/produits.service';
 import { AuthService } from '@/services/auth/auth.service';
 import { MoneyPipe } from '@/pipes/money.pipe';
@@ -86,6 +87,9 @@ export class ProduitsListe implements OnInit, OnDestroy {
     stockDialogSaving = false;
     stockProduit: Produit | null = null;
     stockValue: number | null = null;
+    barcodePrintDialog = false;
+    barcodePrintProduit: Produit | null = null;
+    barcodePrintQuantity: number | null = 12;
 
     filterFields: string[] = ['code', 'nom', 'description', 'type', 'statut', 'qte_stock'];
     produitDialog = false;
@@ -279,8 +283,12 @@ export class ProduitsListe implements OnInit, OnDestroy {
 
     // ── Mobile search (debounced) ─────────────────────────
     onMobileSearchChange(value: string): void {
+        const normalizedValue = this.normalizeScannerDigits(value);
+        if (normalizedValue !== this.mobileSearchTerm) {
+            this.mobileSearchTerm = normalizedValue;
+        }
         this.mobileVisibleCount = this.mobilePageSize;
-        this.searchSubject.next(value);
+        this.searchSubject.next(normalizedValue);
     }
 
     get mobileVisibleProduits(): Produit[] {
@@ -419,7 +427,12 @@ export class ProduitsListe implements OnInit, OnDestroy {
     }
 
     onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const input = event.target as HTMLInputElement;
+        const normalizedValue = this.normalizeScannerDigits(input.value);
+        if (normalizedValue !== input.value) {
+            input.value = normalizedValue;
+        }
+        table.filterGlobal(normalizedValue, 'contains');
     }
 
     saveProduit() {
@@ -551,6 +564,16 @@ export class ProduitsListe implements OnInit, OnDestroy {
         return 'Voir';
     }
 
+    getBarcodePrintTooltip(produit: Produit): string {
+        return this.canPrintBarcode(produit)
+            ? 'Imprimer le code-barres (CODE128)'
+            : 'Code-barres indisponible';
+    }
+
+    canPrintBarcode(produit: Produit): boolean {
+        return this.resolveBarcodeValue(produit).length > 0;
+    }
+
     onProduitPrimaryAction(event: Event, produit: Produit): void {
         if (this.canEditDefinition(produit)) {
             this.goToEditProduit(event, produit.id, produit);
@@ -563,6 +586,173 @@ export class ProduitsListe implements OnInit, OnDestroy {
         }
 
         event.stopPropagation();
+    }
+
+    printBarcode(event: Event, produit: Produit): void {
+        event.stopPropagation();
+
+        const barcodeValue = this.resolveBarcodeValue(produit);
+        if (!barcodeValue) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Code-barres',
+                detail: 'Ce produit n\'a pas de code imprimable.',
+                life: 4000,
+            });
+            return;
+        }
+
+        this.barcodePrintProduit = produit;
+        this.barcodePrintQuantity = 12;
+        this.barcodePrintDialog = true;
+    }
+
+    closeBarcodePrintDialog(): void {
+        this.barcodePrintDialog = false;
+        this.barcodePrintProduit = null;
+        this.barcodePrintQuantity = 12;
+    }
+
+    confirmBarcodePrint(): void {
+        const produit = this.barcodePrintProduit;
+        if (!produit) {
+            this.closeBarcodePrintDialog();
+            return;
+        }
+
+        const quantity = Number(this.barcodePrintQuantity);
+        if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 500) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Quantite invalide',
+                detail: 'Entrez une quantite entre 1 et 500.',
+                life: 4000,
+            });
+            return;
+        }
+
+        this.barcodePrintDialog = false;
+        this.executeBarcodePrint(produit, quantity);
+        this.barcodePrintProduit = null;
+        this.barcodePrintQuantity = 12;
+    }
+
+    private executeBarcodePrint(produit: Produit, quantity: number): void {
+        const barcodeValue = this.resolveBarcodeValue(produit);
+        if (!barcodeValue) return;
+
+        const printWindow = window.open('', '_blank', 'width=560,height=720');
+        if (!printWindow) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Impression bloquee',
+                detail: 'Autorisez les popups puis reessayez.',
+                life: 5000,
+            });
+            return;
+        }
+
+        const productName = this.escapeHtml(produit.nom?.trim() || 'Produit');
+        const escapedCode = this.escapeHtml(barcodeValue);
+        const barcodeSvg = this.buildBarcodeSvgMarkup(barcodeValue);
+        const labelsHtml = Array.from({ length: quantity }, () => `
+      <article class="label">
+        <div class="name">${productName}</div>
+        <div class="barcode">${barcodeSvg}</div>
+        <div class="code">${escapedCode}</div>
+      </article>
+    `).join('');
+
+        printWindow.document.open();
+        printWindow.document.write(`
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Code-barres ${escapedCode}</title>
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: #111827;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(4, 48mm);
+        grid-auto-rows: 28mm;
+        gap: 2mm;
+        justify-content: start;
+      }
+      .label {
+        border: 1px dashed #d1d5db;
+        border-radius: 3px;
+        padding: 1.5mm 2mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1mm;
+        overflow: hidden;
+      }
+      .name {
+        max-width: 100%;
+        font-size: 9px;
+        line-height: 1.1;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .barcode {
+        width: 100%;
+        height: 15mm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .barcode svg {
+        width: 100%;
+        height: 100%;
+      }
+      .code {
+        font-size: 8px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sheet">
+      ${labelsHtml}
+    </main>
+  </body>
+</html>
+        `);
+        printWindow.document.close();
+
+        let printTriggered = false;
+        const triggerPrint = () => {
+            if (printTriggered || printWindow.closed) return;
+            printTriggered = true;
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        };
+
+        // Certains navigateurs déclenchent `load` avant l'affectation du handler.
+        printWindow.addEventListener('load', triggerPrint, { once: true });
+        setTimeout(triggerPrint, 250);
     }
 
     openStockDialog(event: Event, produit: Produit): void {
@@ -658,5 +848,58 @@ export class ProduitsListe implements OnInit, OnDestroy {
 
     private clearMobilePwaMode(): void {
         this.document.body.classList.remove(this.mobilePwaClass);
+    }
+
+    private resolveBarcodeValue(produit: Produit): string {
+        return (
+            produit.code_interne?.trim()
+            || produit.code?.trim()
+            || produit.code_fournisseur?.trim()
+            || ''
+        );
+    }
+
+    private buildBarcodeSvgMarkup(value: string): string {
+        const svg = this.document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        JsBarcode(svg, value, {
+            format: 'CODE128',
+            width: 1.2,
+            height: 34,
+            margin: 1,
+            displayValue: true,
+            fontSize: 8,
+            lineColor: '#000000',
+            background: 'transparent',
+        });
+        return svg.outerHTML;
+    }
+
+    private escapeHtml(value: string): string {
+        const replacements: Record<string, string> = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            '\'': '&#39;',
+        };
+
+        return value.replace(/[&<>"']/g, (character) => replacements[character]);
+    }
+
+    private normalizeScannerDigits(value: string): string {
+        const scannerDigitMap: Record<string, string> = {
+            '&': '1',
+            'é': '2',
+            '"': '3',
+            '\'': '4',
+            '(': '5',
+            '-': '6',
+            'è': '7',
+            '_': '8',
+            'ç': '9',
+            'à': '0',
+        };
+
+        return Array.from(value).map((character) => scannerDigitMap[character] ?? character).join('');
     }
 }
