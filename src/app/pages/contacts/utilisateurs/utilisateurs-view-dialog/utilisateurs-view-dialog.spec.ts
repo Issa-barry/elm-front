@@ -4,6 +4,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { of, throwError } from 'rxjs';
 
 import { User, UserType } from '@/models/user.model';
+import { AuthService } from '@/services/auth/auth.service';
+import { OrganisationService } from '@/services/organisations/organisation.service';
 import { RoleService } from '@/services/role/role.service';
 import { UpdateUserDto, UserService } from '@/services/users/users.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
@@ -25,6 +27,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     reference: 'USR-20260228-0001',
     type: 'staff',
     is_active: true,
+    is_archived: false,
     email_verified_at: null,
     last_login_at: null,
     last_login_ip: null,
@@ -54,15 +57,30 @@ describe('UtilisateursViewDialog', () => {
   let fixture: ComponentFixture<UtilisateursViewDialog>;
   let userServiceSpy: jasmine.SpyObj<UserService>;
   let roleServiceSpy: jasmine.SpyObj<RoleService>;
+  let organisationServiceSpy: jasmine.SpyObj<OrganisationService>;
   let usineServiceSpy: jasmine.SpyObj<UsineService>;
   let usineContextMock: { currentUsineId: jasmine.Spy };
+  let authServiceMock: {
+    currentUser: jasmine.Spy;
+    hasAnyRole: jasmine.Spy;
+  };
 
   beforeEach(async () => {
     userServiceSpy = jasmine.createSpyObj<UserService>('UserService', ['getUser', 'createUserViaApi', 'updateUser']);
     roleServiceSpy = jasmine.createSpyObj<RoleService>('RoleService', ['getRoles']);
+    organisationServiceSpy = jasmine.createSpyObj<OrganisationService>('OrganisationService', ['getAll']);
     usineServiceSpy = jasmine.createSpyObj<UsineService>('UsineService', ['assignUser']);
     usineContextMock = {
       currentUsineId: jasmine.createSpy('currentUsineId').and.returnValue(12),
+    };
+    authServiceMock = {
+      currentUser: jasmine.createSpy('currentUser').and.returnValue({
+        id: 999,
+        organisation_id: 3,
+        organisation_name: 'Agence demo',
+        roles: ['admin_entreprise'],
+      }),
+      hasAnyRole: jasmine.createSpy('hasAnyRole').and.returnValue(false),
     };
 
     roleServiceSpy.getRoles.and.returnValue(
@@ -76,6 +94,11 @@ describe('UtilisateursViewDialog', () => {
         ],
       } as any),
     );
+    organisationServiceSpy.getAll.and.returnValue(
+      of([
+        { id: 3, nom: 'Agence demo', code: 'AGC' },
+      ] as any),
+    );
     userServiceSpy.getUser.and.returnValue(of({ success: true, message: 'OK', data: makeUser() } as any));
     userServiceSpy.createUserViaApi.and.returnValue(of({ success: true, message: 'OK', data: makeUser({ id: 77 }) } as any));
     userServiceSpy.updateUser.and.returnValue(of({ success: true, message: 'OK', data: makeUser({ id: 55 }) } as any));
@@ -86,6 +109,8 @@ describe('UtilisateursViewDialog', () => {
       providers: [
         provideAnimationsAsync(),
         { provide: UserService, useValue: userServiceSpy },
+        { provide: AuthService, useValue: authServiceMock },
+        { provide: OrganisationService, useValue: organisationServiceSpy },
         { provide: RoleService, useValue: roleServiceSpy },
         { provide: UsineService, useValue: usineServiceSpy },
         { provide: UsineContextService, useValue: usineContextMock },
@@ -166,6 +191,7 @@ describe('UtilisateursViewDialog', () => {
 
     expect(userServiceSpy.createUserViaApi).toHaveBeenCalled();
     const payload = userServiceSpy.createUserViaApi.calls.mostRecent().args[0];
+    expect(payload.organisation_id).toBe(3);
     expect(payload.phone).toBe('+232620000001');
     expect(payload.code_phone_pays).toBe('+232');
     expect(usineServiceSpy.assignUser).toHaveBeenCalledWith(12, jasmine.objectContaining({ user_id: 77, role: 'manager' }));
@@ -229,6 +255,62 @@ describe('UtilisateursViewDialog', () => {
       'Le numero de telephone est deja utilise.',
       'Le format de email est invalide.',
     ]);
+  });
+
+  it('mode create: should show backend nested error message', () => {
+    userServiceSpy.createUserViaApi.and.returnValue(
+      throwError(() => ({
+        status: 500,
+        error: {
+          error: {
+            message: 'Le service de creation utilisateur est temporairement indisponible.',
+          },
+        },
+      })),
+    );
+
+    component.mode = 'create';
+    component.model.nom = 'Barry';
+    component.model.prenom = 'Mamadou';
+    component.model.phone = '+224620000010';
+    component.model.code_pays = 'GN';
+    component.model.pays = 'Guinee';
+    component.model.ville = 'Conakry';
+    component.model.quartier = 'Kaloum';
+    component.model.type = 'staff';
+    component.model.role = 'admin_entreprise';
+    component.model.password = 'Password1';
+    component.model.password_confirmation = 'Password1';
+
+    component.save();
+
+    expect(component.formError).toBe('Le service de creation utilisateur est temporairement indisponible.');
+  });
+
+  it('mode create: should parse backend JSON string payload and display message', () => {
+    userServiceSpy.createUserViaApi.and.returnValue(
+      throwError(() => ({
+        status: 500,
+        error: '{"message":"Le backend a refuse la requete."}',
+      })),
+    );
+
+    component.mode = 'create';
+    component.model.nom = 'Barry';
+    component.model.prenom = 'Mamadou';
+    component.model.phone = '+224620000010';
+    component.model.code_pays = 'GN';
+    component.model.pays = 'Guinee';
+    component.model.ville = 'Conakry';
+    component.model.quartier = 'Kaloum';
+    component.model.type = 'staff';
+    component.model.role = 'admin_entreprise';
+    component.model.password = 'Password1';
+    component.model.password_confirmation = 'Password1';
+
+    component.save();
+
+    expect(component.formError).toBe('Le backend a refuse la requete.');
   });
 
   it('mode edit: opening visible with userId should load and map user data', () => {

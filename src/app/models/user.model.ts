@@ -32,6 +32,7 @@ export function getUserTypeLabel(type: UserType): string {
 // ── Interface principale ────────────────────────────────
 export interface User {
   id: number;
+  organisation_id?: number | null;
   nom: string;
   prenom: string;
   phone: string;
@@ -74,6 +75,7 @@ export interface User {
 
 // ── DTO Création ────────────────────────────────────────
 export interface CreateUserDto {
+  organisation_id?: number | null;
   nom: string;
   prenom: string;
   phone: string;

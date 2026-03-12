@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, DestroyRef, effect, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -12,8 +11,8 @@ import {
     DashboardVentesParTypeData,
     StatutRow,
     VenteFactureStatus,
-    VentesParTypePeriod
 } from '@/services/dashboard/dashboard.service';
+import { DashboardPeriodService } from '@/services/dashboard/dashboard-period.service';
 import { MoneyPipe } from '@/pipes/money.pipe';
 
 type StatutTag = {
@@ -24,23 +23,16 @@ type StatutTag = {
 @Component({
     standalone: true,
     selector: 'app-ca-par-statut-widget',
-    imports: [CommonModule, FormsModule, TableModule, TagModule, SelectModule, SkeletonModule, ButtonModule, MoneyPipe],
+    imports: [CommonModule, TableModule, TagModule, SkeletonModule, ButtonModule, MoneyPipe],
     template: `
         <div class="card">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
                 <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold">
                     CA par statut de facture
                 </div>
-                <div class="sm:ml-auto">
-                    <p-select
-                        [options]="periodOptions"
-                        [(ngModel)]="selectedPeriod"
-                        (onChange)="onPeriodChange()"
-                        optionLabel="label"
-                        optionValue="value"
-                        [style]="{ 'min-width': '180px' }"
-                    />
-                </div> 
+                <div class="sm:ml-auto text-sm text-surface-500">
+                    {{ periodService.currentLabel() }}
+                </div>
             </div>
 
             @if (loading) {
@@ -91,22 +83,23 @@ type StatutTag = {
         </div>
     `
 })
-export class caParStatutWidget implements OnInit {
+export class caParStatutWidget {
+    readonly periodService = inject(DashboardPeriodService);
     private readonly dashboardService = inject(DashboardService);
+    private readonly destroyRef = inject(DestroyRef);
     private readonly statutOrder: VenteFactureStatus[] = ['payee', 'partiel', 'impayee', 'annulee'];
 
-    readonly periodOptions: { label: string; value: VentesParTypePeriod }[] = [
-        { label: "Aujourd'hui", value: 'today' },
-        { label: 'Cette semaine', value: 'this_week' },
-        { label: 'Ce mois', value: 'this_month' },
-        { label: 'Mois dernier', value: 'last_month' },
-        { label: 'Cette annee', value: 'this_year' }
-    ];
-
-    selectedPeriod: VentesParTypePeriod = 'this_month';
     rows: StatutRow[] = [];
     loading = false;
     errorMessage: string | null = null;
+
+    constructor() {
+        effect(() => {
+            const period = this.periodService.period();
+            const days = this.periodService.customDays();
+            this.loadData(period, days);
+        });
+    }
 
     get totalCa(): number {
         return this.rows
@@ -124,21 +117,19 @@ export class caParStatutWidget implements OnInit {
             .reduce((sum, item) => sum + (item.nb_commandes ?? 0), 0);
     }
 
-    ngOnInit(): void {
-        this.loadData();
-    }
-
-    onPeriodChange(): void {
-        this.loadData();
-    }
-
-    loadData(): void {
+    loadData(
+        period = this.periodService.period(),
+        days = this.periodService.customDays()
+    ): void {
         this.loading = true;
         this.errorMessage = null;
 
         this.dashboardService
-            .getVentesParTypeVehicule(this.selectedPeriod)
-            .pipe(finalize(() => (this.loading = false)))
+            .getVentesParTypeVehicule(period, days)
+            .pipe(
+                finalize(() => (this.loading = false)),
+                takeUntilDestroyed(this.destroyRef)
+            )
             .subscribe({
                 next: (data: DashboardVentesParTypeData) => {
                     this.rows = this.normalizeRows(data?.par_statut);

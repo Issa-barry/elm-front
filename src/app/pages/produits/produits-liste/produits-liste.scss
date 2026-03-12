@@ -671,6 +671,16 @@
     white-space: nowrap;
 }
 
+// Le loading mask du p-table ne doit pas bloquer/assombrir la barre d'actions.
+:host ::ng-deep .produits-desktop .p-datatable-mask {
+    pointer-events: none;
+    background: transparent;
+}
+
+:host ::ng-deep .produits-desktop .p-datatable-loading-icon {
+    color: var(--p-primary-color);
+}
+
 :host-context(.app-dark) {
     .desktop-filter-count {
         color: var(--p-surface-500);

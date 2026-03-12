@@ -1,13 +1,12 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, DestroyRef, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { LayoutService } from '@/layout/service/layout.service';
-import { DashboardService, VentesParTypePeriod } from '@/services/dashboard/dashboard.service';
+import { DashboardService } from '@/services/dashboard/dashboard.service';
+import { DashboardPeriodService } from '@/services/dashboard/dashboard-period.service';
 import { ChartModule } from 'primeng/chart';
 import { FluidModule } from 'primeng/fluid';
-import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { debounceTime } from 'rxjs';
 
@@ -21,20 +20,13 @@ interface ParTypeItem {
 @Component({
     selector: 'app-doughnut-widget',
     standalone: true,
-    imports: [CommonModule, FormsModule, SelectModule, SkeletonModule, ChartModule, FluidModule],
+    imports: [CommonModule, SkeletonModule, ChartModule, FluidModule],
     template: `
         <div class="col-span-12 xl:col-span-6">
             <div class="card flex flex-col items-center">
                 <div class="flex w-full items-center justify-between mb-4">
                     <div class="font-semibold text-xl">Commandes par type de vehicule</div>
-                    <p-select
-                        [options]="periodOptions"
-                        [ngModel]="selectedPeriod()"
-                        (ngModelChange)="selectedPeriod.set($event)"
-                        optionLabel="label"
-                        optionValue="value"
-                        [style]="{ 'min-width': '160px' }"
-                    />
+                    <span class="text-sm text-surface-500">{{ periodService.currentLabel() }}</span>
                 </div>
 
                 @if (loading()) {
@@ -51,25 +43,15 @@ interface ParTypeItem {
     `
 })
 export class DoughnutWidget {
-    readonly periodOptions: { label: string; value: VentesParTypePeriod }[] = [
-        { label: "Aujourd'hui", value: 'today' },
-        { label: 'Ce mois', value: 'this_month' },
-        { label: 'Mois dernier', value: 'last_month' },
-        { label: 'Cette annee', value: 'this_year' },
-        { label: 'Annee derniere', value: 'last_year' }
-    ];
+    readonly periodService = inject(DashboardPeriodService);
 
-    selectedPeriod = signal<VentesParTypePeriod>('this_month');
     loading = signal(false);
     errorMessage = signal<string | null>(null);
     private rawData = signal<ParTypeItem[]>([]);
     readonly hasData = computed(() => {
         const items = this.rawData();
-        if (!items.length) {
-            return false;
-        }
-        const totalCa = items.reduce((sum, item) => sum + (Number(item.ca_total) || 0), 0);
-        return totalCa > 0;
+        if (!items.length) return false;
+        return items.reduce((sum, item) => sum + (Number(item.ca_total) || 0), 0) > 0;
     });
 
     pieData: ChartData<'doughnut'> = { labels: [], datasets: [] };
@@ -83,21 +65,21 @@ export class DoughnutWidget {
     constructor() {
         this.layoutService.configUpdate$
             .pipe(debounceTime(50), takeUntilDestroyed(this.destroyRef))
-            .subscribe(() => {
-                this.initCharts();
-            });
+            .subscribe(() => this.initCharts());
 
         effect(() => {
-            this.load(this.selectedPeriod());
+            const period = this.periodService.period();
+            const days = this.periodService.customDays();
+            this.load(period, days);
         });
     }
 
-    private load(period: VentesParTypePeriod): void {
+    private load(period = this.periodService.period(), days = this.periodService.customDays()): void {
         this.loading.set(true);
         this.errorMessage.set(null);
 
         this.dashboardService
-            .getVentesParTypeVehicule(period)
+            .getVentesParTypeVehicule(period, days)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (res) => {
@@ -114,9 +96,7 @@ export class DoughnutWidget {
     }
 
     initCharts(): void {
-        if (!isPlatformBrowser(this.platformId)) {
-            return;
-        }
+        if (!isPlatformBrowser(this.platformId)) return;
 
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
@@ -134,36 +114,25 @@ export class DoughnutWidget {
 
         const gray500 = documentStyle.getPropertyValue('--p-gray-500');
         const gray400 = documentStyle.getPropertyValue('--p-gray-400');
-
         const items = this.rawData();
 
         this.pieData = {
             labels: items.map((i) => i.label),
-            datasets: [
-                {
-                    data: items.map((i) => i.ca_total),
-                    backgroundColor: items.map((i) => colorMap[i.type_vehicule] ?? gray500),
-                    hoverBackgroundColor: items.map((i) => hoverMap[i.type_vehicule] ?? gray400)
-                }
-            ]
+            datasets: [{
+                data: items.map((i) => i.ca_total),
+                backgroundColor: items.map((i) => colorMap[i.type_vehicule] ?? gray500),
+                hoverBackgroundColor: items.map((i) => hoverMap[i.type_vehicule] ?? gray400)
+            }]
         };
 
         this.pieOptions = {
             plugins: {
-                legend: {
-                    labels: {
-                        usePointStyle: true,
-                        color: textColor
-                    }
-                },
+                legend: { labels: { usePointStyle: true, color: textColor } },
                 tooltip: {
                     callbacks: {
                         label: (ctx: any) => {
                             const item = items[ctx.dataIndex];
-                            if (!item) {
-                                return '';
-                            }
-
+                            if (!item) return '';
                             return [
                                 ` ${item.nb_commandes} commande(s)`,
                                 ` CA : ${item.ca_total.toLocaleString('fr-FR')} GNF`

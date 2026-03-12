@@ -84,6 +84,7 @@
                     <p-select
                         [(ngModel)]="selectedCountry"
                         [ngModelOptions]="{standalone: true}"
+                        (ngModelChange)="onCountryChange()"
                         [options]="countries"
                         optionLabel="name"
                         [disabled]="isLoading()"
@@ -114,6 +115,8 @@
                         [class.ng-dirty]="isFieldInvalid('phone') || hasFieldError('phone')"
                         placeholder="Numéro de téléphone"
                         [disabled]="isLoading()"
+                        (input)="onPhoneInput()"
+                        (blur)="onPhoneBlur()"
                     />
                 </div>
 
@@ -267,3 +270,4 @@
 </div>
 
 <app-configurator [simple]="false" />
+

@@ -3,8 +3,8 @@
  * (sans sous-dossier browser).
  *
  * Usage:
- * - node scripts/copy-deploy.js              -> dist/apollo-ng-production
- * - node scripts/copy-deploy.js production   -> dist/apollo-ng-production
+ * - node scripts/copy-deploy.js              -> dist/apollo-ng-deploy
+ * - node scripts/copy-deploy.js production   -> dist/apollo-ng-deploy
  * - node scripts/copy-deploy.js preprod      -> dist/apollo-ng-preprod
  */
 const fs = require('fs');
@@ -12,7 +12,7 @@ const path = require('path');
 
 const src = path.join(__dirname, '..', 'dist', 'apollo-ng', 'browser');
 const target = (process.argv[2] || 'production').toLowerCase();
-const destFolder = target === 'preprod' ? 'apollo-ng-preprod' : 'apollo-ng-production';
+const destFolder = target === 'preprod' ? 'apollo-ng-preprod' : 'apollo-ng-deploy';
 const dest = path.join(__dirname, '..', 'dist', destFolder);
 
 if (!fs.existsSync(src)) {

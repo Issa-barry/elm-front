@@ -9,6 +9,9 @@ import { SelectModule } from 'primeng/select';
 
 import { COUNTRIES } from '@/models/country.model';
 import { Civilite, CIVILITE_LABELS, CreateUserDto, User, UserType } from '@/models/user.model';
+import { Organisation } from '@/models/organisation.model';
+import { AuthService } from '@/services/auth/auth.service';
+import { OrganisationService } from '@/services/organisations/organisation.service';
 import { RoleService } from '@/services/role/role.service';
 import { UpdateUserDto, UserService } from '@/services/users/users.service';
 import { UsineContextService } from '@/services/usine/usine-context.service';
@@ -19,6 +22,16 @@ type DialogMode = 'create' | 'edit';
 type RoleOption = {
   label: string;
   value: string;
+};
+
+type OrganisationOption = {
+  label: string;
+  value: number;
+};
+
+type UsineOption = {
+  label: string;
+  value: number;
 };
 
 type UserDialogResult = {
@@ -39,6 +52,8 @@ type UserDialogForm = {
   role: string;
   civilite: Civilite | null;
   date_naissance: string | null;
+  organisation_id: number | null;
+  usine_id: number | null;
   password: string;
   password_confirmation: string;
 };
@@ -79,19 +94,27 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   private readonly staffRoles = ['admin_entreprise', 'manager', 'comptable', 'agent_vente', 'employe'];
 
   availableRoles: RoleOption[] = [];
+  organisationOptions: OrganisationOption[] = [];
+  usineOptions: UsineOption[] = [];
+  currentUserOrganisationId: number | null = null;
+  isSuperAdmin = false;
   private rolesLoaded = false;
 
   model: UserDialogForm = this.getDefaultModel();
 
   constructor(
     private userService: UserService,
+    private authService: AuthService,
+    private organisationService: OrganisationService,
     private roleService: RoleService,
     private usineContext: UsineContextService,
     private usineService: UsineService
   ) {}
 
   ngOnInit(): void {
+    this.initializeOrganisationContext();
     this.loadRoles();
+    this.loadUsineOptions();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -202,6 +225,26 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.loading = false;
   }
 
+  private loadUsineOptions(): void {
+    this.usineService.getAll().subscribe({
+      next: (response) => {
+        if (response.success && Array.isArray(response.data)) {
+          this.usineOptions = response.data.map((u) => ({
+            label: u.code ? `${u.nom} (${u.code})` : u.nom,
+            value: u.id,
+          }));
+        }
+      },
+      error: () => {
+        // Fallback sur les usines accessibles du contexte
+        this.usineOptions = this.usineContext.accessibleUsines().map((u) => ({
+          label: u.code ? `${u.nom} (${u.code})` : u.nom,
+          value: u.id,
+        }));
+      },
+    });
+  }
+
   private loadRoles(): void {
     if (this.rolesLoaded) return;
 
@@ -252,6 +295,8 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
               (response.data.type === 'staff' ? '' : response.data.type),
             civilite: response.data.civilite ?? null,
             date_naissance: response.data.date_naissance ?? null,
+            organisation_id: this.coerceNumber((response.data as { organisation_id?: unknown }).organisation_id),
+            usine_id: this.usineContext.currentUsineId(),
             password: '',
             password_confirmation: '',
           };
@@ -269,15 +314,21 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   }
 
   private createUser(): void {
-    const currentUsineId = this.usineContext.currentUsineId();
-    if (currentUsineId === null) {
+    if (this.usineContext.currentUsineId() === null) {
       this.setFormError('Veuillez selectionner une usine avant de creer un utilisateur.');
+      return;
+    }
+
+    const organisationId = this.resolveOrganisationIdForCreate();
+    if (organisationId === null) {
+      this.setFormError('Veuillez selectionner une agence valide.');
       return;
     }
 
     this.saving = true;
 
     const payload: CreateUserDto = {
+      organisation_id: organisationId,
       nom: this.model.nom.trim(),
       prenom: this.model.prenom.trim(),
       phone: this.normalizePhone(this.model.phone),
@@ -303,19 +354,28 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
           return;
         }
 
-        const user = response.data;
-        const usineRole = (payload.role === 'admin_entreprise' || payload.role === 'manager') ? 'manager' : 'staff';
-        this.usineService.assignUser(currentUsineId, { user_id: user.id, role: usineRole }).subscribe({
-          next: () => {
-            this.saving = false;
-            this.userSaved.emit({ user, mode: 'create' });
-            this.close();
-          },
-          error: (error) => {
-            this.setApiError(error, "Utilisateur cree mais assignation d usine impossible.");
-            this.saving = false;
-          },
-        });
+        const createdUser = response.data;
+        const usineId = this.model.usine_id;
+
+        if (usineId !== null) {
+          this.usineService.assignUser(usineId, { user_id: createdUser.id }).subscribe({
+            next: () => {
+              this.saving = false;
+              this.userSaved.emit({ user: createdUser, mode: 'create' });
+              this.close();
+            },
+            error: () => {
+              // Utilisateur créé mais assignation échouée — on continue quand même
+              this.saving = false;
+              this.userSaved.emit({ user: createdUser, mode: 'create' });
+              this.close();
+            },
+          });
+        } else {
+          this.saving = false;
+          this.userSaved.emit({ user: createdUser, mode: 'create' });
+          this.close();
+        }
       },
       error: (error) => {
         this.setApiError(error, 'Erreur lors de la creation de l utilisateur.');
@@ -350,9 +410,27 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.userService.updateUser(this.userId, payload).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.saving = false;
-          this.userSaved.emit({ user: response.data, mode: 'edit' });
-          this.close();
+          const updatedUser = response.data;
+          const usineId = this.model.usine_id;
+
+          if (usineId !== null && this.userId) {
+            this.usineService.assignUser(usineId, { user_id: this.userId }).subscribe({
+              next: () => {
+                this.saving = false;
+                this.userSaved.emit({ user: updatedUser, mode: 'edit' });
+                this.close();
+              },
+              error: () => {
+                this.saving = false;
+                this.userSaved.emit({ user: updatedUser, mode: 'edit' });
+                this.close();
+              },
+            });
+          } else {
+            this.saving = false;
+            this.userSaved.emit({ user: updatedUser, mode: 'edit' });
+            this.close();
+          }
           return;
         }
         this.setFormError(response.message || 'Modification impossible.');
@@ -387,6 +465,11 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     }
 
     if (this.mode === 'create') {
+      if (this.resolveOrganisationIdForCreate() === null) {
+        this.setFormError('Veuillez selectionner une agence valide.');
+        return false;
+      }
+
       if (!this.model.password.trim() || !this.model.password_confirmation.trim()) {
         this.setFormError('Le mot de passe et sa confirmation sont obligatoires.');
         return false;
@@ -449,6 +532,8 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       role: '',
       civilite: null,
       date_naissance: null,
+      organisation_id: null,
+      usine_id: null,
       password: '',
       password_confirmation: '',
     };
@@ -459,6 +544,21 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
     if (!this.model.type) {
       this.model.type = this.userTypeOptions[0]?.value ?? 'staff';
+    }
+
+    if (this.currentUserOrganisationId !== null) {
+      this.model.organisation_id = this.currentUserOrganisationId;
+    }
+
+    if (this.model.usine_id === null) {
+      const currentId = this.usineContext.currentUsineId();
+      if (currentId !== null) {
+        this.model.usine_id = currentId;
+      }
+    }
+
+    if (this.isSuperAdmin && this.model.organisation_id === null && this.organisationOptions.length > 0) {
+      this.model.organisation_id = this.organisationOptions[0]!.value;
     }
 
     if (this.model.type !== 'staff') {
@@ -475,6 +575,130 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.model.email = '';
     this.model.password = '';
     this.model.password_confirmation = '';
+  }
+
+  private initializeOrganisationContext(): void {
+    this.currentUserOrganisationId = this.resolveCurrentUserOrganisationId();
+    this.isSuperAdmin = this.authService.hasAnyRole(['super_admin', 'super-admin']);
+
+    if (this.isSuperAdmin) {
+      this.loadOrganisationOptionsForSuperAdmin();
+      return;
+    }
+
+    if (this.currentUserOrganisationId !== null) {
+      this.organisationOptions = [
+        {
+          value: this.currentUserOrganisationId,
+          label: this.resolveCurrentUserOrganisationLabel(this.currentUserOrganisationId),
+        },
+      ];
+      this.model.organisation_id = this.currentUserOrganisationId;
+    }
+  }
+
+  private loadOrganisationOptionsForSuperAdmin(): void {
+    this.organisationService.getAll().subscribe({
+      next: (items) => {
+        this.organisationOptions = items.map((item) => ({
+          value: item.id,
+          label: this.buildOrganisationLabel(item),
+        }));
+
+        if (this.model.organisation_id === null) {
+          if (
+            this.currentUserOrganisationId !== null &&
+            this.organisationOptions.some((option) => option.value === this.currentUserOrganisationId)
+          ) {
+            this.model.organisation_id = this.currentUserOrganisationId;
+          } else {
+            this.model.organisation_id = this.organisationOptions[0]?.value ?? null;
+          }
+        }
+      },
+      error: () => {
+        if (this.currentUserOrganisationId !== null) {
+          this.organisationOptions = [
+            {
+              value: this.currentUserOrganisationId,
+              label: this.resolveCurrentUserOrganisationLabel(this.currentUserOrganisationId),
+            },
+          ];
+          this.model.organisation_id = this.currentUserOrganisationId;
+        } else {
+          this.organisationOptions = [];
+          this.model.organisation_id = null;
+        }
+      },
+    });
+  }
+
+  private resolveCurrentUserOrganisationId(): number | null {
+    const user = this.authService.currentUser() as Record<string, unknown> | null;
+    if (!user) return null;
+
+    const directId = this.coerceNumber(user['organisation_id']);
+    if (directId !== null) return directId;
+
+    const organisation = user['organisation'];
+    if (organisation && typeof organisation === 'object') {
+      return this.coerceNumber((organisation as Record<string, unknown>)['id']);
+    }
+
+    return null;
+  }
+
+  private resolveCurrentUserOrganisationLabel(fallbackId: number): string {
+    const user = this.authService.currentUser() as Record<string, unknown> | null;
+    if (!user) return `Organisation #${fallbackId}`;
+
+    const organisationName = user['organisation_name'];
+    if (typeof organisationName === 'string' && organisationName.trim().length > 0) {
+      return organisationName.trim();
+    }
+
+    const organisation = user['organisation'];
+    if (organisation && typeof organisation === 'object') {
+      const nom = (organisation as Record<string, unknown>)['nom'];
+      const code = (organisation as Record<string, unknown>)['code'];
+
+      if (typeof nom === 'string' && nom.trim().length > 0) {
+        if (typeof code === 'string' && code.trim().length > 0) {
+          return `${nom.trim()} (${code.trim()})`;
+        }
+        return nom.trim();
+      }
+    }
+
+    return `Organisation #${fallbackId}`;
+  }
+
+  private buildOrganisationLabel(item: Organisation): string {
+    if (item.code) {
+      return `${item.nom} (${item.code})`;
+    }
+    return item.nom;
+  }
+
+  private coerceNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsedValue = Number.parseInt(value, 10);
+      return Number.isFinite(parsedValue) ? parsedValue : null;
+    }
+
+    return null;
+  }
+
+  private resolveOrganisationIdForCreate(): number | null {
+    if (!this.isSuperAdmin) {
+      return this.currentUserOrganisationId;
+    }
+
+    return this.coerceNumber(this.model.organisation_id);
   }
 
   private getFirstStaffRoleValue(): string {
@@ -498,29 +722,134 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     this.formErrors = details;
   }
 
-  private setApiError(error: any, fallback: string): void {
+  private setApiError(error: unknown, fallback: string): void {
+    const httpError = error as { status?: number; error?: { message?: string } };
+
+    if (httpError.status === 422) {
+      this.setFormError(httpError.error?.message || fallback);
+      return;
+    }
+
+    if (httpError.status === 500) {
+      this.setFormError('Une erreur inattendue est survenue. Veuillez réessayer.');
+      return;
+    }
+
     const validationMessages = this.extractValidationMessages(error);
     if (validationMessages.length > 0) {
       this.setFormError(validationMessages[0], validationMessages);
       return;
     }
 
-    const apiMessage = error?.error?.message;
-    if (typeof apiMessage === 'string' && apiMessage.trim()) {
-      this.setFormError(apiMessage.trim());
+    const apiMessage = this.extractApiMessage(error);
+    if (apiMessage) {
+      this.setFormError(apiMessage);
       return;
     }
 
     this.setFormError(fallback);
   }
 
-  private extractValidationMessages(error: any): string[] {
-    const errors = error?.error?.errors;
-    if (!errors || typeof errors !== 'object') return [];
+  private extractApiMessage(error: unknown): string | null {
+    const apiPayload = (error as { error?: unknown } | undefined)?.error;
+    return this.findFirstMessageCandidate(apiPayload) ?? this.findFirstMessageCandidate(error);
+  }
 
-    return Object.values(errors)
-      .flatMap((value) => (Array.isArray(value) ? value : [value]))
-      .map((message) => String(message).trim())
+  private findFirstMessageCandidate(value: unknown): string | null {
+    if (typeof value === 'string') {
+      const parsedJson = this.parsePossibleJsonString(value);
+      if (parsedJson !== null) {
+        return this.findFirstMessageCandidate(parsedJson);
+      }
+
+      const trimmedValue = value.trim();
+      if (!trimmedValue) return null;
+      if (this.isLikelyHtmlPayload(trimmedValue)) return null;
+      if (this.isLikelyHttpFailureMessage(trimmedValue)) return null;
+      return trimmedValue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const extracted = this.findFirstMessageCandidate(item);
+        if (extracted) return extracted;
+      }
+      return null;
+    }
+
+    if (!value || typeof value !== 'object') {
+      return null;
+    }
+
+    const record = value as Record<string, unknown>;
+    const priorityKeys = ['message', 'error', 'detail', 'title', 'description'];
+
+    for (const key of priorityKeys) {
+      const extracted = this.findFirstMessageCandidate(record[key]);
+      if (extracted) return extracted;
+    }
+
+    return null;
+  }
+
+  private parsePossibleJsonString(value: string): unknown | null {
+    const trimmedValue = value.trim();
+    if (!trimmedValue.startsWith('{') && !trimmedValue.startsWith('[')) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(trimmedValue);
+    } catch {
+      return null;
+    }
+  }
+
+  private isLikelyHtmlPayload(value: string): boolean {
+    const normalized = value.toLowerCase();
+    return normalized.includes('<!doctype html') || normalized.includes('<html');
+  }
+
+  private isLikelyHttpFailureMessage(value: string): boolean {
+    return value.toLowerCase().startsWith('http failure response for');
+  }
+
+  private extractValidationMessages(error: unknown): string[] {
+    const candidates = [
+      (error as { error?: { errors?: unknown } } | undefined)?.error?.errors,
+      (error as { error?: { error?: { errors?: unknown } } } | undefined)?.error?.error?.errors,
+    ];
+
+    for (const candidate of candidates) {
+      const messages = this.flattenValidationMessages(candidate);
+      if (messages.length > 0) {
+        return messages;
+      }
+    }
+
+    return [];
+  }
+
+  private flattenValidationMessages(errors: unknown): string[] {
+    if (!errors) return [];
+
+    if (Array.isArray(errors)) {
+      return errors
+        .flatMap((value) => this.flattenValidationMessages(value))
+        .filter((message) => message.length > 0);
+    }
+
+    if (typeof errors === 'string') {
+      const trimmedMessage = errors.trim();
+      return trimmedMessage ? [trimmedMessage] : [];
+    }
+
+    if (typeof errors !== 'object') {
+      return [];
+    }
+
+    return Object.values(errors as Record<string, unknown>)
+      .flatMap((value) => this.flattenValidationMessages(value))
       .filter((message) => message.length > 0);
   }
 

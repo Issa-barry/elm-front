@@ -5,205 +5,30 @@ import { Component } from '@angular/core';
     standalone: true,
     imports: [],
     template: `
-        <div id="features" class="my-12 py-12 md:my-20 md:py-20">
-            <span
-                class="text-surface-900 dark:text-surface-0 block font-bold text-5xl mb-6 text-center"
-                >Features</span
+        <div class="bg-surface-0 dark:bg-surface-950 p-12 lg:p-20">
+            <div
+                class="rounded-2xl border border-surface-200 dark:border-surface-700 flex flex-col lg:flex-row overflow-hidden relative"
+                style="background: url('https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/storefront/storefront-page-1-13.png') 50% / cover no-repeat"
             >
-            <span
-                class="text-surface-700 dark:text-surface-100 block text-xl mb-20 text-center leading-normal"
-                >PrimeTek Informatics is the author of PrimeVue, a UI Component
-                vendor with well known vastly popular projects including
-                PrimeFaces, PrimeNG and PrimeReact.</span
-            >
-
-            <div class="grid grid-cols-12 gap-4 mt-20">
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-components.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >90+ UI Components</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            The ultimate set of UI Components to assist you with
-                            90+ impressive Vue Components.
-                        </p>
+                <div class="absolute inset-0 bg-surface-0/80 dark:bg-surface-950/70"></div>
+                <div class="flex-1 px-6 lg:px-12 py-12 lg:py-16 flex flex-col gap-16 relative">
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <span class="text-surface-900 dark:text-surface-0 text-[2.5rem] font-medium leading-tight">50% Off<br /></span>
+                            <span class="text-surface-900 dark:text-surface-0 text-[3rem] font-bold leading-tight">Mid-Season Sale</span>
+                        </div>
+                        <div class="text-surface-700 dark:text-surface-300 text-2xl leading-normal max-w-xl">Discover unbeatable deals on carefully curated pieces - save up to 50% while stocks last.</div>
                     </div>
+                    <button pButton severity="contrast" class="self-start">
+                        <span pButtonLabel>Claim Discount</span>
+                    </button>
                 </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-community.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Community</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            Connect with the other open source community
-                            members, collaborate and have a voice in the project
-                            roadmap.
-                        </p>
-                    </div>
-                </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-productivity.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Productivity</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            Boost your productivity by achieving more in less
-                            time and accomplish amazing results.
-                        </p>
-                    </div>
-                </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-accessibility.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Accessibility</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            The ultimate set of UI Components to assist you with
-                            90+ impressive Vue Components.
-                        </p>
-                    </div>
-                </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-support.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Enterprise Support</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            Exceptional support service featuring response
-                            within 1 business day and option to request
-                            enhancements and new features for the library.
-                        </p>
-                    </div>
-                </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-mobile.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Mobile</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            First class support for responsive design led by
-                            touch optimized elements.
-                        </p>
-                    </div>
-                </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-theme.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Themes</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            Built on a design-agnostic api, choose from a vast
-                            amount of themes such as material, bootstrap, custom
-                            or develop your own.
-                        </p>
-                    </div>
-                </div>
-                <div
-                    class="col-span-12 md:col-span-6 xl:col-span-3 flex justify-center p-4"
-                >
-                    <div
-                        class="box p-6 w-full bg-surface-0 dark:bg-surface-900 border-surface-200 dark:border-surface-700 border rounded"
-                    >
-                        <img
-                            src="/demo/images/landing/icon-ts.svg"
-                            alt="components icon"
-                            class="block mb-4"
-                        />
-                        <span
-                            class="text-surface-900 dark:text-surface-0 block font-semibold mb-4 text-lg"
-                            >Typescript</span
-                        >
-                        <p
-                            class="m-0 text-secondary text-surface-700 dark:text-surface-100"
-                        >
-                            Top-notch support for Typescript with types and
-                            tooling assistance.
-                        </p>
-                    </div>
+                <div class="hidden lg:block flex-1 relative">
+                    <img
+                        class="w-full h-full object-cover"
+                        src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/object/public/block.images/blocks/ecommerce/storefront/storefront-page-1-14.png"
+                        alt="Fashion promotion featuring a woman in stylish pink fuzzy jacket"
+                    />
                 </div>
             </div>
         </div>

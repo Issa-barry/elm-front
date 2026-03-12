@@ -1,13 +1,32 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 
 import { authGuard } from '@/guards/auth.guard';
 import { authorizationGuard } from '@/guards/authorization.guard';
 import { guestGuard } from '@/guards/guest.guard';
 import { AppLayout } from '@/layout/components/app.layout';
-import { Landing } from '@/pages/landing/landing';
-import { Notfound } from '@/pages/notfound/notfound';
+ import { Notfound } from '@/pages/notfound/notfound';
+import { AuthService } from '@/services/auth/auth.service';
+import { Landing2 } from '@/pages/landing/landing2/landing2';
+
+const landingOrDashboardGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isAuthenticated()) {
+    return router.createUrlTree(['/dashboard-finance']);
+  }
+
+  return router.createUrlTree(['/auth/login']);
+};
 
 export const appRoutes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [landingOrDashboardGuard],
+    children: [],
+  },
   {
     path: '',
     component: AppLayout,
@@ -143,7 +162,7 @@ export const appRoutes: Routes = [
   },
   {
     path: 'landing',
-    component: Landing,
+    component: Landing2,
     data: { breadcrumb: 'landing' },
   },
   {

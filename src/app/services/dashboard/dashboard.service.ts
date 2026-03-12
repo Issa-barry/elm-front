@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UsineContextService } from '@/services/usine/usine-context.service';
 import { RequestCacheService, type RequestCacheOptions } from '@/services/request-cache.service';
+import { DashboardPeriod } from '@/services/dashboard/dashboard-period.service';
 
 export interface StatCard {
     value: number;
@@ -18,9 +19,9 @@ export interface VehiculeParType {
     count: number;
 }
 
-export type VentesParTypePeriod = 'today' | 'this_week' | 'this_month' | 'this_year' | 'last_month' | 'last_year';
+export type VentesParTypePeriod = DashboardPeriod;
 export type VenteFactureStatus = 'impayee' | 'partiel' | 'payee' | 'annulee';
-export type VentesEncaissementsPeriod = 'this_month' | 'last_month' | 'this_year' | 'this_week';
+export type VentesEncaissementsPeriod = DashboardPeriod;
 export type VentesEvolutionPeriod =
     | 'today'
     | 'yesterday'
@@ -160,12 +161,17 @@ export class DashboardService {
 
     getVentesParTypeVehicule(
         period: VentesParTypePeriod = 'this_month',
+        days?: number,
         cacheOptions: DashboardCacheOptions = {}
     ): Observable<DashboardVentesParTypeData> {
-        const params = new HttpParams().set('period', period);
+        let params = new HttpParams().set('period', period);
+        if (period === 'last_x_days' && days != null) {
+            params = params.set('days', days.toString());
+        }
         const headers = this.getSiteHeaders();
         const cacheKey = this.buildCacheKey('ventes-par-type', {
             period,
+            days: period === 'last_x_days' ? days : undefined,
             site: this.currentSiteCacheKey(),
         });
 
@@ -180,12 +186,17 @@ export class DashboardService {
 
     getVentesEncaissements(
         period: VentesEncaissementsPeriod = 'this_month',
+        days?: number,
         cacheOptions: DashboardCacheOptions = {}
     ): Observable<EncaissementStat> {
-        const params = new HttpParams().set('period', period);
+        let params = new HttpParams().set('period', period);
+        if (period === 'last_x_days' && days != null) {
+            params = params.set('days', days.toString());
+        }
         const headers = this.getSiteHeaders();
         const cacheKey = this.buildCacheKey('ventes-encaissements', {
             period,
+            days: period === 'last_x_days' ? days : undefined,
             site: this.currentSiteCacheKey(),
         });
 

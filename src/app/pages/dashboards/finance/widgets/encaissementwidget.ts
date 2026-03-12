@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, DestroyRef, effect, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonModule } from 'primeng/button';
 import { finalize } from 'rxjs';
 import {
     DashboardService,
     EncaissementStat,
-    VentesEncaissementsPeriod
 } from '@/services/dashboard/dashboard.service';
+import { DashboardPeriodService } from '@/services/dashboard/dashboard-period.service';
 import { StatCardWidget, type StatCardVariant } from './statcardwidget';
 
 interface EncaissementCard {
@@ -44,13 +45,22 @@ interface EncaissementCard {
         '[style.display]': '"contents"'
     }
 })
-export class EncaissementWidget implements OnInit, OnChanges {
+export class EncaissementWidget {
     private readonly dashboardService = inject(DashboardService);
+    private readonly periodService = inject(DashboardPeriodService);
+    private readonly destroyRef = inject(DestroyRef);
 
-    @Input() period: VentesEncaissementsPeriod = 'this_month';
     stat: EncaissementStat | null = null;
     loading = false;
     errorMessage: string | null = null;
+
+    constructor() {
+        effect(() => {
+            const period = this.periodService.period();
+            const days = this.periodService.customDays();
+            this.loadData(period, days);
+        });
+    }
 
     get cards(): EncaissementCard[] {
         return [
@@ -75,23 +85,19 @@ export class EncaissementWidget implements OnInit, OnChanges {
         ];
     }
 
-    ngOnInit(): void {
-        this.loadData();
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['period'] && !changes['period'].firstChange) {
-            this.loadData();
-        }
-    }
-
-    loadData(): void {
+    loadData(
+        period = this.periodService.period(),
+        days = this.periodService.customDays()
+    ): void {
         this.loading = true;
         this.errorMessage = null;
 
         this.dashboardService
-            .getVentesEncaissements(this.period)
-            .pipe(finalize(() => (this.loading = false)))
+            .getVentesEncaissements(period, days)
+            .pipe(
+                finalize(() => (this.loading = false)),
+                takeUntilDestroyed(this.destroyRef)
+            )
             .subscribe({
                 next: (data) => {
                     this.stat = data ?? null;

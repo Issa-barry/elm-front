@@ -1,18 +1,11 @@
 @if (isMobile()) {
     <!-- Composant mobile dédié — layout slider + modules shortcuts -->
-    <app-finance-mobile
-        [period]="encaissementPeriod"
-        (periodChange)="onEncaissementPeriodChange($event)"
-    />
+    <app-finance-mobile />
 } @else {
     <!-- Layout desktop : inchangé -->
     <div class="grid grid-cols-12 gap-8">
-        <app-header-widget2
-            class="col-span-12"
-            [period]="encaissementPeriod"
-            (periodChange)="onEncaissementPeriodChange($event)"
-        />
-        <app-encaissement-widget [period]="encaissementPeriod" />
+        <app-header-widget2 class="col-span-12" />
+        <app-encaissement-widget />
 
         <div class="col-span-12 xl:col-span-12">
             <app-bar-widget />

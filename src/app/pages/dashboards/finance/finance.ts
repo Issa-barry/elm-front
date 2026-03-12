@@ -6,7 +6,6 @@ import { EncaissementWidget } from './widgets/encaissementwidget';
 import { VehiculewWidget } from './widgets/vehiculewidget';
 import { BarWidget } from './widgets/barWidget';
 import { DoughnutWidget } from './widgets/doughnut';
-import { VentesEncaissementsPeriod } from '@/services/dashboard/dashboard.service';
 import { FinanceMobile } from './finance-mobile';
 
 @Component({
@@ -19,14 +18,6 @@ import { FinanceMobile } from './finance-mobile';
 })
 export class Finance {
   readonly isMobile = signal(this.getIsMobileViewport());
-
-  encaissementPeriod: VentesEncaissementsPeriod = 'this_month';
-
-  constructor() {}
-
-  onEncaissementPeriodChange(period: VentesEncaissementsPeriod): void {
-    this.encaissementPeriod = period;
-  }
 
   @HostListener('window:resize')
   onResize(): void {

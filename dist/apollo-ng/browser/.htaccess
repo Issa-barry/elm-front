@@ -1,19 +1,15 @@
-# Angular SPA - Toujours servir index.html pour les routes (évite page blanche au refresh sur #/auth/login etc.)
+# Angular SPA — LiteSpeed/Apache compatible
+Options +FollowSymLinks -MultiViews
+
 RewriteEngine On
 RewriteBase /
 
-# Priorité à index.html pour la racine et les dossiers (Hostinger)
 DirectoryIndex index.html
 
-# Si le fichier existe (JS, CSS, images...), le servir directement
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ - [L]
-
-# Si c'est un dossier réel (ex. /demo/), le servir
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# Tout le reste (/, /auth/login, etc.) → index.html pour que le hash soit géré par Angular
+# Servir les fichiers et dossiers existants directement (JS, CSS, images…)
+# Réécrire vers index.html UNIQUEMENT si ce n'est pas un fichier/dossier réel
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [L]
 
 # ===========================================
@@ -56,5 +52,7 @@ RewriteRule ^ index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
+    AddType application/javascript .js .mjs
+    AddType text/css .css
     AddType application/manifest+json .webmanifest
 </IfModule>

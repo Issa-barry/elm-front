@@ -97,7 +97,7 @@ export class PackingListe implements OnInit {
   searchQuery = signal<string>('');
   selectedStatut = signal<PackingStatut | 'all'>('all');
   filterDateRange: Date[] | null = null;
-  selectedQuickDateFilter: QuickDateFilter = 'none';
+  selectedQuickDateFilter: QuickDateFilter = 'this_week';
   lastNDaysValue: number | null = null;
   loading = false;
   get canCreate(): boolean { return this.authService.hasPermission('packings.create'); }
@@ -266,7 +266,7 @@ export class PackingListe implements OnInit {
 
   ngOnInit(): void {
     this.readyForUsineReload = true;
-    this.load();
+    this.onQuickDateFilterChange('this_week');
     this.mobileFilterMenuItems = [
       { label: 'Tous', icon: 'pi pi-list', command: () => this.setStatutFilter('all') },
       { label: 'Impayee', icon: 'pi pi-times-circle', command: () => this.setStatutFilter('impayee') },
