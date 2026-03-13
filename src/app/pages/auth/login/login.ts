@@ -10,7 +10,8 @@ import { SelectModule } from 'primeng/select';
 import { LayoutService } from '@/layout/service/layout.service';
 import { AppConfigurator } from '@/layout/components/app.configurator';
 import { AuthService } from '@/services/auth/auth.service';
-import { COUNTRIES } from '@/models/country.model';
+import { COUNTRIES, type Country } from '@/models/country.model';
+import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
@@ -35,6 +36,7 @@ interface BeforeInstallPromptEvent extends Event {
   styleUrl: './login.scss',
 })
 export class Login implements OnInit, OnDestroy {
+    private static readonly SELECTED_COUNTRY_STORAGE_KEY = 'elm.auth.selectedCountryCode';
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private router = inject(Router);
@@ -72,7 +74,7 @@ export class Login implements OnInit, OnDestroy {
     };
 
     // Code pays
-    selectedCountry = COUNTRIES[0]; // Guinée par défaut
+    selectedCountry = this.getPersistedCountry() ?? COUNTRIES[0];
     countries = COUNTRIES;
 
     // Formulaire réactif
@@ -192,30 +194,36 @@ export class Login implements OnInit, OnDestroy {
      * Soumettre le formulaire de connexion
      */
     onSubmit(): void {
-        // Réinitialiser les erreurs
+        // Reinitialiser les erreurs
         this.errorMessage.set(null);
         this.fieldErrors.set({});
 
-        // Vérifier la validité du formulaire
+        // Verifier la validite du formulaire
         if (this.loginForm.invalid) {
             this.loginForm.markAllAsTouched();
             return;
         }
 
-        // Démarrer le chargement
+        // Valider la correspondance pays / numero puis normaliser au format international
+        const rawPhone: string = this.loginForm.value.phone ?? '';
+        const internationalPhone = this.resolveInternationalPhoneFromInput(rawPhone);
+        if (!internationalPhone) {
+            return;
+        }
+
+        // Demarrer le chargement
         this.isLoading.set(true);
 
-        // Construire les credentials avec le code pays + téléphone
         const credentials = {
             ...this.loginForm.value,
-            phone: this.selectedCountry.dialCode + this.loginForm.value.phone
+            phone: internationalPhone
         };
 
         // Appeler le service d'authentification
         this.authService.login(credentials).subscribe({
             next: (response) => {
                 this.isLoading.set(false);
-                
+
                 // Rediriger vers le dashboard ou l'URL de retour
                 const returnUrl = this.router.routerState.snapshot.root.queryParams['returnUrl'] || '/';
                 this.router.navigate([returnUrl]);
@@ -223,11 +231,11 @@ export class Login implements OnInit, OnDestroy {
             error: (error) => {
                 this.isLoading.set(false);
 
-                // Gérer les erreurs de validation (422)
+                // Gerer les erreurs de validation (422)
                 if (error.status === 422 && error.error?.errors) {
                     this.fieldErrors.set(error.error.errors);
-                } 
-                // Gérer les autres erreurs
+                }
+                // Gerer les autres erreurs
                 else if (error.error?.message) {
                     this.errorMessage.set(error.error.message);
                 } else {
@@ -237,8 +245,36 @@ export class Login implements OnInit, OnDestroy {
         });
     }
 
+    onCountryChange(): void {
+        this.persistSelectedCountry();
+
+        const rawPhone: string = this.loginForm.value.phone ?? '';
+        if (!rawPhone.trim()) {
+            this.setFieldError('phone', null);
+            return;
+        }
+
+        this.resolveInternationalPhoneFromInput(rawPhone);
+    }
+
+    onPhoneInput(): void {
+        if (this.hasFieldError('phone')) {
+            this.setFieldError('phone', null);
+        }
+    }
+
+    onPhoneBlur(): void {
+        const rawPhone: string = this.loginForm.value.phone ?? '';
+        if (!rawPhone.trim()) {
+            this.setFieldError('phone', null);
+            return;
+        }
+
+        this.resolveInternationalPhoneFromInput(rawPhone);
+    }
+
     /**
-     * Obtenir l'erreur d'un champ spécifique
+     * Obtenir l'erreur d'un champ specifique
      */
     getFieldError(fieldName: string): string | null {
         const errors = this.fieldErrors();
@@ -259,4 +295,131 @@ export class Login implements OnInit, OnDestroy {
         const field = this.loginForm.get(fieldName);
         return !!(field && field.invalid && (field.dirty || field.touched));
     }
+
+    private resolveInternationalPhoneFromInput(rawPhone: string): string | null {
+        const selectedDialCode = this.selectedCountry.dialCode;
+        const selectedCountryName = this.selectedCountry.name;
+        const selectedDialDigits = selectedDialCode.replace('+', '');
+
+        let sanitized = rawPhone.trim().replace(/[^\d+]/g, '');
+        if (sanitized.startsWith('00')) {
+            sanitized = `+${sanitized.slice(2)}`;
+        }
+
+        if (!sanitized) {
+            this.setFieldError('phone', 'Le numero de telephone est obligatoire');
+            return null;
+        }
+
+        if (sanitized.startsWith('+')) {
+            if (!sanitized.startsWith(selectedDialCode)) {
+                const detectedCountry = this.findCountryByInternationalPrefix(sanitized);
+
+                if (detectedCountry && detectedCountry.code !== this.selectedCountry.code) {
+                    this.selectedCountry = detectedCountry;
+                    this.persistSelectedCountry();
+                    return this.resolveInternationalPhoneFromInput(sanitized);
+                }
+
+                const mismatchMessage = detectedCountry
+                    ? `Le numero commence par ${detectedCountry.dialCode} (${detectedCountry.name}) mais le pays selectionne est ${selectedCountryName} (${selectedDialCode}).`
+                    : `Le numero doit commencer par ${selectedDialCode} pour ${selectedCountryName}.`;
+
+                this.setFieldError('phone', mismatchMessage);
+                return null;
+            }
+
+            if (!this.isPhoneValidForSelectedCountry(sanitized)) {
+                this.setFieldError('phone', `Numero invalide pour ${selectedCountryName}.`);
+                return null;
+            }
+
+            this.setFieldError('phone', null);
+            return sanitized;
+        }
+
+        const localDigits = sanitized.replace(/\D/g, '');
+        const normalizedLocalDigits = localDigits.startsWith('0') ? localDigits.slice(1) : localDigits;
+
+        if (!normalizedLocalDigits) {
+            this.setFieldError('phone', 'Le numero de telephone est obligatoire');
+            return null;
+        }
+
+        const detectedWithoutPlus = this.findCountryFromLocalPrefix(normalizedLocalDigits);
+        if (detectedWithoutPlus) {
+            this.selectedCountry = detectedWithoutPlus;
+            this.persistSelectedCountry();
+            return this.resolveInternationalPhoneFromInput(`+${normalizedLocalDigits}`);
+        }
+
+        const internationalPhone = normalizedLocalDigits.startsWith(selectedDialDigits)
+            ? `+${normalizedLocalDigits}`
+            : `${selectedDialCode}${normalizedLocalDigits}`;
+
+        if (!this.isPhoneValidForSelectedCountry(internationalPhone)) {
+            this.setFieldError('phone', `Numero invalide pour ${selectedCountryName}.`);
+            return null;
+        }
+
+        this.setFieldError('phone', null);
+        return internationalPhone;
+    }
+
+    private isPhoneValidForSelectedCountry(internationalPhone: string): boolean {
+        try {
+            return isValidPhoneNumber(internationalPhone, this.selectedCountry.code as CountryCode);
+        } catch {
+            return false;
+        }
+    }
+
+    private findCountryFromLocalPrefix(localDigits: string): Country | undefined {
+        return this.countries.find((country) => {
+            if (country.code === this.selectedCountry.code) {
+                return false;
+            }
+            const dialDigits = country.dialCode.replace('+', '');
+            return localDigits.startsWith(dialDigits);
+        });
+    }
+
+    private findCountryByInternationalPrefix(internationalPhone: string): Country | undefined {
+        const sortedCountries = [...this.countries].sort(
+            (left, right) => right.dialCode.length - left.dialCode.length
+        );
+        return sortedCountries.find((country) => internationalPhone.startsWith(country.dialCode));
+    }
+
+    private getPersistedCountry(): Country | null {
+        if (!this.isBrowser) {
+            return null;
+        }
+
+        const persistedCode = window.localStorage.getItem(Login.SELECTED_COUNTRY_STORAGE_KEY);
+        if (!persistedCode) {
+            return null;
+        }
+
+        return COUNTRIES.find((country) => country.code === persistedCode) ?? null;
+    }
+
+    private persistSelectedCountry(): void {
+        if (!this.isBrowser || !this.selectedCountry?.code) {
+            return;
+        }
+
+        window.localStorage.setItem(Login.SELECTED_COUNTRY_STORAGE_KEY, this.selectedCountry.code);
+    }
+
+    private setFieldError(fieldName: string, message: string | null): void {
+        const nextErrors = { ...this.fieldErrors() };
+        if (!message) {
+            delete nextErrors[fieldName];
+        } else {
+            nextErrors[fieldName] = [message];
+        }
+        this.fieldErrors.set(nextErrors);
+    }
 }
+

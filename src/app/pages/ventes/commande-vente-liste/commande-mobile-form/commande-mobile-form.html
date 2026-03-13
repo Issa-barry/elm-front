@@ -86,7 +86,7 @@
                 @if (getPrixUsine(i) > 0) {
                   <div class="cmf-prix-usine">
                     <i class="pi pi-tag text-xs"></i>
-                    Prix usine : <strong>{{ formatMontant(getPrixUsine(i)) }}</strong>
+                    Prix usine : <strong>{{ getPrixUsine(i) | money }}</strong>
                   </div>
                 }
 
@@ -121,7 +121,7 @@
                 <!-- Total ligne + Supprimer -->
                 <div class="cmf-ligne-footer">
                   @if (getTotalLigne(i) > 0) {
-                    <span class="cmf-ligne-total">{{ formatMontant(getTotalLigne(i)) }}</span>
+                    <span class="cmf-ligne-total">{{ getTotalLigne(i) | money }}</span>
                   } @else {
                     <span class="cmf-ligne-total cmf-ligne-total--empty">—</span>
                   }
@@ -148,7 +148,7 @@
     <div class="cmf-footer">
       <div class="cmf-total-row">
         <span class="cmf-total-label">Total commande</span>
-        <span class="cmf-total-value">{{ formatMontant(totalDialog) }}</span>
+        <span class="cmf-total-value">{{ totalDialog | money }}</span>
       </div>
       <p-button
         [label]="editMode ? 'Enregistrer les modifications' : 'Créer la commande'"

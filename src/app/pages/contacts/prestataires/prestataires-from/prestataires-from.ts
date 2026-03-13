@@ -131,7 +131,7 @@ export class PrestatairesFrom implements OnInit, OnChanges {
   }
 
   private toInternationalPhone(localDigits: string): string {
-    return `${this.getSelectedCountryDialCode()}${localDigits}`;
+    return `${this.getSelectedCountryDialCode()}${localDigits.replace(/^0/, '')}`;
   }
 
   // Phone input is local-only digits (without dial code shown in country selector)

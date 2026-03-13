@@ -68,23 +68,23 @@ import { RouterModule } from '@angular/router';
                         </h4>
                         <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >About Us</a
+                            >A propos de nous</a
                         >
                         <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
                             >News</a
                         >
-                        <a
+                            <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >Investor Relations</a
+                            >Facebook</a
                         >
-                        <a
+                             <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >Careers</a
+                            >Linkedin</a
                         >
-                        <a
-                            class="leading-normal block cursor-pointer text-surface-700 dark:text-surface-100"
-                            >Media Kit</a
+                          <a
+                            class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
+                            >TikTok</a
                         >
                     </div>
 
@@ -96,40 +96,32 @@ import { RouterModule } from '@angular/router';
                         </h4>
                         <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >Get Started</a
+                            >Livreurs</a
                         >
                         <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >Learn</a
+                            >Machinistes</a
                         >
-                        <a
-                            class="leading-normal block cursor-pointer text-surface-700 dark:text-surface-100"
-                            >Case Studies</a
-                        >
+                      
+                        
                     </div>
 
                     <div class="col-span-12 md:col-span-3 mt-6 md:mt-0">
                         <h4
                             class="font-medium text-xl leading-normal mb-4 text-surface-900 dark:text-surface-0"
                         >
-                            Community
+                            Produits
                         </h4>
+                        
                         <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >Discord</a
-                        >
-                        <a
-                            class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >Events</a
+                            >Sachet d'eaux</a
                         >
                         <a
                             class="leading-normal block cursor-pointer mb-2 text-surface-700 dark:text-surface-100"
-                            >FAQ</a
+                            >Eau en bouteille</a
                         >
-                        <a
-                            class="leading-normal block cursor-pointer text-surface-700 dark:text-surface-100"
-                            >Blog</a
-                        >
+                        
                     </div>
 
                     <div class="col-span-12 md:col-span-3 mt-6 md:mt-0">

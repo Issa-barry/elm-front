@@ -116,12 +116,21 @@ export interface UpdatePrixLocalDto {
   tva?: number | null;
 }
 
+// ── Types scan ───────────────────────────────────────────────────────────────
+
+export type ScanMode = 'auto' | 'interne' | 'fournisseur';
+
 // ── Classe Produit ────────────────────────────────────────────────────────────
 
 export class Produit {
   id: number = 0;
   nom: string = '';
+  /** Code legacy — conserver pour compat. Préférer code_interne. */
   code: string = '';
+  /** Code-barres interne Code128 (unique). Auto-généré si absent à la création. */
+  code_interne: string = '';
+  /** Code-barres fournisseur (optionnel, indexé, peut être partagé). */
+  code_fournisseur: string | null = null;
 
   // Prix globaux de référence
   prix_usine: number | null = null;
@@ -213,6 +222,9 @@ export class Produit {
       is_out_of_stock: data?.is_out_of_stock ?? false,
       stock_courant:         data?.stock_courant         ?? null,
       produit_usine_courant: data?.produit_usine_courant ?? null,
+      // code_interne : fallback sur code legacy pour compat
+      code_interne:    data?.code_interne    ?? data?.code ?? '',
+      code_fournisseur: data?.code_fournisseur ?? null,
       // qte_stock : priorité stock_courant, sinon champ racine (compat ancienne API)
       qte_stock: data?.stock_courant?.qte_stock != null
         ? Number(data.stock_courant.qte_stock)
@@ -237,6 +249,10 @@ export interface CreateProduitDto {
   qte_stock?: number;
 
   code?: string;
+  /** Code-barres interne Code128 (auto-généré si absent). */
+  code_interne?: string;
+  /** Code-barres fournisseur (optionnel). */
+  code_fournisseur?: string | null;
   /** Non envoyé à la création — le backend impose toujours 'brouillon'. Utilisé en édition via PUT. */
   statut?: ProduitStatut;
   cout?: number;

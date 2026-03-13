@@ -29,6 +29,29 @@
   }
 
   <div class="edit-content">
+    @if (!usineContext.isConsolidated()) {
+      <div class="mb-4">
+        <label for="new-user-organisation" class="block text-sm font-medium text-gray-700 mb-2">
+          Agence <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          id="new-user-organisation"
+          name="new-user-organisation"
+          [(ngModel)]="selectedOrganisationId"
+          [options]="organisationOptions"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [disabled]="organisationSelectionDisabled"
+          placeholder="Selectionner une agence"
+          styleClass="w-full"
+        ></p-select>
+        <small class="text-red-500 block mt-2" *ngIf="organisationOptions.length === 0">
+          Aucune agence disponible.
+        </small>
+      </div>
+    }
+
     <app-utilisateurs-form
       [mode]="'create'"
       [loading]="loading"

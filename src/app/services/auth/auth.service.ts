@@ -8,6 +8,7 @@ import { User } from '@/models/user.model';
 import { ApiResponse, AuthResponse, ChangePasswordRequest, LoginRequest, RegisterRequest, UpdateProfileRequest } from '@/models/auth.model';
 import { MeResponse } from '@/models/usine.model';
 import { UsineContextService } from '@/services/usine/usine-context.service';
+import { RequestCacheService } from '@/services/request-cache.service';
  
 @Injectable({
   providedIn: 'root'
@@ -16,10 +17,13 @@ export class AuthService {
   private http         = inject(HttpClient);
   private router       = inject(Router);
   private usineContext = inject(UsineContextService);
+  private requestCache = inject(RequestCacheService);
 
   private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'access_token';
   private readonly USER_KEY = 'user';
+  private readonly meCacheKey = 'auth:me';
+  private readonly meCacheTtlMs = 60_000;
 
   // Signals pour gérer l'état
   currentUser = signal<User | null>(this.getUserFromStorage());
@@ -115,21 +119,27 @@ export class AuthService {
    * La réponse /auth/me retourne un MeResponse enrichi (usines, rôles, permissions).
    * On hydrate le store usine après chaque appel réussi.
    */
-  me(): Observable<ApiResponse<MeResponse>> {
-    return this.http.get<ApiResponse<MeResponse>>(`${this.API_URL}/me`).pipe(
-      tap(response => {
-        if (response.success && response.data) {
-          // Extraire et persister le User (conserve la logique existante)
-          const user = this.extractUserFromPayload(response.data);
-          if (user) {
-            this.setUser(user);
+  me(forceRefresh = false): Observable<ApiResponse<MeResponse>> {
+    return this.requestCache
+      .query(
+        this.meCacheKey,
+        () => this.http.get<ApiResponse<MeResponse>>(`${this.API_URL}/me`),
+        { ttlMs: this.meCacheTtlMs, forceRefresh }
+      )
+      .pipe(
+        tap(response => {
+          if (response.success && response.data) {
+            // Extraire et persister le User (conserve la logique existante)
+            const user = this.extractUserFromPayload(response.data);
+            if (user) {
+              this.setUser(user);
+            }
+            // Hydrater le contexte usine avec les donnees multi-usine
+            this.usineContext.hydrateFromMe(response.data);
           }
-          // Hydrater le contexte usine avec les données multi-usine
-          this.usineContext.hydrateFromMe(response.data);
-        }
-      }),
-      catchError(error => this.handleError(error))
-    );
+        }),
+        catchError(error => this.handleError(error))
+      );
   }
 
   /**
@@ -140,6 +150,7 @@ export class AuthService {
       tap(response => {
         if (response.success && response.data) {
           this.setUser(response.data);
+          this.requestCache.invalidate(this.meCacheKey);
         }
       }),
       catchError(error => this.handleError(error))
@@ -193,6 +204,7 @@ export class AuthService {
     this.setToken(data.access_token);
     const user = this.extractUserFromPayload(data) ?? data.user;
     this.setUser(user);
+    this.requestCache.invalidate(this.meCacheKey);
     this.refreshCurrentUserProfile();
   }
 
@@ -245,7 +257,7 @@ export class AuthService {
   }
 
   private refreshCurrentUserProfile(): void {
-    this.me().subscribe({
+    this.me(true).subscribe({
       next: () => {},
       error: () => {},
     });
@@ -367,6 +379,7 @@ export class AuthService {
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
     this.currentUserSubject.next(null);
+    this.requestCache.clear();
     this.usineContext.clear();
   }
 
@@ -445,3 +458,4 @@ export class AuthService {
     return value.trim().toLowerCase();
   }
 }
+

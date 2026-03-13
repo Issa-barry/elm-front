@@ -22,6 +22,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import {
   CommissionVente,
   VersementCommission,
@@ -75,6 +76,7 @@ export function validateVersementMontant(
     DatePickerModule,
     InputNumberModule,
     SelectModule,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './commission-detail-dialog.html',

@@ -13,6 +13,7 @@ import { BillingEvent, BillingEventStatus, BillingEventsFilter } from '@/models/
 import { Organisation } from '@/models/organisation.model';
 import { BillingService } from '@/services/billing/billing.service';
 import { OrganisationService } from '@/services/organisations/organisation.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 const BILLING_STATUS: Record<BillingEventStatus, { label: string; severity: 'warn' | 'info' | 'success' | 'danger' | 'secondary' }> = {
   pending:   { label: 'En attente', severity: 'warn' },
@@ -36,6 +37,7 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
     SelectModule,
     TagModule,
     TooltipModule,
+    MoneyPipe,
   ],
   templateUrl: './billing-events.html',
 })
@@ -151,12 +153,6 @@ export class BillingEvents implements OnInit {
       'bg-yellow-100 text-yellow-700': slug === 'premium',
       'bg-gray-100 text-gray-600':     !slug || !['starter', 'standard', 'premium'].includes(slug),
     };
-  }
-
-  formatGNF(value: string | number): string {
-    const n = typeof value === 'string' ? parseFloat(value) : value;
-    if (isNaN(n)) return String(value);
-    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n) + ' GNF';
   }
 
   formatDate(dateStr: string): string {

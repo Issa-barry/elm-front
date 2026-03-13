@@ -12,6 +12,7 @@ import {
   ProduitStatistics,
   ProduitStatut,
   ProduitType,
+  ScanMode,
   UpdateStockDto,
   UpdateStockResponse,
   UsineAffectation,
@@ -113,6 +114,20 @@ export class ProduitService {
     return this.http.get<ApiResponse<ProduitStatistics>>(`${this.apiUrl}/statistics`).pipe(
       map(response => response.data)
     );
+  }
+
+  /**
+   * GET /produits/by-code/{code}?mode=auto|interne|fournisseur
+   *
+   * Lookup exact Code128 pour le scan POS.
+   * Les erreurs HTTP sont propagées brutes (HttpErrorResponse) :
+   *   404 → introuvable, 409 → ambigu (code_fournisseur partagé), 422 → format invalide.
+   */
+  getByCode(code: string, mode: ScanMode = 'auto'): Observable<Produit> {
+    const params = new HttpParams().set('mode', mode);
+    return this.http
+      .get<ApiResponse<any>>(`${this.apiUrl}/by-code/${encodeURIComponent(code)}`, { params })
+      .pipe(map(response => Produit.fromApi(response.data)));
   }
 
   /**

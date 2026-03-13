@@ -106,7 +106,7 @@
         <!-- Montant total -->
         <div class="w-full p-4 bg-surface-50 dark:bg-surface-800 rounded-xl flex items-center justify-between">
             <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Montant total</span>
-            <span class="text-lg font-bold leading-tight" style="color: var(--p-primary-600)">{{ formatCurrency(packing.montant || 0) }}</span>
+            <span class="text-lg font-bold leading-tight" style="color: var(--p-primary-600)">{{ (packing.montant || 0) | money }}</span>
         </div>
     </div>
 

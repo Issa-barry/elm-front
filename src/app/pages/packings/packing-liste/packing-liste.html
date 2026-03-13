@@ -16,8 +16,8 @@
       <div class="flex flex-col gap-1 p-3 bg-surface-50 dark:bg-surface-800 rounded-lg text-sm">
         <div class="font-semibold">{{ selectedPacking.reference }}</div>
         <div class="text-surface-500">
-          Montant : {{ formatCurrency(selectedPacking.montant) }} &mdash;
-          Restant : <span class="text-orange-500 font-medium">{{ formatCurrency(selectedPacking.montant_restant) }}</span>
+          Montant : {{ selectedPacking.montant | money }} &mdash;
+          Restant : <span class="text-orange-500 font-medium">{{ selectedPacking.montant_restant | money }}</span>
         </div>
       </div>
 
@@ -120,15 +120,15 @@
       <div class="grid grid-cols-3 gap-3 text-sm">
         <div class="flex flex-col gap-0.5 p-3 bg-surface-50 dark:bg-surface-800 rounded-lg">
           <span class="text-surface-500 text-xs">Montant</span>
-          <span class="font-semibold">{{ formatCurrency(historiqueData.packing.montant) }}</span>
+          <span class="font-semibold">{{ historiqueData.packing.montant | money }}</span>
         </div>
         <div class="flex flex-col gap-0.5 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
           <span class="text-surface-500 text-xs">Verse</span>
-          <span class="font-semibold text-green-600">{{ formatCurrency(historiqueData.packing.montant_verse) }}</span>
+          <span class="font-semibold text-green-600">{{ historiqueData.packing.montant_verse | money }}</span>
         </div>
         <div class="flex flex-col gap-0.5 p-3 rounded-lg" [class.bg-orange-50]="historiqueData.packing.montant_restant > 0" [class.bg-surface-50]="historiqueData.packing.montant_restant === 0">
           <span class="text-surface-500 text-xs">Restant</span>
-          <span class="font-semibold" [class.text-orange-500]="historiqueData.packing.montant_restant > 0">{{ formatCurrency(historiqueData.packing.montant_restant) }}</span>
+          <span class="font-semibold" [class.text-orange-500]="historiqueData.packing.montant_restant > 0">{{ historiqueData.packing.montant_restant | money }}</span>
         </div>
       </div>
 
@@ -149,7 +149,7 @@
           <ng-template #body let-v>
             <tr>
               <td class="text-sm">{{ formatDateDisplay(v.date_versement) }}</td>
-              <td class="text-sm font-medium">{{ formatCurrency(v.montant) }}</td>
+              <td class="text-sm font-medium">{{ v.montant | money }}</td>
               <td class="text-sm text-surface-500">{{ getModeLabel(v.mode_paiement) }}</td>
               <td class="text-sm text-surface-500">{{ v.creator?.nom_complet || '-' }}</td>
               <td class="text-sm text-surface-500">{{ formatDateTime(v.created_at) }}</td>
@@ -250,8 +250,8 @@
               styleClass="mobile-status-tag app-table-status"
             />
             <span class="mobile-card-amounts">
-              {{ p.nb_rouleaux }} rouleau{{ p.nb_rouleaux !== 1 ? 'x' : '' }} &middot; {{ formatCurrency(p.montant) }}
-              <span *ngIf="p.montant_restant > 0"> &middot; Reste : {{ formatCurrency(p.montant_restant) }}</span>
+              {{ p.nb_rouleaux }} rouleau{{ p.nb_rouleaux !== 1 ? 'x' : '' }} &middot; {{ p.montant | money }}
+              <span *ngIf="p.montant_restant > 0"> &middot; Reste : {{ p.montant_restant | money }}</span>
             </span>
           </div>
         </div>
@@ -491,9 +491,9 @@
         </td>
         <td class="text-sm">{{ formatDateDisplay(p.date) }}</td>
         <td class="text-sm font-medium">{{ p.nb_rouleaux }}</td>
-        <td class="text-sm font-medium">{{ formatCurrency(p.montant) }}</td>
-        <td class="text-sm font-medium">{{ formatCurrency(p.montant_verse) }}</td>
-        <td class="text-sm font-medium">{{ formatCurrency(p.montant_restant) }}</td>
+        <td class="text-sm font-medium">{{ p.montant | money }}</td>
+        <td class="text-sm font-medium">{{ p.montant_verse | money }}</td>
+        <td class="text-sm font-medium">{{ p.montant_restant | money }}</td>
         <td>
           <p-tag [value]="getStatutLabel(p.statut)" [severity]="getStatutSeverity(p.statut)" styleClass="app-table-status" />
         </td>

@@ -4,6 +4,7 @@ import { FormArray, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { MoneyPipe } from '@/pipes/money.pipe';
 
 export interface ProduitDataMobile {
   prixUsine: number;
@@ -14,7 +15,7 @@ export interface ProduitDataMobile {
 @Component({
   selector: 'app-commande-mobile-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, SelectModule, InputNumberModule],
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule, SelectModule, InputNumberModule, MoneyPipe],
   templateUrl: './commande-mobile-form.html',
   styleUrls: ['./commande-mobile-form.scss'],
 })
@@ -65,9 +66,4 @@ export class CommandeMobileForm {
     return !!c && c.invalid && (c.dirty || c.touched);
   }
 
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
-  }
 }

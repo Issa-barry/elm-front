@@ -26,7 +26,7 @@ export const PERIOD_LABELS: Record<DashboardPeriod, string> = {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardPeriodService {
-  readonly period     = signal<DashboardPeriod>('this_month');
+  readonly period     = signal<DashboardPeriod>('today');
   readonly customDays = signal<number>(30);
 
   readonly currentLabel = computed(() => {

@@ -20,6 +20,12 @@
   height: 2rem;
 }
 
+/* Keep table loading shadow, but keep caption actions usable/visible. */
+:host ::ng-deep .packing-desktop .p-datatable-header {
+  position: relative;
+  z-index: 3;
+}
+
 .packing-mobile-app {
   display: none;
 }

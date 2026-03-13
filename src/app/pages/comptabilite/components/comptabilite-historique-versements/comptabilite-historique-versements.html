@@ -17,16 +17,16 @@
             <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col gap-4">
                 <div class="w-full flex justify-between items-center">
                     <span class="text-surface-500 dark:text-surface-400 text-base">Total packing</span>
-                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium">{{ formatCurrency(data.packing.montant) }}</span>
+                    <span class="text-surface-900 dark:text-surface-0 text-base font-medium">{{ data.packing.montant | money }}</span>
                 </div>
                 <div class="w-full flex justify-between items-center">
                     <span class="text-surface-500 dark:text-surface-400 text-base">Deja verse</span>
-                    <span class="text-base font-semibold" style="color: #059669">{{ formatCurrency(data.packing.montant_verse) }}</span>
+                    <span class="text-base font-semibold" style="color: #059669">{{ data.packing.montant_verse | money }}</span>
                 </div>
                 <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
                 <div class="w-full flex justify-between items-center">
                     <span class="text-surface-900 dark:text-surface-0 text-base font-semibold">Reste a payer</span>
-                    <span class="text-lg font-bold" style="color: #d97706">{{ formatCurrency(data.packing.montant_restant) }}</span>
+                    <span class="text-lg font-bold" style="color: #d97706">{{ data.packing.montant_restant | money }}</span>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
             >
                 <div class="flex justify-between items-center">
                     <span class="text-surface-900 dark:text-surface-0 text-base font-bold" style="color: #059669">
-                        {{ formatCurrency(versement.montant) }}
+                        {{ versement.montant | money }}
                     </span>
                     <span class="versement-mode-badge text-xs font-semibold px-2 py-1 rounded-full">
                         {{ versement.mode_paiement_label }}

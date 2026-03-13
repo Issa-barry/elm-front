@@ -61,15 +61,15 @@
             <div class="fv-facture-card__amounts">
               <div class="fv-amount-item">
                 <span class="fv-amount-label">Brut</span>
-                <span class="fv-amount-value">{{ formatMontant(f.montant_brut) }}</span>
+                <span class="fv-amount-value">{{ f.montant_brut | money }}</span>
               </div>
               <div class="fv-amount-item">
                 <span class="fv-amount-label">Encaissé</span>
-                <span class="fv-amount-value fv-amount-value--success">{{ formatMontant(f.montant_encaisse) }}</span>
+                <span class="fv-amount-value fv-amount-value--success">{{ f.montant_encaisse | money }}</span>
               </div>
               <div class="fv-amount-item">
                 <span class="fv-amount-label">Restant</span>
-                <span class="fv-amount-value fv-amount-value--danger">{{ formatMontant(f.montant_restant) }}</span>
+                <span class="fv-amount-value fv-amount-value--danger">{{ f.montant_restant | money }}</span>
               </div>
             </div>
 
@@ -212,12 +212,12 @@
                 <span class="text-surface-300 text-sm">-</span>
               }
             </td>
-            <td class="font-semibold">{{ formatMontant(f.montant_brut) }}</td>
+            <td class="font-semibold">{{ f.montant_brut | money }}</td>
             <td>
-              <span class="text-sm text-green-600 dark:text-green-400 font-medium">{{ formatMontant(f.montant_encaisse) }}</span>
+              <span class="text-sm text-green-600 dark:text-green-400 font-medium">{{ f.montant_encaisse | money }}</span>
             </td>
             <td>
-              <span class="text-sm text-red-500 dark:text-red-400 font-medium">{{ formatMontant(f.montant_restant) }}</span>
+              <span class="text-sm text-red-500 dark:text-red-400 font-medium">{{ f.montant_restant | money }}</span>
             </td>
             <td>
               <p-tag
@@ -303,7 +303,7 @@
         @if (selectedFacture) {
           <div class="fv-enc-preview">
             <span>Restant à payer</span>
-            <span class="font-bold text-red-500">{{ formatMontant(selectedFacture.montant_restant) }}</span>
+            <span class="font-bold text-red-500">{{ selectedFacture.montant_restant | money }}</span>
           </div>
         }
 

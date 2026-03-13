@@ -21,6 +21,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import {
   FactureVente,
   STATUT_FACTURE_LABELS,
@@ -52,6 +53,7 @@ import {
     IconFieldModule,
     DialogModule,
     DatePickerModule,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './facture-livraison-liste.html',
@@ -192,12 +194,6 @@ export class FactureLivraisonListe implements OnInit {
     if (!d) return '';
     const date = typeof d === 'string' ? new Date(d) : d;
     return date.toISOString().split('T')[0];
-  }
-
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   private showApiError(err: any, action: string) {

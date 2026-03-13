@@ -2,10 +2,7 @@
 
     <!-- En-tête : avatar + nom + sélecteur de période -->
     <div class="fm-header">
-        <app-header-widget2
-            [period]="period"
-            (periodChange)="onPeriodChange($event)"
-        />
+        <app-header-widget2 />
     </div>
 
     <!-- Slider horizontal scroll-snap : un slide = un écran de carte -->
@@ -26,7 +23,7 @@
                         <p-skeleton width="10rem" height="2rem" borderRadius="6px" />
                     } @else {
                         <div class="fm-stat-card__value">
-                            {{ (stat()?.total_factures ?? 0) | number:'1.0-0' }} GNF
+                            {{ (stat()?.total_factures ?? 0) | money }}
                         </div>
                     }
                     <div class="fm-stat-card__sub">
@@ -45,7 +42,7 @@
                         <p-skeleton width="10rem" height="2rem" borderRadius="6px" />
                     } @else {
                         <div class="fm-stat-card__value fm-stat-card__value--primary">
-                            {{ (stat()?.factures_payees ?? 0) | number:'1.0-0' }} GNF
+                            {{ (stat()?.factures_payees ?? 0) | money }}
                         </div>
                     }
                     <div class="fm-stat-card__sub">
@@ -64,7 +61,7 @@
                         <p-skeleton width="10rem" height="2rem" borderRadius="6px" />
                     } @else {
                         <div class="fm-stat-card__value fm-stat-card__value--primary">
-                            {{ (stat()?.reste_a_encaisser ?? 0) | number:'1.0-0' }} GNF
+                            {{ (stat()?.reste_a_encaisser ?? 0) | money }}
                         </div>
                     }
                     <div class="fm-stat-card__sub">

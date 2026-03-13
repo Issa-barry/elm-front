@@ -54,18 +54,18 @@
         <section class="cd-kpi-grid">
           <article class="cd-kpi cd-kpi--primary">
             <span class="cd-kpi-label">Commission totale</span>
-            <span class="cd-kpi-value">{{ formatMontant(c.montant_commission_total) }}</span>
+            <span class="cd-kpi-value">{{ c.montant_commission_total | money }}</span>
           </article>
 
           <article class="cd-kpi">
             <span class="cd-kpi-label">Part livreur ({{ c.taux_livreur_snapshot }}%)</span>
-            <span class="cd-kpi-value">{{ formatMontant(c.part_livreur) }}</span>
+            <span class="cd-kpi-value">{{ c.part_livreur | money }}</span>
           </article>
 
           @if (parseFloat(c.part_proprietaire) > 0) {
             <article class="cd-kpi">
               <span class="cd-kpi-label">Part proprietaire ({{ 100 - parseFloat(c.taux_livreur_snapshot) }}%)</span>
-              <span class="cd-kpi-value">{{ formatMontant(c.part_proprietaire) }}</span>
+              <span class="cd-kpi-value">{{ c.part_proprietaire | money }}</span>
             </article>
           }
         </section>
@@ -101,12 +101,12 @@
                     </div>
 
                     <div class="cd-versement-meta">
-                      <span>Attendu: <strong>{{ formatMontant(v.montant_attendu) }}</strong></span>
+                      <span>Attendu: <strong>{{ v.montant_attendu | money }}</strong></span>
                       @if (v.montant_verse && parseFloat(v.montant_verse) > 0) {
-                        <span>Verse: <strong>{{ formatMontant(v.montant_verse) }}</strong></span>
+                        <span>Verse: <strong>{{ v.montant_verse | money }}</strong></span>
                       }
                       @if (getMontantRestant(v) > 0) {
-                        <span class="cd-restant">Restant: <strong>{{ formatMontant(getMontantRestant(v)) }}</strong></span>
+                        <span class="cd-restant">Restant: <strong>{{ getMontantRestant(v) | money }}</strong></span>
                       }
                       @if (getVersementDate(v); as versementDate) {
                         <span>{{ formatDate(versementDate) }}</span>
@@ -163,15 +163,15 @@
           <div class="cvd-summary-grid">
             <div class="cvd-summary-item">
               <span class="cvd-summary-label">Attendu</span>
-              <strong class="cvd-summary-value">{{ formatMontant(target.versement.montant_attendu) }}</strong>
+              <strong class="cvd-summary-value">{{ target.versement.montant_attendu | money }}</strong>
             </div>
             <div class="cvd-summary-item">
               <span class="cvd-summary-label">Deja verse</span>
-              <strong class="cvd-summary-value">{{ formatMontant(target.versement.montant_verse ?? 0) }}</strong>
+              <strong class="cvd-summary-value">{{ (target.versement.montant_verse ?? 0) | money }}</strong>
             </div>
             <div class="cvd-summary-item cvd-summary-item--restant">
               <span class="cvd-summary-label">Restant</span>
-              <strong class="cvd-summary-value">{{ formatMontant(getMontantRestant(target.versement)) }}</strong>
+              <strong class="cvd-summary-value">{{ getMontantRestant(target.versement) | money }}</strong>
             </div>
           </div>
         </div>

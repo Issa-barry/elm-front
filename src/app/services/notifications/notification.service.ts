@@ -5,6 +5,7 @@ import { map, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ApiNotification } from '@/models/notification.model';
+import { RequestCacheService } from '@/services/request-cache.service';
 
 /** Wrapper générique des réponses API Laravel */
 interface ApiWrapper<T> {
@@ -21,18 +22,28 @@ interface NotificationsResponse {
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private readonly apiUrl = `${environment.apiUrl}/notifications`;
+  private readonly notificationsTtlMs = 5_000;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private requestCache: RequestCacheService
+  ) {}
 
   /** GET /api/v1/notifications?unread_only=true */
-  getNotifications(unreadOnly = true): Observable<NotificationsResponse> {
+  getNotifications(unreadOnly = true, forceRefresh = false): Observable<NotificationsResponse> {
     const params = new HttpParams().set('unread_only', unreadOnly);
-    return this.http
-      .get<ApiWrapper<NotificationsResponse>>(this.apiUrl, { params })
-      .pipe(
-        map(r => r.data),
-        catchError(err => throwError(() => err))
-      );
+    const cacheKey = this.buildNotificationsCacheKey(unreadOnly);
+
+    return this.requestCache
+      .query(
+        cacheKey,
+        () =>
+          this.http
+            .get<ApiWrapper<NotificationsResponse>>(this.apiUrl, { params })
+            .pipe(map(r => r.data)),
+        { ttlMs: this.notificationsTtlMs, forceRefresh }
+      )
+      .pipe(catchError(err => throwError(() => err)));
   }
 
   /** POST /api/v1/notifications/{id}/read */
@@ -41,6 +52,10 @@ export class NotificationService {
       .post<ApiWrapper<{ unread_count: number }>>(`${this.apiUrl}/${id}/read`, {})
       .pipe(
         map(r => r.data),
+        map((data) => {
+          this.invalidateNotificationsCache();
+          return data;
+        }),
         catchError(err => throwError(() => err))
       );
   }
@@ -51,7 +66,19 @@ export class NotificationService {
       .post<ApiWrapper<{ unread_count: number }>>(`${this.apiUrl}/read-all`, {})
       .pipe(
         map(r => r.data),
+        map((data) => {
+          this.invalidateNotificationsCache();
+          return data;
+        }),
         catchError(err => throwError(() => err))
       );
+  }
+
+  invalidateNotificationsCache(): void {
+    this.requestCache.invalidateByPrefix('notifications:');
+  }
+
+  private buildNotificationsCacheKey(unreadOnly: boolean): string {
+    return `notifications:unread_only=${unreadOnly ? '1' : '0'}`;
   }
 }

@@ -1,0 +1,56 @@
+<div class="flex flex-col gap-1">
+  <div class="flex gap-2 items-center">
+
+    <!-- Champ de saisie / scan USB -->
+    <span class="p-input-icon-left flex-1 relative">
+      <i
+        class="pi absolute left-3 top-1/2 -translate-y-1/2 text-surface-400 pointer-events-none"
+        [class.pi-barcode]="!scanning"
+        [class.pi-spinner]="scanning"
+        [class.pi-spin]="scanning"
+      ></i>
+      <input
+        #scanInput
+        pInputText
+        type="text"
+        [(ngModel)]="rawCode"
+        [placeholder]="placeholder"
+        [disabled]="scanning"
+        (keydown.enter)="onEnter()"
+        autocomplete="off"
+        class="w-full font-mono pl-9"
+        autofocus
+      />
+    </span>
+
+    <!-- Bouton recherche manuelle -->
+    <button
+      pButton
+      type="button"
+      icon="pi pi-search"
+      [label]="searchLabel"
+      [loading]="scanning"
+      [disabled]="!rawCode.trim() || scanning"
+      (click)="onEnter()"
+    ></button>
+
+    <!-- Bouton reset (visible si texte ou erreur) -->
+    <button
+      *ngIf="rawCode || lastError"
+      pButton
+      type="button"
+      icon="pi pi-times"
+      severity="secondary"
+      [disabled]="scanning"
+      (click)="reset()"
+      title="Effacer"
+    ></button>
+
+  </div>
+
+  <!-- Message d'erreur inline -->
+  <small *ngIf="lastError" class="text-red-500 flex items-center gap-1 ml-1">
+    <i class="pi pi-exclamation-circle text-xs"></i>
+    {{ lastError }}
+  </small>
+</div>

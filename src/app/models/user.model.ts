@@ -32,6 +32,7 @@ export function getUserTypeLabel(type: UserType): string {
 // ── Interface principale ────────────────────────────────
 export interface User {
   id: number;
+  organisation_id?: number | null;
   nom: string;
   prenom: string;
   phone: string;
@@ -70,10 +71,13 @@ export interface User {
   piece_delivree_le?: string | null;
   piece_expire_le?: string | null;
   piece_pays?: string | null;
+  // Site d'affectation par défaut
+  default_site_id?: number | null;
 }
 
 // ── DTO Création ────────────────────────────────────────
 export interface CreateUserDto {
+  organisation_id?: number | null;
   nom: string;
   prenom: string;
   phone: string;
@@ -97,4 +101,5 @@ export interface CreateUserDto {
   piece_delivree_le?: string;
   piece_expire_le?: string;
   piece_pays?: string;
+  site_id?: number | null;
 }

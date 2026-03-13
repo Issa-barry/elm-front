@@ -62,10 +62,4 @@ export class StatsComptabilitePackingWidget implements OnInit {
     });
   }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-    }).format(value) + ' GNF';
-  }
 }

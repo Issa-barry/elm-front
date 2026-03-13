@@ -27,7 +27,10 @@
       "Bash(where py)",
       "Bash(php artisan tinker --execute=\"echo implode\\('','', array_column\\(DB::select\\(''SHOW TABLES''\\), ''Tables_in_elm-api''\\)\\);\")",
       "Bash(php artisan db:show)",
-      "Bash(php artisan migrate:status)"
+      "Bash(php artisan migrate:status)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\issab\\.claude\\projects\\c--laragon-www-FRONT-elm-front\\memory"

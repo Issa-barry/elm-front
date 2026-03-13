@@ -19,6 +19,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { CardModule } from 'primeng/card';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { AuthService } from '@/services/auth/auth.service';
 import {
   EncaissementVente,
@@ -48,6 +49,7 @@ import {
     InputIconModule,
     IconFieldModule,
     CardModule,
+    MoneyPipe,
   ],
   providers: [MessageService],
   templateUrl: './encaissement-vente-liste.html',
@@ -161,12 +163,6 @@ export class EncaissementVenteListe implements OnInit {
   formatDateDisplay(d: string | undefined): string {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('fr-FR');
-  }
-
-  formatMontant(n: string | number | undefined | null): string {
-    if (n == null || n === '') return '—';
-    const num = typeof n === 'string' ? parseFloat(n) : n;
-    return new Intl.NumberFormat('fr-FR').format(num) + ' GNF';
   }
 
   getModePaiementLabel(mode: string): string {

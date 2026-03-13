@@ -1,67 +1,52 @@
+
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { RippleModule } from 'primeng/ripple';
-import { Subscription } from 'rxjs';
-import { LayoutService } from '@/layout/service/layout.service';
 
 @Component({
     selector: 'apps-widget',
     standalone: true,
-    imports: [ButtonModule, RippleModule, ButtonModule],
+    imports: [CommonModule, ButtonModule],
     template: `
-        <div id="apps" class="my-12 md:my-20">
-        <span class="text-surface-900 dark:text-surface-0 block font-bold text-5xl mb-6 text-center">Apps</span>
-        <span class="text-surface-700 dark:text-surface-100 block text-xl mb-20 text-center leading-normal">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit numquam eligendi quos.</span>
+       <div class="relative min-h-160 lg:min-h-0 bg-surface-0 dark:bg-surface-900 flex lg:flex-row flex-col">
+            <div class="flex lg:flex lg:flex-row flex-col justify-center md:justify-normal h-full flex-1">
+                <div class="relative flex-1 z-20 flex items-center justify-center">
+                    <div class="flex items-center justify-center h-full">
+                        <div class="w-full max-w-2xl px-6 py-12 lg:p-12 xl:p-16 text-center lg:text-left">
+                            <h1 class="text-4xl xl:text-5xl font-bold text-surface-0 lg:text-surface-900 dark:text-surface-0 mb-6 leading-tight!">
+                                <span class="block">Create the screens your</span>
+                                <span class="block text-primary">visitors deserve to see</span>
+                            </h1>
 
-        <div class="flex flex-col lg:flex-row items-center justify-between mt-20 gap-20">
-        <div class="flex flex-col items-center">
-                    <img
-                        animateEnter="scalein"
-                        src="/demo/images/landing/{{
-                            darkMode ? 'chat-dark' : 'chat-light'
-                        }}.png"
-                        alt="chat"
-                       class="w-full h-full rounded border-surface-200 dark:border-surface-700 shadow animate-duration-500 animate-scalein origin-top"
-                    />
-                    <span class="block text-surface-900 dark:text-surface-0 text-lg font-semibold mt-6">Chat</span>
+                            <p class="text-surface-0/90 lg:text-surface-700 dark:text-surface-200 text-xl leading-normal mb-8 max-w-xl lg:max-w-none">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            </p>
+
+                            <div class="flex items-center gap-4 justify-center lg:justify-start">
+                                <button pButton type="button">
+                                    <span pButtonLabel>Learn More</span>
+                                </button>
+                                <button pButton type="button" outlined>
+                                    <span pButtonLabel>Live Demo</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex flex-col items-center">
+
+                <div class="absolute lg:relative inset-0 lg:inset-auto flex-1">
+                    <div class="absolute lg:hidden inset-0 bg-surface-900/60 dark:bg-surface-900/80 z-10"></div>
                     <img
-                        animateEnter="scalein"
-                        src="/demo/images/landing/{{
-                            darkMode ? 'mail-dark' : 'mail-light'
-                        }}.png"
-                        alt="chat"
-                       class="w-full h-full rounded border-surface-200 dark:border-surface-700 shadow animate-duration-500 animate-scalein origin-top"
+                        src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/hero/hero-1.png"
+                        alt="hero-1"
+                        class="h-full w-full object-cover xl:[clip-path:polygon(12%_0,100%_0%,100%_100%,0_100%)]"
                     />
-                    <span class="block text-surface-900 dark:text-surface-0 text-lg font-semibold mt-6">Mail</span>
                 </div>
             </div>
         </div>
     `,
 })
 export class AppsWidget {
-    subscription: Subscription;
-
-    darkMode: boolean = false;
-
-    constructor(
-        public router: Router,
-        private layoutService: LayoutService,
-    ) {
-        this.subscription = this.layoutService.configUpdate$.subscribe(
-            (config) => {
-                this.darkMode =
-                    config.colorScheme === 'dark' ||
-                    config.colorScheme === 'dim'
-                        ? true
-                        : false;
-            },
-        );
-    }
-
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
+     
 }
+ 

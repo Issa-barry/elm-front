@@ -249,6 +249,13 @@
         flex-shrink: 0;
     }
 
+    .mobile-print-action {
+        width: 2.05rem;
+        height: 2.05rem;
+        color: var(--mobile-primary) !important;
+        flex-shrink: 0;
+    }
+
     .mobile-state {
         margin-top: 1rem;
         background: #f8faff;
@@ -669,6 +676,16 @@
     color: var(--p-surface-400);
     font-weight: 500;
     white-space: nowrap;
+}
+
+// Le loading mask du p-table ne doit pas bloquer/assombrir la barre d'actions.
+:host ::ng-deep .produits-desktop .p-datatable-mask {
+    pointer-events: none;
+    background: transparent;
+}
+
+:host ::ng-deep .produits-desktop .p-datatable-loading-icon {
+    color: var(--p-primary-color);
 }
 
 :host-context(.app-dark) {

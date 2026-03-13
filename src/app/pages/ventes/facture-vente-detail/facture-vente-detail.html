@@ -83,7 +83,7 @@
           @if (facture) {
             <div class="fv-enc-preview">
               <span>Restant à payer</span>
-              <span class="font-bold text-red-500">{{ formatMontant(facture.montant_restant) }}</span>
+              <span class="font-bold text-red-500">{{ facture.montant_restant | money }}</span>
             </div>
           }
 
@@ -178,7 +178,7 @@
           </div>
 
           <div class="fv-hero__center">
-            <div class="fv-hero__amount">{{ formatMontant(facture.montant_net) }}</div>
+            <div class="fv-hero__amount">{{ facture.montant_net | money }}</div>
             <div class="fv-hero__amount-label">Montant net</div>
           </div>
 
@@ -192,13 +192,13 @@
           <div class="fv-hero__split">
             <div class="fv-hero__split-col">
               <i class="pi pi-check-circle fv-hero__split-icon fv-hero__split-icon--green"></i>
-              <div class="fv-hero__split-val fv-hero__split-val--green">{{ formatMontant(facture.montant_encaisse) }}</div>
+              <div class="fv-hero__split-val fv-hero__split-val--green">{{ facture.montant_encaisse | money }}</div>
               <div class="fv-hero__split-lbl">Encaissé</div>
             </div>
             <div class="fv-hero__split-sep"></div>
             <div class="fv-hero__split-col">
               <i class="pi pi-clock fv-hero__split-icon fv-hero__split-icon--red"></i>
-              <div class="fv-hero__split-val fv-hero__split-val--red">{{ formatMontant(facture.montant_restant) }}</div>
+              <div class="fv-hero__split-val fv-hero__split-val--red">{{ facture.montant_restant | money }}</div>
               <div class="fv-hero__split-lbl">Restant</div>
             </div>
           </div>
@@ -235,7 +235,7 @@
               @for (enc of facture.encaissements; track enc.id) {
                 <div class="fv-enc-card">
                   <div>
-                    <div class="fv-enc-card__amount">{{ formatMontant(enc.montant) }}</div>
+                    <div class="fv-enc-card__amount">{{ enc.montant | money }}</div>
                     @if (enc.note) {
                       <div class="fv-enc-card__note">{{ enc.note }}</div>
                     }
@@ -266,7 +266,7 @@
           <div class="fv-stats-bar__item">
             <div class="fv-stats-bar__icon"><i class="pi pi-wallet"></i></div>
             <div>
-              <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_net) }}</div>
+              <div class="fv-stats-bar__value">{{ facture.montant_net | money }}</div>
               <div class="fv-stats-bar__label">Montant net</div>
             </div>
           </div>
@@ -274,7 +274,7 @@
           <div class="fv-stats-bar__item">
             <div class="fv-stats-bar__icon"><i class="pi pi-check-circle"></i></div>
             <div>
-              <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_encaisse) }}</div>
+              <div class="fv-stats-bar__value">{{ facture.montant_encaisse | money }}</div>
               <div class="fv-stats-bar__label">Encaissé</div>
             </div>
           </div>
@@ -282,7 +282,7 @@
           <div class="fv-stats-bar__item">
             <div class="fv-stats-bar__icon"><i class="pi pi-clock"></i></div>
             <div>
-              <div class="fv-stats-bar__value">{{ formatMontant(facture.montant_restant) }}</div>
+              <div class="fv-stats-bar__value">{{ facture.montant_restant | money }}</div>
               <div class="fv-stats-bar__label">Restant</div>
             </div>
           </div>
@@ -308,19 +308,19 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <p class="text-color-secondary text-sm m-0 mb-1">Montant brut</p>
-                <p class="text-2xl font-bold m-0 text-primary">{{ formatMontant(facture.montant_brut) }}</p>
+                <p class="text-2xl font-bold m-0 text-primary">{{ facture.montant_brut | money }}</p>
               </div>
               <div>
                 <p class="text-color-secondary text-sm m-0 mb-1">Montant net</p>
-                <p class="text-xl font-semibold m-0">{{ formatMontant(facture.montant_net) }}</p>
+                <p class="text-xl font-semibold m-0">{{ facture.montant_net | money }}</p>
               </div>
               <div>
                 <p class="text-color-secondary text-sm m-0 mb-1">Encaissé</p>
-                <p class="font-semibold text-green-600 m-0">{{ formatMontant(facture.montant_encaisse) }}</p>
+                <p class="font-semibold text-green-600 m-0">{{ facture.montant_encaisse | money }}</p>
               </div>
               <div>
                 <p class="text-color-secondary text-sm m-0 mb-1">Restant</p>
-                <p class="font-semibold text-red-500 m-0">{{ formatMontant(facture.montant_restant) }}</p>
+                <p class="font-semibold text-red-500 m-0">{{ facture.montant_restant | money }}</p>
               </div>
               <div>
                 <p class="text-color-secondary text-sm m-0 mb-1">Date de création</p>
@@ -440,7 +440,7 @@
                 @for (enc of facture.encaissements; track enc.id) {
                   <div class="fv-enc-card">
                     <div>
-                      <div class="fv-enc-card__amount">{{ formatMontant(enc.montant) }}</div>
+                      <div class="fv-enc-card__amount">{{ enc.montant | money }}</div>
                       @if (enc.note) {
                         <div class="fv-enc-card__note">{{ enc.note }}</div>
                       }

@@ -65,7 +65,7 @@
     <div class="stats-bar__item">
         <div class="stats-bar__icon"><i class="pi pi-wallet"></i></div>
         <div>
-            <div class="stats-bar__value">{{ formatCurrency(totalMontant) }}</div>
+            <div class="stats-bar__value">{{ totalMontant | money }}</div>
             <div class="stats-bar__label">Total a payer</div>
         </div>
     </div>
@@ -73,7 +73,7 @@
     <div class="stats-bar__item">
         <div class="stats-bar__icon"><i class="pi pi-check-circle"></i></div>
         <div>
-            <div class="stats-bar__value">{{ formatCurrency(totalVerse) }}</div>
+            <div class="stats-bar__value">{{ totalVerse | money }}</div>
             <div class="stats-bar__label">Total verse</div>
         </div>
     </div>
@@ -81,7 +81,7 @@
     <div class="stats-bar__item">
         <div class="stats-bar__icon"><i class="pi pi-arrow-right"></i></div>
         <div>
-            <div class="stats-bar__value">{{ formatCurrency(totalRestant) }}</div>
+            <div class="stats-bar__value">{{ totalRestant | money }}</div>
             <div class="stats-bar__label">Reste a payer</div>
         </div>
     </div>
@@ -336,11 +336,11 @@
         <div class="preview-summary">
             <span class="font-bold text-lg">{{ historiqueData.packing.reference }}</span>
             <span class="preview-summary__sep"></span>
-            <span>Total: <strong>{{ formatCurrency(historiqueData.packing.montant) }}</strong></span>
+            <span>Total: <strong>{{ historiqueData.packing.montant | money }}</strong></span>
             <span class="preview-summary__sep"></span>
-            <span class="cell-success">Verse: <strong>{{ formatCurrency(historiqueData.packing.montant_verse) }}</strong></span>
+            <span class="cell-success">Verse: <strong>{{ historiqueData.packing.montant_verse | money }}</strong></span>
             <span class="preview-summary__sep"></span>
-            <span class="cell-bold">Restant: {{ formatCurrency(historiqueData.packing.montant_restant) }}</span>
+            <span class="cell-bold">Restant: {{ historiqueData.packing.montant_restant | money }}</span>
             <span class="ml-auto">
                 <span class="status-badge" [ngClass]="historiqueData.packing.statut === 'payee' ? 'status-badge--success' : 'status-badge--warn'">
                     {{ historiqueData.packing.statut === 'payee' ? 'Solde' : 'En cours' }}
@@ -361,7 +361,7 @@
             <ng-template #body let-versement>
                 <tr>
                     <td class="cell-secondary">{{ formatDateDisplay(versement.date_versement) }}</td>
-                    <td class="text-right cell-mono cell-success font-bold">{{ formatCurrency(versement.montant) }}</td>
+                    <td class="text-right cell-mono cell-success font-bold">{{ versement.montant | money }}</td>
                     <td>{{ versement.mode_paiement_label }}</td>
                     <td class="cell-secondary">{{ versement.notes || '-' }}</td>
                     <td class="text-center" *ngIf="canDeleteVersement">

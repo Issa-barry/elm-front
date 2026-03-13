@@ -102,8 +102,18 @@
                     </div>
 
                     <div class="mobile-card-footer">
-                        <span class="mobile-card-summary">{{ produit.qte_stock }} en stock · {{ formatCurrency(produit.prix_vente) }}</span>
+                        <span class="mobile-card-summary">{{ produit.qte_stock }} en stock · {{ produit.prix_vente | money }}</span>
                         <div class="mobile-card-actions">
+                            <button
+                                pButton
+                                pRipple
+                                icon="pi pi-print"
+                                class="p-button-rounded p-button-text p-button-sm mobile-print-action"
+                                [pTooltip]="getBarcodePrintTooltip(produit)"
+                                tooltipPosition="top"
+                                (click)="printBarcode($event, produit)"
+                                [disabled]="!canPrintBarcode(produit)"
+                            ></button>
                             <button
                                 pButton
                                 pRipple
@@ -361,6 +371,16 @@
                         tooltipPosition="top"
                         (click)="openStockDialog($event, produit)"
                     ></button>
+                    <button
+                        pButton
+                        pRipple
+                        icon="pi pi-print"
+                        class="p-button-rounded p-button-text p-button-sm mr-2"
+                        [pTooltip]="getBarcodePrintTooltip(produit)"
+                        tooltipPosition="top"
+                        (click)="printBarcode($event, produit)"
+                        [disabled]="!canPrintBarcode(produit)"
+                    ></button>
                     <p-button
                         icon="pi pi-trash"
                         severity="danger"
@@ -412,6 +432,45 @@
             [loading]="stockDialogSaving"
             [disabled]="stockDialogSaving"
         />
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="barcodePrintDialog"
+    [modal]="true"
+    [style]="{ width: '420px', maxWidth: '95vw' }"
+    header="Imprimer code-barres"
+    (onHide)="closeBarcodePrintDialog()"
+>
+    <ng-template #content>
+        <div class="flex flex-col gap-4">
+            <div *ngIf="barcodePrintProduit">
+                <div class="font-medium mb-1">{{ barcodePrintProduit.nom }}</div>
+                <small class="text-surface-500">
+                    CODE128 · {{ barcodePrintProduit.code_interne || barcodePrintProduit.code || barcodePrintProduit.code_fournisseur || '-' }}
+                </small>
+            </div>
+
+            <div>
+                <label for="barcode_print_qty" class="block font-bold mb-2">Nombre d'etiquettes</label>
+                <p-inputnumber
+                    inputId="barcode_print_qty"
+                    [(ngModel)]="barcodePrintQuantity"
+                    [min]="1"
+                    [max]="500"
+                    [minFractionDigits]="0"
+                    [maxFractionDigits]="0"
+                    [useGrouping]="false"
+                    fluid
+                />
+                <small class="text-surface-500">Saisissez une valeur entre 1 et 500.</small>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Annuler" icon="pi pi-times" text (click)="closeBarcodePrintDialog()" />
+        <p-button label="Imprimer" icon="pi pi-print" (click)="confirmBarcodePrint()" />
     </ng-template>
 </p-dialog>
 

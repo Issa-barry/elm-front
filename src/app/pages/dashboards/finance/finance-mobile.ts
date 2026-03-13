@@ -1,51 +1,43 @@
 import {
     AfterViewInit,
     Component,
+    DestroyRef,
     ElementRef,
-    EventEmitter,
-    Input,
-    OnChanges,
     OnDestroy,
-    OnInit,
-    Output,
-    SimpleChanges,
     ViewChild,
+    effect,
     inject,
     signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SkeletonModule } from 'primeng/skeleton';
-import {
-    DashboardService,
-    EncaissementStat,
-    VentesEncaissementsPeriod,
-} from '@/services/dashboard/dashboard.service';
+import { DashboardService, EncaissementStat } from '@/services/dashboard/dashboard.service';
+import { DashboardPeriodService } from '@/services/dashboard/dashboard-period.service';
 import { HeaderWidget2 } from './widgets/headerwidget2';
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-finance-mobile',
     standalone: true,
-    imports: [CommonModule, SkeletonModule, HeaderWidget2],
+    imports: [CommonModule, SkeletonModule, HeaderWidget2, MoneyPipe],
     templateUrl: './finance-mobile.html',
     styleUrl: './finance-mobile.scss',
 })
-export class FinanceMobile implements OnInit, OnChanges, AfterViewInit, OnDestroy {
-    @Input() period: VentesEncaissementsPeriod = 'this_month';
-    @Output() periodChange = new EventEmitter<VentesEncaissementsPeriod>();
-
+export class FinanceMobile implements AfterViewInit, OnDestroy {
     @ViewChild('slider', { static: false }) sliderRef?: ElementRef<HTMLElement>;
 
     private readonly dashboardService = inject(DashboardService);
+    private readonly periodService = inject(DashboardPeriodService);
+    private readonly destroyRef = inject(DestroyRef);
     private readonly router = inject(Router);
 
-    // Données encaissement chargées ici — pas via EncaissementWidget
     stat = signal<EncaissementStat | null>(null);
     loading = signal(false);
     errorMessage = signal<string | null>(null);
 
-    // 3 slides : total / payees / reste
     readonly slideCount = 3;
     readonly slidesArray = Array.from({ length: this.slideCount }, (_, i) => i);
     activeSlide = signal(0);
@@ -53,25 +45,20 @@ export class FinanceMobile implements OnInit, OnChanges, AfterViewInit, OnDestro
     readonly moduleShortcuts = [
         { label: 'Dashboard',     icon: 'pi pi-th-large',      route: '/dashboard'              },
         { label: 'Accueil',       icon: 'pi pi-home',          route: '/dashboard-finance'      },
-        { label: 'Commissions',   icon: 'pi pi-percentage',    route: '/ventes/commissions'     },
-        { label: 'Ventes',        icon: 'pi pi-shopping-cart', route: '/ventes/commandes'       },
         { label: 'Produits',      icon: 'pi pi-box',           route: '/produits'               },
         { label: 'Packing',       icon: 'pi pi-inbox',         route: '/packings'               },
         { label: 'Prestataires',  icon: 'pi pi-users',         route: '/contacts/prestataires'  },
         { label: 'Utilisateurs',  icon: 'pi pi-user',          route: '/contacts/utilisateurs'  },
-        { label: 'Vehicules',     icon: 'pi pi-car',           route: '/vehicules'              },
     ] as const;
 
     private observer?: IntersectionObserver;
 
-    ngOnInit(): void {
-        this.loadStat();
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['period'] && !changes['period'].firstChange) {
-            this.loadStat();
-        }
+    constructor() {
+        effect(() => {
+            const period = this.periodService.period();
+            const days = this.periodService.customDays();
+            this.loadStat(period, days);
+        });
     }
 
     ngAfterViewInit(): void {
@@ -82,21 +69,23 @@ export class FinanceMobile implements OnInit, OnChanges, AfterViewInit, OnDestro
         this.observer?.disconnect();
     }
 
-    onPeriodChange(p: VentesEncaissementsPeriod): void {
-        this.periodChange.emit(p);
-    }
-
     goToModule(route: string): void {
         this.router.navigateByUrl(route);
     }
 
-    loadStat(): void {
+    loadStat(
+        period = this.periodService.period(),
+        days = this.periodService.customDays()
+    ): void {
         this.loading.set(true);
         this.errorMessage.set(null);
 
         this.dashboardService
-            .getVentesEncaissements(this.period)
-            .pipe(finalize(() => this.loading.set(false)))
+            .getVentesEncaissements(period, days)
+            .pipe(
+                finalize(() => this.loading.set(false)),
+                takeUntilDestroyed(this.destroyRef)
+            )
             .subscribe({
                 next: (data) => this.stat.set(data ?? null),
                 error: () => {

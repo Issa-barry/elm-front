@@ -1,3 +1,4 @@
+import { MoneyPipe } from '@/pipes/money.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -8,7 +9,7 @@ export type StatValueFormat = 'number' | 'text';
 @Component({
     standalone: true,
     selector: 'app-stat-card-widget',
-    imports: [CommonModule, SkeletonModule],
+    imports: [CommonModule, SkeletonModule, MoneyPipe],
     host: {
         '[style.display]': '"contents"'
     },
@@ -38,13 +39,13 @@ export type StatValueFormat = 'number' | 'text';
                             <p-skeleton width="12rem" height="2.1rem" borderRadius="6px"></p-skeleton>
                         } @else {
                             <div class="text-2xl mb-3 mt-4 font-bold">
-                                @if (format === 'number' && typeof value === 'number') {
-                                    {{ value | number: '1.0-0' }}
+                                @if (format === 'number') {
+                                    {{ value | money: suffix }}
                                 } @else {
                                     {{ value ?? 0 }}
-                                }
-                                @if (suffix) {
-                                    <span class="ml-1">{{ suffix }}</span>
+                                    @if (suffix) {
+                                        <span class="ml-1">{{ suffix }}</span>
+                                    }
                                 }
                             </div>
                         }
@@ -58,13 +59,13 @@ export type StatValueFormat = 'number' | 'text';
                         <p-skeleton width="16rem" height="2.1rem" borderRadius="6px"></p-skeleton>
                     } @else {
                         <span class="text-2xl text-primary font-bold">
-                            @if (format === 'number' && typeof value === 'number') {
-                                {{ value | number: '1.0-0' }}
+                            @if (format === 'number') {
+                                {{ value | money: suffix }}
                             } @else {
                                 {{ value ?? 0 }}
-                            }
-                            @if (suffix) {
-                                <span class="ml-1">{{ suffix }}</span>
+                                @if (suffix) {
+                                    <span class="ml-1">{{ suffix }}</span>
+                                }
                             }
                         </span>
                     }

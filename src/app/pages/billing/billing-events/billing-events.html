@@ -77,7 +77,7 @@
           <code class="text-sm">{{ event.user?.reference }}</code>
         </td>
         <td>{{ getEventTypeLabel(event.event_type) }}</td>
-        <td class="font-semibold">{{ formatGNF(event.amount) }}</td>
+        <td class="font-semibold">{{ event.amount | money }}</td>
         <td>
           <p-tag
             [value]="getStatusConfig(event.status).label"
@@ -114,15 +114,15 @@
   <div class="flex gap-4 mt-4 pt-4 border-top-1 surface-border flex-wrap">
     <div class="flex align-items-center gap-2">
       <span class="text-color-secondary">Total :</span>
-      <span class="font-bold">{{ formatGNF(totalAmount) }}</span>
+      <span class="font-bold">{{ totalAmount | money }}</span>
     </div>
     <div class="flex align-items-center gap-2">
       <span class="text-color-secondary">En attente :</span>
-      <span class="font-bold text-orange-500">{{ formatGNF(totalPending) }}</span>
+      <span class="font-bold text-orange-500">{{ totalPending | money }}</span>
     </div>
     <div class="flex align-items-center gap-2">
       <span class="text-color-secondary">Payé :</span>
-      <span class="font-bold text-green-500">{{ formatGNF(totalPaid) }}</span>
+      <span class="font-bold text-green-500">{{ totalPaid | money }}</span>
     </div>
   </div>
 </div>
