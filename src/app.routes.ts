@@ -5,9 +5,9 @@ import { authGuard } from '@/guards/auth.guard';
 import { authorizationGuard } from '@/guards/authorization.guard';
 import { guestGuard } from '@/guards/guest.guard';
 import { AppLayout } from '@/layout/components/app.layout';
- import { Notfound } from '@/pages/notfound/notfound';
+
 import { AuthService } from '@/services/auth/auth.service';
-import { Landing2 } from '@/pages/landing/landing2/landing2';
+
 
 const landingOrDashboardGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
@@ -162,12 +162,12 @@ export const appRoutes: Routes = [
   },
   {
     path: 'landing',
-    component: Landing2,
+    loadComponent: () => import('@/pages/landing/landing2/landing2').then((c) => c.Landing2),
     data: { breadcrumb: 'landing' },
   },
   {
     path: 'notfound',
-    component: Notfound,
+    loadComponent: () => import('@/pages/notfound/notfound').then((c) => c.Notfound),
     data: { breadcrumb: 'notfound' },
   },
   {

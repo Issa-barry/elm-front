@@ -71,6 +71,8 @@ export interface User {
   piece_delivree_le?: string | null;
   piece_expire_le?: string | null;
   piece_pays?: string | null;
+  // Site d'affectation par défaut
+  default_site_id?: number | null;
 }
 
 // ── DTO Création ────────────────────────────────────────
@@ -99,4 +101,5 @@ export interface CreateUserDto {
   piece_delivree_le?: string;
   piece_expire_le?: string;
   piece_pays?: string;
+  site_id?: number | null;
 }

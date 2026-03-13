@@ -155,17 +155,23 @@
 
       <div class="col-span-12 md:col-span-6">
         <label for="phone" class="field-label">Telephone <span class="required-star">*</span></label>
-        <input
-          id="phone"
-          name="phone"
-          type="text"
-          pInputText
-          class="w-full"
-          [(ngModel)]="model.phone"
-          [disabled]="saving"
-          placeholder="622000000"
-          (blur)="onPhoneBlur()"
-        />
+        <div class="flex">
+          <span class="inline-flex items-center px-3 border border-r-0 rounded-l-md bg-surface-100 text-sm font-medium whitespace-nowrap">
+            {{ currentDialCode }}
+          </span>
+          <input
+            id="phone"
+            name="phone"
+            type="text"
+            pInputText
+            class="w-full"
+            style="border-top-left-radius:0;border-bottom-left-radius:0"
+            [(ngModel)]="model.phone"
+            [disabled]="saving"
+            placeholder="622000000"
+            (blur)="onPhoneBlur()"
+          />
+        </div>
         <small *ngIf="submitted && !model.phone.trim()" class="field-error">Telephone obligatoire.</small>
         <small *ngIf="phonePrefixError" class="field-error">{{ phonePrefixError }}</small>
       </div>

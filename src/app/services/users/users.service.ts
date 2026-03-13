@@ -74,6 +74,7 @@ export interface UpdateUserDto {
   piece_delivree_le?: string | null;
   piece_expire_le?: string | null;
   piece_pays?: string | null;
+  site_id?: number | null;
 }
 
 @Injectable({

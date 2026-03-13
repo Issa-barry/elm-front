@@ -173,18 +173,16 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
 
   onCountryChange(): void {
     this.model.pays = this.getCountryName(this.model.code_pays);
-    if (this.model.phone.trim()) {
-      this.validatePhonePrefixAndNormalize();
-    }
+    this.phonePrefixError = null;
   }
 
   onPhoneBlur(): void {
-    if (!this.model.phone.trim()) {
-      this.phonePrefixError = null;
-      return;
-    }
+    this.model.phone = (this.model.phone || '').replace(/[^\d]/g, '');
+    this.phonePrefixError = null;
+  }
 
-    this.validatePhonePrefixAndNormalize();
+  get currentDialCode(): string {
+    return this.getCodePhonePays(this.model.code_pays);
   }
 
   save(): void {
@@ -279,13 +277,24 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       next: (response) => {
         if (response.success && response.data) {
           this.loadedUser = response.data;
+          const codePays = response.data.code_pays || 'GN';
+          const rawPhone = response.data.phone ?? '';
+          const dialCode = this.getCodePhonePays(codePays);
+          let localPhone = rawPhone.startsWith(dialCode)
+            ? rawPhone.slice(dialCode.length)
+            : (() => {
+                const match = COUNTRIES.find((c) => rawPhone.startsWith(c.dialCode));
+                return match ? rawPhone.slice(match.dialCode.length) : rawPhone;
+              })();
+          localPhone = localPhone.replace(/[^\d]/g, '');
+
           this.model = {
             nom: response.data.nom ?? '',
             prenom: response.data.prenom ?? '',
-            phone: response.data.phone ?? '',
+            phone: localPhone,
             email: response.data.email ?? '',
-            code_pays: response.data.code_pays || 'GN',
-            pays: response.data.pays || this.getCountryName(response.data.code_pays || 'GN'),
+            code_pays: codePays,
+            pays: response.data.pays || this.getCountryName(codePays),
             ville: response.data.ville ?? '',
             quartier: response.data.quartier ?? '',
             type: response.data.type ?? 'staff',
@@ -296,7 +305,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
             civilite: response.data.civilite ?? null,
             date_naissance: response.data.date_naissance ?? null,
             organisation_id: this.coerceNumber((response.data as { organisation_id?: unknown }).organisation_id),
-            usine_id: this.usineContext.currentUsineId(),
+            usine_id: this.coerceNumber(response.data.default_site_id) ?? this.usineContext.currentUsineId(),
             password: '',
             password_confirmation: '',
           };
@@ -331,7 +340,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       organisation_id: organisationId,
       nom: this.model.nom.trim(),
       prenom: this.model.prenom.trim(),
-      phone: this.normalizePhone(this.model.phone),
+      phone: this.getCodePhonePays(this.model.code_pays) + this.model.phone.replace(/[^\d]/g, '').replace(/^0/, ''),
       email: this.model.email.trim() || undefined,
       pays: this.model.pays,
       code_pays: this.model.code_pays,
@@ -344,6 +353,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       role: this.model.role,
       civilite: this.model.civilite ?? undefined,
       date_naissance: this.model.date_naissance || undefined,
+      site_id: this.model.usine_id ?? undefined,
     };
 
     this.userService.createUserViaApi(payload).subscribe({
@@ -354,28 +364,9 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
           return;
         }
 
-        const createdUser = response.data;
-        const usineId = this.model.usine_id;
-
-        if (usineId !== null) {
-          this.usineService.assignUser(usineId, { user_id: createdUser.id }).subscribe({
-            next: () => {
-              this.saving = false;
-              this.userSaved.emit({ user: createdUser, mode: 'create' });
-              this.close();
-            },
-            error: () => {
-              // Utilisateur créé mais assignation échouée — on continue quand même
-              this.saving = false;
-              this.userSaved.emit({ user: createdUser, mode: 'create' });
-              this.close();
-            },
-          });
-        } else {
-          this.saving = false;
-          this.userSaved.emit({ user: createdUser, mode: 'create' });
-          this.close();
-        }
+        this.saving = false;
+        this.userSaved.emit({ user: response.data, mode: 'create' });
+        this.close();
       },
       error: (error) => {
         this.setApiError(error, 'Erreur lors de la creation de l utilisateur.');
@@ -394,7 +385,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     const payload: UpdateUserDto = {
       nom: this.model.nom.trim(),
       prenom: this.model.prenom.trim(),
-      phone: this.normalizePhone(this.model.phone),
+      phone: this.getCodePhonePays(this.model.code_pays) + this.model.phone.replace(/[^\d]/g, '').replace(/^0/, ''),
       email: this.model.email.trim() || undefined,
       pays: this.model.pays,
       code_pays: this.model.code_pays,
@@ -405,32 +396,15 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
       role: this.model.role,
       civilite: this.model.civilite ?? null,
       date_naissance: this.model.date_naissance || null,
+      site_id: this.model.usine_id,
     };
 
     this.userService.updateUser(this.userId, payload).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          const updatedUser = response.data;
-          const usineId = this.model.usine_id;
-
-          if (usineId !== null && this.userId) {
-            this.usineService.assignUser(usineId, { user_id: this.userId }).subscribe({
-              next: () => {
-                this.saving = false;
-                this.userSaved.emit({ user: updatedUser, mode: 'edit' });
-                this.close();
-              },
-              error: () => {
-                this.saving = false;
-                this.userSaved.emit({ user: updatedUser, mode: 'edit' });
-                this.close();
-              },
-            });
-          } else {
-            this.saving = false;
-            this.userSaved.emit({ user: updatedUser, mode: 'edit' });
-            this.close();
-          }
+          this.saving = false;
+          this.userSaved.emit({ user: response.data, mode: 'edit' });
+          this.close();
           return;
         }
         this.setFormError(response.message || 'Modification impossible.');
@@ -461,6 +435,12 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     }
 
     if (!this.validatePhonePrefixAndNormalize()) {
+      return false;
+    }
+
+    const emailVal = this.model.email.trim();
+    if (emailVal && !emailVal.includes('@')) {
+      this.setFormError('L\'adresse email est invalide.');
       return false;
     }
 
@@ -499,11 +479,7 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
     return country ? country.name : 'Guinee';
   }
 
-  private normalizePhone(phone: string): string {
-    return (phone || '').replace(/[^\d+]/g, '');
-  }
-
-  get additionalFormErrors(): string[] {
+get additionalFormErrors(): string[] {
     if (this.formErrors.length === 0) return [];
     if (this.formError && this.formErrors[0] === this.formError) {
       return this.formErrors.slice(1);
@@ -854,57 +830,12 @@ export class UtilisateursViewDialog implements OnInit, OnChanges {
   }
 
   private validatePhonePrefixAndNormalize(): boolean {
-    const rawPhone = this.model.phone || '';
-    const selectedDialCode = this.getCodePhonePays(this.model.code_pays);
-    const selectedCountry = this.getCountryName(this.model.code_pays);
-    const selectedDialDigits = selectedDialCode.replace('+', '');
-
-    let sanitized = rawPhone.trim().replace(/[^\d+]/g, '');
-
-    if (sanitized.startsWith('00')) {
-      sanitized = `+${sanitized.slice(2)}`;
-    }
-
-    if (!sanitized) {
+    const local = (this.model.phone || '').replace(/[^\d]/g, '');
+    if (!local) {
       this.phonePrefixError = 'Telephone obligatoire.';
       return false;
     }
-
-    if (sanitized.startsWith('+')) {
-      if (!sanitized.startsWith(selectedDialCode)) {
-        const detectedCountry = COUNTRIES.find(
-          (country) => country.code !== this.model.code_pays && sanitized.startsWith(country.dialCode)
-        );
-
-        this.phonePrefixError = detectedCountry
-          ? `Le numero commence par ${detectedCountry.dialCode} (${detectedCountry.name}) mais le pays selectionne est ${selectedCountry} (${selectedDialCode}).`
-          : `Le numero doit commencer par ${selectedDialCode} pour le pays selectionne (${selectedCountry}).`;
-        return false;
-      }
-
-      this.model.phone = sanitized;
-      this.phonePrefixError = null;
-      return true;
-    }
-
-    if (sanitized.startsWith(selectedDialDigits)) {
-      this.model.phone = `+${sanitized}`;
-      this.phonePrefixError = null;
-      return true;
-    }
-
-    const detectedWithoutPlus = COUNTRIES.find((country) => {
-      if (country.code === this.model.code_pays) return false;
-      const dialDigits = country.dialCode.replace('+', '');
-      return sanitized.startsWith(dialDigits);
-    });
-
-    if (detectedWithoutPlus) {
-      this.phonePrefixError = `Le numero commence par ${detectedWithoutPlus.dialCode} (${detectedWithoutPlus.name}). Selectionnez ce pays ou corrigez le prefixe.`;
-      return false;
-    }
-
-    this.model.phone = `${selectedDialCode}${sanitized}`;
+    this.model.phone = local;
     this.phonePrefixError = null;
     return true;
   }
