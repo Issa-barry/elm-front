@@ -25,6 +25,6 @@ export class Finance {
   }
 
   private getIsMobileViewport(): boolean {
-    return typeof window !== 'undefined' ? window.innerWidth <= 768 : false;
+    return typeof window !== 'undefined' ? window.innerWidth <= 800 : false;
   }
 }
