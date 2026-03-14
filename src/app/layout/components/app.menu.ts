@@ -70,24 +70,24 @@ export class AppMenu {
                             'encaissements.read',
                         ]),
                         items: [
-                            {
-                                label: 'Commissions',
-                                icon: 'pi pi-fw pi-percentage',
-                                routerLink: ['/ventes/commissions'],
-                                visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
-                            },
+                            // {
+                            //     label: 'Commissions',
+                            //     icon: 'pi pi-fw pi-percentage',
+                            //     routerLink: ['/ventes/commissions'],
+                            //     visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
+                            // },
                             // {
                             //     label: 'Commissions 2',
                             //     icon: 'pi pi-fw pi-percentage',
                             //     routerLink: ['/ventes/commissions2'],
                             //     visible: this.authService.hasAnyPermission(['commissions.read', 'commandes.read']),
                             // },
-                            {
-                                label: 'Factures vente',
-                                icon: 'pi pi-fw pi-receipt',
-                                routerLink: ['/ventes/factures'],
-                                visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
-                            },
+                            // {
+                            //     label: 'Factures vente',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/ventes/factures'],
+                            //     visible: this.authService.hasAnyPermission(['factures-livraisons.read', 'encaissements.read']),
+                            // },
                             // {
                             //     label: 'Factures vente liste 2',
                             //     icon: 'pi pi-fw pi-receipt',
@@ -134,12 +134,12 @@ export class AppMenu {
         icon: 'pi pi-th-large',
         items: [
              // Ventes
-                    {
-                        label: 'Ventes',
-                        icon: 'pi pi-fw pi-shopping-cart',
-                        routerLink: ['/ventes/commandes'],
-                        visible: this.authService.hasAnyPermission(['commandes.read', 'commande.read']),
-                    },
+                    // {
+                    //     label: 'Ventes',
+                    //     icon: 'pi pi-fw pi-shopping-cart',
+                    //     routerLink: ['/ventes/commandes'],
+                    //     visible: this.authService.hasAnyPermission(['commandes.read', 'commande.read']),
+                    // },
 
           {
             label: 'Packing',

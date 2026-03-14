@@ -72,8 +72,15 @@ export class Login implements OnInit, OnDestroy {
     };
 
     // Code pays
+    private readonly COUNTRY_STORAGE_KEY = 'login_country_code';
     selectedCountry = COUNTRIES[0]; // Guinée par défaut
     countries = COUNTRIES;
+
+    onCountryChange(): void {
+        if (this.isBrowser) {
+            localStorage.setItem(this.COUNTRY_STORAGE_KEY, this.selectedCountry.code);
+        }
+    }
 
     // Formulaire réactif
     loginForm: FormGroup = this.fb.group({
@@ -85,6 +92,14 @@ export class Login implements OnInit, OnDestroy {
     ngOnInit(): void {
         if (!this.isBrowser) {
             return;
+        }
+
+        const savedCode = localStorage.getItem(this.COUNTRY_STORAGE_KEY);
+        if (savedCode) {
+            const found = COUNTRIES.find(c => c.code === savedCode);
+            if (found) {
+                this.selectedCountry = found;
+            }
         }
 
         this.updateInstallState();
@@ -210,6 +225,7 @@ export class Login implements OnInit, OnDestroy {
             ...this.loginForm.value,
             phone: this.selectedCountry.dialCode + this.loginForm.value.phone
         };
+console.log(credentials);
 
         // Appeler le service d'authentification
         this.authService.login(credentials).subscribe({

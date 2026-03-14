@@ -88,6 +88,7 @@
                         optionLabel="name"
                         [disabled]="isLoading()"
                         class="w-32 sm:w-36 shrink-0"
+                        (onChange)="onCountryChange()"
                     >
                         <ng-template let-country pTemplate="selectedItem">
                             <div class="flex items-center gap-2" *ngIf="country">
