@@ -13,7 +13,9 @@ import { VentesEncaissementsPeriod } from '@/services/dashboard/dashboard.servic
     template: `
         <div class="flex flex-col sm:flex-row items-center gap-6">
             <div class="flex flex-col sm:flex-row items-center gap-4">
-                <img alt="avatar" src="/demo/images/avatar/circle/avatar-m-12.png" class="w-16 h-16 shrink-0" />
+                <div class="w-16 h-16 shrink-0 rounded-full bg-primary flex items-center justify-center text-white font-bold text-xl select-none">
+                        {{ initiales() }}
+                    </div>
                 <div class="flex flex-col items-center sm:items-start">
                     <span class="text-surface-900 dark:text-surface-0 font-bold text-xl">{{ nomComplet() }}</span>
                     <p class="text-surface-600 dark:text-surface-200 m-0">{{ lastLoginLabel() }}</p>
@@ -55,6 +57,14 @@ export class HeaderWidget2 {
     ];
 
     nomComplet = computed(() => this.auth.currentUser()?.nom_complet ?? '');
+
+    initiales = computed(() => {
+        const u = this.auth.currentUser();
+        if (!u) return '?';
+        const p = (u.prenom?.[0] ?? '').toUpperCase();
+        const n = (u.nom?.[0] ?? '').toUpperCase();
+        return p + n || '?';
+    });
 
     lastLoginLabel = computed(() => {
         const dt = this.auth.currentUser()?.last_login_at;

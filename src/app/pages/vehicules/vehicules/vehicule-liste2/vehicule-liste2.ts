@@ -14,6 +14,7 @@ import { StyleClassModule } from 'primeng/styleclass';
 import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import { VehiculeService } from '@/services/vehicules/vehicule.service';
 import { Vehicule, TYPE_VEHICULE_LABELS } from '@/models/vehicule.model';
@@ -43,6 +44,7 @@ interface FilterOption {
     RippleModule,
     SelectModule,
     StyleClassModule,
+    SkeletonModule,
     TagModule,
     ToastModule,
     TooltipModule,
