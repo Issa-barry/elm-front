@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/sites/sites-detail/sites-detail.scss", "src/app/pages/sites/sites-detail/sites-detail.scss"],
+  "sourcesContent": [".site-detail-page {\n  border-radius: 1rem;\n}\r\n", ".site-detail-page {\n  border-radius: 1rem;\n}\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJmaWxlOi8vL0M6L2xhcmFnb24vd3d3L0ZST05UL2VsbS1mcm9udC9zcmMvYXBwL3BhZ2VzL3NpdGVzL3NpdGVzLWRldGFpbC9zaXRlcy1kZXRhaWwuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFIiwic291cmNlc0NvbnRlbnQiOlsiLnNpdGUtZGV0YWlsLXBhZ2Uge1xuICBib3JkZXItcmFkaXVzOiAxcmVtO1xufVxyXG4iXX0= */"],
+  "mappings": ";AAAA,CAAA;AACE,iBAAA;ACCF;",
+  "names": []
+}

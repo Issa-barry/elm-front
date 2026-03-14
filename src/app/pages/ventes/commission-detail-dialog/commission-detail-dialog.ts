@@ -18,14 +18,19 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { DividerModule } from 'primeng/divider';
 import { TextareaModule } from 'primeng/textarea';
 import { DatePickerModule } from 'primeng/datepicker';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
 
 import { CommissionVenteService } from '@/services/ventes/commission-vente.service';
 import {
   CommissionVente,
   VersementCommission,
   BeneficiaireType,
+  ModePaiement,
   StatutCommission,
   StatutVersement,
+  StoreVersementDto,
+  MODE_PAIEMENT_OPTIONS,
   STATUT_COMMISSION_LABELS,
   STATUT_COMMISSION_SEVERITY,
   STATUT_VERSEMENT_LABELS,
@@ -36,6 +41,22 @@ interface VersementTarget {
   commissionId: number;
   versement: VersementCommission;
   nom: string;
+}
+
+interface VersementFormErrors {
+  montant?: string;
+  modePaiement?: string;
+}
+
+export function validateVersementMontant(
+  montant: number | null,
+  montantRestant: number
+): string | null {
+  if (montant == null || montant === 0) return 'Le montant est obligatoire.';
+  if (montant <= 0) return 'Le montant doit être supérieur à 0.';
+  if (montant > montantRestant)
+    return `Le montant ne peut pas dépasser le restant dû.`;
+  return null;
 }
 
 @Component({
@@ -52,9 +73,12 @@ interface VersementTarget {
     DividerModule,
     TextareaModule,
     DatePickerModule,
+    InputNumberModule,
+    SelectModule,
   ],
   providers: [MessageService],
   templateUrl: './commission-detail-dialog.html',
+  styleUrls: ['./commission-detail-dialog.scss'],
 })
 export class CommissionDetailDialog implements OnChanges {
   @Input() commissionId!: number;
@@ -67,9 +91,16 @@ export class CommissionDetailDialog implements OnChanges {
 
   versementDialogVisible = false;
   versementTarget = signal<VersementTarget | null>(null);
-  versementNote = '';
+
+  // form fields
+  versementMontant: number | null = null;
+  versementModePaiement: ModePaiement | null = null;
   versementDate: Date = new Date();
+  versementNote = '';
+  versementErrors: VersementFormErrors = {};
   versementLoading = false;
+
+  readonly modesPaiement = MODE_PAIEMENT_OPTIONS;
 
   parseFloat = parseFloat;
 
@@ -113,7 +144,23 @@ export class CommissionDetailDialog implements OnChanges {
   }
 
   canVerser(c: CommissionVente): boolean {
-    return c.statut === 'eligible' || c.statut === 'partiellement_versee';
+    return c.statut === 'impayee' || c.statut === 'partielle';
+  }
+
+  canVerserVersement(c: CommissionVente, v: VersementCommission): boolean {
+    return (
+      this.canVerser(c) &&
+      v.statut !== 'effectue' &&
+      v.statut !== 'annule' &&
+      this.getMontantRestant(v) > 0
+    );
+  }
+
+  getMontantRestant(v: VersementCommission): number {
+    if (v.montant_restant !== undefined) return v.montant_restant;
+    const attendu = parseFloat(v.montant_attendu ?? '0') || 0;
+    const verse = parseFloat(v.montant_verse ?? '0') || 0;
+    return Math.max(0, attendu - verse);
   }
 
   getBeneficiaireNom(c: CommissionVente, v: VersementCommission): string {
@@ -131,35 +178,44 @@ export class CommissionDetailDialog implements OnChanges {
       versement: v,
       nom: this.getBeneficiaireNom(c, v),
     });
-    this.versementNote = '';
+    this.versementMontant = this.getMontantRestant(v) || null;
+    this.versementModePaiement = 'especes';
     this.versementDate = new Date();
+    this.versementNote = '';
+    this.versementErrors = {};
     this.versementDialogVisible = true;
   }
 
   confirmVersement(): void {
     const target = this.versementTarget();
     if (!target || this.versementLoading) return;
+
+    const restant = this.getMontantRestant(target.versement);
+    if (!this.validateVersementForm(restant)) return;
+
     this.versementLoading = true;
-    const dateIso = this.versementDate instanceof Date
-      ? this.versementDate.toISOString().split('T')[0]
-      : String(this.versementDate);
+
+    const dto: StoreVersementDto = {
+      montant: this.versementMontant!,
+      date_paiement: this.toApiDate(this.versementDate),
+      mode_paiement: this.versementModePaiement!,
+      note: this.versementNote || undefined,
+    };
 
     this.commissionService
       .verser(
         target.commissionId,
         target.versement.beneficiaire_type as BeneficiaireType,
-        this.versementNote || undefined,
-        dateIso
+        dto
       )
       .subscribe({
         next: () => {
           this.versementLoading = false;
           this.versementDialogVisible = false;
-          const montant = this.formatMontant(target.versement.montant_attendu);
           this.messageService.add({
             severity: 'success',
             summary: 'Versement effectué',
-            detail: `Versement de ${montant} effectué avec succès`,
+            detail: `Versement de ${this.formatMontant(this.versementMontant)} effectué avec succès`,
             life: 4000,
           });
           this.loadDetail();
@@ -178,6 +234,24 @@ export class CommissionDetailDialog implements OnChanges {
       });
   }
 
+  private validateVersementForm(montantRestant: number): boolean {
+    this.versementErrors = {};
+    let valid = true;
+
+    const montantErr = validateVersementMontant(this.versementMontant, montantRestant);
+    if (montantErr) {
+      this.versementErrors.montant = montantErr;
+      valid = false;
+    }
+
+    if (!this.versementModePaiement) {
+      this.versementErrors.modePaiement = 'Le mode de paiement est obligatoire.';
+      valid = false;
+    }
+
+    return valid;
+  }
+
   getStatutLabel(s: StatutCommission): string {
     return STATUT_COMMISSION_LABELS[s] ?? s;
   }
@@ -194,6 +268,10 @@ export class CommissionDetailDialog implements OnChanges {
     return STATUT_VERSEMENT_SEVERITY[s] ?? 'info';
   }
 
+  getVersementDate(v: VersementCommission): string | null {
+    return v.verse_at ?? v.date_versement ?? null;
+  }
+
   formatMontant(n: string | number | undefined | null): string {
     if (n == null || n === '') return '—';
     const num = typeof n === 'string' ? parseFloat(n) : n;
@@ -202,12 +280,27 @@ export class CommissionDetailDialog implements OnChanges {
 
   formatDate(d: string | null): string {
     if (!d) return '—';
-    return new Date(d).toLocaleString('fr-FR', {
+    const normalized = d.includes(' ') && !d.includes('T')
+      ? d.replace(' ', 'T')
+      : d;
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) return d;
+    return parsed.toLocaleString('fr-FR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  private toApiDate(value: Date | string): string {
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return String(value ?? '').trim();
   }
 }

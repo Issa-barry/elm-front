@@ -1,0 +1,377 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .commission-detail-dialog .p-dialog {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .commission-detail-dialog .p-dialog-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--p-surface-200);
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+:host ::ng-deep .commission-detail-dialog .p-dialog-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+:host ::ng-deep .commission-detail-dialog .p-dialog-content {
+  padding: 1.1rem 1.3rem 1.3rem;
+}
+
+.cd-loading {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.cd-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.cd-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.cd-meta-item {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cd-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.cd-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cd-sub {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.cd-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.cd-kpi {
+  border: 1px solid var(--p-surface-200);
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.cd-kpi--primary {
+  border-color: #6366f1;
+  background: linear-gradient(160deg, #eef2ff 0%, #f8faff 100%);
+}
+
+.cd-kpi-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cd-kpi-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #334155;
+}
+
+.cd-kpi--primary .cd-kpi-value {
+  color: #4f46e5;
+}
+
+.cd-status {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.cd-status-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.cd-divider {
+  margin: 0.2rem 0 0;
+}
+
+.cd-versements {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.cd-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cd-section-head h4 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cd-section-head span {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.cd-versement-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.cd-versement-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.8rem;
+}
+
+.cd-versement-main {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cd-versement-top {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.cd-versement-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cd-versement-role {
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+}
+
+.cd-versement-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.cd-versement-meta strong {
+  color: #334155;
+}
+
+.cd-restant strong {
+  color: #f97316;
+}
+
+.cd-versement-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.cd-empty {
+  border: 1px dashed var(--p-surface-300);
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+:host ::ng-deep .commission-versement-dialog .p-dialog {
+  border-radius: 16px;
+}
+
+:host ::ng-deep .commission-versement-dialog .p-dialog-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--p-surface-200);
+  background: #f8fafc;
+}
+
+:host ::ng-deep .commission-versement-dialog .p-dialog-content {
+  padding: 1.4rem 1.75rem 1.75rem;
+}
+
+.cvd-shell {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.cvd-head {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.9rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--p-surface-200);
+}
+
+.cvd-head i {
+  color: #4f46e5;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.cvd-head-body {
+  display: grid;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.cvd-head-title {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cvd-head-role {
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+}
+
+.cvd-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.cvd-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--p-surface-200);
+}
+
+.cvd-summary-item--restant {
+  border-color: #f97316;
+  background: #fff7ed;
+}
+
+.cvd-summary-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.cvd-summary-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.cvd-summary-item--restant .cvd-summary-value {
+  color: #f97316;
+}
+
+.cvd-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.cvd-field label {
+  font-size: 0.83rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.cvd-field label span {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.cvd-required {
+  color: #ef4444 !important;
+}
+
+.cvd-error {
+  color: #ef4444;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .cvd-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .cd-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cd-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cd-versement-card {
+    flex-direction: column;
+  }
+
+  .cd-versement-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

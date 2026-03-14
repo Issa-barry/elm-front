@@ -1,11 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
@@ -13,6 +11,11 @@ import { LayoutService } from '@/layout/service/layout.service';
 import { AppConfigurator } from '@/layout/components/app.configurator';
 import { AuthService } from '@/services/auth/auth.service';
 import { COUNTRIES } from '@/models/country.model';
+
+interface BeforeInstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
  
 @Component({
   selector: 'app-login',standalone: true,
@@ -23,8 +26,6 @@ import { COUNTRIES } from '@/models/country.model';
         FormsModule,
         RouterModule,
         AppConfigurator,
-        IconFieldModule,
-        InputIconModule,
         ButtonModule,
         SelectModule,
          ReactiveFormsModule,
@@ -33,10 +34,11 @@ import { COUNTRIES } from '@/models/country.model';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements OnInit, OnDestroy {
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private router = inject(Router);
+    private readonly isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined';
     layoutService = inject(LayoutService);
 
     isDarkTheme = computed(() => this.layoutService.isDarkTheme());
@@ -46,6 +48,28 @@ export class Login {
     showPassword = signal(false);
     errorMessage = signal<string | null>(null);
     fieldErrors = signal<Record<string, string[]>>({});
+    deferredInstallPrompt = signal<BeforeInstallPromptEvent | null>(null);
+    isIosDevice = signal(false);
+    isMobileDevice = signal(false);
+    isStandaloneMode = signal(false);
+    showIosInstructions = signal(false);
+    showManualInstallInstructions = signal(false);
+    installFeedback = signal<string | null>(null);
+    isInstalling = signal(false);
+    canInstallDirectly = computed(() => !!this.deferredInstallPrompt());
+    showInstallCard = computed(() => !this.isStandaloneMode());
+
+    private readonly onBeforeInstallPrompt = (event: Event): void => {
+        event.preventDefault();
+        this.deferredInstallPrompt.set(event as BeforeInstallPromptEvent);
+    };
+
+    private readonly onAppInstalled = (): void => {
+        this.isStandaloneMode.set(true);
+        this.deferredInstallPrompt.set(null);
+        this.showIosInstructions.set(false);
+        this.showManualInstallInstructions.set(false);
+    };
 
     // Code pays
     selectedCountry = COUNTRIES[0]; // Guinée par défaut
@@ -57,6 +81,112 @@ export class Login {
         password: ['', [Validators.required, Validators.minLength(6)]],
         remember_me: [false]
     });
+
+    ngOnInit(): void {
+        if (!this.isBrowser) {
+            return;
+        }
+
+        this.updateInstallState();
+        window.addEventListener('beforeinstallprompt', this.onBeforeInstallPrompt as EventListener);
+        window.addEventListener('appinstalled', this.onAppInstalled);
+    }
+
+    ngOnDestroy(): void {
+        if (!this.isBrowser) {
+            return;
+        }
+
+        window.removeEventListener('beforeinstallprompt', this.onBeforeInstallPrompt as EventListener);
+        window.removeEventListener('appinstalled', this.onAppInstalled);
+    }
+
+    async installApp(): Promise<'accepted' | 'dismissed' | 'unavailable' | 'error'> {
+        const promptEvent = this.deferredInstallPrompt();
+        if (!promptEvent) {
+            return 'unavailable';
+        }
+
+        this.isInstalling.set(true);
+        try {
+            await promptEvent.prompt();
+            const choice = await promptEvent.userChoice;
+            this.deferredInstallPrompt.set(null);
+            return choice.outcome === 'accepted' ? 'accepted' : 'dismissed';
+        } catch {
+            this.deferredInstallPrompt.set(null);
+            return 'error';
+        } finally {
+            this.isInstalling.set(false);
+        }
+    }
+
+    async handleInstallClick(): Promise<void> {
+        this.installFeedback.set(null);
+
+        if (this.isStandaloneMode()) {
+            this.installFeedback.set("L'application est deja installee sur cet appareil.");
+            return;
+        }
+
+        if (this.canInstallDirectly()) {
+            const result = await this.installApp();
+            if (result === 'accepted') {
+                this.installFeedback.set("Installation lancee.");
+                return;
+            }
+            if (result === 'dismissed') {
+                this.installFeedback.set('Installation annulee. Vous pouvez reessayer.');
+            } else {
+                this.installFeedback.set(
+                    "Installation directe indisponible. Utilisez les etapes ci-dessous."
+                );
+            }
+
+            if (this.isIosDevice()) {
+                this.showIosInstructions.set(true);
+                this.showManualInstallInstructions.set(false);
+                return;
+            }
+
+            this.showManualInstallInstructions.set(true);
+            this.showIosInstructions.set(false);
+            return;
+        }
+
+        if (this.isIosDevice()) {
+            this.showIosInstructions.set(true);
+            this.showManualInstallInstructions.set(false);
+            this.installFeedback.set("Safari ne permet pas d'installer en un clic.");
+            return;
+        }
+
+        this.showManualInstallInstructions.set(true);
+        this.showIosInstructions.set(false);
+
+        const host = this.isBrowser ? window.location.hostname : '';
+        const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+        if (isLocalhost) {
+            this.installFeedback.set(
+                "En local (localhost), l'installation directe est souvent desactivee. Testez en build production sur HTTPS."
+            );
+            return;
+        }
+
+        this.installFeedback.set(
+            "Votre navigateur ne propose pas l'installation directe sur cette page."
+        );
+    }
+
+    private updateInstallState(): void {
+        const standaloneMedia = window.matchMedia?.('(display-mode: standalone)').matches ?? false;
+        const iosStandalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
+        const userAgent = navigator.userAgent.toLowerCase();
+
+        this.isStandaloneMode.set(standaloneMedia || iosStandalone);
+        this.isIosDevice.set(/iphone|ipad|ipod/.test(userAgent));
+        this.isMobileDevice.set(/android|iphone|ipad|ipod|mobile/.test(userAgent));
+    }
 
     /**
      * Soumettre le formulaire de connexion

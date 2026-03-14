@@ -16,6 +16,7 @@
         />
       </p-iconfield>
       <p-button
+        *ngIf="isSuperAdmin()"
         icon="pi pi-plus"
         rounded
         pTooltip="Ajouter un rôle"
@@ -74,6 +75,7 @@
         <td>
           <div class="flex items-center justify-end gap-1">
             <p-button
+              *ngIf="isSuperAdmin()"
               icon="pi pi-trash"
               severity="danger"
               [text]="true"
@@ -86,7 +88,7 @@
               severity="secondary"
               [text]="true"
               [rounded]="true"
-              pTooltip="Modifier"
+              pTooltip="Voir / Modifier"
               (click)="editRole(item)"
             />
           </div>

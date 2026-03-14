@@ -38,7 +38,7 @@ import { UsineContextService } from '@/services/usine/usine-context.service';
 
                 <div class="mb-6 md:hidden">
                     <p class="text-xs font-semibold uppercase tracking-widest text-surface-400 m-0 mb-2">
-                        <i class="pi pi-building mr-1"></i> Usine
+                        <i class="pi pi-building mr-1"></i> Site
                     </p>
                     <app-usine-selector />
                 </div>
@@ -170,7 +170,10 @@ export class AppProfileSidebar {
 
     userRole = computed(() => {
         const user = this.authService.currentUser();
-        return user?.roles?.length ? user.roles.join(', ') : '';
+        if (!user) return '';
+        const roles = [...(user.roles ?? []), ...(user.role_names ?? [])];
+        const uniqueRoles = roles.filter((role, index) => role && roles.indexOf(role) === index);
+        return uniqueRoles.join(', ');
     });
 
     userName = computed(() => {

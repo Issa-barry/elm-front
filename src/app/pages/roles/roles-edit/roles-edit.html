@@ -12,12 +12,13 @@
                     class="role-name-input"
                     (blur)="saveName()"
                     (keydown.enter)="saveName()"
-                    [disabled]="originalName === 'admin'"
+                    [disabled]="originalName === 'admin_entreprise' || !isSuperAdmin()"
                 />
             </div>
             <p-skeleton *ngIf="loading" width="200px" height="2.2rem" />
         </div>
         <p-button
+            *ngIf="isSuperAdmin()"
             label="Sauvegarder"
             icon="pi pi-save"
             (click)="savePermissions()"
@@ -42,7 +43,7 @@
                     [ngModel]="isColumnAllChecked(action)"
                     (onChange)="toggleColumn(action)"
                     [indeterminate]="isColumnIndeterminate(action)"
-                    [disabled]="isColumnToggleDisabled(action)"
+                    [disabled]="isColumnToggleDisabled(action) || !isSuperAdmin()"
                 />
             </div>
         </div>
@@ -59,7 +60,7 @@
                     [ngModel]="isRowAllChecked(module)"
                     (onChange)="toggleRow(module)"
                     [indeterminate]="isRowIndeterminate(module)"
-                    [disabled]="isRowToggleDisabled(module)"
+                    [disabled]="isRowToggleDisabled(module) || !isSuperAdmin()"
                 />
                 <span class="permission-matrix__module-name">{{ module.module }}</span>
             </div>
@@ -68,7 +69,7 @@
                     [binary]="true"
                     [ngModel]="module.permissions[action]"
                     (onChange)="togglePermission(module, action)"
-                    [disabled]="!isActionAllowed(module, action)"
+                    [disabled]="!isActionAllowed(module, action) || !isSuperAdmin()"
                 />
             </div>
         </div>

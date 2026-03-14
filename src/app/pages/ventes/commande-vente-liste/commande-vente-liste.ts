@@ -1,8 +1,8 @@
 import { Component, HostListener, Inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { MenuItem, MessageService } from 'primeng/api';
 import { TableModule, Table } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -17,6 +17,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { DividerModule } from 'primeng/divider';
+import { Menu, MenuModule } from 'primeng/menu';
 
 import { CommandeMobileForm } from './commande-mobile-form/commande-mobile-form';
 import { CommissionDetailDialog } from '../commission-detail-dialog/commission-detail-dialog';
@@ -27,8 +28,8 @@ import { AuthService } from '@/services/auth/auth.service';
 import {
   CommandeVente,
   STATUT_FACTURE_LABELS,
-  STATUT_FACTURE_SEVERITY,
   StatutFacture,
+  StatutCommandeVente,
   StatutCommission,
   STATUT_COMMISSION_LABELS,
   STATUT_COMMISSION_SEVERITY,
@@ -49,6 +50,7 @@ interface ProduitData {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
@@ -64,6 +66,7 @@ interface ProduitData {
     InputIconModule,
     IconFieldModule,
     DividerModule,
+    MenuModule,
     CommandeMobileForm,
     PhoneFormatPipe,
     CommissionDetailDialog,
@@ -83,29 +86,51 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
   editMode = false;
   editingId: number | null = null;
 
-  deleteDialogVisible = false;
-  deleteLoading = false;
-  commandeToDelete: CommandeVente | null = null;
+  // Annulation
+  annulationDialogVisible = false;
+  annulationLoading = false;
+  commandeToAnnuler: CommandeVente | null = null;
+  motifAnnulation = '';
+
+  // Filtre statut
+  filtreStatut = signal<'all' | StatutFacture | 'cloturee'>('all');
+  statutOptions: { label: string; value: 'all' | StatutFacture | 'cloturee' }[] = [
+    { label: 'Toutes', value: 'all' },
+    { label: 'Impayées', value: 'impayee' },
+    { label: 'Partielles', value: 'partiel' },
+    { label: 'Payées', value: 'payee' },
+    { label: 'Annulées', value: 'annulee' },
+    { label: 'Clôturées', value: 'cloturee' },
+  ];
 
   createForm!: FormGroup;
   vehiculeOptions: { label: string; value: number }[] = [];
   produitOptions: { label: string; value: number }[] = [];
 
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('commandes.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('commandes.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('commandes.delete'); }
 
   // Commission detail dialog
   selectedCommissionId = signal<number | null>(null);
   commissionDetailVisible = signal(false);
+  desktopRowMenuItems: MenuItem[] = [];
   produitData = new Map<number, ProduitData>();
   defaultProduitId: number | null = null;
   mobileSearchQuery = '';
 
+  get commandesFiltreesParStatutFacture(): CommandeVente[] {
+    const statut = this.filtreStatut();
+    if (statut === 'all') return this.commandes();
+    if (statut === 'cloturee') return this.commandes().filter((c) => c.statut === 'cloturee');
+    return this.commandes().filter((c) => c.facture?.statut_facture === statut);
+  }
+
   get filteredCommandes(): CommandeVente[] {
     const q = this.mobileSearchQuery.trim().toLowerCase();
-    if (!q) return this.commandes();
-    return this.commandes().filter((c) =>
+    const base = this.commandesFiltreesParStatutFacture;
+    if (!q) return base;
+    return base.filter((c) =>
       c.reference?.toLowerCase().includes(q) ||
       c.vehicule?.nom_vehicule?.toLowerCase().includes(q) ||
       c.vehicule?.immatriculation?.toLowerCase().includes(q)
@@ -131,8 +156,51 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     return this.produitData.get(produitId)?.prixUsine ?? 0;
   }
 
+  isAnnulee(c: CommandeVente): boolean {
+    return c.statut === 'annulee';
+  }
+
+  isCloturee(c: CommandeVente): boolean {
+    return c.statut === 'cloturee';
+  }
+
   isLocked(c: CommandeVente): boolean {
-    return (c.facture?.montant_encaisse ?? 0) > 0;
+    return this.isAnnulee(c) || this.isCloturee(c) || (c.facture?.montant_encaisse ?? 0) > 0;
+  }
+
+  hasDesktopRowMenuActions(c: CommandeVente): boolean {
+    return this.getDesktopRowMenuItems(c).length > 0;
+  }
+
+  getDesktopRowMenuItems(c: CommandeVente): MenuItem[] {
+    const items: MenuItem[] = [];
+
+    if (this.canUpdate) {
+      items.push({
+        label: 'Modifier',
+        icon: 'pi pi-pen-to-square',
+        disabled: this.isLocked(c),
+        command: () => this.openEditDialog(c),
+      });
+    }
+
+    if (this.canDelete) {
+      items.push({
+        label: 'Annuler',
+        icon: 'pi pi-ban',
+        disabled: this.isAnnulee(c) || this.isCloturee(c),
+        command: () => this.openAnnulationDialog(c),
+      });
+    }
+
+    return items;
+  }
+
+  openDesktopRowMenu(event: Event, menu: Menu, c: CommandeVente): void {
+    event.stopPropagation();
+    this.desktopRowMenuItems = this.getDesktopRowMenuItems(c);
+    if (this.desktopRowMenuItems.length === 0) return;
+    menu.toggle(event);
   }
 
   constructor(
@@ -145,9 +213,6 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     private router: Router,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.canCreate = this.authService.hasPermission('commandes.create');
-    this.canUpdate = this.authService.hasPermission('commandes.update');
-    this.canDelete = this.authService.hasPermission('commandes.delete');
   }
 
   @HostListener('window:resize')
@@ -259,6 +324,16 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     this.dialogVisible = true;
   }
 
+  onMobileEditAction(event: Event, c: CommandeVente): void {
+    event.stopPropagation();
+    this.openEditDialog(c);
+  }
+
+  onMobileAnnulationAction(event: Event, c: CommandeVente): void {
+    event.stopPropagation();
+    this.openAnnulationDialog(c);
+  }
+
   onSaveCommande() {
     this.createForm.markAllAsTouched();
     if (this.createForm.invalid || this.saving) return;
@@ -321,32 +396,36 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     });
   }
 
-  openDeleteDialog(c: CommandeVente) {
-    this.commandeToDelete = c;
-    this.deleteDialogVisible = true;
+  openAnnulationDialog(c: CommandeVente) {
+    this.commandeToAnnuler = c;
+    this.motifAnnulation = '';
+    this.annulationDialogVisible = true;
   }
 
-  confirmerSuppression() {
-    if (!this.commandeToDelete || this.deleteLoading) return;
-    this.deleteLoading = true;
-    this.commandeService.deleteCommande(this.commandeToDelete.id).subscribe({
+  confirmerAnnulation() {
+    if (!this.commandeToAnnuler || this.annulationLoading || !this.motifAnnulation.trim()) return;
+    this.annulationLoading = true;
+    this.commandeService.annulerCommande(this.commandeToAnnuler.id, { motif_annulation: this.motifAnnulation.trim() }).subscribe({
       next: () => {
-        this.deleteLoading = false;
-        this.deleteDialogVisible = false;
+        this.annulationLoading = false;
+        this.annulationDialogVisible = false;
         this.messageService.add({
           severity: 'success',
-          summary: 'Commande supprimée',
-          detail: 'La commande a été supprimée avec succès.',
-          life: 3000,
+          summary: 'Commande annulée',
+          detail: 'La commande a été annulée et les stocks ont été restaurés.',
+          life: 4000,
         });
         this.loadCommandes();
       },
       error: (err) => {
-        this.deleteLoading = false;
-        this.deleteDialogVisible = false;
-        this.showApiError(err, 'supprimer la commande');
+        this.annulationLoading = false;
+        this.showApiError(err, 'annuler la commande');
       },
     });
+  }
+
+  setFiltreStatut(statut: 'all' | StatutFacture | 'cloturee'): void {
+    this.filtreStatut.set(statut);
   }
 
   loadCommandes() {
@@ -445,8 +524,14 @@ export class CommandeVenteListe implements OnInit, OnDestroy {
     return STATUT_FACTURE_LABELS[s] ?? s;
   }
 
-  getStatutSeverity(s: StatutFacture) {
-    return STATUT_FACTURE_SEVERITY[s] ?? 'info';
+  getStatutDotClass(s: StatutFacture): string {
+    const map: Record<StatutFacture, string> = {
+      impayee: 'cv-status-dot--impayee',
+      partiel: 'cv-status-dot--partiel',
+      payee: 'cv-status-dot--payee',
+      annulee: 'cv-status-dot--annulee',
+    };
+    return map[s] ?? 'cv-status-dot--annulee';
   }
 
   formatMontant(n: string | number | undefined | null): string {

@@ -17,7 +17,8 @@
                 pInputText
                 class="w-full"
                 [(ngModel)]="idRouleauPacking"
-                [disabled]="loading || saving"
+                [readonly]="true"
+                [disabled]="loading"
               />
             </div>
 

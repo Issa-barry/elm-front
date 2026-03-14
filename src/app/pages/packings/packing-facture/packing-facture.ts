@@ -40,7 +40,7 @@ export class PackingFacture implements OnInit {
   encaissementSaving = false;
   backNavigating = false;
   printLoading = false;
-  canCreateVersement = false;
+  get canCreateVersement(): boolean { return this.authService.hasPermission('versements.create'); }
   packing: Packing | null = null;
   usineFacture: Usine | null = null;
   versements: Versement[] = [];
@@ -63,7 +63,6 @@ export class PackingFacture implements OnInit {
     private authService: AuthService,
     private messageService: MessageService,
   ) {
-    this.canCreateVersement = this.authService.hasPermission('versements.create');
   }
 
   ngOnInit(): void {

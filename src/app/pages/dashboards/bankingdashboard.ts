@@ -20,7 +20,7 @@ import { ProductService } from '@/pages/service/product.service'
     ],
     providers: [ProductService],
     template: `
-        <div class="grid grid-cols-12 gap-8">
+        <div class="grid grid-cols-12 gap-8"> 
             <app-header-widget class="col-span-12" />
             <app-stats-banking-widget />
 

@@ -4,3 +4,56 @@
 @use 'primeicons/primeicons.css';
 @use './demo/demo.scss';
 
+/* Standard statut tableau: point colore + texte lisible light/dark, sans fond */
+.app-table-status.p-tag {
+  background: transparent !important;
+  border: none !important;
+  color: var(--p-surface-900) !important;
+  padding: 0 !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1.15;
+}
+
+.app-table-status.p-tag .p-tag-value {
+  color: inherit !important;
+}
+
+.app-table-status.p-tag .p-tag-icon {
+  display: none !important;
+}
+
+.app-table-status.p-tag::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  margin-right: 0.45rem;
+  flex-shrink: 0;
+  background: #94a3b8;
+}
+
+.app-table-status.p-tag.p-tag-success::before {
+  background: #22c55e;
+}
+
+.app-table-status.p-tag.p-tag-info::before {
+  background: #3b82f6;
+}
+
+.app-table-status.p-tag.p-tag-warn::before {
+  background: #f59e0b;
+}
+
+.app-table-status.p-tag.p-tag-danger::before {
+  background: #ef4444;
+}
+
+.app-table-status.p-tag.p-tag-secondary::before {
+  background: #94a3b8;
+}
+
+.app-dark .app-table-status.p-tag {
+  color: var(--p-surface-0) !important;
+}

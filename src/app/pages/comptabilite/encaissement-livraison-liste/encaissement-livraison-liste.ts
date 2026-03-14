@@ -62,7 +62,7 @@ export class EncaissementLivraisonListe implements OnInit {
   createForm!: FormGroup;
   modePaiementOptions = MODE_PAIEMENT_OPTIONS;
 
-  canCreate = false;
+  get canCreate(): boolean { return this.authService.hasPermission('encaissements.create'); }
 
   // Stats calculées (montant est une string décimale côté API)
   totalEncaisse = computed(() =>
@@ -75,7 +75,6 @@ export class EncaissementLivraisonListe implements OnInit {
     private authService: AuthService,
     private messageService: MessageService
   ) {
-    this.canCreate = this.authService.hasPermission('encaissements.create');
   }
 
   ngOnInit() {

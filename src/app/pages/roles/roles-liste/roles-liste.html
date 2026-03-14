@@ -13,7 +13,7 @@
             />
         </ng-template>
         <ng-template #end>
-            <p-button label="Ajouter un rôle" icon="pi pi-plus" severity="secondary" (onClick)="openCreateDialog()" />
+            <p-button *ngIf="isSuperAdmin()" label="Ajouter un rôle" icon="pi pi-plus" severity="secondary" (onClick)="openCreateDialog()" />
         </ng-template>
     </p-toolbar>
 
@@ -72,6 +72,7 @@
                 <td class="cell-secondary">{{ formatDate(item.role.created_at) }}</td>
                 <td class="text-center">
                     <p-button
+                        *ngIf="isSuperAdmin()"
                         icon="pi pi-trash"
                         severity="danger"
                         [text]="true"
@@ -85,7 +86,7 @@
                         severity="secondary"
                         [text]="true"
                         [rounded]="true"
-                        pTooltip="Modifier"
+                        pTooltip="Voir / Modifier"
                         (click)="editRole(item)"
                     />
                 </td>

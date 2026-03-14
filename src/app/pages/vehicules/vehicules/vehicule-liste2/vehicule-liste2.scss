@@ -6,6 +6,55 @@
   display: none;
 }
 
+@media screen and (min-width: 769px) {
+  .vehicule-primary-col {
+    flex: 1.35;
+  }
+
+  .vehicule-meta-col {
+    flex: 1;
+  }
+
+  .vehicule-photo-col {
+    width: 5.75rem;
+    min-width: 5.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vehicule-photo-lg {
+    width: 5.75rem;
+    height: 3.75rem;
+    border-radius: 0.75rem;
+    object-fit: cover;
+    background: var(--p-surface-100);
+    border: 1px solid var(--p-surface-200);
+    padding: 0.125rem;
+    display: block;
+  }
+
+  .vehicule-photo-fallback {
+    width: 5.75rem;
+    height: 3.75rem;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #5f6bff 0%, #7c8aff 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  :host-context(.app-dark) {
+    .vehicule-photo-lg {
+      background: var(--p-surface-800);
+      border-color: var(--p-surface-600);
+    }
+  }
+}
+
 @media screen and (max-width: 768px) {
   :host {
     --mobile-primary: #5f6bff;

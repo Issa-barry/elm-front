@@ -247,7 +247,7 @@
             <p-tag
               [value]="getStatutLabel(p.statut)"
               [severity]="getStatutSeverity(p.statut)"
-              styleClass="mobile-status-tag"
+              styleClass="mobile-status-tag app-table-status"
             />
             <span class="mobile-card-amounts">
               {{ p.nb_rouleaux }} rouleau{{ p.nb_rouleaux !== 1 ? 'x' : '' }} &middot; {{ formatCurrency(p.montant) }}
@@ -350,6 +350,7 @@
 
 <!-- DESKTOP -->
 <div class="card packing-desktop">
+  <p-menu #rowActionsMenu [model]="desktopRowMenuItems" [popup]="true" appendTo="body"></p-menu>
   <p-table
     [value]="filteredPackings()"
     [loading]="loading"
@@ -491,16 +492,14 @@
         <td class="text-sm">{{ formatDateDisplay(p.date) }}</td>
         <td class="text-sm font-medium">{{ p.nb_rouleaux }}</td>
         <td class="text-sm font-medium">{{ formatCurrency(p.montant) }}</td>
-        <td class="text-sm font-medium text-green-600">{{ formatCurrency(p.montant_verse) }}</td>
-        <td class="text-sm font-medium">
-          <span [class.text-orange-500]="p.montant_restant > 0">{{ formatCurrency(p.montant_restant) }}</span>
-        </td>
+        <td class="text-sm font-medium">{{ formatCurrency(p.montant_verse) }}</td>
+        <td class="text-sm font-medium">{{ formatCurrency(p.montant_restant) }}</td>
         <td>
-          <p-tag [value]="getStatutLabel(p.statut)" [severity]="getStatutSeverity(p.statut)" />
+          <p-tag [value]="getStatutLabel(p.statut)" [severity]="getStatutSeverity(p.statut)" styleClass="app-table-status" />
         </td>
         @if (hasActionsColumn) {
-          <td>
-            <div class="flex gap-1 justify-center">
+          <td class="packing-actions-cell">
+            <div class="packing-actions-row">
               @if (canViewFacture) {
                 <button
                 pButton
@@ -509,68 +508,26 @@
                 severity="primary"
                 text
                 rounded
-                size="small"
-                pTooltip="Voir facture"
+                  size="small"
+                  pTooltip="Voir facture"
+                  class="packing-action-btn"
                   tooltipPosition="top"
                   (click)="goFacture(p)"
                 ></button>
               }
-              @if (canReadVersement) {
-                <button
-                pButton
-                type="button"
-                icon="pi pi-history"
-                severity="secondary"
-                text
-                rounded
-                size="small"
-                pTooltip="Historique versements"
-                  tooltipPosition="top"
-                  (click)="openHistorique(p)"
-                ></button>
-              }
-              @if (canEditPacking(p)) {
+              @if (hasDesktopRowMenuActions(p)) {
                 <button
                   pButton
-                  appConsolidatedDisable
                   type="button"
-                  icon="pi pi-pen-to-square"
+                  icon="pi pi-ellipsis-v"
+                  severity="secondary"
                   text
                   rounded
                   size="small"
-                  pTooltip="Modifier"
+                  class="packing-action-btn"
+                  pTooltip="Plus d'actions"
                   tooltipPosition="top"
-                  (click)="goEdit(p)"
-                ></button>
-              }
-              @if (canCancelPacking(p)) {
-                <button
-                  pButton
-                  appConsolidatedDisable
-                  type="button"
-                  icon="pi pi-ban"
-                  severity="warn"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Annuler"
-                  tooltipPosition="top"
-                  (click)="cancelPacking(p)"
-                ></button>
-              }
-              @if (canDelete && p.statut === 'impayee') {
-                <button
-                  pButton
-                  appConsolidatedDisable
-                  type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  text
-                  rounded
-                  size="small"
-                  pTooltip="Supprimer"
-                  tooltipPosition="top"
-                  (click)="deletePacking(p)"
+                  (click)="openDesktopRowMenu($event, rowActionsMenu, p)"
                 ></button>
               }
             </div>

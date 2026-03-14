@@ -2,6 +2,24 @@
   display: block;
 }
 
+.packing-actions-cell {
+  text-align: center;
+}
+
+.packing-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .packing-action-btn.p-button {
+  width: 2rem;
+  height: 2rem;
+}
+
 .packing-mobile-app {
   display: none;
 }

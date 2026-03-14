@@ -269,10 +269,13 @@ export class AuthService {
 
     const roles = this.mergeUniqueStrings(
       this.normalizeStringList(source?.roles),
-      this.normalizeStringList(payload?.roles)
+      this.normalizeStringList(source?.role_names),
+      this.normalizeStringList(payload?.roles),
+      this.normalizeStringList(payload?.role_names)
     );
     if (roles.length > 0) {
       user.roles = roles;
+      user.role_names = roles;
     }
 
     return user;
@@ -392,10 +395,53 @@ export class AuthService {
    * Vérifier si l'utilisateur possède une permission
    */
   hasPermission(permission: string): boolean {
+    return this.hasAnyPermission([permission]);
+  }
+
+  hasAnyPermission(requiredPermissions: string[]): boolean {
+    if (requiredPermissions.length === 0) return true;
+
     const user = this.currentUser();
     if (!user) return false;
+
+    if (this.hasAnyRole(['super_admin', 'super-admin'])) {
+      return true;
+    }
+
     const permissions = user.permissions ?? [];
-    if (permissions.length === 0) return true; // Fallback permissif
-    return permissions.includes(permission);
+    if (permissions.length === 0) return false;
+
+    const normalizedCurrent = new Set(
+      permissions.map((permission) => this.normalizePermission(permission)).filter((permission) => permission.length > 0)
+    );
+
+    return requiredPermissions.some((permission) => normalizedCurrent.has(this.normalizePermission(permission)));
+  }
+
+  hasRole(role: string): boolean {
+    return this.hasAnyRole([role]);
+  }
+
+  hasAnyRole(requiredRoles: string[]): boolean {
+    if (requiredRoles.length === 0) return true;
+
+    const user = this.currentUser();
+    if (!user) return false;
+
+    const currentRoles = new Set(
+      [...(user.roles ?? []), ...(user.role_names ?? [])]
+        .map((roleItem) => this.normalizeRole(roleItem))
+        .filter((roleItem) => roleItem.length > 0)
+    );
+
+    return requiredRoles.some((roleItem) => currentRoles.has(this.normalizeRole(roleItem)));
+  }
+
+  private normalizeRole(value: string): string {
+    return value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  private normalizePermission(value: string): string {
+    return value.trim().toLowerCase();
   }
 }

@@ -56,7 +56,8 @@
                                     "maximumError": "40kb"
                                 }
                             ],
-                            "outputHashing": "all"
+                            "outputHashing": "all",
+                            "serviceWorker": "ngsw-config.json"
                         },
                         "preprod": {
                             "fileReplacements": [

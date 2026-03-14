@@ -74,9 +74,9 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     { label: 'Inactif', command: () => this.applyMobileStatusFilter(false) },
   ];
 
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('users.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('users.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('users.delete'); }
 
   constructor(
     private userService: UserService,
@@ -87,10 +87,6 @@ export class UtilisateursListe implements OnInit, OnDestroy {
     private usineContext: UsineContextService,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.canCreate = this.authService.hasPermission('users.create');
-    this.canUpdate = this.authService.hasPermission('users.update');
-    this.canDelete = this.authService.hasPermission('users.delete');
-
     effect(() => {
       this.usineContext.currentUsineId();
       if (!this.readyForUsineReload) return;

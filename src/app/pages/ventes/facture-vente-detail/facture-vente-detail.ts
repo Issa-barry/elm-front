@@ -66,8 +66,8 @@ export class FactureVenteDetail implements OnInit {
 
   annulerDialogVisible = false;
 
-  canEncaissement = false;
-  canUpdate = false;
+  get canEncaissement(): boolean { return this.authService.hasPermission('encaissements.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('factures-livraisons.update'); }
 
   constructor(
     private fb: FormBuilder,
@@ -77,8 +77,6 @@ export class FactureVenteDetail implements OnInit {
     private authService: AuthService,
     private messageService: MessageService
   ) {
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
-    this.canUpdate = this.authService.hasPermission('factures-livraisons.update');
   }
 
   ngOnInit() {

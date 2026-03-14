@@ -97,10 +97,10 @@ export class ProduitsListe implements OnInit, OnDestroy {
     exportColumns!: ExportColumn[];
     cols!: Column[];
 
-    canCreate = false;
-    canUpdate = false;
-    canDelete = false;
-    canManageSystemDefinition = false;
+    get canCreate(): boolean { return this.authService.hasPermission('produits.create'); }
+    get canUpdate(): boolean { return this.authService.hasPermission('produits.update'); }
+    get canDelete(): boolean { return this.authService.hasPermission('produits.delete'); }
+    get canManageSystemDefinition(): boolean { return this.hasSystemDefinitionAccess(); }
 
     // Mobile pagination
     mobileSearchTerm = '';
@@ -136,11 +136,6 @@ export class ProduitsListe implements OnInit, OnDestroy {
         private usineContext: UsineContextService,
         @Inject(DOCUMENT) private document: Document
     ) {
-        this.canCreate = this.authService.hasPermission('produits.create');
-        this.canUpdate = this.authService.hasPermission('produits.update');
-        this.canDelete = this.authService.hasPermission('produits.delete');
-        this.canManageSystemDefinition = this.hasSystemDefinitionAccess();
-
         effect(() => {
             this.usineContext.currentUsineId(); // dépendance signal usine
             if (!this.readyForUsineReload) return;
@@ -644,11 +639,11 @@ export class ProduitsListe implements OnInit, OnDestroy {
         const user = this.authService.currentUser();
         if (!user) return false;
 
-        const roles = [...(user.roles ?? []), ...(user.role_names ?? [])]
-            .map((role) => String(role).trim().toLowerCase())
+        const normalizedRoles = [...(user.roles ?? []), ...(user.role_names ?? [])]
+            .map((role) => String(role).trim().toLowerCase().replace(/[\s_-]/g, ''))
             .filter((role) => role.length > 0);
 
-        return roles.includes('admin') || roles.includes('manager') || roles.includes('super-admin');
+        return normalizedRoles.includes('adminentreprise') || normalizedRoles.includes('manager') || normalizedRoles.includes('superadmin');
     }
 
     private resetMobilePagination(): void {

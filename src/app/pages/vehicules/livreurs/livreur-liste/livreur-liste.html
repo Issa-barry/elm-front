@@ -58,9 +58,9 @@
           <div class="mobile-card-meta">{{ l.phone | phoneFormat }}</div>
           <div class="mobile-card-footer">
             @if (l.is_active) {
-              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag" />
+              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag app-table-status" />
             } @else {
-              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag" />
+              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag app-table-status" />
             }
           </div>
         </div>
@@ -162,9 +162,9 @@
         <td class="text-sm">{{ l.phone | phoneFormat }}</td>
         <td>
           @if (l.is_active) {
-            <p-tag value="Actif" severity="success" />
+            <p-tag value="Actif" severity="success" styleClass="app-table-status" />
           } @else {
-            <p-tag value="Inactif" severity="secondary" />
+            <p-tag value="Inactif" severity="secondary" styleClass="app-table-status" />
           }
         </td>
         <td class="text-surface-500 text-sm">

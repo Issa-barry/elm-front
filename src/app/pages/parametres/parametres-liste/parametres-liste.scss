@@ -1,0 +1,117 @@
+:host {
+  display: block;
+}
+
+.parametres-page {
+  padding: 1rem;
+}
+
+.parametres-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.parametres-mobile-nav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.parametres-desktop-nav {
+  display: none;
+}
+
+.parametres-mobile-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.parametres-nav-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--p-surface-300);
+  background: var(--p-surface-0);
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.parametres-nav-chip--active {
+  border-color: var(--p-primary-500);
+  background: color-mix(in srgb, var(--p-primary-500) 12%, transparent);
+  color: var(--p-primary-600);
+}
+
+.parametres-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.parametres-nav-item {
+  margin-left: -2px;
+  border-left: 2px solid var(--p-surface-300);
+}
+
+.parametres-nav-item--active {
+  border-left-color: var(--p-primary-color);
+}
+
+.parametres-nav-link {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.parametres-content {
+  border: 1px solid var(--p-surface-200);
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .parametres-page {
+    padding: 1.5rem;
+  }
+
+  .parametres-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .parametres-mobile-nav {
+    display: none;
+  }
+
+  .parametres-desktop-nav {
+    display: block;
+  }
+
+  .parametres-page {
+    padding: 2rem 2.5rem;
+  }
+
+  .parametres-layout {
+    display: grid;
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.25rem;
+  }
+
+  .parametres-content {
+    padding: 2rem;
+  }
+}

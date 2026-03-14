@@ -51,9 +51,9 @@ import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 export class VehiculeListe implements OnInit {
   vehicules = signal<Vehicule[]>([]);
   loading = false;
-  canCreate = false;
-  canUpdate = false;
-  canDelete = false;
+  get canCreate(): boolean { return this.authService.hasPermission('vehicules.create'); }
+  get canUpdate(): boolean { return this.authService.hasPermission('vehicules.update'); }
+  get canDelete(): boolean { return this.authService.hasPermission('vehicules.delete'); }
 
   // ─── Mobile ────────────────────────────────────────────────────────────────
   searchQuery = signal<string>('');
@@ -75,9 +75,6 @@ export class VehiculeListe implements OnInit {
     private authService: AuthService,
     private router: Router,
   ) {
-    this.canCreate = this.authService.hasPermission('vehicules.create');
-    this.canUpdate = this.authService.hasPermission('vehicules.update');
-    this.canDelete = this.authService.hasPermission('vehicules.delete');
   }
 
   ngOnInit() {

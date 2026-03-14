@@ -1,0 +1,21 @@
+<div class="card site-detail-page">
+  <div class="flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <h2 class="m-0 text-2xl font-semibold">Detail site</h2>
+    <button pButton type="button" icon="pi pi-arrow-left" label="Retour" class="p-button-text" routerLink="/sites"></button>
+  </div>
+
+  <div *ngIf="loading" class="text-color-secondary py-4">Chargement...</div>
+  <div *ngIf="!loading && errorMessage" class="text-red-500 py-4">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && site" class="grid">
+    <div class="col-12 md:col-6"><strong>Nom:</strong> {{ site.nom }}</div>
+    <div class="col-12 md:col-6"><strong>Code:</strong> {{ site.code || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Type:</strong> {{ site.type || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Statut:</strong> {{ site.statut || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Pays:</strong> {{ site.pays || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Ville:</strong> {{ site.ville || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Quartier:</strong> {{ site.quartier || '-' }}</div>
+    <div class="col-12 md:col-6"><strong>Localisation:</strong> {{ site.localisation || '-' }}</div>
+    <div class="col-12"><strong>Description:</strong> {{ site.description || '-' }}</div>
+  </div>
+</div>

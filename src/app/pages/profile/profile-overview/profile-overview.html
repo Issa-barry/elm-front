@@ -1,0 +1,130 @@
+<div class="profile-shell">
+  <section class="profile-hero card">
+    <div class="profile-hero__left">
+      <div class="profile-avatar">{{ userInitials() }}</div>
+
+      <div class="profile-hero__identity">
+        <p class="profile-hero__eyebrow">Compte</p>
+        <h1 class="profile-hero__title">{{ userFullName() }}</h1>
+        <p class="profile-hero__subtitle">Vue session, roles, permissions et contexte site.</p>
+
+        <div class="profile-hero__meta" *ngIf="user() as current">
+          <span class="profile-chip profile-chip--soft">{{ current.type || '-' }}</span>
+          <span class="profile-chip">Ref: {{ current.reference || '-' }}</span>
+          <span class="profile-chip">Contexte: {{ contextLabel() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-hero__stats">
+      <div class="profile-stat">
+        <span class="profile-stat__value">{{ roles().length }}</span>
+        <span class="profile-stat__label">Role(s)</span>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat__value">{{ permissions().length }}</span>
+        <span class="profile-stat__label">Permission(s)</span>
+      </div>
+      <div class="profile-stat">
+        <span class="profile-stat__value">{{ accessibleSites().length }}</span>
+        <span class="profile-stat__label">Site(s)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="profile-grid">
+    <article class="card profile-panel">
+      <header class="profile-panel__header">
+        <h2>Informations personnelles</h2>
+      </header>
+
+      <div *ngIf="user() as current; else noUser" class="profile-info-list">
+        <div class="profile-info-row">
+          <span class="profile-info-row__label">Nom complet</span>
+          <span class="profile-info-row__value">{{ userFullName() }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="profile-info-row__label">Telephone</span>
+          <span class="profile-info-row__value">{{ current.phone || '-' }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="profile-info-row__label">Email</span>
+          <span class="profile-info-row__value">{{ current.email || '-' }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="profile-info-row__label">Type de compte</span>
+          <span class="profile-info-row__value">{{ current.type || '-' }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="profile-info-row__label">Site courant</span>
+          <span class="profile-info-row__value">{{ contextLabel() }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="profile-info-row__label">Site par defaut</span>
+          <span class="profile-info-row__value">{{ defaultSiteId() ?? '-' }}</span>
+        </div>
+      </div>
+
+      <ng-template #noUser>
+        <p class="profile-empty">Aucune session utilisateur detectee.</p>
+      </ng-template>
+    </article>
+
+    <article class="card profile-panel">
+      <header class="profile-panel__header">
+        <h2>Roles</h2>
+      </header>
+
+      <div class="profile-tags" *ngIf="roles().length > 0; else noRoles">
+        <p-tag *ngFor="let role of roles()" [value]="formatRole(role)" severity="info"></p-tag>
+      </div>
+
+      <ng-template #noRoles>
+        <p class="profile-empty">Aucun role recu par l'API.</p>
+      </ng-template>
+    </article>
+  </section>
+
+  <section class="profile-grid profile-grid--bottom">
+    <article class="card profile-panel profile-panel--permissions">
+      <header class="profile-panel__header">
+        <h2>Permissions</h2>
+      </header>
+
+      <div *ngIf="permissionGroups().length > 0; else noPermissions" class="permission-groups">
+        <div class="permission-group" *ngFor="let group of permissionGroups()">
+          <h3>{{ formatRole(group.module) }}</h3>
+          <div class="permission-group__items">
+            <span class="permission-pill" *ngFor="let item of group.permissions">{{ item }}</span>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noPermissions>
+        <p class="profile-empty">Aucune permission remontee par l'API.</p>
+      </ng-template>
+    </article>
+
+    <article class="card profile-panel">
+      <header class="profile-panel__header">
+        <h2>Sites accessibles</h2>
+      </header>
+
+      <div *ngIf="accessibleSites().length > 0; else noSite" class="site-grid">
+        <div class="site-item" *ngFor="let site of accessibleSites()">
+          <div class="site-item__top">
+            <h3>{{ site.nom }}</h3>
+            <span class="site-item__badge" *ngIf="site.id === defaultSiteId()">Par defaut</span>
+          </div>
+          <p>Code: {{ site.code || '-' }}</p>
+          <p>Type: {{ site.type || '-' }}</p>
+          <p>Statut: {{ site.statut || '-' }}</p>
+        </div>
+      </div>
+
+      <ng-template #noSite>
+        <p class="profile-empty">Aucun site accessible.</p>
+      </ng-template>
+    </article>
+  </section>
+</div>

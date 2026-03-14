@@ -1,0 +1,173 @@
+<div class="card organisations-page">
+  <div class="org-page-header">
+    <div class="org-page-header__text">
+      <h2 class="m-0 text-2xl font-semibold">Organisations</h2>
+      <p class="m-0 text-color-secondary">Gestion des organisations (super admin).</p>
+    </div>
+    <div class="org-page-header__actions" *ngIf="canCreate()">
+      <button
+        pButton
+        type="button"
+        icon="pi pi-plus"
+        label="Nouvelle organisation"
+        class="org-create-btn"
+        (click)="openCreateDialog()"
+      ></button>
+    </div>
+  </div>
+
+  <p-table [value]="organisations" [loading]="loading" dataKey="id" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nom</th>
+        <th>Code</th>
+        <th>Forfait</th>
+        <th>Statut</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td class="font-semibold">{{ item.nom }}</td>
+        <td>
+          <code class="text-sm border-round px-2 py-1 surface-100 text-color-secondary">{{ item.code }}</code>
+        </td>
+        <td>
+          <span
+            class="border-round px-2 text-xs font-semibold white-space-nowrap bg-gray-100 text-gray-600"
+            style="padding-top: 3px; padding-bottom: 3px;"
+            [ngClass]="{
+              'bg-gray-100 text-gray-700':     item.forfait?.slug === 'starter',
+              'bg-blue-100 text-blue-700':     item.forfait?.slug === 'standard',
+              'bg-yellow-100 text-yellow-700': item.forfait?.slug === 'premium'
+            }"
+          >{{ item.forfait?.nom ?? 'Aucun' }}</span>
+        </td>
+        <td>
+          <span
+            class="border-round px-2 text-xs font-semibold white-space-nowrap"
+            style="padding-top: 3px; padding-bottom: 3px;"
+            [ngClass]="{
+              'bg-green-100 text-green-700':   item.statut === 'active',
+              'bg-gray-100 text-gray-600':     item.statut === 'inactive' || item.statut === 'archived',
+              'bg-orange-100 text-orange-700': item.statut === 'suspended'
+            }"
+          >{{ getStatutLabel(item.statut) }}</span>
+        </td>
+        <td>{{ item.email || '—' }}</td>
+        <td>{{ item.phone || '—' }}</td>
+        <td class="text-right">
+          <div class="flex justify-content-end gap-2">
+            <button pButton pRipple type="button" class="p-button-text p-button-sm"
+              icon="pi pi-eye" pTooltip="Voir le détail"
+              [routerLink]="['/organisations', item.id]"></button>
+            <button *ngIf="canUpdate()" pButton pRipple type="button" class="p-button-text p-button-sm"
+              icon="pi pi-pencil" pTooltip="Modifier"
+              (click)="openEditDialog(item)"></button>
+            <button *ngIf="canDelete()" pButton pRipple type="button" class="p-button-text p-button-danger p-button-sm"
+              icon="pi pi-trash" pTooltip="Supprimer"
+              (click)="confirmDelete(item)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center text-color-secondary py-5">
+          Aucune organisation disponible.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [header]="dialogTitle"
+  [modal]="true"
+  [style]="{ width: '48rem', maxWidth: '96vw' }"
+  styleClass="org-dialog"
+  [draggable]="false"
+  (onHide)="closeDialog()"
+>
+  <form class="grid org-form-grid" [formGroup]="organisationForm" (ngSubmit)="submitForm()">
+
+    <div class="col-12">
+      <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Identité</p>
+    </div>
+    <div class="col-12 md:col-6">
+      <label class="block mb-2 font-medium">Nom <span class="text-red-500">*</span></label>
+      <input pInputText type="text" class="w-full" formControlName="nom" placeholder="Ex: ELM Guinée" />
+    </div>
+    <div class="col-12 md:col-6">
+      <label class="block mb-2 font-medium">Code <span class="text-red-500">*</span></label>
+      <input pInputText type="text" class="w-full" formControlName="code" placeholder="Ex: ELM-GN" />
+    </div>
+
+    <div class="col-12 mt-2">
+      <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Contact</p>
+    </div>
+    <div class="col-12 md:col-6">
+      <label class="block mb-2 font-medium">Email</label>
+      <input pInputText type="email" class="w-full" formControlName="email" placeholder="contact@exemple.com" />
+    </div>
+    <div class="col-12 md:col-6">
+      <label class="block mb-2 font-medium">Téléphone</label>
+      <input pInputText type="text" class="w-full" formControlName="phone" placeholder="+224 6X XX XX XX" />
+    </div>
+
+    <div class="col-12 mt-2">
+      <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Localisation</p>
+    </div>
+    <div class="col-12 md:col-4">
+      <label class="block mb-2 font-medium">Pays</label>
+      <input pInputText type="text" class="w-full" formControlName="pays" />
+    </div>
+    <div class="col-12 md:col-4">
+      <label class="block mb-2 font-medium">Ville</label>
+      <input pInputText type="text" class="w-full" formControlName="ville" />
+    </div>
+    <div class="col-12 md:col-4">
+      <label class="block mb-2 font-medium">Quartier</label>
+      <input pInputText type="text" class="w-full" formControlName="quartier" />
+    </div>
+    <div class="col-12">
+      <label class="block mb-2 font-medium">Adresse</label>
+      <input pInputText type="text" class="w-full" formControlName="adresse" />
+    </div>
+    <div class="col-12">
+      <label class="block mb-2 font-medium">Description</label>
+      <textarea pTextarea rows="2" class="w-full" formControlName="description"></textarea>
+    </div>
+
+    <div class="col-12 mt-2">
+      <p class="m-0 mb-3 text-sm font-semibold text-color-secondary uppercase" style="letter-spacing:.05em">Configuration</p>
+    </div>
+    <div class="col-12 md:col-6">
+      <label class="block mb-2 font-medium">Statut</label>
+      <p-select
+        [options]="statutOptions" formControlName="statut"
+        optionLabel="label" optionValue="value" styleClass="w-full"
+      />
+    </div>
+    <div class="col-12 md:col-6">
+      <label class="block mb-2 font-medium">Forfait</label>
+      <p-select
+        [options]="forfaitSelectOptions" formControlName="forfait_id"
+        optionLabel="label" optionValue="value" styleClass="w-full"
+        placeholder="Aucun forfait"
+      />
+    </div>
+
+    <div class="col-12 org-actions">
+      <button pButton type="button" class="p-button-text" label="Annuler" (click)="closeDialog()"></button>
+      <button pButton type="submit" icon="pi pi-save" [loading]="saving" label="Enregistrer"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

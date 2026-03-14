@@ -1,57 +1,177 @@
 <p-toast />
 
-<!-- ── Widgets statistiques ──────────────────────────────────────────── -->
-<app-commission-stats-widget [refreshTrigger]="statsRefreshTrigger()" />
+@if (isMobile()) {
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MOBILE  (≤ 768 px)
+     ══════════════════════════════════════════════════════════════════ -->
+<div class="cv-app">
+
+  <!-- ── Header sticky ───────────────────────────────────────────── -->
+  <header class="cv-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text cv-header__back-btn"
+      (click)="goBack()"
+    ></button>
+    <div class="cv-header__title-wrap">
+      <h1 class="cv-header__title">Commissions</h1>
+      <p class="cv-header__subtitle">{{ totalRecords() }} résultat(s)</p>
+    </div>
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text cv-header__filter-btn"
+      (click)="openMobileFilters()"
+    ></button>
+  </header>
+
+  <!-- ── Zone scrollable ─────────────────────────────────────────── -->
+  <div class="cv-scroll">
+
+    <!-- Stats widget -->
+    <div class="grid grid-cols-12 gap-3 mb-5">
+      @for (card of commissionStatCards; track card.title) {
+        <app-stat-card-widget
+          [title]="card.title"
+          [value]="card.value"
+          [subtitle]="card.subtitle"
+          [loading]="statsLoading()"
+          [variant]="card.variant"
+        />
+      }
+    </div>
+
+
+    <!-- Liste de cartes -->
+    <div class="cv-list">
+
+      @if (loading()) {
+        @for (_ of [1, 2, 3, 4]; track $index) {
+          <div class="cv-card cv-card--skeleton">
+            <p-skeleton shape="circle" size="2.75rem" />
+            <div class="cv-card__body">
+              <p-skeleton height="0.9rem" width="60%" styleClass="mb-2" />
+              <p-skeleton height="0.75rem" width="40%" />
+            </div>
+          </div>
+        }
+      } @else if (commissions().length === 0) {
+        <div class="cv-empty">
+          <i class="pi pi-percentage"></i>
+          <span>Aucune commission trouvée</span>
+        </div>
+      } @else {
+        @for (c of commissions(); track c.id) {
+          <article class="cv-card" (click)="openDetail(c)">
+            <div class="cv-card__avatar" [style.background]="getAvatarColor(c)">
+              {{ getInitials(c) }}
+            </div>
+            <div class="cv-card__body">
+              <div class="cv-card__name">{{ c.livreur?.prenom }} {{ c.livreur?.nom }}</div>
+              <div class="cv-card__meta">{{ c.commande?.reference ?? '—' }} · {{ c.vehicule?.nom_vehicule ?? '—' }}</div>
+              <div class="cv-card__footer">
+                <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" styleClass="app-table-status" />
+                <span class="cv-card__montant">{{ formatMontant(c.montant_commission_total) }}</span>
+                <button pButton pRipple icon="pi pi-eye"
+                  class="p-button-rounded p-button-text p-button-sm cv-card__action"
+                  (click)="$event.stopPropagation(); openDetail(c)"></button>
+              </div>
+            </div>
+          </article>
+        }
+      }
+
+    </div>
+
+    <!-- Pagination mobile -->
+    @if (totalRecords() > perPage()) {
+      <div class="cv-pagination">
+        <p-button icon="pi pi-chevron-left" [outlined]="true"
+          [disabled]="currentPage() === 1"
+          (onClick)="loadCommissions(currentPage() - 1)" />
+        <span class="cv-pagination__info">{{ currentPage() }} / {{ Math.ceil(totalRecords() / perPage()) }}</span>
+        <p-button icon="pi pi-chevron-right" [outlined]="true"
+          [disabled]="currentPage() * perPage() >= totalRecords()"
+          (onClick)="loadCommissions(currentPage() + 1)" />
+      </div>
+    }
+
+  </div><!-- /cv-scroll -->
+  <!-- ── Drawer filtres ─────────────────────────────────────────────── -->
+  <p-drawer
+    [(visible)]="mobileFilterVisible"
+    position="right"
+    styleClass="cv-filter-drawer"
+    header="Filtres"
+  >
+    <div class="filter-drawer-body">
+
+      <div class="filter-group">
+        <label class="filter-label">Statut</label>
+        <p-select
+          [(ngModel)]="tempFilterStatut"
+          [options]="statutOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Tous les statuts"
+          [showClear]="true"
+          fluid
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Date début</label>
+        <p-datepicker [(ngModel)]="tempFilterDateDebut" dateFormat="dd/mm/yy" [showClear]="true" placeholder="Du…" fluid appendTo="body" />
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Date fin</label>
+        <p-datepicker [(ngModel)]="tempFilterDateFin" dateFormat="dd/mm/yy" [showClear]="true" placeholder="Au…" fluid appendTo="body" />
+      </div>
+
+    </div>
+
+    <ng-template #footer>
+      <div class="filter-drawer-footer">
+        <p-button
+          label="Réinitialiser"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="resetMobileFiltersTemp()"
+          styleClass="flex-1"
+        />
+        <p-button
+          label="Appliquer"
+          (onClick)="applyMobileFilters()"
+          styleClass="flex-1"
+        />
+      </div>
+    </ng-template>
+  </p-drawer>
+
+</div><!-- /cv-app -->
+
+} @else {
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESKTOP
+     ══════════════════════════════════════════════════════════════════ -->
+
+<div class="grid grid-cols-12 gap-3 mb-5">
+  @for (card of commissionStatCards; track card.title) {
+    <app-stat-card-widget
+      [title]="card.title"
+      [value]="card.value"
+      [subtitle]="card.subtitle"
+      [loading]="statsLoading()"
+      [variant]="card.variant"
+    />
+  }
+</div>
 
 <div class="card">
-
-  <!-- ── Filtres ────────────────────────────────────────────────────── -->
-  <div class="flex flex-wrap items-end gap-3 mb-5">
-
-    <div class="flex flex-col gap-1" style="min-width:13rem">
-      <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Statut</label>
-      <p-select
-        [(ngModel)]="filterStatut"
-        [options]="statutOptions"
-        optionLabel="label"
-        optionValue="value"
-        placeholder="Tous les statuts"
-        styleClass="w-full"
-        (onChange)="applyFilters()"
-      />
-    </div>
-
-    <div class="flex flex-col gap-1">
-      <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Date début</label>
-      <p-datepicker
-        [(ngModel)]="filterDateDebut"
-        dateFormat="dd/mm/yy"
-        [showClear]="true"
-        placeholder="Du…"
-        inputStyleClass="w-36"
-      />
-    </div>
-
-    <div class="flex flex-col gap-1">
-      <label class="text-xs font-semibold text-surface-400 uppercase tracking-wide">Date fin</label>
-      <p-datepicker
-        [(ngModel)]="filterDateFin"
-        dateFormat="dd/mm/yy"
-        [showClear]="true"
-        placeholder="Au…"
-        inputStyleClass="w-36"
-      />
-    </div>
-
-    <div class="flex gap-2 pb-0.5">
-      <p-button label="Filtrer" icon="pi pi-filter" (onClick)="applyFilters()" />
-      <p-button label="Réinitialiser" icon="pi pi-filter-slash" [outlined]="true"
-                severity="secondary" (onClick)="resetFilters()" />
-    </div>
-
-  </div>
-
-  <!-- ── Table ──────────────────────────────────────────────────────── -->
   <p-table
     [value]="commissions()"
     [loading]="loading()"
@@ -68,7 +188,57 @@
     styleClass="p-datatable-sm"
   >
     <ng-template #caption>
-      <div class="flex items-center">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
+          <p-iconfield class="w-full xl:max-w-sm">
+            <p-inputicon styleClass="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              class="w-full"
+              [(ngModel)]="searchTerm"
+              placeholder="Rechercher une commission..."
+            />
+          </p-iconfield>
+
+          <div class="flex flex-wrap items-center gap-2 xl:justify-end">
+            <p-select
+              [(ngModel)]="filterStatut"
+              [options]="statutOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Tous les statuts"
+              [style]="{ 'min-width': '170px' }"
+              (onChange)="applyFilters()"
+            />
+            <p-datepicker
+              [(ngModel)]="filterDateDebut"
+              dateFormat="dd/mm/yy"
+              [showClear]="true"
+              placeholder="Du..."
+              inputStyleClass="w-32"
+            />
+            <p-datepicker
+              [(ngModel)]="filterDateFin"
+              dateFormat="dd/mm/yy"
+              [showClear]="true"
+              placeholder="Au..."
+              inputStyleClass="w-32"
+            />
+            <span class="text-sm text-surface-500 px-1">
+              {{ totalRecords() }} résultat{{ totalRecords() > 1 ? 's' : '' }}
+            </span>
+            <p-button label="Filtrer" icon="pi pi-filter" (onClick)="applyFilters()" />
+            <p-button
+              label="Réinitialiser"
+              icon="pi pi-filter-slash"
+              [outlined]="true"
+              severity="secondary"
+              (onClick)="resetFilters()"
+            />
+          </div>
+        </div>
+
         <span class="text-xl font-semibold">Commissions sur ventes</span>
       </div>
     </ng-template>
@@ -89,24 +259,16 @@
 
     <ng-template #body let-c>
       <tr class="cursor-pointer" (click)="openDetail(c)">
-
-        <td>
-          <span class="font-mono text-sm font-semibold">{{ c.commande?.reference ?? '—' }}</span>
-        </td>
-
+        <td><span class="font-mono text-sm font-semibold">{{ c.commande?.reference ?? '—' }}</span></td>
         <td>
           <div class="font-medium text-sm">{{ c.vehicule?.nom_vehicule }}</div>
           <code class="text-xs text-surface-400">{{ c.vehicule?.immatriculation }}</code>
         </td>
-
         <td class="text-sm">{{ c.livreur?.prenom }} {{ c.livreur?.nom }}</td>
-
         <td class="text-right">
           <span class="font-semibold text-primary">{{ formatMontant(c.montant_commission_total) }}</span>
         </td>
-
         <td class="text-right text-sm">{{ formatMontant(c.part_livreur) }}</td>
-
         <td class="text-right text-sm">
           @if (parseFloat(c.part_proprietaire) > 0) {
             {{ formatMontant(c.part_proprietaire) }}
@@ -114,19 +276,15 @@
             <span class="text-surface-300">—</span>
           }
         </td>
-
         <td>
-          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" />
+          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" styleClass="app-table-status" />
         </td>
-
         <td class="text-sm text-surface-500">{{ formatDate(c.eligible_at) }}</td>
-
         <td (click)="$event.stopPropagation()">
           <p-button icon="pi pi-eye" severity="info" [text]="true" [rounded]="true"
                     pTooltip="Voir le détail" tooltipPosition="top"
                     (onClick)="openDetail(c)" />
         </td>
-
       </tr>
     </ng-template>
 
@@ -155,12 +313,4 @@
 
 </div>
 
-<!-- ── Dialog détail ──────────────────────────────────────────────── -->
-@if (selectedCommissionId()) {
-  <app-commission-detail-dialog
-    [commissionId]="selectedCommissionId()!"
-    [visible]="detailVisible()"
-    (visibleChange)="detailVisible.set($event)"
-    (onVersementDone)="onVersementDone()"
-  />
-}
+} <!-- end desktop -->

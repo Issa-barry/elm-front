@@ -31,8 +31,8 @@ function makeUser(overrides: Partial<User> = {}): User {
     created_at: '2026-02-28T10:00:00Z',
     updated_at: '2026-02-28T10:00:00Z',
     nom_complet: 'Mamadou Barry',
-    roles: ['admin'],
-    role_names: ['admin'],
+    roles: ['admin_entreprise'],
+    role_names: ['admin_entreprise'],
     permissions: [],
     civilite: 'M',
     date_naissance: null,
@@ -70,7 +70,7 @@ describe('UtilisateursViewDialog', () => {
         success: true,
         message: 'OK',
         data: [
-          { role: { id: 1, name: 'admin', created_at: '' }, modules: [] },
+          { role: { id: 1, name: 'admin_entreprise', created_at: '' }, modules: [] },
           { role: { id: 2, name: 'manager', created_at: '' }, modules: [] },
           { role: { id: 3, name: 'employe', created_at: '' }, modules: [] },
         ],
@@ -110,7 +110,7 @@ describe('UtilisateursViewDialog', () => {
     });
 
     expect(component.model.type).toBe('staff');
-    expect(component.model.role).toBe('admin');
+    expect(component.model.role).toBe('admin_entreprise');
   });
 
   it('onTypeChange: non-staff should force role to same value', () => {
@@ -155,7 +155,7 @@ describe('UtilisateursViewDialog', () => {
     component.model.ville = 'Freetown';
     component.model.quartier = 'Town';
     component.model.type = 'staff';
-    component.model.role = 'admin';
+    component.model.role = 'admin_entreprise';
     component.model.password = 'Password1';
     component.model.password_confirmation = 'Password1';
 
@@ -168,7 +168,7 @@ describe('UtilisateursViewDialog', () => {
     const payload = userServiceSpy.createUserViaApi.calls.mostRecent().args[0];
     expect(payload.phone).toBe('+232620000001');
     expect(payload.code_phone_pays).toBe('+232');
-    expect(usineServiceSpy.assignUser).toHaveBeenCalledWith(12, jasmine.objectContaining({ user_id: 77, role: 'admin' }));
+    expect(usineServiceSpy.assignUser).toHaveBeenCalledWith(12, jasmine.objectContaining({ user_id: 77, role: 'manager' }));
     expect(component.userSaved.emit).toHaveBeenCalledWith(jasmine.objectContaining({ mode: 'create' }));
     expect(component.visibleChange.emit).toHaveBeenCalledWith(false);
   });
@@ -184,7 +184,7 @@ describe('UtilisateursViewDialog', () => {
     component.model.ville = 'Conakry';
     component.model.quartier = 'Kaloum';
     component.model.type = 'staff';
-    component.model.role = 'admin';
+    component.model.role = 'admin_entreprise';
     component.model.password = 'Password1';
     component.model.password_confirmation = 'Password1';
 
@@ -218,7 +218,7 @@ describe('UtilisateursViewDialog', () => {
     component.model.ville = 'Conakry';
     component.model.quartier = 'Kaloum';
     component.model.type = 'staff';
-    component.model.role = 'admin';
+    component.model.role = 'admin_entreprise';
     component.model.password = 'Password1';
     component.model.password_confirmation = 'Password1';
 
@@ -274,7 +274,7 @@ describe('UtilisateursViewDialog', () => {
     component.model.ville = 'Conakry';
     component.model.quartier = 'Kaloum';
     component.model.type = 'staff';
-    component.model.role = 'admin';
+    component.model.role = 'admin_entreprise';
 
     spyOn(component.userSaved, 'emit');
     spyOn(component.visibleChange, 'emit');

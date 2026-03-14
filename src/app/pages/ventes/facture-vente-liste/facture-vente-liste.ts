@@ -16,7 +16,6 @@ import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { DatePickerModule } from 'primeng/datepicker';
 
 import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
 import { AuthService } from '@/services/auth/auth.service';
@@ -28,7 +27,9 @@ import {
   MODE_PAIEMENT_OPTIONS,
   StoreEncaissementVenteDto,
   ModePaiement,
+  
 } from '@/models/vente.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-facture-vente-liste',
@@ -49,7 +50,7 @@ import {
     TooltipModule,
     InputIconModule,
     IconFieldModule,
-    DatePickerModule,
+    PhoneFormatPipe
   ],
   providers: [MessageService],
   templateUrl: './facture-vente-liste.html',
@@ -66,7 +67,7 @@ export class FactureVenteListe implements OnInit {
   modePaiementOptions = MODE_PAIEMENT_OPTIONS;
   selectedFacture: FactureVente | null = null;
 
-  canEncaissement = false;
+  get canEncaissement(): boolean { return this.authService.hasPermission('encaissements.create'); }
 
   statutOptions = [
     { label: 'Toutes', value: null },
@@ -84,7 +85,6 @@ export class FactureVenteListe implements OnInit {
     private messageService: MessageService,
     private router: Router
   ) {
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
   }
 
   goBack() {
@@ -100,7 +100,6 @@ export class FactureVenteListe implements OnInit {
     this.encaissementForm = this.fb.group({
       montant: [null, [Validators.required, Validators.min(1)]],
       mode_paiement: ['especes', Validators.required],
-      date_encaissement: [new Date(), Validators.required],
       note: [''],
     });
   }
@@ -125,7 +124,7 @@ export class FactureVenteListe implements OnInit {
   }
 
   goDetail(id: number) {
-    this.router.navigate(['/ventes/factures', id]);
+    this.router.navigate(['/ventes/factures-vente-detail3/', id]);
   }
 
   // ── Encaissement ──────────────────────────────────────────────────────
@@ -155,7 +154,7 @@ export class FactureVenteListe implements OnInit {
       facture_vente_id: this.selectedFacture.id,
       montant: v.montant,
       mode_paiement: v.mode_paiement as ModePaiement,
-      date_encaissement: this.formatDateIso(v.date_encaissement),
+      date_encaissement: this.formatDateIso(new Date()),
       note: v.note || undefined,
     };
 

@@ -64,7 +64,7 @@
             <p-tag
               [value]="prestataire.is_active ? 'Actif' : 'Inactif'"
               [severity]="prestataire.is_active ? 'success' : 'danger'"
-              styleClass="mobile-status-tag"
+              styleClass="mobile-status-tag app-table-status"
             />
             <div class="mobile-card-actions">
               <button
@@ -235,6 +235,7 @@
           <p-tag
             [value]="prestataire.is_active ? 'Actif' : 'Inactif'"
             [severity]="prestataire.is_active ? 'success' : 'danger'"
+            styleClass="app-table-status"
           ></p-tag>
         </td>
         <td>

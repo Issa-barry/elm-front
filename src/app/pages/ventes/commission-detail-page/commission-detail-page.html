@@ -1,0 +1,236 @@
+<p-toast />
+
+<div class="commission-detail-page">
+  <div class="commission-detail-page__header">
+    <p-button
+      icon="pi pi-arrow-left"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+      (onClick)="goBack()"
+    />
+    <div class="commission-detail-page__title-wrap">
+      <h1>Commission - {{ commission()?.commande?.reference ?? 'Detail' }}</h1>
+      <p>Detail commission et versements</p>
+    </div>
+  </div>
+
+  <div class="commission-detail-page__card">
+    @if (loadingDetail()) {
+      <div class="cd-loading">
+        @for (_ of [1, 2, 3, 4, 5]; track $index) {
+          <p-skeleton height="2.8rem" borderRadius="10px" />
+        }
+      </div>
+    } @else if (commission()) {
+      @let c = commission()!;
+
+      <div class="cd-shell">
+        <section class="cd-meta-grid">
+          <article class="cd-meta-item">
+            <span class="cd-label">Vehicule</span>
+            <span class="cd-value">{{ c.vehicule?.nom_vehicule }}</span>
+            <span class="cd-sub">{{ c.vehicule?.immatriculation }}</span>
+          </article>
+
+          <article class="cd-meta-item">
+            <span class="cd-label">Livreur</span>
+            <span class="cd-value">{{ c.livreur?.prenom }} {{ c.livreur?.nom }}</span>
+          </article>
+
+          @if (c.proprietaire) {
+            <article class="cd-meta-item">
+              <span class="cd-label">Proprietaire</span>
+              <span class="cd-value">{{ c.proprietaire.prenom }} {{ c.proprietaire.nom }}</span>
+            </article>
+          }
+
+          <article class="cd-meta-item">
+            <span class="cd-label">Taux livreur</span>
+            <span class="cd-value">{{ c.taux_livreur_snapshot }} %</span>
+          </article>
+        </section>
+
+        <section class="cd-kpi-grid">
+          <article class="cd-kpi cd-kpi--primary">
+            <span class="cd-kpi-label">Commission totale</span>
+            <span class="cd-kpi-value">{{ formatMontant(c.montant_commission_total) }}</span>
+          </article>
+
+          <article class="cd-kpi">
+            <span class="cd-kpi-label">Part livreur ({{ c.taux_livreur_snapshot }}%)</span>
+            <span class="cd-kpi-value">{{ formatMontant(c.part_livreur) }}</span>
+          </article>
+
+          @if (parseFloat(c.part_proprietaire) > 0) {
+            <article class="cd-kpi">
+              <span class="cd-kpi-label">Part proprietaire ({{ 100 - parseFloat(c.taux_livreur_snapshot) }}%)</span>
+              <span class="cd-kpi-value">{{ formatMontant(c.part_proprietaire) }}</span>
+            </article>
+          }
+        </section>
+
+        <section class="cd-status">
+          <p-tag [value]="getStatutLabel(c.statut)" [severity]="getStatutSeverity(c.statut)" />
+          @if (c.eligible_at) {
+            <span class="cd-status-date">
+              <i class="pi pi-calendar"></i>
+              Eligible depuis le {{ formatDate(c.eligible_at) }}
+            </span>
+          }
+        </section>
+
+        <p-divider styleClass="cd-divider" />
+
+        <section class="cd-versements">
+          <div class="cd-section-head">
+            <h4>Versements</h4>
+            <span>{{ c.versements.length }} element(s)</span>
+          </div>
+
+          @if (c.versements && c.versements.length > 0) {
+            <div class="cd-versement-list">
+              @for (v of c.versements; track v.id) {
+                <article class="cd-versement-card">
+                  <div class="cd-versement-main">
+                    <div class="cd-versement-top">
+                      <span class="cd-versement-name">{{ getBeneficiaireNom(c, v) }}</span>
+                      <span class="cd-versement-role">
+                        {{ v.beneficiaire_type === 'livreur' ? 'Livreur' : 'Proprietaire' }}
+                      </span>
+                    </div>
+
+                    <div class="cd-versement-meta">
+                      <span>Attendu: <strong>{{ formatMontant(v.montant_attendu) }}</strong></span>
+                      @if (v.montant_verse && parseFloat(v.montant_verse) > 0) {
+                        <span>Verse: <strong>{{ formatMontant(v.montant_verse) }}</strong></span>
+                      }
+                      @if (getMontantRestant(v) > 0) {
+                        <span class="cd-restant">Restant: <strong>{{ formatMontant(getMontantRestant(v)) }}</strong></span>
+                      }
+                      @if (getVersementDate(v); as versementDate) {
+                        <span>{{ formatDate(versementDate) }}</span>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="cd-versement-actions">
+                    <p-tag [value]="getVersementLabel(v.statut)" [severity]="getVersementSeverity(v.statut)" />
+                    @if (canVerserVersement(c, v)) {
+                      <p-button
+                        label="Verser"
+                        icon="pi pi-send"
+                        size="small"
+                        severity="success"
+                        [outlined]="true"
+                        (onClick)="openVersementDialog(c, v)"
+                      />
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="cd-empty">Aucun versement disponible pour cette commission.</div>
+          }
+        </section>
+      </div>
+    } @else {
+      <div class="cd-empty">Commission introuvable.</div>
+    }
+  </div>
+</div>
+
+<p-dialog
+  header="Confirmer le versement"
+  [(visible)]="versementDialogVisible"
+  [modal]="true"
+  [style]="{ width: '42rem', maxWidth: '95vw' }"
+  [draggable]="false"
+  appendTo="body"
+  styleClass="commission-versement-dialog"
+>
+  @if (versementTarget()) {
+    @let target = versementTarget()!;
+    <div class="cvd-shell">
+      <div class="cvd-head">
+        <i class="pi pi-send"></i>
+        <div class="cvd-head-body">
+          <p class="cvd-head-title">
+            <strong>{{ target.nom }}</strong>
+            <span class="cvd-head-role">{{ target.versement.beneficiaire_type === 'livreur' ? 'Livreur' : 'Proprietaire' }}</span>
+          </p>
+          <div class="cvd-summary-grid">
+            <div class="cvd-summary-item">
+              <span class="cvd-summary-label">Attendu</span>
+              <strong class="cvd-summary-value">{{ formatMontant(target.versement.montant_attendu) }}</strong>
+            </div>
+            <div class="cvd-summary-item">
+              <span class="cvd-summary-label">Deja verse</span>
+              <strong class="cvd-summary-value">{{ formatMontant(target.versement.montant_verse ?? 0) }}</strong>
+            </div>
+            <div class="cvd-summary-item cvd-summary-item--restant">
+              <span class="cvd-summary-label">Restant</span>
+              <strong class="cvd-summary-value">{{ formatMontant(getMontantRestant(target.versement)) }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cvd-field">
+        <label>Montant a verser <span class="cvd-required">*</span></label>
+        <p-inputnumber
+          [(ngModel)]="versementMontant"
+          [useGrouping]="true"
+          [min]="1"
+          [max]="getMontantRestant(target.versement)"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="0"
+          suffix=" GNF"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          placeholder="Ex: 50 000"
+          [ngClass]="{ 'ng-invalid': versementErrors.montant }"
+          (ngModelChange)="versementErrors.montant = undefined"
+        />
+        @if (versementErrors.montant) {
+          <small class="cvd-error">{{ versementErrors.montant }}</small>
+        }
+      </div>
+
+      <div class="cvd-field">
+        <label>Mode de paiement <span class="cvd-required">*</span></label>
+        <p-select
+          [options]="modesPaiement"
+          [(ngModel)]="versementModePaiement"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Choisir un mode"
+          styleClass="w-full"
+          [ngClass]="{ 'ng-invalid': versementErrors.modePaiement }"
+          (ngModelChange)="versementErrors.modePaiement = undefined"
+        />
+        @if (versementErrors.modePaiement) {
+          <small class="cvd-error">{{ versementErrors.modePaiement }}</small>
+        }
+      </div>
+    </div>
+  }
+
+  <ng-template #footer>
+    <p-button
+      label="Annuler"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="versementDialogVisible = false"
+      [disabled]="versementLoading"
+    />
+    <p-button
+      label="Confirmer"
+      icon="pi pi-check"
+      severity="success"
+      (onClick)="confirmVersement()"
+      [loading]="versementLoading"
+    />
+  </ng-template>
+</p-dialog>

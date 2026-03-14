@@ -1,94 +1,55 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
-import { TooltipModule } from 'primeng/tooltip';
-import { DialogModule } from 'primeng/dialog';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { SelectModule } from 'primeng/select';
-import { DatePickerModule } from 'primeng/datepicker';
-import { InputTextModule } from 'primeng/inputtext';
 import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 import { CommandeVenteService } from '@/services/ventes/commande-vente.service';
-import { FactureLivraisonService } from '@/services/livraisons/facture-livraison.service';
-import { AuthService } from '@/services/auth/auth.service';
 import {
   CommandeVente,
+  EncaissementVente,
   STATUT_FACTURE_LABELS,
-  STATUT_FACTURE_SEVERITY,
   StatutFacture,
-  MODE_PAIEMENT_OPTIONS,
-  StoreEncaissementVenteDto,
 } from '@/models/vente.model';
+
+type AssistantRiskLevel = 'faible' | 'moyen' | 'eleve';
+
+interface LocalAssistantInsight {
+  summary: string;
+  riskLevel: AssistantRiskLevel;
+  anomalies: string[];
+  recommendations: string[];
+  generatedAt: string;
+}
 
 @Component({
   selector: 'app-commande-vente-detail',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    ButtonModule,
-    TagModule,
-    SkeletonModule,
-    ToastModule,
-    TooltipModule,
-    DialogModule,
-    InputNumberModule,
-    SelectModule,
-    DatePickerModule,
-    InputTextModule,
-    PhoneFormatPipe,
-  ],
+  imports: [CommonModule, ButtonModule, SkeletonModule, ToastModule, PhoneFormatPipe],
   providers: [MessageService],
   templateUrl: './commande-vente-detail.html',
 })
 export class CommandeVenteDetail implements OnInit {
   commande: CommandeVente | null = null;
   loading = false;
-  canUpdate = false;
-  canEncaissement = false;
-
-  encaissementDialogVisible = false;
-  savingEncaissement = false;
-  encaissementForm!: FormGroup;
-  modePaiementOptions = MODE_PAIEMENT_OPTIONS;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder,
     private commandeService: CommandeVenteService,
-    private factureService: FactureLivraisonService,
-    private authService: AuthService,
     private messageService: MessageService
-  ) {
-    this.canUpdate = this.authService.hasPermission('commandes.update');
-    this.canEncaissement = this.authService.hasPermission('encaissements.create');
-  }
+  ) {}
 
   ngOnInit() {
-    this.initEncaissementForm();
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) {
       this.router.navigate(['/notfound']);
       return;
     }
     this.loadCommande(id);
-  }
-
-  private initEncaissementForm() {
-    this.encaissementForm = this.fb.group({
-      montant: [null, [Validators.required, Validators.min(1)]],
-      mode_paiement: ['especes', Validators.required],
-      date_encaissement: [new Date(), Validators.required],
-      note: [''],
-    });
   }
 
   loadCommande(id: number) {
@@ -103,9 +64,10 @@ export class CommandeVenteDetail implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: err.status === 404 ? 'Introuvable' : 'Erreur',
-          detail: err.status === 404
-            ? "Cette commande n'existe pas ou a été supprimée."
-            : 'Impossible de charger la commande.',
+          detail:
+            err.status === 404
+              ? "Cette commande n'existe pas ou a ete supprimee."
+              : 'Impossible de charger la commande.',
           life: 4000,
         });
         setTimeout(() => this.router.navigate(['/ventes/commandes']), 2500);
@@ -113,106 +75,42 @@ export class CommandeVenteDetail implements OnInit {
     });
   }
 
-  get isLocked(): boolean {
-    return (this.commande?.facture?.montant_encaisse ?? 0) > 0;
+  get encaissements(): EncaissementVente[] {
+    return this.commande?.facture?.encaissements ?? [];
   }
 
-  get progressPct(): number {
-    if (!this.commande?.facture) return 0;
-    const net = parseFloat(String(this.commande.facture.montant_net));
-    if (!net) return 0;
-    return Math.min(100, Math.round((this.commande.facture.montant_encaisse / net) * 100));
+  get encaissementsCount(): number {
+    return this.encaissements.length;
   }
 
-  get canEncaisserFacture(): boolean {
-    if (!this.commande?.facture) return false;
-    return (
-      this.canEncaissement &&
-      this.commande.facture.statut_facture !== 'payee' &&
-      this.commande.facture.statut_facture !== 'annulee'
+  get firstEncaissementDate(): string | undefined {
+    if (!this.encaissements.length) return undefined;
+    const sorted = [...this.encaissements].sort(
+      (a, b) => new Date(a.date_encaissement).getTime() - new Date(b.date_encaissement).getTime()
     );
+    return sorted[0]?.date_encaissement;
   }
 
-  openEncaissementDialog() {
-    this.initEncaissementForm();
-    this.encaissementDialogVisible = true;
-  }
-
-  onSaveEncaissement() {
-    this.encaissementForm.markAllAsTouched();
-    if (this.encaissementForm.invalid || this.savingEncaissement) return;
-    if (!this.commande?.facture?.id) return;
-
-    const v = this.encaissementForm.value;
-    const date = v.date_encaissement instanceof Date
-      ? v.date_encaissement.toISOString().split('T')[0]
-      : String(v.date_encaissement);
-
-    const dto: StoreEncaissementVenteDto = {
-      facture_vente_id: this.commande.facture.id,
-      montant: v.montant,
-      mode_paiement: v.mode_paiement,
-      date_encaissement: date,
-      note: v.note || undefined,
-    };
-
-    this.savingEncaissement = true;
-    this.factureService.createEncaissement(dto).subscribe({
-      next: () => {
-        this.savingEncaissement = false;
-        this.encaissementDialogVisible = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Paiement enregistré',
-          detail: 'Le paiement a été enregistré avec succès.',
-          life: 3000,
-        });
-        this.loadCommande(this.commande!.id);
-      },
-      error: (err) => {
-        this.savingEncaissement = false;
-        if (err.status === 422 && err.error?.errors) {
-          const msgs = Object.values(err.error.errors).flat() as string[];
-          msgs.forEach(m =>
-            this.messageService.add({ severity: 'error', summary: 'Erreur de validation', detail: m, life: 5000 })
-          );
-          return;
-        }
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: err.error?.message ?? "Impossible d'enregistrer le paiement.",
-          life: 5000,
-        });
-      },
-    });
-  }
-
-  isEncaissInvalid(name: string): boolean {
-    const c = this.encaissementForm.get(name)!;
-    return c.invalid && (c.dirty || c.touched);
+  get lastEncaissementDate(): string | undefined {
+    if (!this.encaissements.length) return undefined;
+    const sorted = [...this.encaissements].sort(
+      (a, b) => new Date(a.date_encaissement).getTime() - new Date(b.date_encaissement).getTime()
+    );
+    return sorted[sorted.length - 1]?.date_encaissement;
   }
 
   goBack() {
     this.router.navigate(['/ventes/commandes']);
   }
 
-  goEdit() {
-    this.router.navigate(['/ventes/commandes'], { queryParams: { edit: this.commande?.id } });
-  }
-
   goFacture() {
     if (this.commande?.facture?.id) {
-      this.router.navigate(['/ventes/factures', this.commande.facture.id]);
+      this.router.navigate(['/ventes//factures-vente-detail3/', this.commande.facture.id]);
     }
   }
 
   getStatutLabel(s: StatutFacture): string {
     return STATUT_FACTURE_LABELS[s] ?? s;
-  }
-
-  getStatutSeverity(s: StatutFacture) {
-    return STATUT_FACTURE_SEVERITY[s] ?? 'info';
   }
 
   formatMontant(n: string | number | undefined | null): string {
@@ -246,27 +144,172 @@ export class CommandeVenteDetail implements OnInit {
     return map[s] ?? 'pi-circle';
   }
 
-  getModeLabel(mode: string): string {
-    const labels: Record<string, string> = {
-      especes: 'Espèces',
-      mobile_money: 'Mobile Money',
-      virement: 'Virement bancaire',
-      cheque: 'Chèque',
+  get assistantInsight(): LocalAssistantInsight | null {
+    if (!this.commande) return null;
+
+    const facture = this.commande.facture;
+    const total = this.toNumber(this.commande.total_commande);
+    const encaisse = this.toNumber(facture?.montant_encaisse);
+    const restant = this.toNumber(facture?.montant_restant);
+    const statut = facture?.statut_facture;
+    const daysSinceCreation = this.getDaysSinceCreation();
+
+    const anomalies: string[] = [];
+    const recommendations: string[] = [];
+
+    if (!facture) {
+      anomalies.push('Aucune facture liee a cette commande.');
+      recommendations.push('Generer la facture pour lancer le suivi des paiements.');
+    }
+
+    if (facture) {
+      if (total > 0 && !this.isNearlyEqual(encaisse + restant, total)) {
+        anomalies.push('Incoherence montants: encaisse + restant different du total.');
+      }
+      if (statut === 'payee' && restant > 0) {
+        anomalies.push('Statut payee alors qu un montant reste a encaisser.');
+      }
+      if (statut === 'impayee' && encaisse > 0) {
+        anomalies.push('Statut impayee alors qu un encaissement existe.');
+      }
+      if (statut === 'annulee' && encaisse > 0) {
+        anomalies.push('Statut annulee avec un montant deja encaisse.');
+      }
+    }
+
+    if (facture && restant > 0 && statut !== 'annulee') {
+      if (encaisse <= 0) {
+        recommendations.push('Relancer pour obtenir un premier encaissement rapidement.');
+      } else {
+        recommendations.push('Planifier un encaissement du solde restant.');
+      }
+    }
+
+    if (statut === 'partiel' && (daysSinceCreation ?? 0) >= 3) {
+      recommendations.push('Confirmer une date de paiement finale avec le livreur.');
+    }
+
+    if (statut === 'impayee' && (daysSinceCreation ?? 0) >= 3) {
+      recommendations.push('Escalader le suivi vers le responsable de recouvrement.');
+    }
+
+    if (anomalies.length > 0) {
+      recommendations.unshift('Verifier la coherence statut/montants avant action financiere.');
+    }
+
+    if (!recommendations.length) {
+      recommendations.push('Aucune action urgente. Continuer le suivi normal.');
+    }
+
+    const riskLevel = this.computeRiskLevel({
+      hasFacture: !!facture,
+      total,
+      encaisse,
+      restant,
+      statut,
+      anomaliesCount: anomalies.length,
+      daysSinceCreation,
+    });
+
+    return {
+      summary: this.buildAssistantSummary(statut, total, encaisse, restant, !!facture, riskLevel),
+      riskLevel,
+      anomalies,
+      recommendations,
+      generatedAt: new Date().toLocaleString('fr-FR'),
     };
-    return labels[mode] ?? mode;
   }
 
-  getModeIcon(mode: string): string {
-    const map: Record<string, string> = {
-      especes: 'pi-money-bill',
-      mobile_money: 'pi-mobile',
-      virement: 'pi-building',
-      cheque: 'pi-file',
+  getAssistantRiskLabel(level: AssistantRiskLevel): string {
+    const labels: Record<AssistantRiskLevel, string> = {
+      faible: 'Faible',
+      moyen: 'Moyen',
+      eleve: 'Eleve',
     };
-    return map[mode] ?? 'pi-credit-card';
+    return labels[level];
   }
 
-  totalLignes(): number {
-    return (this.commande?.lignes ?? []).reduce((sum, l) => sum + parseFloat(String(l.total_ligne ?? 0)), 0);
+  getAssistantRiskDotClass(level: AssistantRiskLevel): string {
+    const map: Record<AssistantRiskLevel, string> = {
+      faible: 'bg-green-500',
+      moyen: 'bg-orange-500',
+      eleve: 'bg-red-500',
+    };
+    return map[level];
+  }
+
+  private buildAssistantSummary(
+    statut: StatutFacture | undefined,
+    total: number,
+    encaisse: number,
+    restant: number,
+    hasFacture: boolean,
+    riskLevel: AssistantRiskLevel
+  ): string {
+    if (!hasFacture) {
+      return 'Commande creee sans facture. Le suivi financier n est pas encore demarre.';
+    }
+
+    if (statut === 'payee') {
+      return 'Commande soldee. Aucun reste a encaisser attendu.';
+    }
+
+    if (statut === 'partiel') {
+      return `Commande partiellement payee: ${this.formatMontant(encaisse)} encaisses sur ${this.formatMontant(total)}.`;
+    }
+
+    if (statut === 'impayee') {
+      return `Commande impayee: ${this.formatMontant(restant)} restent a encaisser (${this.getAssistantRiskLabel(riskLevel).toLowerCase()} risque).`;
+    }
+
+    if (statut === 'annulee') {
+      return 'Commande annulee. Verifier que les montants encaisse/restant sont coherents.';
+    }
+
+    return `Commande en suivi: total ${this.formatMontant(total)}, encaisse ${this.formatMontant(encaisse)}, restant ${this.formatMontant(restant)}.`;
+  }
+
+  private computeRiskLevel(input: {
+    hasFacture: boolean;
+    total: number;
+    encaisse: number;
+    restant: number;
+    statut: StatutFacture | undefined;
+    anomaliesCount: number;
+    daysSinceCreation: number | null;
+  }): AssistantRiskLevel {
+    let score = 0;
+
+    if (!input.hasFacture) score += 2;
+    if (input.restant > 0) score += 1;
+    if (input.total > 0 && input.restant / input.total >= 0.7) score += 2;
+    else if (input.total > 0 && input.restant / input.total >= 0.3) score += 1;
+    if (input.encaisse <= 0 && input.total > 0) score += 1;
+    if ((input.daysSinceCreation ?? 0) >= 7 && input.restant > 0) score += 1;
+    if (input.statut === 'impayee') score += 1;
+    if (input.anomaliesCount > 0) score += 2;
+
+    if (score >= 5) return 'eleve';
+    if (score >= 3) return 'moyen';
+    return 'faible';
+  }
+
+  private getDaysSinceCreation(): number | null {
+    if (!this.commande?.created_at) return null;
+    const created = new Date(this.commande.created_at).getTime();
+    if (Number.isNaN(created)) return null;
+    const diff = Date.now() - created;
+    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  }
+
+  private toNumber(value: number | string | undefined | null): number {
+    if (value == null || value === '') return 0;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private isNearlyEqual(a: number, b: number, tolerance = 1): boolean {
+    return Math.abs(a - b) <= tolerance;
   }
 }
