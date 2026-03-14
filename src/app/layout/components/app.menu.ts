@@ -34,22 +34,17 @@ export class AppMenu {
 
     private buildMenuModel(permissions: string[]) {
         return [
-            {
-                // label: 'Statistiques',
-                // icon: 'pi pi-home',
+           {
+                label: 'Dashboards',
+                icon: 'pi pi-home',
                 items: [
-                    // {
-                    //     label: 'E-Commerce',
-                    //     icon: 'pi pi-fw pi-home',
-                    //     routerLink: ['/'],
-                    // },
+                    {
+                        label: 'Statistiques',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/'],
+                    },
                     // {
                     //     label: 'Banking',
-                    //     icon: 'pi pi-fw pi-image',
-                    //     routerLink: ['/dashboard-banking'],
-                    // },
-                    // {
-                    //     label: 'Stock',
                     //     icon: 'pi pi-fw pi-image',
                     //     routerLink: ['/dashboard-banking'],
                     // },
@@ -59,55 +54,74 @@ export class AppMenu {
                 label: 'Modules',
                 icon: 'pi pi-th-large',
                 items: [
-                    {
-                        label: 'Comptabilité',
-                        icon: 'pi pi-fw pi-calculator',
-                        visible: this.hasAnyPermission(permissions, [
-                            'facture-packings.read',
-                            'facture-packing.read',
-                            'facture_packings.read',
-                            'facture_packing.read',
-                            'facturepackings.read',
-                            'facturepacking.read',
-                        ]),
-                        items: [
-                            {
-                                label: 'Facture packing',
-                                icon: 'pi pi-fw pi-money-bill',
-                                routerLink: ['/comptabilite/comptabilite-packing-liste'],
-                                visible: this.hasAnyPermission(permissions, [
-                                    'facture-packings.read',
-                                    'facture-packing.read',
-                                    'facture_packings.read',
-                                    'facture_packing.read',
-                                    'facturepackings.read',
-                                    'facturepacking.read',
-                                ]),
-                            },
-                            // {
-                            //     label: 'Sailaire véhicule',
-                            //     icon: 'pi pi-fw pi-list',
-                            //     routerLink: ['/apps/blog/detail'],
-                            // },
-                            // {
-                            //     label: 'Salaire employé',
-                            //     icon: 'pi pi-fw pi-pencil',
-                            //     routerLink: ['/apps/blog/edit'],
-                            // },
-                        ],
-                    },
-
+                    
+                    // Ventes
                     // {
                     //     label: 'Ventes',
-                    //     icon: 'pi pi-fw pi-comments',
-                    //     routerLink: ['/apps/chat'],
+                    //     icon: 'pi pi-fw pi-shopping-cart',
+                    //     routerLink: ['/ventes/commandes'],
+                    //     visible: this.hasAnyPermission(permissions, ['commandes.read']),
                     // },
+
+                    // // Comptabilite
                     // {
-                    //     label: 'Achats',
-                    //     icon: 'pi pi-fw pi-folder',
-                    //     routerLink: ['/apps/files'],
+                    //     label: 'Comptabilite',
+                    //     icon: 'pi pi-fw pi-calculator',
+                    //     visible: this.hasAnyPermission(permissions, [
+                    //         'commissions.read',
+                    //         'commandes.read',
+                    //         'facture-packings.read',
+                    //         'facture-packing.read',
+                    //         'facture_packings.read',
+                    //         'facture_packing.read',
+                    //         'facturepackings.read',
+                    //         'facturepacking.read',
+                    //         'factures-livraisons.read',
+                    //         'encaissements.read',
+                    //     ]),
+                    //     items: [
+                    //     //     {
+                    //     //         label: 'Commissions',
+                    //     //         icon: 'pi pi-fw pi-percentage',
+                    //     //         routerLink: ['/ventes/commissions'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                    //     //     },
+                    //     //     {
+                    //     //         label: 'Commissions 2',
+                    //     //         icon: 'pi pi-fw pi-percentage',
+                    //     //         routerLink: ['/ventes/commissions2'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['commissions.read', 'commandes.read']),
+                    //     //     },
+                    //     //     {
+                    //     //         label: 'Factures vente',
+                    //     //         icon: 'pi pi-fw pi-receipt',
+                    //     //         routerLink: ['/ventes/factures'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                    //     //     },
+                    //     //     {
+                    //     //         label: 'Factures vente liste 2',
+                    //     //         icon: 'pi pi-fw pi-receipt',
+                    //     //         routerLink: ['/ventes/factures-vente-liste2'],
+                    //     //         visible: this.hasAnyPermission(permissions, ['factures-livraisons.read', 'encaissements.read']),
+                    //     //     },
+                    //         {
+                    //             label: 'Facture packing',
+                    //             icon: 'pi pi-fw pi-box',
+                    //             routerLink: ['/comptabilite/comptabilite-packing-liste'],
+                    //             visible: this.hasAnyPermission(permissions, [
+                    //                 'facture-packings.read',
+                    //                 'facture-packing.read',
+                    //                 'facture_packings.read',
+                    //                 'facture_packing.read',
+                    //                 'facturepackings.read',
+                    //                 'facturepacking.read',
+                    //             ]),
+                    //         },
+                    //     ],
                     // },
-                     {
+
+                    // Packing
+                    {
                         label: 'Packing',
                         icon: 'pi pi-fw pi-box',
                         routerLink: ['/packings'],
@@ -116,58 +130,69 @@ export class AppMenu {
                             'packing.read',
                         ]),
                     },
+
+                    // Vehicules
+                    // {
+                    //     label: 'Vehicules',
+                    //     icon: 'pi pi-fw pi-car',
+                    //     visible: true,
+                    //     items: [
+                    //         // {
+                    //         //     label: 'Liste des vehicules',
+                    //         //     icon: 'pi pi-fw pi-list',
+                    //         //     routerLink: ['/vehicules'],
+                    //         // },
+                    //         {
+                    //             label: 'Liste des vehicules ',
+                    //             icon: 'pi pi-fw pi-list',
+                    //             routerLink: ['/vehicules/vehicules-liste2'],
+                    //         },
+                    //         {
+                    //             label: 'Proprietaires',
+                    //             icon: 'pi pi-fw pi-user',
+                    //             routerLink: ['/vehicules/proprietaires'],
+                    //         },
+                    //         {
+                    //             label: 'Livreurs',
+                    //             icon: 'pi pi-fw pi-truck',
+                    //             routerLink: ['/vehicules/livreurs'],
+                    //         },
+                    //     ],
+                    // },
+
+                    // Contacts
                     {
                         label: 'Contacts',
                         icon: 'pi pi-fw pi-address-book',
                         visible: this.hasAnyPermission(permissions, [
                             'prestataires.read',
                             'prestataire.read',
-                            'prestateurs.read',
-                            'prestateur.read',
                         ]),
                         items: [
-                            
                             {
-                                label: 'Prestateurs-externes',
-                                icon: 'pi pi-fw pi-briefcase',
-                                routerLink: ['contacts/prestateurs'],
+                                label: 'Prestataires externes',
+                                icon: 'pi pi-fw pi-users',
+                                routerLink: ['contacts/prestataires'],
                                 visible: this.hasAnyPermission(permissions, [
                                     'prestataires.read',
                                     'prestataire.read',
-                                    'prestateurs.read',
-                                    'prestateur.read',
                                 ]),
                             },
                             {
                                 label: 'Utilisateurs',
-                                icon: 'pi pi-fw pi-briefcase',
+                                icon: 'pi pi-fw pi-user',
                                 routerLink: ['contacts/utilisateurs'],
                                 visible: this.hasAnyPermission(permissions, [
-                                    'users.read',
-                                    'users.read',
                                     'users.read',
                                     'user.read',
                                     'utilisateurs.read',
                                     'utilisateur.read',
                                 ]),
                             },
-                            // {
-                            //     label: 'Fournisseurs',
-                            //     icon: 'pi pi-fw pi-users',
-                            //     routerLink: ['profile/list'],
-                            // },
-                            //  {
-                            //     label: 'Véhicules',
-                            //     icon: 'pi pi-fw pi-truck',
-                            //     routerLink: ['/apps/mail/inbox'],
-                            // },
-                            // {
-                            //     label: 'Employés',
-                            //     icon: 'pi pi-fw pi-user',
-                            //     routerLink: ['/apps/mail/detail/1000'],
-                            // },
                         ],
                     },
+
+                    // Produits
                     {
                         label: 'Produits',
                         icon: 'pi pi-fw pi-barcode',
@@ -179,14 +204,32 @@ export class AppMenu {
                             'product.read',
                         ]),
                     },
+
+                    
                 ],
-            },
+                
+            }, //fin module
+            // {
+            //     label: 'Autres',
+            //     icon: 'pi pi-fw pi-download',
+            //     items: [
+            //         {
+            //             label: 'Aide',
+            //             icon: 'pi pi-fw pi-question-circle',
+            //             routerLink: ['/pages/help'],
+            //         },
+            //         {
+            //             label: 'Parametres',
+            //             icon: 'pi pi-fw pi-cog',
+            //             routerLink: ['/parametres'],
+            //         },
+            //     ],
+            // }, //fin module
         ];
     }
 
     private hasAnyPermission(userPermissions: unknown[] | undefined, required: string[]): boolean {
         if (!userPermissions || userPermissions.length === 0) {
-            // Mode strict pour le menu: sans permission explicite, on masque l'entrée.
             return false;
         }
 
@@ -213,5 +256,3 @@ export class AppMenu {
         return required.some((permission) => normalized.has(permission.toLowerCase()));
     }
 }
-
-

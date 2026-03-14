@@ -8,6 +8,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SkeletonModule } from 'primeng/skeleton';
 import { Packing, PackingStatut } from '@/models/packing.model';
 import { Prestataire } from '@/models/prestataire.model';
+import { PhoneFormatPipe } from '@/pipes/phone-format.pipe';
 
 interface StatutOption {
   label: string;
@@ -27,6 +28,7 @@ interface StatutOption {
     SelectModule,
     DatePickerModule,
     SkeletonModule,
+    PhoneFormatPipe,
   ],
 })
 export class PackingMobileForm {
@@ -42,9 +44,10 @@ export class PackingMobileForm {
   @Output() selectedPrestataireChange = new EventEmitter<Prestataire | null>();
 
   statuses: StatutOption[] = [
-    { label: 'À valider', value: 'a_valider' },
-    { label: 'Validé', value: 'valide' },
-    { label: 'Annulé', value: 'annule' },
+    { label: 'Impayee', value: 'impayee' },
+    { label: 'Partielle', value: 'partielle' },
+    { label: 'Payee', value: 'payee' },
+    { label: 'Annulee', value: 'annulee' },
   ];
 
   calculateMontant() {

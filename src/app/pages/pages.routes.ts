@@ -9,13 +9,13 @@ import { Faq } from './faq/faq';
 import { ContactUs } from './contactus/contactus';
 
 export default [
-    { path: 'documentation', component: Documentation },
-    { path: 'crud', component: Crud },
-    { path: 'empty', component: Empty },
-    { path: 'invoice', component: Invoice },
-    { path: 'aboutus', component: AboutUs },
-    { path: 'help', component: Help },
-    { path: 'faq', component: Faq},
-    { path: 'contact', component: ContactUs},
+    { path: 'documentation', component: Documentation, data: { breadcrumb: 'documentation' }},
+    { path: 'crud', component: Crud, data: { breadcrumb: 'crud' }},
+    { path: 'empty', component: Empty, data: { breadcrumb: 'empty' }},
+    { path: 'invoice', component: Invoice, data: { breadcrumb: 'invoice' }},
+    { path: 'aboutus', component: AboutUs, data: { breadcrumb: 'aboutus' }},
+    { path: 'help', component: Help, data: { breadcrumb: 'help' }},
+    { path: 'faq', component: Faq, data: { breadcrumb: 'faq' }},
+    { path: 'contact', component: ContactUs, data: { breadcrumb: 'contact' }},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

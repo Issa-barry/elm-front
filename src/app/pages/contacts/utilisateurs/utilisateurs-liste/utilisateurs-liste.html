@@ -1,5 +1,12 @@
 <p-confirmDialog></p-confirmDialog>
 
+<app-utilisateurs-view-dialog
+  [(visible)]="viewDialogVisible"
+  [mode]="viewDialogMode"
+  [userId]="viewUserId"
+  (userSaved)="onDialogUserSaved($event)"
+></app-utilisateurs-view-dialog>
+
 <!-- Mobile: app-like list (≤768px) -->
 <div class="utilisateurs-mobile-app">
   <header class="mobile-header">
@@ -61,30 +68,20 @@
           <div class="mobile-card-meta">{{ user.email || (user.phone | phoneFormat:'INT') }}</div>
           <div class="mobile-card-footer">
             <p-tag
-              [value]="user.is_active ? 'Actif' : 'Inactif'"
-              [severity]="user.is_active ? 'success' : 'danger'"
+              [value]="user.is_archived ? 'Archivé' : (user.is_active ? 'Actif' : 'Inactif')"
+              [severity]="user.is_archived ? 'secondary' : (user.is_active ? 'success' : 'warn')"
               styleClass="mobile-status-tag"
             />
             <div class="mobile-card-actions">
               <button
                 pButton
                 pRipple
-                icon="pi pi-eye"
+                icon="pi pi-pencil"
                 class="p-button-rounded p-button-text p-button-sm"
-                [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+                [pTooltip]="'Modifier'"
                 tooltipPosition="top"
                 (click)="goToEdit($event, user.id)"
                 [disabled]="!canUpdate"
-              ></button>
-              <button
-                *ngIf="canDelete"
-                pButton
-                pRipple
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                [pTooltip]="'Supprimer'"
-                tooltipPosition="top"
-                (click)="$event.stopPropagation(); deleteUser($event, user.id)"
               ></button>
             </div>
           </div>
@@ -107,7 +104,7 @@
     type="button"
     class="mobile-fab"
     aria-label="Nouveau utilisateur"
-    (click)="navigateToCreate()"
+    (click)="openCreateDialog()"
   >
     <i class="pi pi-user-plus"></i>
   </button>
@@ -160,7 +157,7 @@
           <!-- Bouton Nouveau -->
           <button
             *ngIf="canCreate"
-            (click)="navigateToCreate()"
+            (click)="openCreateDialog()"
             pButton
             outlined
             class="flex-shrink-0"
@@ -224,17 +221,9 @@
           </div>
         </td>
         <td>
-          <ng-container *ngIf="(user.role_names?.length || user.roles?.length); else noRole">
-            <p-tag
-              *ngFor="let role of (user.role_names || user.roles)"
-              [value]="role"
-              [severity]="getRoleSeverity(role)"
-              class="mr-1"
-            ></p-tag>
-          </ng-container>
-          <ng-template #noRole>
-            <span class="text-surface-400">-</span>
-          </ng-template>
+          <span class="text-sm text-surface-700">
+            {{ (user.role_names || user.roles)?.join(', ') || '-' }}
+          </span>
         </td>
         <td>
           <div class="flex items-center gap-2">
@@ -247,24 +236,24 @@
         </td>
         <td>
           <p-tag
-            [value]="user.is_active ? 'Actif' : 'Inactif'"
-            [severity]="user.is_active ? 'success' : 'danger'"
+            [value]="user.is_archived ? 'Archivé' : (user.is_active ? 'Actif' : 'Inactif')"
+            [severity]="user.is_archived ? 'secondary' : (user.is_active ? 'success' : 'warn')"
           ></p-tag>
         </td>
         <td>
           <div class="flex gap-2">
             <button
+              *ngIf="canUpdate"
               pButton
               pRipple
-              icon="pi pi-eye"
+              icon="pi pi-pencil"
               class="p-button-rounded p-button-text p-button-sm"
-              [pTooltip]="canUpdate ? 'Modifier' : 'Voir'"
+              pTooltip="Modifier"
               tooltipPosition="top"
-              (click)="goToEdit($event, user.id)"
-              [disabled]="!canUpdate"
+              (click)="openViewDialog($event, user.id)"
             ></button>
             <button
-              *ngIf="canUpdate"
+              *ngIf="canUpdate && !user.is_archived"
               pButton
               pRipple
               [icon]="user.is_active ? 'pi pi-lock-open' : 'pi pi-lock'"
@@ -274,6 +263,16 @@
               [pTooltip]="user.is_active ? 'Désactiver' : 'Activer'"
               tooltipPosition="top"
               (click)="toggleStatus($event, user.id)"
+            ></button>
+            <button
+              *ngIf="!user.is_archived && canDelete"
+              pButton
+              pRipple
+              icon="pi pi-inbox"
+              class="p-button-rounded p-button-text p-button-secondary p-button-sm"
+              pTooltip="Archiver"
+              tooltipPosition="top"
+              (click)="archiveUserAction($event, user.id)"
             ></button>
             <button
               *ngIf="canDelete"

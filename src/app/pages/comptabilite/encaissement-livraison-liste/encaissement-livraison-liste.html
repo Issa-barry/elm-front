@@ -1,0 +1,210 @@
+<p-toast />
+
+<div class="flex flex-col gap-4">
+
+  <!-- Stats ──────────────────────────────────────────────────────────── -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-0">
+    <p-card>
+      <div class="flex align-items-center gap-3">
+        <span
+          class="flex align-items-center justify-content-center bg-green-100 text-green-700 border-circle"
+          style="width:3rem;height:3rem"
+        >
+          <i class="pi pi-wallet text-xl"></i>
+        </span>
+        <div>
+          <p class="text-color-secondary text-sm m-0">Total encaissé</p>
+          <p class="text-2xl font-bold text-green-600 m-0">{{ formatMontant(totalEncaisse()) }}</p>
+        </div>
+      </div>
+    </p-card>
+    <p-card>
+      <div class="flex align-items-center gap-3">
+        <span
+          class="flex align-items-center justify-content-center bg-blue-100 text-blue-700 border-circle"
+          style="width:3rem;height:3rem"
+        >
+          <i class="pi pi-list text-xl"></i>
+        </span>
+        <div>
+          <p class="text-color-secondary text-sm m-0">Nombre d'encaissements</p>
+          <p class="text-2xl font-bold m-0">{{ encaissements().length }}</p>
+        </div>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Table ──────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <p-toolbar styleClass="mb-4">
+      <ng-template #start>
+        <h2 class="text-xl font-semibold m-0 flex align-items-center gap-2">
+          <i class="pi pi-money-bill text-primary"></i>
+          Encaissements livraison
+        </h2>
+      </ng-template>
+      <ng-template #end>
+        @if (canCreate) {
+          <p-button label="Nouvel encaissement" icon="pi pi-plus" (onClick)="openCreateDialog()" />
+        }
+      </ng-template>
+    </p-toolbar>
+
+    <p-table
+      #dt
+      [value]="encaissements()"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [globalFilterFields]="['mode_paiement', 'note']"
+      styleClass="p-datatable-gridlines"
+      responsiveLayout="scroll"
+      currentPageReportTemplate="{first} à {last} sur {totalRecords} encaissements"
+      [showCurrentPageReport]="true"
+    >
+      <ng-template #caption>
+        <div class="flex justify-end">
+          <p-iconfield>
+            <p-inputicon class="pi pi-search" />
+            <input
+              pInputText
+              type="text"
+              placeholder="Rechercher…"
+              (input)="onGlobalFilter(dt, $event)"
+              class="w-full md:w-20rem"
+            />
+          </p-iconfield>
+        </div>
+      </ng-template>
+
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="date_encaissement" style="min-width:10rem">
+            Date <p-sortIcon field="date_encaissement" />
+          </th>
+          <th pSortableColumn="montant" style="min-width:10rem">
+            Montant <p-sortIcon field="montant" />
+          </th>
+          <th style="min-width:10rem">Mode de paiement</th>
+          <th style="min-width:8rem">Facture</th>
+          <th style="min-width:10rem">Notes</th>
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-e>
+        <tr>
+          <td class="text-sm">{{ formatDateDisplay(e.date_encaissement) }}</td>
+          <td class="font-semibold text-green-600">{{ formatMontant(e.montant) }}</td>
+          <td>
+            <span class="surface-100 px-2 py-1 border-round text-sm">
+              {{ getModePaiementLabel(e.mode_paiement) }}
+            </span>
+          </td>
+          <td class="text-color-secondary text-sm">
+            @if (e.facture_vente_id) {
+              #{{ e.facture_vente_id }}
+            } @else { — }
+          </td>
+          <td class="text-color-secondary text-sm">{{ e.note || '—' }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5" class="text-center py-8">
+            <i class="pi pi-inbox text-4xl mb-3 block" style="opacity:.25"></i>
+            <p class="text-color-secondary m-0">Aucun encaissement enregistré.</p>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #loadingbody>
+        @for (_ of [1, 2, 3]; track $index) {
+          <tr>
+            @for (__ of [1, 2, 3, 4, 5]; track $index) {
+              <td><p-skeleton /></td>
+            }
+          </tr>
+        }
+      </ng-template>
+    </p-table>
+  </div>
+
+</div>
+
+<!-- ── Dialog : Nouvel encaissement ──────────────────────────────────── -->
+<p-dialog
+  header="Nouvel encaissement"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '30rem' }"
+  [draggable]="false"
+>
+  <form [formGroup]="createForm" novalidate>
+    <div class="flex flex-col gap-4">
+
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Montant (GNF) <span class="text-red-500">*</span></label>
+        <p-inputNumber
+          formControlName="montant"
+          [min]="1"
+          suffix=" GNF"
+          [useGrouping]="true"
+          styleClass="w-full"
+          [ngClass]="{'ng-invalid ng-dirty': isInvalid('montant')}"
+        />
+        @if (isInvalid('montant')) {
+          <small class="text-red-500">Montant requis (> 0).</small>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Mode de paiement <span class="text-red-500">*</span></label>
+        <p-select
+          formControlName="mode_paiement"
+          [options]="modePaiementOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Date d'encaissement <span class="text-red-500">*</span></label>
+        <p-datepicker
+          formControlName="date_encaissement"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">ID facture de vente <span class="text-red-500">*</span></label>
+        <p-inputNumber
+          formControlName="facture_vente_id"
+          [useGrouping]="false"
+          placeholder="ID de la facture"
+          styleClass="w-full"
+          [ngClass]="{'ng-invalid ng-dirty': isInvalid('facture_vente_id')}"
+        />
+        @if (isInvalid('facture_vente_id')) {
+          <small class="text-red-500">ID facture requis.</small>
+        }
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="font-medium text-sm">Note <span class="text-color-secondary">(optionnel)</span></label>
+        <input pInputText formControlName="note" placeholder="Remarques…" />
+      </div>
+
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="w-full">
+      <p-button label="Enregistrer" icon="pi pi-save" (onClick)="onSaveEncaissement()" [loading]="saving" fluid />
+    </div>
+  </ng-template>
+</p-dialog>

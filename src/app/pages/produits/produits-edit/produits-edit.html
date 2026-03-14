@@ -4,6 +4,7 @@
     *ngIf="initialData"
     mode="edit"
     [initialData]="initialData"
+    [canManageSystemDefinition]="canManageSystemDefinition"
     [loading]="loading"
     (submitForm)="onSubmitForm($event)"
     (cancel)="onCancel()"

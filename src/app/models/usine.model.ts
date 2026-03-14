@@ -15,6 +15,10 @@ export interface AccessibleUsine {
   code?:   string;
   type?:   UsineType;
   statut?: UsineStatut;
+  adresse?: string | null;
+  quartier?: string | null;
+  ville?: string | null;
+  pays?: string | null;
 }
 
 /** Usine complète (endpoint GET /usines) */
@@ -25,6 +29,9 @@ export interface Usine {
   type?:     UsineType;
   statut?:   UsineStatut;
   adresse?:  string | null;
+  quartier?: string | null;
+  ville?: string | null;
+  pays?: string | null;
   created_at?: string;
   updated_at?: string;
 }

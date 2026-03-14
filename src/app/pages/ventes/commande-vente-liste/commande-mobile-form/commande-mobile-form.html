@@ -1,0 +1,163 @@
+<!-- Backdrop + slideover full-screen (mobile) / panneau latéral (desktop) -->
+<div class="fixed inset-0 z-50">
+
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/50 animate-fadein" (click)="onClose.emit()"></div>
+
+  <!-- Panneau -->
+  <div class="cmf-panel animate-fadeinright">
+
+    <!-- ── Header sticky ─────────────────────────────────── -->
+    <div class="cmf-header">
+      <p-button [text]="true" [rounded]="true" icon="pi pi-times"
+                styleClass="cmf-close-btn" (onClick)="onClose.emit()" />
+      <h2 class="cmf-title">
+        {{ editMode ? 'Modifier la commande' : 'Nouvelle commande' }}
+      </h2>
+      <!-- Spacer pour centrer le titre -->
+      <div style="width:2.5rem; flex-shrink:0"></div>
+    </div>
+
+    <!-- ── Body scrollable ───────────────────────────────── -->
+    <div class="cmf-body">
+      <form [formGroup]="form" novalidate>
+
+        <!-- Véhicule -->
+        <div class="cmf-field">
+          <label class="cmf-label">Véhicule <span class="text-red-500">*</span></label>
+          <p-select
+            formControlName="vehicule_id"
+            [options]="vehiculeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Sélectionner un véhicule"
+            [filter]="true"
+            filterPlaceholder="Rechercher…"
+            styleClass="w-full"
+            [ngClass]="{'ng-invalid ng-dirty': isInvalid('vehicule_id')}"
+          />
+          @if (isInvalid('vehicule_id')) {
+            <small class="text-red-500">Sélectionnez un véhicule.</small>
+          }
+        </div>
+
+        <div class="cmf-divider"></div>
+
+        <!-- Lignes de commande -->
+        <div class="cmf-section">
+          <div class="cmf-section-header">
+            <span class="cmf-section-title">
+              Lignes <span class="text-red-500">*</span>
+            </span>
+            <p-button
+              label="Ajouter"
+              icon="pi pi-plus"
+              [text]="true"
+              size="small"
+              (onClick)="onAddLigne.emit()"
+            />
+          </div>
+
+          <div formArrayName="lignes" class="cmf-lignes">
+            @for (ligne of lignes.controls; track $index; let i = $index) {
+              <div [formGroupName]="i" class="cmf-ligne-card">
+
+                <!-- Produit -->
+                <div class="cmf-field">
+                  <label class="cmf-field-label-sm">Produit</label>
+                  <p-select
+                    formControlName="produit_id"
+                    [options]="produitOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Choisir un produit…"
+                    [filter]="true"
+                    filterPlaceholder="Rechercher…"
+                    styleClass="w-full"
+                    [ngClass]="{'ng-invalid ng-dirty': isLigneInvalid(i, 'produit_id')}"
+                    (onChange)="onProduitChange.emit({ i: i, id: $event.value })"
+                  />
+                  @if (isLigneInvalid(i, 'produit_id')) {
+                    <small class="text-red-500">Requis</small>
+                  }
+                </div>
+
+                <!-- Prix usine (lecture seule) -->
+                @if (getPrixUsine(i) > 0) {
+                  <div class="cmf-prix-usine">
+                    <i class="pi pi-tag text-xs"></i>
+                    Prix usine : <strong>{{ formatMontant(getPrixUsine(i)) }}</strong>
+                  </div>
+                }
+
+                <!-- Prix vente + Quantité -->
+                <div class="cmf-inputs-row">
+                  <div class="cmf-input-group">
+                    <label class="cmf-field-label-sm">Prix vente</label>
+                    <p-inputNumber
+                      formControlName="prix_vente"
+                      [min]="0"
+                      [useGrouping]="true"
+                      styleClass="w-full"
+                      inputStyleClass="w-full text-right"
+                      [ngClass]="{'ng-invalid ng-dirty': isLigneInvalid(i, 'prix_vente')}"
+                    />
+                    @if (isLigneInvalid(i, 'prix_vente')) {
+                      <small class="text-red-500">Requis</small>
+                    }
+                  </div>
+                  <div class="cmf-input-group cmf-input-group--small">
+                    <label class="cmf-field-label-sm">Qté</label>
+                    <p-inputNumber
+                      formControlName="qte"
+                      [min]="1"
+                      [useGrouping]="false"
+                      styleClass="w-full"
+                      inputStyleClass="w-full text-center"
+                    />
+                  </div>
+                </div>
+
+                <!-- Total ligne + Supprimer -->
+                <div class="cmf-ligne-footer">
+                  @if (getTotalLigne(i) > 0) {
+                    <span class="cmf-ligne-total">{{ formatMontant(getTotalLigne(i)) }}</span>
+                  } @else {
+                    <span class="cmf-ligne-total cmf-ligne-total--empty">—</span>
+                  }
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [text]="true"
+                    [rounded]="true"
+                    size="small"
+                    [disabled]="lignes.length === 1"
+                    (onClick)="onRemoveLigne.emit(i)"
+                  />
+                </div>
+
+              </div>
+            }
+          </div>
+        </div><!-- /cmf-section -->
+
+      </form>
+    </div><!-- /cmf-body -->
+
+    <!-- ── Footer sticky ─────────────────────────────────── -->
+    <div class="cmf-footer">
+      <div class="cmf-total-row">
+        <span class="cmf-total-label">Total commande</span>
+        <span class="cmf-total-value">{{ formatMontant(totalDialog) }}</span>
+      </div>
+      <p-button
+        [label]="editMode ? 'Enregistrer les modifications' : 'Créer la commande'"
+        icon="pi pi-check"
+        styleClass="w-full"
+        (onClick)="onSave.emit()"
+        [loading]="saving"
+      />
+    </div><!-- /cmf-footer -->
+
+  </div><!-- /cmf-panel -->
+</div>

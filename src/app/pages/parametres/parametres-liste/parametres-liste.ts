@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
@@ -9,8 +9,11 @@ import { ParametresProfile } from '../components/parametres-profile/parametres-p
 import { ParametresAuth } from '../components/parametres-auth/parametres-auth';
 import { ParametresRolesPermissions } from '../components/parametres-roles-permissions/parametres-roles-permissions';
 import { ParametresNotifications } from '../components/parametres-notifications/parametres-notifications';
+import { AuthService } from '@/services/auth/auth.service';
 
 type Section = 'profile' | 'auth' | 'packing' | 'roles' | 'notifications';
+
+const ADMIN_SECTIONS: Section[] = ['packing', 'roles', 'notifications'];
 
 @Component({
   selector: 'app-parametres-liste',
@@ -23,7 +26,15 @@ type Section = 'profile' | 'auth' | 'packing' | 'roles' | 'notifications';
 export class ParametresListe {
   activeSection: Section = 'profile';
 
+  isAdmin = computed(() => {
+    const roles = this.authService.currentUser()?.roles ?? [];
+    return roles.includes('admin') || roles.includes('super-admin');
+  });
+
+  constructor(private authService: AuthService) {}
+
   setActiveSection(section: Section): void {
+    if (ADMIN_SECTIONS.includes(section) && !this.isAdmin()) return;
     this.activeSection = section;
   }
 

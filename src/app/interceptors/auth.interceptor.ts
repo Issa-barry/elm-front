@@ -1,26 +1,15 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
 const TOKEN_KEY = 'access_token';
 const USER_KEY = 'user';
-const LOGIN_PATH = '/auth/login';
-
-function clearSessionAndRedirectToLogin(): void {
-  sessionStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(USER_KEY);
-
-  const currentPath = `${window.location.pathname}${window.location.search}`;
-  if (window.location.pathname === LOGIN_PATH) {
-    return;
-  }
-
-  const returnUrl = encodeURIComponent(currentPath);
-  window.location.assign(`${LOGIN_PATH}?returnUrl=${returnUrl}`);
-}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = sessionStorage.getItem(TOKEN_KEY);
   const isFormData = req.body instanceof FormData;
+  const router = inject(Router);
 
   const headers: Record<string, string> = {
     Accept: 'application/json'
@@ -43,7 +32,18 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         error.status === 401 &&
         !authReq.url.includes('/auth/login')
       ) {
-        clearSessionAndRedirectToLogin();
+        sessionStorage.removeItem(TOKEN_KEY);
+        sessionStorage.removeItem(USER_KEY);
+
+        // Utiliser le routeur Angular (compatible withHashLocation)
+        // router.url contient le chemin sans le '#' (ex: '/comptabilite/factures')
+        const currentUrl = router.url;
+        if (!currentUrl.startsWith('/auth/login')) {
+          router.navigate(['/auth/login'], {
+            queryParams: { returnUrl: currentUrl },
+            replaceUrl: true
+          });
+        }
       }
 
       return throwError(() => error);

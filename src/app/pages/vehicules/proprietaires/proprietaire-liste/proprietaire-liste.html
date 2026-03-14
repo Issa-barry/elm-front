@@ -1,0 +1,239 @@
+<p-toast />
+<p-confirmdialog />
+
+<!-- ══ MOBILE : app shell (masqué sur desktop) ══════════════════════════════ -->
+<div class="proprietaire-mobile-app">
+  <header class="mobile-header">
+    <button
+      pButton pRipple
+      icon="pi pi-arrow-left"
+      class="p-button-rounded p-button-text mobile-back"
+      aria-label="Retour à l'accueil"
+      (click)="goBack()"
+    ></button>
+    <div class="mobile-title-wrap">
+      <h1 class="mobile-title">Propriétaires</h1>
+      <p class="mobile-subtitle">{{ filteredProprietaires().length }} propriétaire{{ filteredProprietaires().length !== 1 ? 's' : '' }}</p>
+    </div>
+    <p-menu
+      #filterMenu
+      [model]="mobileFilterMenuItems"
+      [popup]="true"
+      appendTo="body"
+      styleClass="mobile-status-menu"
+    />
+    <button
+      pButton pRipple
+      icon="pi pi-filter"
+      class="p-button-rounded p-button-text mobile-add"
+      aria-label="Filtrer par statut"
+      (click)="filterMenu.toggle($event)"
+    ></button>
+  </header>
+
+  <div class="mobile-scroll">
+    <section class="mobile-search">
+      <p-iconfield>
+        <p-inputicon class="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Nom, téléphone, ville..."
+          class="w-full"
+        />
+      </p-iconfield>
+    </section>
+
+    <section class="mobile-list" *ngIf="!loading && filteredProprietaires().length; else mobileListState">
+      <article
+        class="mobile-proprietaire-card"
+        *ngFor="let p of filteredProprietaires()"
+        (click)="goEdit(p)"
+      >
+        <div class="mobile-card-avatar">{{ p.prenom[0] }}{{ p.nom[0] }}</div>
+        <div class="mobile-card-body">
+          <div class="mobile-card-name">{{ fullName(p) }}</div>
+          <div class="mobile-card-meta">
+            {{ p.phone | phoneFormat }}
+            @if (p.ville) { · {{ p.ville }} }
+          </div>
+          <div class="mobile-card-footer">
+            @if (p.is_active) {
+              <p-tag value="Actif" severity="success" styleClass="mobile-status-tag" />
+            } @else {
+              <p-tag value="Inactif" severity="secondary" styleClass="mobile-status-tag" />
+            }
+            @if (p.email) {
+              <span class="mobile-card-email">{{ p.email }}</span>
+            }
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #mobileListState>
+      <div class="mobile-state" *ngIf="loading">Chargement...</div>
+      <div class="mobile-state" *ngIf="!loading && !filteredProprietaires().length">Aucun propriétaire trouvé.</div>
+    </ng-template>
+  </div>
+
+  @if (canCreate) {
+    <button
+      type="button"
+      class="mobile-fab"
+      aria-label="Nouveau propriétaire"
+      (click)="goNew()"
+    >
+      <i class="pi pi-plus"></i>
+    </button>
+  }
+</div>
+
+<!-- ══ DESKTOP : tableau standard (masqué sur mobile) ═══════════════════════ -->
+<div class="card proprietaire-desktop">
+  <p-table
+    [value]="filteredProprietaires()"
+    [loading]="loading"
+    [paginator]="true"
+    paginatorDropdownAppendTo="body"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    responsiveLayout="scroll"
+    currentPageReportTemplate="  {first} / {last} de {totalRecords} proprietaires"
+    [showCurrentPageReport]="true"
+    [rowHover]="true"
+  >
+    <ng-template #caption>
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <p-iconfield class="w-full sm:w-80 order-1 sm:order-0">
+          <p-inputicon class="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Rechercher un proprietaire..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            class="w-full"
+          />
+        </p-iconfield>
+        <div class="flex gap-2 w-full sm:w-auto">
+          <p-select
+            [options]="filterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedFilter()"
+            (ngModelChange)="setSelectedFilter($event)"
+            placeholder="Tous"
+            class="w-full sm:w-44"
+          />
+          @if (canCreate) {
+            <button pButton outlined icon="pi pi-plus" label="Nouveau proprietaire" (click)="goNew()"></button>
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="prenom" style="width:22%">
+          <span class="flex items-center gap-2">Nom <p-sortIcon field="prenom" /></span>
+        </th>
+        <th pSortableColumn="phone" style="width:15%">
+          <span class="flex items-center gap-2">Telephone <p-sortIcon field="phone" /></span>
+        </th>
+        <th style="width:20%">Email</th>
+        <th pSortableColumn="ville" style="width:16%">
+          <span class="flex items-center gap-2">Adresse <p-sortIcon field="ville" /></span>
+        </th>
+        <th style="width:10%">Pays</th>
+        <th style="width:10%">Statut</th>
+        <th pSortableColumn="created_at" style="width:5%">
+          <span class="flex items-center gap-2">Ajoute <p-sortIcon field="created_at" /></span>
+        </th>
+        @if (canUpdate || canDelete) {
+          <th style="width:5%" class="text-center">Actions</th>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-p>
+      <tr>
+        <td>
+          <div class="flex items-center gap-2">
+            <span
+              class="inline-flex items-center justify-center rounded-full bg-primary text-white font-bold text-xs flex-shrink-0"
+              style="width:2rem;height:2rem"
+            >
+              {{ p.prenom[0] }}{{ p.nom[0] }}
+            </span>
+            <div>
+              <div class="font-medium">{{ fullName(p) }}</div>
+            </div>
+          </div>
+        </td>
+        <td class="text-sm">{{ p.phone | phoneFormat }}</td>
+        <td class="text-sm text-surface-500">{{ p.email || '-' }}</td>
+        <td>
+          <div>
+            <div class="font-medium">{{ p.ville || '-' }}</div>
+            <div class="text-sm text-surface-500">{{ p.quartier || '-' }}</div>
+          </div>
+        </td>
+        <td class="text-sm">{{ p.pays || '-' }}</td>
+        <td>
+          @if (p.is_active) {
+            <p-tag value="Actif" severity="success" />
+          } @else {
+            <p-tag value="Inactif" severity="secondary" />
+          }
+        </td>
+        <td class="text-surface-500 text-sm">
+          {{ p.created_at ? (p.created_at | date:'dd/MM/yy') : '-' }}
+        </td>
+        @if (canUpdate || canDelete) {
+          <td>
+            <div class="flex gap-1 justify-center">
+              @if (canUpdate) {
+                <button
+                  pButton type="button" icon="pi pi-pen-to-square"
+                  text rounded size="small" pTooltip="Modifier" tooltipPosition="top"
+                  (click)="goEdit(p)"
+                ></button>
+              }
+              @if (canDelete) {
+                <button
+                  pButton type="button" icon="pi pi-trash" severity="danger"
+                  text rounded size="small" pTooltip="Supprimer" tooltipPosition="top"
+                  (click)="deleteProprietaire(p)"
+                ></button>
+              }
+            </div>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td [attr.colspan]="(canUpdate || canDelete) ? 8 : 7" class="text-center py-8">
+          <div class="flex flex-col items-center gap-3 text-surface-500">
+            <i class="pi pi-user text-4xl"></i>
+            <span>Aucun proprietaire trouve</span>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #loadingbody>
+      @for (_ of [1, 2, 3, 4, 5]; track $index) {
+        <tr>
+          @for (__ of [1, 2, 3, 4, 5, 6, 7, 8]; track $index) {
+            <td><p-skeleton /></td>
+          }
+        </tr>
+      }
+    </ng-template>
+  </p-table>
+</div>

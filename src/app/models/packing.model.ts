@@ -1,25 +1,71 @@
 import { Prestataire } from './prestataire.model';
 
-// Types pour le statut du packing
-export type PackingStatut = 'a_valider' | 'valide' | 'annule';
+// ========================= Statuts Packing =========================
 
-// Labels français pour l'affichage
+export type PackingStatut = 'impayee' | 'partielle' | 'payee' | 'annulee';
+
 export const PACKING_STATUT_LABELS: Record<PackingStatut, string> = {
-  a_valider: 'À valider',
-  valide: 'Validé',
-  annule: 'Annulé'
+  impayee: 'Impayée',
+  partielle: 'Partielle',
+  payee: 'Payée',
+  annulee: 'Annulée',
 };
 
 export type PackingStatutSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast';
 
-// Severities PrimeNG pour les tags de statut
 export const PACKING_STATUT_SEVERITY: Record<PackingStatut, PackingStatutSeverity> = {
-  a_valider: 'warn',
-  valide: 'success',
-  annule: 'danger'
+  impayee: 'danger',
+  partielle: 'warn',
+  payee: 'success',
+  annulee: 'secondary',
 };
 
-// Interface principale Packing
+// ========================= Modes de paiement =========================
+
+export type ModePaiement = 'especes' | 'virement' | 'cheque' | 'mobile_money';
+
+export const MODE_PAIEMENT_LABELS: Record<ModePaiement, string> = {
+  especes: 'Espèces',
+  virement: 'Virement bancaire',
+  cheque: 'Chèque',
+  mobile_money: 'Mobile Money',
+};
+
+// ========================= Versement =========================
+
+export interface Versement {
+  id: number;
+  packing_id: number;
+  reference: string;
+  montant: number;
+  date_versement: string;
+  mode_paiement: ModePaiement;
+  notes: string | null;
+  created_by: number | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+
+  // Appended
+  mode_paiement_label: string;
+  creator?: { id: number; nom: string; prenom: string; nom_complet: string };
+}
+
+export interface StoreVersementDto {
+  montant: number;
+  date_versement: string;
+  mode_paiement?: ModePaiement;
+  notes?: string;
+}
+
+// Réponse de GET /packings/{id}/versements
+export interface VersementIndexResponse {
+  packing: Packing;
+  versements: Versement[];
+}
+
+// ========================= Packing =========================
+
 export interface Packing {
   id: number;
   prestataire_id: number;
@@ -29,7 +75,6 @@ export interface Packing {
   prix_par_rouleau: number;
   montant: number;
   statut: PackingStatut;
-  facture_id: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -38,9 +83,12 @@ export interface Packing {
   // Appended
   statut_label?: string;
   prestataire_nom?: string;
+  montant_verse: number;
+  montant_restant: number;
 
-  // Relation
+  // Relations
   prestataire?: Prestataire;
+  versements?: Versement[];
 }
 
 // DTO pour création
@@ -49,7 +97,6 @@ export interface CreatePackingDto {
   date: string;
   nb_rouleaux: number;
   prix_par_rouleau: number;
-  statut?: PackingStatut;
   notes?: string;
 }
 
@@ -59,7 +106,6 @@ export interface UpdatePackingDto {
   date?: string;
   nb_rouleaux?: number;
   prix_par_rouleau?: number;
-  statut?: PackingStatut;
   notes?: string;
 }
 
@@ -77,7 +123,7 @@ export interface PackingFilters {
   page?: number;
 }
 
-// Interface pour le changement de statut
+// DTO pour changement de statut
 export interface ChangePackingStatutDto {
   statut: PackingStatut;
 }

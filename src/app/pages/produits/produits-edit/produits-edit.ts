@@ -6,6 +6,7 @@ import { ToastModule } from 'primeng/toast';
 
 import { ProduitsForm } from '../produits-form/produits-form';
 import { CreateProduitDto, Produit } from '@/models/produit.model';
+import { AuthService } from '@/services/auth/auth.service';
 import { ProduitService } from '@/services/produits/produits.service';
 
 @Component({
@@ -20,6 +21,7 @@ export class ProduitsEdit implements OnInit, OnDestroy {
   loading = false;
   produitId: number | null = null;
   initialData: Produit | null = null;
+  canManageSystemDefinition = false;
   private readonly mobileBreakpoint = 768;
   private readonly mobilePwaClass = 'produits-mobile-pwa';
 
@@ -27,11 +29,13 @@ export class ProduitsEdit implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private produitService: ProduitService,
+    private authService: AuthService,
     private messageService: MessageService,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
+    this.canManageSystemDefinition = this.hasSystemDefinitionAccess();
     this.updateMobilePwaMode();
     const idParam = this.route.snapshot.paramMap.get('id');
     const parsedId = idParam ? Number(idParam) : NaN;
@@ -166,6 +170,17 @@ export class ProduitsEdit implements OnInit, OnDestroy {
       detail,
       life: 5000,
     });
+  }
+
+  private hasSystemDefinitionAccess(): boolean {
+    const user = this.authService.currentUser();
+    if (!user) return false;
+
+    const roles = [...(user.roles ?? []), ...(user.role_names ?? [])]
+      .map((role) => String(role).trim().toLowerCase())
+      .filter((role) => role.length > 0);
+
+    return roles.includes('admin') || roles.includes('manager') || roles.includes('super-admin');
   }
 
 }

@@ -1,9 +1,9 @@
-<div class="paiement-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="facture">
+<div class="paiement-panel flex flex-col h-full bg-surface-0 dark:bg-surface-900" *ngIf="packing">
     <!-- Header -->
     <div class="paiement-header w-full flex-shrink-0 p-6 border-b border-surface-200 dark:border-surface-700 flex justify-start items-center">
         <div class="flex-1">
-            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ facture.reference.replace('FACT-PACK-', '') }}</div>
-            <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Versement facture</div>
+            <div class="text-surface-900 dark:text-surface-0 text-xl font-medium leading-tight">{{ packing.reference }}</div>
+            <div class="text-surface-500 dark:text-surface-400 text-sm font-normal mt-1">Versement packing</div>
         </div>
         <button pButton [text]="true" [rounded]="true" class="w-10 h-10" (click)="onClose.emit()">
             <i pButtonIcon class="pi pi-times"></i>
@@ -12,32 +12,32 @@
 
     <!-- Body (scroll sur mobile, footer reste visible) -->
     <div class="paiement-body flex-1 min-h-0 w-full p-6 flex flex-col justify-start items-start gap-6 overflow-y-auto">
-        <!-- Résumé facture -->
+        <!-- Resume packing -->
         <div class="w-full p-5 bg-surface-50 dark:bg-surface-800 rounded-xl flex flex-col justify-start items-start gap-4">
             <div class="w-full flex justify-start items-start gap-6">
-                <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Total facture</div>
-                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{  facture.montant_total | money :'GNF'}}</div>
+                <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Total packing</div>
+                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">{{ packing.montant | money:'GNF' }}</div>
             </div>
             <div class="w-full flex justify-start items-start gap-6">
-                <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Déjà versé</div>
-                <div class="text-base font-semibold leading-tight" style="color: #059669">{{  facture.montant_verse | money :'GNF'}}</div>
+                <div class="flex-1 text-surface-500 dark:text-surface-400 text-base font-normal leading-tight">Deja verse</div>
+                <div class="text-base font-semibold leading-tight" style="color: #059669">{{ packing.montant_verse | money:'GNF' }}</div>
             </div>
 
             <div class="w-full h-px bg-surface-200 dark:bg-surface-700"></div>
 
             <div class="w-full flex justify-start items-start gap-6">
-                <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Reste à payer</div>
-                <div class="text-lg font-bold leading-tight" style="color: #d97706">{{  facture.montant_restant | money :'GNF' }}</div>
+                <div class="flex-1 text-surface-900 dark:text-surface-0 text-base font-semibold leading-tight">Reste a payer</div>
+                <div class="text-lg font-bold leading-tight" style="color: #d97706">{{ packing.montant_restant | money:'GNF' }}</div>
             </div>
-        </div> 
+        </div>
 
-        <!-- Montant à verser -->
+        <!-- Montant a verser -->
         <div class="w-full flex flex-col gap-3">
-            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Montant à verser</div>
+            <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Montant a verser</div>
             <p-inputnumber
                 [(ngModel)]="montant"
                 [min]="1"
-                [max]="facture.montant_restant"
+                [max]="packing.montant_restant"
                 suffix=" GNF"
                 [useGrouping]="true"
                 locale="fr-FR"
@@ -47,13 +47,23 @@
             ></p-inputnumber>
         </div>
 
+    </div>
+
+    <!-- Footer (toujours visible sur mobile) -->
+    <div class="paiement-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-4 flex-shrink-0">
+        <!-- Montant a payer -->
+        <div class="w-full flex justify-start items-center gap-4">
+            <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant a payer</div>
+            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? formatCurrency(montant) : '0 GNF' }}</div>
+        </div>
+
         <!-- Mode de paiement -->
-        <div class="w-full flex flex-col gap-3">
+        <div class="w-full flex flex-col gap-2">
             <div class="text-surface-500 dark:text-surface-400 text-xs font-semibold uppercase tracking-wider">Mode de paiement</div>
             <div class="w-full flex gap-3 paiement-modes">
                 <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'especes'" (click)="selectMode('especes')">
                     <i class="pi pi-money-bill"></i>
-                    <span>Espèces</span>
+                    <span>Especes</span>
                 </div>
                 <div class="slideover-mode" [class.slideover-mode--active]="selectedMode === 'virement'" (click)="selectMode('virement')">
                     <i class="pi pi-building"></i>
@@ -65,18 +75,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer (toujours visible sur mobile) -->
-    <div class="paiement-footer w-full border-t border-surface-200 dark:border-surface-700 p-6 flex flex-col gap-5 flex-shrink-0">
-        <div class="w-full flex justify-start items-start gap-4">
-            <div class="flex justify-start items-end gap-2">
-                <div class="text-surface-900 dark:text-surface-0 text-base font-medium leading-tight">Montant à payer</div>
-            </div>
-            <div class="flex-1 text-right text-surface-900 dark:text-surface-0 text-lg font-bold leading-tight">{{ montant ? formatCurrency(montant) : '0 GNF' }}</div>
-        </div>
-
-        <button pButton class="w-full py-3" severity="contrast" (click)="confirmer()" [disabled]="saving || !montant" [loading]="saving">
+        <button pButton class="w-full py-3" severity="primary" (click)="confirmer()" [disabled]="saving || !montant" [loading]="saving">
             <i pButtonIcon class="pi pi-check mr-2"></i>
             <span pButtonLabel>Confirmer le paiement</span>
         </button>

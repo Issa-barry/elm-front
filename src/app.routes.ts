@@ -18,91 +18,111 @@ export const appRoutes: Routes = [
             {
                 path: '',
                 loadComponent: () => import('./app/pages/dashboards/ecommercedashboard').then(c => c.EcommerceDashboard),
-                data: { breadcrumb: 'E-Commerce Dashboard' },
+                data: { breadcrumb: 'accueil' },
             },
             {
                 path: 'comptabilite',
                 loadChildren: () => import('@/pages/comptabilite/comptabilite.routes'),
-            },
+                            data: { breadcrumb: 'comptabilite' },
+},
             {
                 path: 'contacts',
                 loadChildren: () => import('@/pages/contacts/contacts.routes'),
-            },
+                            data: { breadcrumb: 'contacts' },
+},
             {
                 path: 'packings',
                 loadChildren: () => import('@/pages/packings/packings.routes'),
-            },
+                            data: { breadcrumb: 'packings' },
+},
             {
                 path: 'produits',
                 loadChildren: () => import('@/pages/produits/produits.routes'),
-            },
+                            data: { breadcrumb: 'produits' },
+},
+            {
+                path: 'vehicules',
+                loadChildren: () => import('@/pages/vehicules/vehicules.routes'),
+                            data: { breadcrumb: 'vehicules' },
+},
+            {
+                path: 'ventes',
+                loadChildren: () => import('@/pages/ventes/ventes.routes'),
+                            data: { breadcrumb: 'ventes' },
+},
              {
                 path: 'parametres',
                 loadChildren: () => import('@/pages/parametres/parametres.routes'),
-            },
+                            data: { breadcrumb: 'parametres' },
+},
             {
                 path: 'roles',
                 canActivate: [authorizationGuard],
-                data: { roles: ['admin'] },
+                data: { breadcrumb: 'roles',  roles: ['admin'] },
                 loadChildren: () => import('@/pages/roles/roles.routes'),
             },
             {
                 path: 'dashboard-banking',
                 loadComponent: () => import('./app/pages/dashboards/bankingdashboard').then(c => c.BankingDashboard),
-                data: { breadcrumb: 'Banking Dashboard' },
+                data: { breadcrumb: 'dashboard-banking' },
             },
             {
                 path: 'uikit',
-                data: { breadcrumb: 'UI Kit' },
+                data: { breadcrumb: 'uikit' },
                 loadChildren: () => import('@/pages/uikit/uikit.routes'),
             },
             {
                 path: 'documentation',
-                data: { breadcrumb: 'Documentation' },
+                data: { breadcrumb: 'documentation' },
                 loadComponent: () => import('./app/pages/documentation/documentation').then(c => c.Documentation)
             },
             {
                 path: 'pages',
                 loadChildren: () => import('@/pages/pages.routes'),
-            },
+                            data: { breadcrumb: 'pages' },
+},
             {
                 path: 'apps',
                 loadChildren: () => import('@/apps/apps.routes'),
-                data: { breadcrumb: 'Apps' },
+                data: { breadcrumb: 'apps' },
             },
             {
                 path: 'blocks',
-                data: { breadcrumb: 'Free Blocks' },
+                data: { breadcrumb: 'blocks' },
                 loadChildren: () => import('./app/pages/blocks/blocks.routes')
             },
             {
                 path: 'ecommerce',
                 loadChildren: () => import('@/pages/ecommerce/ecommerce.routes'),
-                data: { breadcrumb: 'E-Commerce' },
+                data: { breadcrumb: 'ecommerce' },
             },
             {
                 path: 'profile',
                 loadChildren: () => import('@/pages/usermanagement/usermanagement.routes'),
-            },
+                            data: { breadcrumb: 'profile' },
+},
         ],
     },
 
     // Routes publiques (accessibles sans authentification)
     { 
         path: 'landing', 
-        component: Landing 
-    },
+        component: Landing, 
+            data: { breadcrumb: 'landing' },
+},
     { 
         path: 'notfound', 
-        component: Notfound 
-    },
+        component: Notfound, 
+            data: { breadcrumb: 'notfound' },
+},
 
     // Routes d'authentification (accessibles uniquement si NON connecté)
     {
         path: 'auth',
         canActivate: [guestGuard], // ← Protection : redirige vers dashboard si déjà connecté
         loadChildren: () => import('@/pages/auth/auth.routes'),
-    },
+            data: { breadcrumb: 'auth' },
+},
 
     // Route 404
     { 
